@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="MetaNN" Version="10.0.0" InternalType="Library">
+  <Description/>
+  <Dependencies/>
+  <Settings Type="Static Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g" C_Options="-g" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Debug" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <BuildSystem Name="Default"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+  <VirtualDirectory Name="_root">
+    <File Name="meta_nn.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="data">
+    <VirtualDirectory Name="3d_array">
+      <File Name="data/3d_array/3d_array.h"/>
+      <File Name="data/3d_array/cpu_3d_array.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="batch">
+      <File Name="data/batch/3d_array.h"/>
+      <File Name="data/batch/array.h"/>
+      <File Name="data/batch/batch.h"/>
+      <File Name="data/batch/duplicate.h"/>
+      <File Name="data/batch/matrix.h"/>
+      <File Name="data/batch/scalar.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="facilities">
+      <File Name="data/facilities/allocators.h"/>
+      <File Name="data/facilities/continuous_memory.h"/>
+      <File Name="data/facilities/lower_access.h"/>
+      <File Name="data/facilities/tags.h"/>
+      <File Name="data/facilities/traits.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="matrices">
+      <File Name="data/matrices/cpu_matrix.h"/>
+      <File Name="data/matrices/matrices.h"/>
+      <File Name="data/matrices/one_hot_vector.h"/>
+      <File Name="data/matrices/trival_matrix.h"/>
+      <File Name="data/matrices/zero_matrix.h"/>
+    </VirtualDirectory>
+    <File Name="data/dynamic.h"/>
+    <File Name="data/scalar.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="data_copy">
+    <File Name="data_copy/data_copy.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="evaluate">
+    <VirtualDirectory Name="cpu">
+      <File Name="evaluate/cpu/trival_eval_pool.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="facilities">
+      <File Name="evaluate/facilities/eval_buffer.h"/>
+      <File Name="evaluate/facilities/eval_group.h"/>
+      <File Name="evaluate/facilities/eval_handle.h"/>
+      <File Name="evaluate/facilities/eval_plan.h"/>
+      <File Name="evaluate/facilities/eval_pool.h"/>
+      <File Name="evaluate/facilities/eval_unit.h"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="facilities">
+    <VirtualDirectory Name="cont_metafuns">
+      <File Name="facilities/cont_metafuns/helpers.h"/>
+      <File Name="facilities/cont_metafuns/multi_map.h"/>
+      <File Name="facilities/cont_metafuns/sequential.h"/>
+      <File Name="facilities/cont_metafuns/set.h"/>
+    </VirtualDirectory>
+    <File Name="facilities/null_param.h"/>
+    <File Name="facilities/traits.h"/>
+    <File Name="facilities/var_type_dict.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="layers">
+    <VirtualDirectory Name="compose">
+      <File Name="layers/compose/compose_kernel.h"/>
+      <File Name="layers/compose/linear_layer.h"/>
+      <File Name="layers/compose/single_layer.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="cost">
+      <File Name="layers/cost/negative_log_likelihood_layer.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="elementary">
+      <File Name="layers/elementary/abs_layer.h"/>
+      <File Name="layers/elementary/add_layer.h"/>
+      <File Name="layers/elementary/bias_layer.h"/>
+      <File Name="layers/elementary/element_mul_layer.h"/>
+      <File Name="layers/elementary/interpolate_layer.h"/>
+      <File Name="layers/elementary/sigmoid_layer.h"/>
+      <File Name="layers/elementary/softmax_layer.h"/>
+      <File Name="layers/elementary/tanh_layer.h"/>
+      <File Name="layers/elementary/weight_layer.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="facilities">
+      <File Name="layers/facilities/common_io.h"/>
+      <File Name="layers/facilities/interface_fun.h"/>
+      <File Name="layers/facilities/policies.h"/>
+      <File Name="layers/facilities/traits.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="recurrent">
+      <File Name="layers/recurrent/gru_step.h"/>
+      <File Name="layers/recurrent/recurrent_layer.h"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="operators">
+    <File Name="operators/abs.h"/>
+    <File Name="operators/add.h"/>
+    <File Name="operators/collapse.h"/>
+    <File Name="operators/divide.h"/>
+    <File Name="operators/dot.h"/>
+    <File Name="operators/element_mul.h"/>
+    <File Name="operators/interpolate.h"/>
+    <File Name="operators/negative_log_likelihood.h"/>
+    <File Name="operators/negative_log_likelihood_derivative.h"/>
+    <File Name="operators/operators.h"/>
+    <File Name="operators/sigmoid.h"/>
+    <File Name="operators/sigmoid_derivative.h"/>
+    <File Name="operators/sign.h"/>
+    <File Name="operators/softmax.h"/>
+    <File Name="operators/softmax_derivative.h"/>
+    <File Name="operators/substract.h"/>
+    <File Name="operators/tanh.h"/>
+    <File Name="operators/tanh_derivative.h"/>
+    <File Name="operators/transpose.h"/>
+    <VirtualDirectory Name="facilities">
+      <File Name="operators/facilities/category_cal.h"/>
+      <File Name="operators/facilities/oper_seq.h"/>
+      <File Name="operators/facilities/organizer.h"/>
+      <File Name="operators/facilities/tags.h"/>
+      <File Name="operators/facilities/traits.h"/>
+    </VirtualDirectory>
+  </VirtualDirectory>
+  <VirtualDirectory Name="policies">
+    <File Name="policies/change_policy.h"/>
+    <File Name="policies/inject_policy.h"/>
+    <File Name="policies/policy_container.h"/>
+    <File Name="policies/policy_macro_begin.h"/>
+    <File Name="policies/policy_macro_end.h"/>
+    <File Name="policies/policy_operations.h"/>
+    <File Name="policies/policy_selector.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="model">
+    <VirtualDirectory Name="grad_col">
+      <File Name="model/grad_col/grad_collector.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="param_initializer">
+      <File Name="model/param_initializer/constant_filler.h"/>
+      <File Name="model/param_initializer/gaussian_filler.h"/>
+      <File Name="model/param_initializer/param_initializer.h"/>
+      <File Name="model/param_initializer/uniform_filler.h"/>
+      <File Name="model/param_initializer/var_scale_filler.h"/>
+      <VirtualDirectory Name="facilities">
+        <File Name="model/param_initializer/facilities/fill_with_spec_dist.h"/>
+        <File Name="model/param_initializer/facilities/policies.h"/>
+        <File Name="model/param_initializer/facilities/traits.h"/>
+      </VirtualDirectory>
+    </VirtualDirectory>
+  </VirtualDirectory>
+</CodeLite_Project>

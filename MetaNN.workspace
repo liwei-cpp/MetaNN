@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="MetaNN" Database="" Version="10.0.0">
+  <Project Name="MetaNN" Path="MetaNN/MetaNN.project" Active="No"/>
+  <Project Name="GeneralTest" Path="GeneralTest/GeneralTest.project" Active="Yes"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Environment/>
+      <Project Name="MetaNN" ConfigName="Debug"/>
+      <Project Name="GeneralTest" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="no">
+      <Environment/>
+      <Project Name="MetaNN" ConfigName="Release"/>
+      <Project Name="GeneralTest" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>
