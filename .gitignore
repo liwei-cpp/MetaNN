@@ -1,0 +1,7 @@
+/.codelite
+/GeneralTest/Debug
+/GeneralTest/Release
+/GeneralTest/GeneralTest.mk
+/GeneralTest/GeneralTest.txt
+/MetaNN/MetaNN.mk
+/Makefile
