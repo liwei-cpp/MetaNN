@@ -43,7 +43,7 @@ void TestMatrix1()
             assert(rm2(i, j) == c++);
     }
 
-    auto rm3 = rm.SubMatrix(3, 7, 5, 15);
+    auto rm3 = SubMatrix(rm, 3, 7, 5, 15);
     for (size_t i=0; i<rm3.RowNum(); ++i)
     {
         for (size_t j = 0; j<rm3.ColNum(); ++j)

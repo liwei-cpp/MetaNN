@@ -26,8 +26,8 @@ void test_div1()
 
     rm1 = GenMatrix<float>(111, 113, 1, 1);
     rm2 = GenMatrix<float>(111, 113, 2, 3);
-    rm1 = rm1.SubMatrix(31, 35, 17, 22);
-    rm2 = rm2.SubMatrix(41, 45, 27, 32);
+    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
+    rm2 = SubMatrix(rm2, 41, 45, 27, 32);
     div = rm1 / rm2;
 
     div_r = Evaluate(div);
@@ -56,7 +56,7 @@ void test_div2()
     }
 
     rm1 = GenMatrix<float>(111, 113, 2, 3);
-    rm1 = rm1.SubMatrix(31, 35, 17, 22);
+    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
     auto div1 = Scalar<float>(3) / rm1;
 
     div_r = Evaluate(div1);

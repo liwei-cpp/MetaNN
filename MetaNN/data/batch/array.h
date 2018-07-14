@@ -2,7 +2,6 @@
 
 #include <MetaNN/data/facilities/tags.h>
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/data/batch/batch.h>
 #include <MetaNN/evaluate/facilities/eval_buffer.h>
 #include <MetaNN/evaluate/facilities/eval_group.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>

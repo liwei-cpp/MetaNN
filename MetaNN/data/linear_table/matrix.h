@@ -1,25 +1,22 @@
 #pragma once
 
-#include <MetaNN/data/batch/batch.h>
+#include <MetaNN/data/linear_table/linear_table.h>
 #include <MetaNN/data/matrices/matrices.h>
 #include <vector>
 
 namespace MetaNN
 {
-template <typename TElem, typename TDevice>
-struct LowerAccessImpl<Batch<TElem, TDevice, CategoryTags::Matrix>>;
-
 template <typename TElement, typename TDevice>
-class Batch<TElement, TDevice, CategoryTags::Matrix>
+class LinearTable<TElement, TDevice, CategoryTags::Matrix>
 {
 public:
     using ElementType = TElement;
     using DeviceType = TDevice;
     
-    friend struct LowerAccessImpl<Batch<TElement, TDevice, CategoryTags::Matrix>>;
+    friend struct LowerAccessImpl<LinearTable<TElement, TDevice, CategoryTags::Matrix>>;
     
 public:
-    Batch(size_t p_batchNum = 0, size_t p_rowNum = 0, size_t p_colNum = 0)
+    LinearTable(size_t p_batchNum = 0, size_t p_rowNum = 0, size_t p_colNum = 0)
         : m_mem(p_rowNum * p_colNum * p_batchNum)
         , m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
@@ -28,7 +25,7 @@ public:
         , m_rawMatrixSize(p_rowNum * p_colNum)
     {}
 
-    bool operator== (const Batch& val) const
+    bool operator== (const LinearTable& val) const
     {
         return (m_mem == val.m_mem) &&
                (m_rowNum == val.m_rowNum) &&
@@ -38,21 +35,8 @@ public:
                (m_rawMatrixSize == val.m_rawMatrixSize);
     }
 
-    template <typename TOtherType>
-    bool operator== (const TOtherType&) const
-    {
-        return false;
-    }
-
-    template <typename TData>
-    bool operator!= (const TData& val) const
-    {
-        return !(operator==(val));
-    }
-
     size_t RowNum() const { return m_rowNum; }
     size_t ColNum() const { return m_colNum; }
-    size_t BatchNum() const { return m_batchNum; }
 
     bool AvailableForWrite() const { return m_mem.UseCount() == 1; }
 
@@ -76,29 +60,24 @@ public:
                                          m_rowNum, m_colNum, m_rowLen);
     }
 
-    auto SubBatchMatrix(size_t p_rowB, size_t p_rowE, size_t p_colB, size_t p_colE) const
+    auto SubMatrix(size_t p_rowB, size_t p_rowE, size_t p_colB, size_t p_colE) const
     {
         assert((p_rowB < m_rowNum) && (p_colB < m_colNum));
         assert((p_rowE <= m_rowNum) && (p_colE <= m_colNum));
         auto pos = m_mem.RawMemory() + p_rowB * m_rowLen + p_colB;
-        return Batch(m_mem.SharedPtr(), pos,
-                         p_rowE - p_rowB, p_colE - p_colB, m_batchNum,
-                         m_rowLen, m_rawMatrixSize);
+        return LinearTable(m_mem.SharedPtr(), pos,
+                           p_rowE - p_rowB, p_colE - p_colB, m_batchNum,
+                           m_rowLen, m_rawMatrixSize);
     }
 
-    auto EvalRegister() const
-    {
-        return MakeConstEvalHandle(*this);
-    }
-    
 private:
-    Batch(std::shared_ptr<ElementType> p_mem,
-              ElementType* p_memStart,
-              size_t p_rowNum,
-              size_t p_colNum,
-              size_t p_batchNum,
-              size_t p_rowLen,
-              size_t p_matrixSize)
+    LinearTable(std::shared_ptr<ElementType> p_mem,
+                ElementType* p_memStart,
+                size_t p_rowNum,
+                size_t p_colNum,
+                size_t p_batchNum,
+                size_t p_rowLen,
+                size_t p_matrixSize)
         : m_mem(p_mem, p_memStart)
         , m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
@@ -107,6 +86,9 @@ private:
         , m_rawMatrixSize(p_matrixSize)
     {}
 
+protected:
+    size_t Count() const { return m_batchNum; }
+    
 private:
     ContinuousMemory<ElementType, DeviceType> m_mem;
     size_t m_rowNum;
@@ -117,9 +99,9 @@ private:
 };
 
 template <typename TElem, typename TDevice>
-struct LowerAccessImpl<Batch<TElem, TDevice, CategoryTags::Matrix>>
+struct LowerAccessImpl<LinearTable<TElem, TDevice, CategoryTags::Matrix>>
 {
-    LowerAccessImpl(Batch<TElem, TDevice, CategoryTags::Matrix> p)
+    LowerAccessImpl(LinearTable<TElem, TDevice, CategoryTags::Matrix> p)
         : m_rawData(std::move(p))
     {}
 
@@ -144,6 +126,6 @@ struct LowerAccessImpl<Batch<TElem, TDevice, CategoryTags::Matrix>>
     }
 
 private:
-    Batch<TElem, TDevice, CategoryTags::Matrix> m_rawData;
+    LinearTable<TElem, TDevice, CategoryTags::Matrix> m_rawData;
 };
 }

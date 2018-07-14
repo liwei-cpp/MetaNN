@@ -28,7 +28,7 @@ void test_abs1()
     }
 
     rm1 = GenMatrix<float>(111, 113, -22, 0.0001f);
-    rm1 = rm1.SubMatrix(31, 35, 17, 22);
+    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
     t = Abs(rm1);
     t_r = Evaluate(t);
 

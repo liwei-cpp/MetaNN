@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MetaNN/data/batch/batch.h>
+#include <MetaNN/data/linear_table/linear_table.h>
 #include <MetaNN/data/facilities/continuous_memory.h>
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/data/facilities/tags.h>
@@ -10,20 +10,18 @@
 namespace MetaNN
 {
 template <typename TElem>
-class Batch<TElem, DeviceTags::CPU, CategoryTags::Scalar>
+class LinearTable<TElem, DeviceTags::CPU, CategoryTags::Scalar>
 {
 public:
     using ElementType = TElem;
     using DeviceType = DeviceTags::CPU;
     
-    friend LowerAccessImpl<Batch<TElem, DeviceTags::CPU, CategoryTags::Scalar>>;
+    friend LowerAccessImpl<LinearTable<TElem, DeviceTags::CPU, CategoryTags::Scalar>>;
     
 public:
-    Batch(size_t length = 0)
+    LinearTable(size_t length = 0)
         : m_mem(length)
         , m_len(length) {}
-     
-    size_t BatchNum() const { return m_len; }
 
     bool AvailableForWrite() const { return m_mem.UseCount() == 1; }
 
@@ -40,7 +38,7 @@ public:
         return (m_mem.RawMemory())[p_id];
     }
    
-    bool operator== (const Batch& val) const
+    bool operator== (const LinearTable& val) const
     {
         return (m_mem == val.m_mem) && (m_len == val.m_len);
     }
@@ -57,20 +55,17 @@ public:
         return !(operator==(val));
     }
     
-    auto EvalRegister() const
-    {
-        return MakeConstEvalHandle(*this);
-    }
-    
+protected:
+    size_t Count() const { return m_len; }
 private:
     ContinuousMemory<ElementType, DeviceType> m_mem;
     size_t m_len;
 };
 
 template<typename TElem>
-struct LowerAccessImpl<Batch<TElem, DeviceTags::CPU, CategoryTags::Scalar>>
+struct LowerAccessImpl<LinearTable<TElem, DeviceTags::CPU, CategoryTags::Scalar>>
 {
-    LowerAccessImpl(Batch<TElem, DeviceTags::CPU, CategoryTags::Scalar> p)
+    LowerAccessImpl(LinearTable<TElem, DeviceTags::CPU, CategoryTags::Scalar> p)
         : m_data(std::move(p))
     {}
 
@@ -85,6 +80,6 @@ struct LowerAccessImpl<Batch<TElem, DeviceTags::CPU, CategoryTags::Scalar>>
     }
 
 private:
-    Batch<TElem, DeviceTags::CPU, CategoryTags::Scalar> m_data;
+    LinearTable<TElem, DeviceTags::CPU, CategoryTags::Scalar> m_data;
 };
 }

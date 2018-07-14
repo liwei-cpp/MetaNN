@@ -11,11 +11,11 @@ namespace
 void test_batch_3d_array1()
 {
     cout << "Test batch 3d array case 1...\t";
-    static_assert(IsBatchThreeDArray<Batch<int, CheckDevice, CategoryTags::ThreeDArray>>, "Test Error");
-    static_assert(IsBatchThreeDArray<Batch<int, CheckDevice, CategoryTags::ThreeDArray> &>, "Test Error");
-    static_assert(IsBatchThreeDArray<Batch<int, CheckDevice, CategoryTags::ThreeDArray> &&>, "Test Error");
-    static_assert(IsBatchThreeDArray<const Batch<int, CheckDevice, CategoryTags::ThreeDArray> &>, "Test Error");
-    static_assert(IsBatchThreeDArray<const Batch<int, CheckDevice, CategoryTags::ThreeDArray> &&>, "Test Error");
+    static_assert(IsBatchThreeDArray<Batch<int, CheckDevice, CategoryTags::ThreeDArray>>);
+    static_assert(IsBatchThreeDArray<Batch<int, CheckDevice, CategoryTags::ThreeDArray> &>);
+    static_assert(IsBatchThreeDArray<Batch<int, CheckDevice, CategoryTags::ThreeDArray> &&>);
+    static_assert(IsBatchThreeDArray<const Batch<int, CheckDevice, CategoryTags::ThreeDArray> &>);
+    static_assert(IsBatchThreeDArray<const Batch<int, CheckDevice, CategoryTags::ThreeDArray> &&>);
     
     Batch<int, CheckDevice, CategoryTags::ThreeDArray> data(10, 7, 13, 35);
     assert(data.AvailableForWrite());

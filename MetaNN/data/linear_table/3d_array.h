@@ -1,29 +1,26 @@
 #pragma once
 
-#include <MetaNN/data/batch/batch.h>
+#include <MetaNN/data/linear_table/linear_table.h>
 #include <MetaNN/data/3d_array/3d_array.h>
 #include <vector>
 
 namespace MetaNN
 {
-template <typename TElem, typename TDevice>
-struct LowerAccessImpl<Batch<TElem, TDevice, CategoryTags::ThreeDArray>>;
-
 template <typename TElement, typename TDevice>
-class Batch<TElement, TDevice, CategoryTags::ThreeDArray>
+class LinearTable<TElement, TDevice, CategoryTags::ThreeDArray>
 {
 public:
     using ElementType = TElement;
     using DeviceType = TDevice;
     
-    friend struct LowerAccessImpl<Batch<TElement, TDevice, CategoryTags::ThreeDArray>>;
+    friend struct LowerAccessImpl<LinearTable<TElement, TDevice, CategoryTags::ThreeDArray>>;
     
 public:
-    Batch()
-        : Batch(0, 0, 0, 0)
+    LinearTable()
+        : LinearTable(0, 0, 0, 0)
     {}
     
-    Batch(size_t p_batchNum, size_t p_pageNum, size_t p_rowNum, size_t p_colNum)
+    LinearTable(size_t p_batchNum, size_t p_pageNum, size_t p_rowNum, size_t p_colNum)
         : m_mem(p_pageNum * p_rowNum * p_colNum * p_batchNum)
         , m_pageNum(p_pageNum)
         , m_rowNum(p_rowNum)
@@ -31,7 +28,7 @@ public:
         , m_batchNum(p_batchNum)
     {}
 
-    bool operator== (const Batch& val) const
+    bool operator== (const LinearTable& val) const
     {
         return (m_mem == val.m_mem) &&
                (m_pageNum == val.m_pageNum) &&
@@ -55,7 +52,6 @@ public:
     size_t PageNum() const { return m_pageNum; }
     size_t RowNum() const { return m_rowNum; }
     size_t ColNum() const { return m_colNum; }
-    size_t BatchNum() const { return m_batchNum; }
 
     bool AvailableForWrite() const { return m_mem.UseCount() == 1; }
 
@@ -79,12 +75,9 @@ public:
         return ThreeDArray<TElement, TDevice>(m_mem.SharedPtr(), pos,
                                               m_pageNum, m_rowNum, m_colNum);
     }
-
-    auto EvalRegister() const
-    {
-        return MakeConstEvalHandle(*this);
-    }
     
+protected:
+    size_t Count() const { return m_batchNum; }
 private:
     ContinuousMemory<ElementType, DeviceType> m_mem;
     size_t m_pageNum;
@@ -94,9 +87,9 @@ private:
 };
 
 template <typename TElem, typename TDevice>
-struct LowerAccessImpl<Batch<TElem, TDevice, CategoryTags::ThreeDArray>>
+struct LowerAccessImpl<LinearTable<TElem, TDevice, CategoryTags::ThreeDArray>>
 {
-    LowerAccessImpl(Batch<TElem, TDevice, CategoryTags::ThreeDArray> p)
+    LowerAccessImpl(LinearTable<TElem, TDevice, CategoryTags::ThreeDArray> p)
         : m_rawData(std::move(p))
     {}
 
@@ -111,6 +104,6 @@ struct LowerAccessImpl<Batch<TElem, TDevice, CategoryTags::ThreeDArray>>
     }
 
 private:
-    Batch<TElem, TDevice, CategoryTags::ThreeDArray> m_rawData;
+    LinearTable<TElem, TDevice, CategoryTags::ThreeDArray> m_rawData;
 };
 }

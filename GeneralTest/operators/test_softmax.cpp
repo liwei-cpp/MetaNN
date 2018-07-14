@@ -28,7 +28,7 @@ void test_softmax1()
     }
 
     rm1 = GenMatrix<float>(111, 113, 2, 0.001f);
-    rm1 = rm1.SubMatrix(17, 18, 31, 51);
+    rm1 = SubMatrix(rm1, 17, 18, 31, 51);
     t = VecSoftmax(rm1);
     t_r = Evaluate(t);
 

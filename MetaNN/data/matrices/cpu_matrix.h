@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MetaNN/data/batch/batch.h>
+#include <MetaNN/data/linear_table/linear_table.h>
 #include <MetaNN/data/facilities/continuous_memory.h>
 #include <MetaNN/data/facilities/lower_access.h>
 #include <MetaNN/data/matrices/matrices.h>
@@ -12,9 +12,6 @@
 namespace MetaNN
 {
 template <typename TElem>
-struct LowerAccessImpl<Matrix<TElem, DeviceTags::CPU>>;
-
-template <typename TElem>
 class Matrix<TElem, DeviceTags::CPU>
 {    
 public:
@@ -25,7 +22,7 @@ public:
     using DeviceType = DeviceTags::CPU;
     
     friend struct LowerAccessImpl<Matrix<TElem, DeviceTags::CPU>>;
-    friend class Batch<TElem, DeviceTags::CPU, CategoryTags::Matrix>;
+    friend class LinearTable<TElem, DeviceTags::CPU, CategoryTags::Matrix>;
 
 public:
     Matrix(size_t p_rowNum = 0, size_t p_colNum = 0)
@@ -73,7 +70,7 @@ public:
         return (m_mem.RawMemory())[p_rowId * m_rowLen + p_colId];
     }
 
-    Matrix SubMatrix(size_t p_rowB, size_t p_rowE, size_t p_colB, size_t p_colE) const
+    Matrix SubMatrix2(size_t p_rowB, size_t p_rowE, size_t p_colB, size_t p_colE) const
     {
         assert((p_rowB < m_rowNum) && (p_colB < m_colNum));
         assert((p_rowE <= m_rowNum) && (p_colE <= m_colNum));

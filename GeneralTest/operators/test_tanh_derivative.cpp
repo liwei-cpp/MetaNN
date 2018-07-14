@@ -26,8 +26,8 @@ void test_tanh_derivative1()
 
     rm1 = GenMatrix<float>(111, 113, 1, 0.001f);
     rm2 = GenMatrix<float>(111, 113, 0, 0.003f);
-    rm1 = rm1.SubMatrix(31, 35, 17, 22);
-    rm2 = rm2.SubMatrix(30, 34, 18, 23);
+    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
+    rm2 = SubMatrix(rm2, 30, 34, 18, 23);
     t = TanhDerivative(rm1, rm2);
     t_r = Evaluate(t);
     for (size_t i = 0; i < 4; ++i)

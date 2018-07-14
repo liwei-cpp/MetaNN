@@ -28,7 +28,7 @@ void test_negative_log_likelihood1()
 
 
     rm1 = GenMatrix<float>(111, 113, 1.1f, 0.0001f);
-    rm1 = rm1.SubMatrix(31, 35, 17, 22);
+    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
     t = NegativeLogLikelihood(rm1, rm2);
     t_r = Evaluate(t);
 

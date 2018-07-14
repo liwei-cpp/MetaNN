@@ -1,7 +1,7 @@
 #pragma once
 
+#include <MetaNN/data/linear_table/linear_table.h>
 #include <MetaNN/data/3d_array/3d_array.h>
-#include <MetaNN/data/batch/batch.h>
 #include <MetaNN/data/facilities/continuous_memory.h>
 #include <MetaNN/data/facilities/lower_access.h>
 #include <MetaNN/evaluate/facilities/eval_handle.h>
@@ -11,9 +11,6 @@
 
 namespace MetaNN
 {
-template <typename TElem>
-struct LowerAccessImpl<ThreeDArray<TElem, DeviceTags::CPU>>;
-
 template <typename TElem>
 class ThreeDArray<TElem, DeviceTags::CPU>
 {    
@@ -25,7 +22,7 @@ public:
     using DeviceType = DeviceTags::CPU;
     
     friend struct LowerAccessImpl<ThreeDArray<TElem, DeviceTags::CPU>>;
-    friend class Batch<TElem, DeviceTags::CPU, CategoryTags::ThreeDArray>;
+    friend class LinearTable<TElem, DeviceTags::CPU, CategoryTags::ThreeDArray>;
 
 public:
     ThreeDArray()

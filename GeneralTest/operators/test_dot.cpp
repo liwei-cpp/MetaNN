@@ -30,8 +30,8 @@ void test_dot_1()
 
     auto rm2 = GenMatrix<int>(111, 113, 0, 1);
     auto cm2 = GenMatrix<int>(111, 113, 2, 3);
-    rm2 = rm2.SubMatrix(31, 35, 17, 22);
-    cm2 = cm2.SubMatrix(31, 36, 41, 44);
+    rm2 = SubMatrix(rm2, 31, 35, 17, 22);
+    cm2 = SubMatrix(cm2, 31, 36, 41, 44);
     for (size_t i = 0; i < 4; ++i)
     {
         for (size_t j = 0; j < 5; ++j)

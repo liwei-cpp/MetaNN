@@ -100,12 +100,8 @@
       <File Name="data/3d_array/cpu_3d_array.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="batch">
-      <File Name="data/batch/3d_array.h"/>
       <File Name="data/batch/array.h"/>
-      <File Name="data/batch/batch.h"/>
       <File Name="data/batch/duplicate.h"/>
-      <File Name="data/batch/matrix.h"/>
-      <File Name="data/batch/scalar.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
       <File Name="data/facilities/allocators.h"/>
@@ -123,6 +119,13 @@
     </VirtualDirectory>
     <File Name="data/dynamic.h"/>
     <File Name="data/scalar.h"/>
+    <VirtualDirectory Name="linear_table">
+      <File Name="data/linear_table/scalar.h"/>
+      <File Name="data/linear_table/linear_table.h"/>
+      <File Name="data/linear_table/matrix.h"/>
+      <File Name="data/linear_table/3d_array.h"/>
+    </VirtualDirectory>
+    <File Name="data/batch.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data_copy">
     <File Name="data_copy/data_copy.h"/>
