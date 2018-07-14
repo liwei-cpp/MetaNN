@@ -7,6 +7,9 @@ namespace MetaNN
 template<typename TElement, typename TDevice>
 class ThreeDArray;
 
-template <typename TElement, typename TDevice>
-constexpr bool IsThreeDArray<ThreeDArray<TElement, TDevice>> = true;
+template <typename TElem, typename TDevice>
+struct DataCategory_<ThreeDArray<TElem, TDevice>>
+{
+    using type = CategoryTags::ThreeDArray;
+};
 }

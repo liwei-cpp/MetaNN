@@ -1,5 +1,6 @@
 #pragma once
 #include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/facilities/traits.h>
 #include <type_traits>
 
 namespace MetaNN
@@ -52,130 +53,62 @@ struct PrincipalDataType_<CategoryTags::BatchThreeDArray, TElem, TDevice>
 template <typename TCategory, typename TElem, typename TDevice>
 using PrincipalDataType = typename PrincipalDataType_<TCategory, TElem, TDevice>::type;
 
-/// is scalar
 template <typename T>
-constexpr bool IsScalar = false;
-
-template <typename T>
-constexpr bool IsScalar<const T> = IsScalar<T>;
-
-template <typename T>
-constexpr bool IsScalar<T&> = IsScalar<T>;
-
-template <typename T>
-constexpr bool IsScalar<T&&> = IsScalar<T>;
-
-/// is matrix
-template <typename T>
-constexpr bool IsMatrix = false;
-
-template <typename T>
-constexpr bool IsMatrix<const T> = IsMatrix<T>;
-
-template <typename T>
-constexpr bool IsMatrix<T&> = IsMatrix<T>;
-
-template <typename T>
-constexpr bool IsMatrix<T&&> = IsMatrix<T>;
-
-/// is batch scalar
-template <typename T>
-constexpr bool IsBatchScalar = false;
-
-template <typename T>
-constexpr bool IsBatchScalar<const T> = IsBatchScalar<T>;
-
-template <typename T>
-constexpr bool IsBatchScalar<T&> = IsBatchScalar<T>;
-
-template <typename T>
-constexpr bool IsBatchScalar<const T&> = IsBatchScalar<T>;
-
-template <typename T>
-constexpr bool IsBatchScalar<T&&> = IsBatchScalar<T>;
-
-template <typename T>
-constexpr bool IsBatchScalar<const T&&> = IsBatchScalar<T>;
-
-/// is batch matrix
-template <typename T>
-constexpr bool IsBatchMatrix = false;
-
-template <typename T>
-constexpr bool IsBatchMatrix<const T> = IsBatchMatrix<T>;
-
-template <typename T>
-constexpr bool IsBatchMatrix<T&> = IsBatchMatrix<T>;
-
-template <typename T>
-constexpr bool IsBatchMatrix<const T&> = IsBatchMatrix<T>;
-
-template <typename T>
-constexpr bool IsBatchMatrix<T&&> = IsBatchMatrix<T>;
-
-template <typename T>
-constexpr bool IsBatchMatrix<const T&&> = IsBatchMatrix<T>;
-
-/// is 3d array
-template <typename T>
-constexpr bool IsThreeDArray = false;
-
-template <typename T>
-constexpr bool IsThreeDArray<const T> = IsThreeDArray<T>;
-
-template <typename T>
-constexpr bool IsThreeDArray<T&> = IsThreeDArray<T>;
-
-template <typename T>
-constexpr bool IsThreeDArray<const T&> = IsThreeDArray<T>;
-
-template <typename T>
-constexpr bool IsThreeDArray<T&&> = IsThreeDArray<T>;
-
-template <typename T>
-constexpr bool IsThreeDArray<const T&&> = IsThreeDArray<T>;
-
-/// is batch matrix
-template <typename T>
-constexpr bool IsBatchThreeDArray = false;
-
-template <typename T>
-constexpr bool IsBatchThreeDArray<const T> = IsBatchThreeDArray<T>;
-
-template <typename T>
-constexpr bool IsBatchThreeDArray<T&> = IsBatchThreeDArray<T>;
-
-template <typename T>
-constexpr bool IsBatchThreeDArray<const T&> = IsBatchThreeDArray<T>;
-
-template <typename T>
-constexpr bool IsBatchThreeDArray<T&&> = IsBatchThreeDArray<T>;
-
-template <typename T>
-constexpr bool IsBatchThreeDArray<const T&&> = IsBatchThreeDArray<T>;
-
-namespace NSDataCategory
+struct DataCategory_
 {
-using tt = std::true_type*;
-using ft = std::false_type*;
-CategoryTags::Scalar      apply(tt, ft...);
-CategoryTags::Matrix      apply(ft, tt, ft...);
-CategoryTags::BatchScalar apply(ft, ft, tt, ft...);
-CategoryTags::BatchMatrix apply(ft, ft, ft, tt, ft...);
-CategoryTags::ThreeDArray apply(ft, ft, ft, ft, tt, ft...);
-CategoryTags::BatchThreeDArray apply(ft, ft, ft, ft, ft, tt, ft...);
+    using type = CategoryTags::Invalid;
 };
 
 template <typename T>
-using DataCategory = decltype(NSDataCategory::apply(
-                              std::conditional_t<IsScalar<T>,      std::true_type*, std::false_type*>(),
-                              std::conditional_t<IsMatrix<T>,      std::true_type*, std::false_type*>(),
-                              std::conditional_t<IsBatchScalar<T>, std::true_type*, std::false_type*>(),
-                              std::conditional_t<IsBatchMatrix<T>, std::true_type*, std::false_type*>(),
-                              std::conditional_t<IsThreeDArray<T>, std::true_type*, std::false_type*>(),
-                              std::conditional_t<IsBatchThreeDArray<T>, std::true_type*, std::false_type*>(),
-                              (std::false_type*){}
-                              ));
+struct DataCategory_<const T>
+{
+    using type = typename DataCategory_<T>::type;
+};
+
+template <typename T>
+struct DataCategory_<T&>
+{
+    using type = typename DataCategory_<T>::type;
+};
+
+template <typename T>
+struct DataCategory_<const T&>
+{
+    using type = typename DataCategory_<T>::type;
+};
+
+template <typename T>
+struct DataCategory_<T&&>
+{
+    using type = typename DataCategory_<T>::type;
+};
+
+template <typename T>
+struct DataCategory_<const T&&>
+{
+    using type = typename DataCategory_<T>::type;
+};
+
+template <typename T>
+using DataCategory = typename DataCategory_<T>::type;
+
+template <typename T>
+constexpr bool IsScalar = std::is_same_v<DataCategory<T>, CategoryTags::Scalar>;
+
+template <typename T>
+constexpr bool IsMatrix = std::is_same_v<DataCategory<T>, CategoryTags::Matrix>;
+
+template <typename T>
+constexpr bool IsThreeDArray = std::is_same_v<DataCategory<T>, CategoryTags::ThreeDArray>;
+
+template <typename T>
+constexpr bool IsBatchMatrix = std::is_same_v<DataCategory<T>, CategoryTags::BatchMatrix>;
+
+template <typename T>
+constexpr bool IsBatchScalar = std::is_same_v<DataCategory<T>, CategoryTags::BatchScalar>;
+
+template <typename T>
+constexpr bool IsBatchThreeDArray = std::is_same_v<DataCategory<T>, CategoryTags::BatchThreeDArray>;
 
 template <typename T>
 struct IsIterator_

@@ -113,5 +113,8 @@ private:
 };
 
 template <typename TElem, typename TDevice>
-constexpr bool IsMatrix<OneHotVector<TElem, TDevice>> = true;
+struct DataCategory_<OneHotVector<TElem, TDevice>>
+{
+    using type = CategoryTags::Matrix;
+};
 }

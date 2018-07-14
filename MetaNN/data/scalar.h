@@ -55,5 +55,8 @@ private:
 };
 
 template <typename TElem, typename TDevice>
-constexpr bool IsScalar<Scalar<TElem, TDevice>> = true;
+struct DataCategory_<Scalar<TElem, TDevice>>
+{
+    using type = CategoryTags::Scalar;
+};
 }

@@ -127,7 +127,10 @@ private:
 };
 
 template <typename TElem, typename TDevice, typename TScalar>
-constexpr bool IsMatrix<TrivalMatrix<TElem, TDevice, TScalar>> = true;
+struct DataCategory_<TrivalMatrix<TElem, TDevice, TScalar>>
+{
+    using type = CategoryTags::Matrix;
+};
 
 template<typename TElem, typename TDevice, typename TVal>
 auto MakeTrivalMatrix(size_t rowNum, size_t colNum, TVal&& m_val)

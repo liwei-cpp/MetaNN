@@ -213,50 +213,20 @@ private:
 };
 
 template <typename TOpTag, typename TData>
-constexpr bool IsMatrix<UnaryOp<TOpTag, TData>>
-    = std::is_same<OperCateCal<TOpTag, TData>, CategoryTags::Matrix>::value;
-    
-template <typename TOpTag, typename TData>
-constexpr bool IsScalar<UnaryOp<TOpTag, TData>>
-    = std::is_same<OperCateCal<TOpTag, TData>, CategoryTags::Scalar>::value;
-
-template <typename TOpTag, typename TData>
-constexpr bool IsBatchMatrix<UnaryOp<TOpTag, TData>>
-    = std::is_same<OperCateCal<TOpTag, TData>, CategoryTags::BatchMatrix>::value;
-    
-template <typename TOpTag, typename TData>
-constexpr bool IsBatchScalar<UnaryOp<TOpTag, TData>>
-    = std::is_same<OperCateCal<TOpTag, TData>, CategoryTags::BatchScalar>::value;
+struct DataCategory_<UnaryOp<TOpTag, TData>>
+{
+    using type = OperCateCal<TOpTag, TData>;
+};
 
 template <typename TOpTag, typename TData1, typename TData2>
-constexpr bool IsScalar<BinaryOp<TOpTag, TData1, TData2>>
-    = std::is_same<OperCateCal<TOpTag, TData1, TData2>, CategoryTags::Scalar>::value;
-    
-template <typename TOpTag, typename TData1, typename TData2>
-constexpr bool IsMatrix<BinaryOp<TOpTag, TData1, TData2>>
-    = std::is_same<OperCateCal<TOpTag, TData1, TData2>, CategoryTags::Matrix>::value;
-
-template <typename TOpTag, typename TData1, typename TData2>
-constexpr bool IsBatchMatrix<BinaryOp<TOpTag, TData1, TData2>>
-    = std::is_same<OperCateCal<TOpTag, TData1, TData2>, CategoryTags::BatchMatrix>::value;
-    
-template <typename TOpTag, typename TData1, typename TData2>
-constexpr bool IsBatchScalar<BinaryOp<TOpTag, TData1, TData2>>
-    = std::is_same<OperCateCal<TOpTag, TData1, TData2>, CategoryTags::BatchScalar>::value;
+struct DataCategory_<BinaryOp<TOpTag, TData1, TData2>>
+{
+    using type = OperCateCal<TOpTag, TData1, TData2>;
+};
 
 template <typename TOpTag, typename TData1, typename TData2, typename TData3>
-constexpr bool IsScalar<TernaryOp<TOpTag, TData1, TData2, TData3>>
-    = std::is_same<OperCateCal<TOpTag, TData1, TData2, TData3>, CategoryTags::Scalar>::value;
-    
-template <typename TOpTag, typename TData1, typename TData2, typename TData3>
-constexpr bool IsMatrix<TernaryOp<TOpTag, TData1, TData2, TData3>>
-    = std::is_same<OperCateCal<TOpTag, TData1, TData2, TData3>, CategoryTags::Matrix>::value;
-
-template <typename TOpTag, typename TData1, typename TData2, typename TData3>
-constexpr bool IsBatchMatrix<TernaryOp<TOpTag, TData1, TData2, TData3>>
-    = std::is_same<OperCateCal<TOpTag, TData1, TData2, TData3>, CategoryTags::BatchMatrix>::value;
-    
-template <typename TOpTag, typename TData1, typename TData2, typename TData3>
-constexpr bool IsBatchScalar<TernaryOp<TOpTag, TData1, TData2, TData3>>
-    = std::is_same<OperCateCal<TOpTag, TData1, TData2, TData3>, CategoryTags::BatchScalar>::value;
+struct DataCategory_<TernaryOp<TOpTag, TData1, TData2, TData3>>
+{
+    using type = OperCateCal<TOpTag, TData1, TData2, TData3>;
+};
 }

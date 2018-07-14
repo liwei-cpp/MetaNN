@@ -28,10 +28,10 @@ public:
 };
 
 template <typename TData>
-constexpr bool IsBatchMatrix<Array<TData>> = IsMatrix<TData>;
-
-template <typename TData>
-constexpr bool IsBatchScalar<Array<TData>> = IsScalar<TData>;
+struct DataCategory_<Array<TData>>
+{
+    using type = CategoryTags::Batch<DataCategory<TData>>;
+};
 
 namespace NSArray
 {

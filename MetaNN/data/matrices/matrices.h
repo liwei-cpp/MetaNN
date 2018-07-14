@@ -7,6 +7,9 @@ namespace MetaNN
 template<typename TElement, typename TDevice>
 class Matrix;
 
-template <typename TElement, typename TDevice>
-constexpr bool IsMatrix<Matrix<TElement, TDevice>> = true;
+template <typename TElem, typename TDevice>
+struct DataCategory_<Matrix<TElem, TDevice>>
+{
+    using type = CategoryTags::Matrix;
+};
 }

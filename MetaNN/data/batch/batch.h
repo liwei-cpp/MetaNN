@@ -9,12 +9,9 @@ namespace MetaNN
 template<typename TElement, typename TDevice, typename TCategory>
 class Batch;
 
-template <typename TElement, typename TDevice>
-constexpr bool IsBatchMatrix<Batch<TElement, TDevice, CategoryTags::Matrix>> = true;
-
-template <typename TElement, typename TDevice>
-constexpr bool IsBatchScalar<Batch<TElement, TDevice, CategoryTags::Scalar>> = true;
-
-template <typename TElement, typename TDevice>
-constexpr bool IsBatchThreeDArray<Batch<TElement, TDevice, CategoryTags::ThreeDArray>> = true;
+template <typename TElement, typename TDevice, typename TCategory>
+struct DataCategory_<Batch<TElement, TDevice, TCategory>>
+{
+    using type = CategoryTags::Batch<TCategory>;
+};
 }

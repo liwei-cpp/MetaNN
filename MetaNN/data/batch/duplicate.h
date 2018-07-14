@@ -15,10 +15,10 @@ public:
 };
 
 template <typename TData>
-constexpr bool IsBatchMatrix<Duplicate<TData>> = IsMatrix<TData>;
-
-template <typename TData>
-constexpr bool IsBatchScalar<Duplicate<TData>> = IsScalar<TData>;
+struct DataCategory_<Duplicate<TData>>
+{
+    using type = CategoryTags::Batch<DataCategory<TData>>;
+};
 
 namespace NSDuplicate
 {

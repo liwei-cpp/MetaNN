@@ -505,15 +505,9 @@ auto MakeDynamic(TData&& data)
     }
 }
 
-template <typename TElem, typename TDevice>
-constexpr bool IsMatrix<DynamicData<TElem, TDevice, CategoryTags::Matrix>> = true;
-
-template <typename TElem, typename TDevice>
-constexpr bool IsBatchMatrix<DynamicData<TElem, TDevice, CategoryTags::BatchMatrix>> = true;
-
-template <typename TElem, typename TDevice>
-constexpr bool IsThreeDArray<DynamicData<TElem, TDevice, CategoryTags::ThreeDArray>> = true;
-
-template <typename TElem, typename TDevice>
-constexpr bool IsBatchThreeDArray<DynamicData<TElem, TDevice, CategoryTags::BatchThreeDArray>> = true;
+template <typename TElem, typename TDevice, typename TCate>
+struct DataCategory_<DynamicData<TElem, TDevice, TCate>>
+{
+    using type = TCate;
+};
 }

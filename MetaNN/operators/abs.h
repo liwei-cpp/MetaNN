@@ -67,7 +67,8 @@ private:
 };
 
 template <typename TOperHandle, typename TElem>
-class EvalUnit<TOperHandle, TElem, DeviceTags::CPU, CategoryTags::BatchMatrix> : public BaseEvalUnit<DeviceTags::CPU>
+class EvalUnit<TOperHandle, TElem, DeviceTags::CPU, CategoryTags::BatchMatrix>
+    : public BaseEvalUnit<DeviceTags::CPU>
 {
 public:
     using ElementType = TElem;

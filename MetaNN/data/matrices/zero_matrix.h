@@ -105,5 +105,8 @@ private:
 };
 
 template <typename TElem, typename TDevice>
-constexpr bool IsMatrix<ZeroMatrix<TElem, TDevice>> = true;
+struct DataCategory_<ZeroMatrix<TElem, TDevice>>
+{
+    using type = CategoryTags::Matrix;
+};
 }
