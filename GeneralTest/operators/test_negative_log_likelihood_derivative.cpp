@@ -27,8 +27,8 @@ void test_negative_log_likelihood_derivative1()
 
     rm1 = GenMatrix<float>(111, 113, 1, 1);
     rm2 = GenMatrix<float>(111, 113, 2, 3);
-    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
-    rm2 = SubMatrix(rm2, 41, 45, 27, 32);
+    rm1.Shrink(31, 35, 17, 22);
+    rm2.Shrink(41, 45, 27, 32);
     div = NegativeLogLikelihoodDerivative(Scalar<float>(0.3), rm1, rm2);
     div_r = Evaluate(div);
     for (size_t i = 0; i < 4; ++i)

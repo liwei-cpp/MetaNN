@@ -44,7 +44,9 @@ void test_batch_matrix1()
         }
     }
     
-    auto data2 = SubMatrix(data, 3, 7, 11, 22);
+    auto data2 = data;
+    data2.Shrink(3, 7, 11, 22);
+    
     assert(!data.AvailableForWrite());
     assert(!data2.AvailableForWrite());
     assert(data2.BatchNum() == 10);
@@ -103,13 +105,13 @@ void test_batch_matrix2()
         }
     }
 
-    rm1 = SubMatrix(rm1, 3, 7, 11, 16);
+    rm1.Shrink(3, 7, 11, 16);
     assert(rm1.RowNum() == 4);
     assert(rm1.ColNum() == 5);
     assert(rm1.BatchNum() == 3);
-    me1 = SubMatrix(me1, 3, 7, 11, 16);
-    me2 = SubMatrix(me2, 3, 7, 11, 16);
-    me3 = SubMatrix(me3, 3, 7, 11, 16);
+    me1.Shrink(3, 7, 11, 16);
+    me2.Shrink(3, 7, 11, 16);
+    me3.Shrink(3, 7, 11, 16);
     for (size_t i = 0; i < 4; ++i)
     {
         for (size_t j = 0; j < 5; ++j)

@@ -60,32 +60,17 @@ public:
                                          m_rowNum, m_colNum, m_rowLen);
     }
 
-    auto SubMatrix(size_t p_rowB, size_t p_rowE, size_t p_colB, size_t p_colE) const
+    void Shrink(size_t p_rowB, size_t p_rowE, size_t p_colB, size_t p_colE)
     {
         assert((p_rowB < m_rowNum) && (p_colB < m_colNum));
         assert((p_rowE <= m_rowNum) && (p_colE <= m_colNum));
         auto pos = m_mem.RawMemory() + p_rowB * m_rowLen + p_colB;
-        return LinearTable(m_mem.SharedPtr(), pos,
-                           p_rowE - p_rowB, p_colE - p_colB, m_batchNum,
-                           m_rowLen, m_rawMatrixSize);
+        
+        m_mem.SetStartPoint(pos);
+        m_rowNum = p_rowE - p_rowB;
+        m_colNum = p_colE - p_colB;
     }
-
-private:
-    LinearTable(std::shared_ptr<ElementType> p_mem,
-                ElementType* p_memStart,
-                size_t p_rowNum,
-                size_t p_colNum,
-                size_t p_batchNum,
-                size_t p_rowLen,
-                size_t p_matrixSize)
-        : m_mem(p_mem, p_memStart)
-        , m_rowNum(p_rowNum)
-        , m_colNum(p_colNum)
-        , m_batchNum(p_batchNum)
-        , m_rowLen(p_rowLen)
-        , m_rawMatrixSize(p_matrixSize)
-    {}
-
+    
 protected:
     size_t Count() const { return m_batchNum; }
     

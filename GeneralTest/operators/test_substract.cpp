@@ -26,8 +26,8 @@ void test_substract1()
 
     rm1 = GenMatrix<int>(111, 113, 0, 1);
     rm2 = GenMatrix<int>(111, 113, 2, 3);
-    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
-    rm2 = SubMatrix(rm2, 41, 45, 27, 32);
+    rm1.Shrink(31, 35, 17, 22);
+    rm2.Shrink(41, 45, 27, 32);
     sub = rm1 - rm2;
     sub_r = Evaluate(sub);
     for (size_t i = 0; i < 4; ++i)
@@ -55,7 +55,7 @@ void test_substract2()
     }
 
     rm1 = GenMatrix<int>(111, 113, 2, 3);
-    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
+    rm1.Shrink(31, 35, 17, 22);
     auto sub1 = Scalar<int>(3) - rm1;
     sub_r = Evaluate(sub1);
     for (size_t i = 0; i < 4; ++i)

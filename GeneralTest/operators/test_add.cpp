@@ -27,8 +27,8 @@ void test_add1()
 
     rm1 = GenMatrix<int>(111, 113, 1, 2);
     rm2 = GenMatrix<int>(111, 113, 2, 3);
-    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
-    rm2 = SubMatrix(rm2, 41, 45, 27, 32);
+    rm1.Shrink(31, 35, 17, 22);
+    rm2.Shrink(41, 45, 27, 32);
     add = rm1 + rm2;
     add_r = Evaluate(add);
     for (size_t i = 0; i < 4; ++i)
@@ -56,7 +56,7 @@ void test_add2()
     }
 
     rm1 = GenMatrix<int>(111, 113, 2, 3);
-    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
+    rm1.Shrink(31, 35, 17, 22);
     add = Scalar<int>(3) + rm1;
     add_r = Evaluate(add);
     for (size_t i = 0; i < 4; ++i)

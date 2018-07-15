@@ -15,9 +15,6 @@ class Batch : public LinearTable<TElem, TDevice, TCategory>
 public:
     using TBase::TBase;
     
-    Batch(TBase val)
-        : TBase(std::move(val)) {}
-    
     bool operator == (const Batch& val) const
     {
         const TBase& base = static_cast<const TBase&>(val);
@@ -62,12 +59,4 @@ struct DataCategory_<Batch<TElement, TDevice, TCategory>>
 {
     using type = CategoryTags::Batch<TCategory>;
 };
-
-template <typename TElem, typename TDevice>
-auto SubMatrix(const Batch<TElem, TDevice, CategoryTags::Matrix>& input,
-               size_t p_rowB, size_t p_rowE, size_t p_colB, size_t p_colE)
-{
-    auto res = input.SubMatrix(p_rowB, p_rowE, p_colB, p_colE);
-    return Batch<TElem, TDevice, CategoryTags::Matrix>(std::move(res));
-}
 }

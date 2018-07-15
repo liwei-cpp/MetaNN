@@ -30,7 +30,7 @@ void test_sign1()
     }
 
     rm1 = GenMatrix<float>(111, 113, -22, 0.0001f);
-    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
+    rm1.Shrink(31, 35, 17, 22);
     t = Sign(rm1);
     t_r = Evaluate(t);
 

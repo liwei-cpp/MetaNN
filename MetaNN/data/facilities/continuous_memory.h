@@ -8,6 +8,7 @@ class ContinuousMemory
 {
     static_assert(std::is_same<RemConstRef<TElem>, TElem>::value);
     using ElementType = TElem;
+    
 public:
     explicit ContinuousMemory(size_t p_size)
         : m_mem(Allocator<TDevice>::template Allocate<ElementType>(p_size))
@@ -18,6 +19,11 @@ public:
         : m_mem(std::move(p_mem))
         , m_memStart(p_memStart)
     {}
+
+    void SetStartPoint(ElementType* pos)
+    {
+        m_memStart = pos;
+    }
 
     auto RawMemory() const { return m_memStart; }
 

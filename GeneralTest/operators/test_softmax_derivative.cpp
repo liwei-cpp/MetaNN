@@ -41,8 +41,8 @@ void test_softmax_derivative1()
 
     mSout = GenMatrix<float>(111, 113, 1.1f, 0.0001f);
     mGrad = Matrix<float, CheckDevice>(111, 113);
-    mGrad = SubMatrix(mGrad, 27, 28, 41, 45);
-    mSout = SubMatrix(mSout, 17, 18, 31, 35);
+    mGrad.Shrink(27, 28, 41, 45);
+    mSout.Shrink(17, 18, 31, 35);
     t = VecSoftmaxDerivative(mGrad, mSout);
     t_r = Evaluate(t);
 

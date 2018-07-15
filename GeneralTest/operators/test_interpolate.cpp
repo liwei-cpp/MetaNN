@@ -30,9 +30,9 @@ void test_interpolate1()
     rm2 = GenMatrix<float>(111, 113, 1, 0.0002f);
     rm3 = GenMatrix<float>(111, 113, 3, 0.0007f);
 
-    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
-    rm2 = SubMatrix(rm2, 41, 45, 27, 32);
-    rm3 = SubMatrix(rm3, 51, 55, 37, 42);
+    rm1.Shrink(31, 35, 17, 22);
+    rm2.Shrink(41, 45, 27, 32);
+    rm3.Shrink(51, 55, 37, 42);
 
     res = Interpolate(rm1, rm2, rm3);
     res_r = Evaluate(res);

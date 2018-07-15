@@ -28,8 +28,8 @@ void test_sigmoid_derivative1()
 
     rm1 = GenMatrix<float>(111, 113, 1, 0.002f);
     rm2 = GenMatrix<float>(111, 113, 0, 0.001f);
-    rm1 = SubMatrix(rm1, 31, 35, 17, 22);
-    rm2 = SubMatrix(rm2, 30, 34, 18, 23);
+    rm1.Shrink(31, 35, 17, 22);
+    rm2.Shrink(30, 34, 18, 23);
     t = SigmoidDerivative(rm1, rm2);
     t_r = Evaluate(t);
     for (size_t i = 0; i < 4; ++i)

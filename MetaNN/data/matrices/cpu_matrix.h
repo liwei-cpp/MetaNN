@@ -1,6 +1,5 @@
 #pragma once
 
-#include <MetaNN/data/linear_table/linear_table.h>
 #include <MetaNN/data/facilities/continuous_memory.h>
 #include <MetaNN/data/facilities/lower_access.h>
 #include <MetaNN/data/matrices/matrices.h>
@@ -22,7 +21,6 @@ public:
     using DeviceType = DeviceTags::CPU;
     
     friend struct LowerAccessImpl<Matrix<TElem, DeviceTags::CPU>>;
-    friend class LinearTable<TElem, DeviceTags::CPU, CategoryTags::Matrix>;
 
 public:
     Matrix(size_t p_rowNum = 0, size_t p_colNum = 0)
@@ -30,6 +28,17 @@ public:
         , m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
         , m_rowLen(p_colNum)
+    {}
+    
+    Matrix(std::shared_ptr<ElementType> p_mem,
+            ElementType* p_memStart,
+            size_t p_rowNum,
+            size_t p_colNum,
+            size_t p_rowLen)
+        : m_mem(p_mem, p_memStart)
+        , m_rowNum(p_rowNum)
+        , m_colNum(p_colNum)
+        , m_rowLen(p_rowLen)
     {}
 
     bool operator== (const Matrix& val) const
@@ -70,14 +79,15 @@ public:
         return (m_mem.RawMemory())[p_rowId * m_rowLen + p_colId];
     }
 
-    Matrix SubMatrix2(size_t p_rowB, size_t p_rowE, size_t p_colB, size_t p_colE) const
+    void Shrink(size_t p_rowB, size_t p_rowE, size_t p_colB, size_t p_colE)
     {
         assert((p_rowB < m_rowNum) && (p_colB < m_colNum));
         assert((p_rowE <= m_rowNum) && (p_colE <= m_colNum));
         auto pos = m_mem.RawMemory() + p_rowB * m_rowLen + p_colB;
-        return Matrix(m_mem.SharedPtr(), pos,
-                      p_rowE - p_rowB, p_colE - p_colB,
-                      m_rowLen);
+        
+        m_mem.SetStartPoint(pos);
+        m_rowNum = p_rowE - p_rowB;
+        m_colNum = p_colE - p_colB;
     }
 
     auto EvalRegister() const
@@ -85,18 +95,6 @@ public:
         return MakeConstEvalHandle(*this);
     }
     
-private:
-    Matrix(std::shared_ptr<ElementType> p_mem,
-            ElementType* p_memStart,
-            size_t p_rowNum,
-            size_t p_colNum,
-            size_t p_rowLen)
-        : m_mem(p_mem, p_memStart)
-        , m_rowNum(p_rowNum)
-        , m_colNum(p_colNum)
-        , m_rowLen(p_rowLen)
-    {}
-
 private:
     ContinuousMemory<ElementType, DeviceType> m_mem;
     size_t m_rowNum;
