@@ -126,6 +126,7 @@
       <File Name="data/linear_table/3d_array.h"/>
     </VirtualDirectory>
     <File Name="data/batch.h"/>
+    <File Name="data/sequence.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data_copy">
     <File Name="data_copy/data_copy.h"/>

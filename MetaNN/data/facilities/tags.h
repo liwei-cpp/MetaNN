@@ -12,15 +12,15 @@ namespace CategoryTags
     struct ThreeDArray;
 
     template <typename> struct Batch;
-    template <typename> struct Seq;
+    template <typename> struct Sequence;
 
     using BatchScalar = Batch<Scalar>;
     using BatchMatrix = Batch<Matrix>;
     using BatchThreeDArray = Batch<ThreeDArray>;
 
-    using SeqScalar = Seq<Scalar>;
-    using SeqMatrix = Seq<Matrix>;
-    using SeqThreeDArray = Seq<ThreeDArray>;
+    using ScalarSequence = Sequence<Scalar>;
+    using MatrixSequence = Sequence<Matrix>;
+    using ThreeDArraySequence = Sequence<ThreeDArray>;
 }
 
 /// device types

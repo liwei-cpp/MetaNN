@@ -23,6 +23,9 @@
       <File Name="data/test_scalar.h"/>
       <File Name="data/test_trival_matrix.h"/>
       <File Name="data/test_zero_matrix.h"/>
+      <File Name="data/test_sequence_3d_array.h"/>
+      <File Name="data/test_sequence_matrix.h"/>
+      <File Name="data/test_sequence_scalar.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="src">
       <File Name="data/test_3d_array.cpp"/>
@@ -36,6 +39,9 @@
       <File Name="data/test_scalar.cpp"/>
       <File Name="data/test_trival_matrix.cpp"/>
       <File Name="data/test_zero_matrix.cpp"/>
+      <File Name="data/test_sequence_3d_array.cpp"/>
+      <File Name="data/test_sequence_matrix.cpp"/>
+      <File Name="data/test_sequence_scalar.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="evaluate">

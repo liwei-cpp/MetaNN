@@ -18,6 +18,7 @@
 #include <MetaNN/data/3d_array/cpu_3d_array.h>
 
 #include <MetaNN/data/batch.h>
+#include <MetaNN/data/sequence.h>
 #include <MetaNN/data/batch/array.h>
 #include <MetaNN/data/batch/duplicate.h>
 

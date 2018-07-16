@@ -111,6 +111,15 @@ template <typename T>
 constexpr bool IsBatchThreeDArray = std::is_same_v<DataCategory<T>, CategoryTags::BatchThreeDArray>;
 
 template <typename T>
+constexpr bool IsMatrixSequence = std::is_same_v<DataCategory<T>, CategoryTags::MatrixSequence>;
+
+template <typename T>
+constexpr bool IsScalarSequence = std::is_same_v<DataCategory<T>, CategoryTags::ScalarSequence>;
+
+template <typename T>
+constexpr bool IsThreeDArraySequence = std::is_same_v<DataCategory<T>, CategoryTags::ThreeDArraySequence>;
+
+template <typename T>
 struct IsIterator_
 {   
     template <typename R>

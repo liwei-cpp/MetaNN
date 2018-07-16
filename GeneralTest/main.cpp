@@ -3,6 +3,7 @@
 #include "policies/test_policy_selector.h"
 #include "facilities/test_var_type_dict.h"
 #include "evaluate/test_eval_plan.h"
+
 #include "data/test_array.h"
 #include "data/test_duplicate.h"
 #include "data/test_scalar.h"
@@ -14,6 +15,10 @@
 #include "data/test_batch_matrix.h"
 #include "data/test_3d_array.h"
 #include "data/test_batch_3d_array.h"
+#include "data/test_sequence_3d_array.h"
+#include "data/test_sequence_matrix.h"
+#include "data/test_sequence_scalar.h"
+
 #include "operators/test_abs.h"
 #include "operators/test_add.h"
 #include "operators/test_collapse.h"
@@ -69,10 +74,14 @@ int main(int argc, char **argv)
     test_duplicate();
     test_batch_scalar();
     test_batch_matrix();
-    
+
     test_3d_array();
     test_batch_3d_array();
     
+    test_sequence_3d_array();
+    test_sequence_matrix();
+    test_sequence_scalar();
+
     test_abs();
     test_add();
     test_collapse();
