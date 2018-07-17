@@ -213,6 +213,10 @@
       <File Name="operators/facilities/tags.h"/>
       <File Name="operators/facilities/traits.h"/>
     </VirtualDirectory>
+    <File Name="operators/conv.h"/>
+    <VirtualDirectory Name="parameters">
+      <File Name="operators/parameters/conv_params.h"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/change_policy.h"/>
