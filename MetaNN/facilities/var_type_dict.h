@@ -15,11 +15,16 @@ struct VarTypeDict
     template <typename...TTypes>
     struct Values
     {
-        Values()
-            : m_tuple(sizeof...(TTypes)) {}
+    public:
+        Values() = default;
 
-        Values(std::vector<std::shared_ptr<void>> input)
-            : m_tuple(std::move(input)) {}
+        Values(std::shared_ptr<void> (&&input)[sizeof...(TTypes)])
+        {
+            for (size_t i = 0; i < sizeof...(TTypes); ++i)
+            {
+                m_tuple[i] = std::move(input[i]);
+            }
+        }
 
     public:
         template <typename TTag, typename TVal>
@@ -65,7 +70,7 @@ struct VarTypeDict
         using ValueType = ContMetaFun::Sequential::At<Values, ContMetaFun::Sequential::Order<VarTypeDict, TTag>>;
 
     private:
-        std::vector<std::shared_ptr<void>> m_tuple;
+        std::shared_ptr<void> m_tuple[sizeof...(TTypes)];
     };
 
 public:
