@@ -6,6 +6,22 @@
 WORKDIR = `pwd`
 
 CXX = clang++
+
+CompilerVer = $(shell $(CXX) --version | grep version | grep -o -m 1 "[0-9]\+\.[0-9]\+\.*[0-9]*" | head -n 1)
+COMPILER_VERSION_NUMBER := $(shell echo $(CompilerVer) | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g')
+$(info Compiler: 'clang++' $(CompilerVer))
+CLANG_600_OR_MORE := $(shell expr $(COMPILER_VERSION_NUMBER) \>= 60000)
+
+ifeq ($(CLANG_600_OR_MORE),0)
+  $(warning )
+  $(warning )
+  $(warning ===================================================================================)
+  $(warning Warning: The version of clang++ is lower than 6.0.0, the compile might not succeed.)
+  $(warning ===================================================================================)
+  $(warning )
+  $(warning )
+endif
+
 AR = ar
 LD = clang++
 WINDRES = windres

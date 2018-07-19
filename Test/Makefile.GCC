@@ -7,6 +7,22 @@ WORKDIR = `pwd`
 
 CC = gcc
 CXX = g++
+
+CompilerVer = $(shell $(CXX) -dumpfullversion | head -1)
+COMPILER_VERSION_NUMBER := $(shell echo $(CompilerVer) | sed -e 's/\.\([0-9][0-9]\)/\1/g' -e 's/\.\([0-9]\)/0\1/g')
+$(info Compiler: 'g++' $(CompilerVer))
+GCC_710_OR_MORE := $(shell expr $(COMPILER_VERSION_NUMBER) \>= 70100)
+
+ifeq ($(GCC_710_OR_MORE),0)
+  $(warning )
+  $(warning )
+  $(warning ===============================================================================)
+  $(warning Warning: The version of g++ is lower than 7.1.0, the compile might not succeed.)
+  $(warning ===============================================================================)
+  $(warning )
+  $(warning )
+endif
+
 AR = ar
 LD = g++
 WINDRES = windres
