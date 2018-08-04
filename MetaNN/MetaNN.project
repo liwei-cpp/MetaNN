@@ -212,6 +212,7 @@
       <File Name="operators/facilities/organizer.h"/>
       <File Name="operators/facilities/tags.h"/>
       <File Name="operators/facilities/traits.h"/>
+      <File Name="operators/facilities/oper_aux_params.h"/>
     </VirtualDirectory>
     <File Name="operators/conv.h"/>
     <VirtualDirectory Name="parameters">
