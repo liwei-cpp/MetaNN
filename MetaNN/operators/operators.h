@@ -56,7 +56,7 @@ public:
             
             using THead = SeqHead<TOperSeqCont>;
             using TTail = SeqTail<TOperSeqCont>;
-            THead::template EvalRegister<TTail>(m_evalBuf, m_data);
+            THead::template EvalRegister<TTail>(m_evalBuf, *this);
         }
         return m_evalBuf.ConstHandle();
     }
@@ -122,7 +122,7 @@ public:
             
             using THead = SeqHead<TOperSeqCont>;
             using TTail = SeqTail<TOperSeqCont>;
-            THead::template EvalRegister<TTail>(m_evalBuf, m_data1, m_data2);
+            THead::template EvalRegister<TTail>(m_evalBuf, *this);
         }
         return m_evalBuf.ConstHandle();
     }
@@ -199,7 +199,7 @@ public:
             
             using THead = SeqHead<TOperSeqCont>;
             using TTail = SeqTail<TOperSeqCont>;
-            THead::template EvalRegister<TTail>(m_evalBuf, m_data1, m_data2, m_data3);
+            THead::template EvalRegister<TTail>(m_evalBuf, *this);
         }
         return m_evalBuf.ConstHandle();
     }

@@ -10,7 +10,87 @@
 
 namespace MetaNN
 {
-namespace OperConv
+template <>
+class OperAuxParams<ConvRelated::Conv2D, CategoryTags::ThreeDArray>
+{
+public:
+    template <typename TPadHead, typename TPadTail, typename TStride>
+    OperAuxParams(TPadHead&& head, TPadTail&& tail, TStride&& stride)
+        : m_padHeadRow(head.template Get<ConvParams::RowNum>())
+        , m_padHeadCol(head.template Get<ConvParams::ColNum>())
+        , m_padHeadPage(head.template Get<ConvParams::PageNum>())
+        , m_padTailRow(tail.template Get<ConvParams::RowNum>())
+        , m_padTailCol(tail.template Get<ConvParams::ColNum>())
+        , m_padTailPage(tail.template Get<ConvParams::PageNum>())
+        , m_strideRow(stride.template Get<ConvParams::RowNum>())
+        , m_strideCol(stride.template Get<ConvParams::ColNum>())
+    {}
+        
+public:
+    bool operator == (const OperAuxParams& val) const
+    {
+        return (m_padHeadRow == val.m_padHeadRow) &&
+               (m_padHeadCol == val.m_padHeadCol) &&
+               (m_padHeadPage == val.m_padHeadPage) &&
+               (m_padTailRow == val.m_padTailRow) &&
+               (m_padTailCol == val.m_padTailCol) &&
+               (m_padTailPage == val.m_padTailPage) &&
+               (m_strideRow == val.m_strideRow) &&
+               (m_strideCol == val.m_strideCol);
+    }
+    
+public:
+    const size_t m_padHeadRow;
+    const size_t m_padHeadCol;
+    const size_t m_padHeadPage;
+    
+    const size_t m_padTailRow;
+    const size_t m_padTailCol;
+    const size_t m_padTailPage;
+    
+    const size_t m_strideRow;
+    const size_t m_strideCol;
+};
+
+namespace NSOperConv::NSCaseGen
+{
+struct Calculator
+{
+    template <typename TCaseTail, typename TEvalRes, typename TOperator1, typename TOperator2>
+    static void EvalRegister(TEvalRes& evalRes, const TOperator1& oper1, const TOperator2& oper2)
+    {
+        /*
+        static_assert(std::is_same<TCaseTail, OperSeqContainer<>>::value,
+                      "General Case is not the last one");
+                      
+        using ElementType = typename TEvalRes::DataType::ElementType;
+        using DeviceType = typename TEvalRes::DataType::DeviceType;
+        using CategoryType = DataCategory<typename TEvalRes::DataType>;
+
+        auto handle1 = oper1.EvalRegister();
+        auto handle2 = oper2.EvalRegister();
+        using UnitType = EvalUnit<decltype(handle1), decltype(handle2),
+                                  ElementType, DeviceType, CategoryType>;
+        using GroupType = TrivalEvalGroup<UnitType>;
+
+        auto outHandle = evalRes.Handle();
+        const void* dataPtr = outHandle.DataPtr();
+        auto depVec = {handle1.DataPtr(), handle2.DataPtr()};
+        
+        UnitType unit(std::move(handle1), std::move(handle2), std::move(outHandle));
+        EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, std::move(depVec));
+        */
+    }
+};
+}
+
+template <>
+struct OperSeq_<ConvRelated::Conv2D>
+{
+    using type = OperSeqContainer<NSOperConv::NSCaseGen::Calculator>;
+};
+
+namespace NSOperConv
 {
     inline size_t CalculateOutSize(size_t inSize,
                                    size_t padHead, size_t padTail,
@@ -74,9 +154,12 @@ namespace OperConv
                                             p_padTail.template Get<ConvParams::ColNum>(),
                                             p_strides.template Get<ConvParams::ColNum>(),
                                             p_kernel.ColNum());
-        auto outSize = VarTypeDict<ConvParams::RowNum, ConvParams::ColNum>::Create()
+        auto outSize = VarTypeDict<ConvParams::RowNum,
+                                   ConvParams::ColNum,
+                                   ConvParams::PageNum>::Create()
                         .template Set<ConvParams::RowNum>(outRowNum)
-                        .template Set<ConvParams::ColNum>(outColNum);
+                        .template Set<ConvParams::ColNum>(outColNum)
+                        .template Set<ConvParams::PageNum>(p_input.PageNum());
 
         return MakeConvTemplate(std::forward<TInput>(p_input), std::forward<TKernel>(p_kernel),
                                 std::forward<TPadHeadValueCont>(p_padHead),
@@ -118,12 +201,12 @@ namespace OperConv
 template <typename TInput, typename TKernel,
           typename TPadHeadValueCont, typename TPadTailValueCont, 
           typename TStrideValueCont,
-          std::enable_if_t<OperConv::valid<TInput, TKernel>>* = nullptr>
+          std::enable_if_t<NSOperConv::valid<TInput, TKernel>>* = nullptr>
 auto DefultConv(TInput&& p_input, TKernel&& p_kernel,
                 TPadHeadValueCont&& p_padHead, TPadTailValueCont&& p_padTail,
                 TStrideValueCont&& p_strides)
 {
-    return OperConv::DefaultEval(std::forward<TInput>(p_input), std::forward<TKernel>(p_kernel),
+    return NSOperConv::DefaultEval(std::forward<TInput>(p_input), std::forward<TKernel>(p_kernel),
                                  std::forward<TPadHeadValueCont>(p_padHead),
                                  std::forward<TPadTailValueCont>(p_padTail),
                                  std::forward<TStrideValueCont>(p_strides));
@@ -131,11 +214,11 @@ auto DefultConv(TInput&& p_input, TKernel&& p_kernel,
 
 template <typename TInput, typename TKernel,
           typename TStrideValueCont,
-          std::enable_if_t<OperConv::valid<TInput, TKernel>>* = nullptr>
+          std::enable_if_t<NSOperConv::valid<TInput, TKernel>>* = nullptr>
 auto SameConv(TInput&& p_input, TKernel&& p_kernel,
               TStrideValueCont&& p_strides)
 {
-    return OperConv::SameEval(std::forward<TInput>(p_input), std::forward<TKernel>(p_kernel),
-                              std::forward<TStrideValueCont>(p_strides));
+    return NSOperConv::SameEval(std::forward<TInput>(p_input), std::forward<TKernel>(p_kernel),
+                                std::forward<TStrideValueCont>(p_strides));
 }
 }

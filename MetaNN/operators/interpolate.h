@@ -155,10 +155,8 @@ private:
 
 struct Calculator
 {
-    template <typename TCaseTail, typename TEvalRes,
-              typename TOperator1, typename TOperator2, typename TOperator3>
-    static void EvalRegister(TEvalRes& evalRes, const TOperator1& oper1,
-                             const TOperator2& oper2, const TOperator3& oper3)
+    template <typename TCaseTail, typename TEvalRes, typename TOper>
+    static void EvalRegister(TEvalRes& evalRes, const TOper& oper)
     {
         static_assert(std::is_same<TCaseTail, OperSeqContainer<>>::value,
                       "General Case is not the last one");
@@ -167,9 +165,9 @@ struct Calculator
         using DeviceType = typename TEvalRes::DataType::DeviceType;
         using CategoryType = DataCategory<typename TEvalRes::DataType>;
 
-        auto handle1 = oper1.EvalRegister();
-        auto handle2 = oper2.EvalRegister();
-        auto handle3 = oper3.EvalRegister();
+        auto handle1 = oper.Operand1().EvalRegister();
+        auto handle2 = oper.Operand2().EvalRegister();
+        auto handle3 = oper.Operand3().EvalRegister();
         using UnitType = EvalUnit<decltype(handle1), decltype(handle2), 
                                   decltype(handle3), ElementType, DeviceType, CategoryType>;
         using GroupType = TrivalEvalGroup<UnitType>;

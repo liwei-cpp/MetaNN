@@ -253,23 +253,28 @@ struct Calculator
     };
     
     
-    template <typename TCaseRem, typename TEvalRes, typename TOperator1, typename TOperator2>
-    static void EvalRegister(TEvalRes& evalRes, const TOperator1& oper1, const TOperator2& oper2)
+    template <typename TCaseRem, typename TEvalRes, typename TOper>
+    static void EvalRegister(TEvalRes& evalRes, const TOper& oper)
     {
+        using TOperator1 = RemConstRef<decltype(oper.Operand1())>;
+        using TOperator2 = RemConstRef<decltype(oper.Operand2())>;
         if constexpr (!Valid<TOperator1, TOperator2>)
         {
             using THead = SeqHead<TCaseRem>;
             using TTail = SeqTail<TCaseRem>;
-            THead::template EvalRegister<TTail>(evalRes, oper1, oper2);
+            THead::template EvalRegister<TTail>(evalRes, oper);
         }
         else
         {
+            const auto& oper1 = oper.Operand1();
+            const auto& oper2 = oper.Operand2();
+
             const auto& softmax_res = oper1.Operand3();
             if (softmax_res != oper2)
             {
                 using THead = SeqHead<TCaseRem>;
                 using TTail = SeqTail<TCaseRem>;
-                THead::template EvalRegister<TTail>(evalRes, oper1, oper2);
+                THead::template EvalRegister<TTail>(evalRes, oper);
                 return;
             }
         
@@ -397,12 +402,14 @@ private:
 
 struct Calculator
 {
-    template <typename TCaseTail, typename TEvalRes, typename TOperator1, typename TOperator2>
-    static void EvalRegister(TEvalRes& evalRes, const TOperator1& oper1, const TOperator2& oper2)
+    template <typename TCaseTail, typename TEvalRes, typename TOper>
+    static void EvalRegister(TEvalRes& evalRes, const TOper& oper)
     {
         static_assert(std::is_same<TCaseTail, OperSeqContainer<>>::value,
                       "General Case is not the last one");
-                      
+
+        const auto& oper1 = oper.Operand1();
+        const auto& oper2 = oper.Operand2();
         auto handle1 = oper1.EvalRegister();
         auto handle2 = oper2.EvalRegister();
 
