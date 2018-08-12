@@ -26,7 +26,7 @@ public:
 public:
     template <typename... TAux>
     UnaryOp(TData data, TAux &&... aux)
-        : OperOrganizer<TOpTag, Cate>(data)
+        : OperOrganizer<TOpTag, Cate>(data, aux...)
         , OperAuxParams<TOpTag, Cate>(std::forward<TAux>(aux)...)
         , m_data(std::move(data)) {}
 
@@ -91,7 +91,7 @@ public:
 public:
     template <typename... TAux>
     BinaryOp(TData1 data1, TData2 data2, TAux &&... aux)
-        : OperOrganizer<TOpTag, Cate>(data1, data2)
+        : OperOrganizer<TOpTag, Cate>(data1, data2, aux...)
         , OperAuxParams<TOpTag, Cate>(std::forward<TAux>(aux)...)
         , m_data1(std::move(data1))
         , m_data2(std::move(data2)) {}
@@ -165,7 +165,7 @@ public:
 public:
     template <typename... TAux>
     TernaryOp(TData1 data1, TData2 data2, TData3 data3, TAux &&... aux)
-        : OperOrganizer<TOpTag, Cate>(data1, data2, data3)
+        : OperOrganizer<TOpTag, Cate>(data1, data2, data3, aux...)
         , OperAuxParams<TOpTag, Cate>(std::forward<TAux>(aux)...)
         , m_data1(std::move(data1))
         , m_data2(std::move(data2))
