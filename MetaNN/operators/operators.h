@@ -5,12 +5,15 @@
 #include <MetaNN/operators/facilities/oper_seq.h>
 #include <MetaNN/operators/facilities/organizer.h>
 #include <MetaNN/operators/facilities/traits.h>
+#include <MetaNN/operators/facilities/oper_aux_params.h>
 
 namespace MetaNN
 {
 
 template <typename TOpTag, typename TData>
-class UnaryOp : public OperOrganizer<TOpTag, OperCateCal<TOpTag, TData>>
+class UnaryOp
+    : public OperOrganizer<TOpTag, OperCateCal<TOpTag, TData>>
+    , public OperAuxParams<TOpTag, OperCateCal<TOpTag, TData>>
 {
     static_assert(std::is_same<RemConstRef<TData>, TData>::value,
                   "TData is not an available type");
@@ -21,13 +24,16 @@ public:
     using DeviceType = typename OperDeviceType_<TOpTag, TData>::type;
 
 public:
-    UnaryOp(TData data)
-        : OperOrganizer<TOpTag, Cate>(data)
+    template <typename... TAux>
+    UnaryOp(TData data, TAux &&... aux)
+        : OperOrganizer<TOpTag, Cate>(data, aux...)
+        , OperAuxParams<TOpTag, Cate>(std::forward<TAux>(aux)...)
         , m_data(std::move(data)) {}
 
     bool operator== (const UnaryOp& val) const
     {
-        return m_data == val.m_data;
+        return (OperAuxParams<TOpTag, Cate>::operator ==(val)) &&
+               (m_data == val.m_data);
     }
 
     template <typename TOtherData>
@@ -50,7 +56,7 @@ public:
             
             using THead = SeqHead<TOperSeqCont>;
             using TTail = SeqTail<TOperSeqCont>;
-            THead::template EvalRegister<TTail>(m_evalBuf, m_data);
+            THead::template EvalRegister<TTail>(m_evalBuf, *this);
         }
         return m_evalBuf.ConstHandle();
     }
@@ -68,7 +74,9 @@ private:
 };
 
 template <typename TOpTag, typename TData1, typename TData2>
-class BinaryOp : public OperOrganizer<TOpTag, OperCateCal<TOpTag, TData1, TData2>>
+class BinaryOp
+    : public OperOrganizer<TOpTag, OperCateCal<TOpTag, TData1, TData2>>
+    , public OperAuxParams<TOpTag, OperCateCal<TOpTag, TData1, TData2>>
 {
     static_assert(std::is_same<RemConstRef<TData1>, TData1>::value,
                   "TData1 is not an available type");
@@ -81,14 +89,17 @@ public:
     using DeviceType = typename OperDeviceType_<TOpTag, TData1, TData2>::type;
 
 public:
-    BinaryOp(TData1 data1, TData2 data2)
-        : OperOrganizer<TOpTag, Cate>(data1, data2)
+    template <typename... TAux>
+    BinaryOp(TData1 data1, TData2 data2, TAux &&... aux)
+        : OperOrganizer<TOpTag, Cate>(data1, data2, aux...)
+        , OperAuxParams<TOpTag, Cate>(std::forward<TAux>(aux)...)
         , m_data1(std::move(data1))
         , m_data2(std::move(data2)) {}
 
     bool operator== (const BinaryOp& val) const
     {
-        return (m_data1 == val.m_data1) && (m_data2 == val.m_data2);
+        return (OperAuxParams<TOpTag, Cate>::operator ==(val)) &&
+               (m_data1 == val.m_data1) && (m_data2 == val.m_data2);
     }
 
     template <typename TOtherData>
@@ -111,7 +122,7 @@ public:
             
             using THead = SeqHead<TOperSeqCont>;
             using TTail = SeqTail<TOperSeqCont>;
-            THead::template EvalRegister<TTail>(m_evalBuf, m_data1, m_data2);
+            THead::template EvalRegister<TTail>(m_evalBuf, *this);
         }
         return m_evalBuf.ConstHandle();
     }
@@ -135,7 +146,9 @@ private:
 };
 
 template <typename TOpTag, typename TData1, typename TData2, typename TData3>
-class TernaryOp : public OperOrganizer<TOpTag, OperCateCal<TOpTag, TData1, TData2, TData3>>
+class TernaryOp
+    : public OperOrganizer<TOpTag, OperCateCal<TOpTag, TData1, TData2, TData3>>
+    , public OperAuxParams<TOpTag, OperCateCal<TOpTag, TData1, TData2, TData3>>
 {
     static_assert(std::is_same<RemConstRef<TData1>, TData1>::value,
                   "TData1 is not an available type");
@@ -150,15 +163,18 @@ public:
     using DeviceType = typename OperDeviceType_<TOpTag, TData1, TData2, TData3>::type;
 
 public:
-    TernaryOp(TData1 data1, TData2 data2, TData3 data3)
-        : OperOrganizer<TOpTag, Cate>(data1, data2, data3)
+    template <typename... TAux>
+    TernaryOp(TData1 data1, TData2 data2, TData3 data3, TAux &&... aux)
+        : OperOrganizer<TOpTag, Cate>(data1, data2, data3, aux...)
+        , OperAuxParams<TOpTag, Cate>(std::forward<TAux>(aux)...)
         , m_data1(std::move(data1))
         , m_data2(std::move(data2))
         , m_data3(std::move(data3)) {}
 
     bool operator== (const TernaryOp& val) const
     {
-        return (m_data1 == val.m_data1) &&
+        return (OperAuxParams<TOpTag, Cate>::operator ==(val)) &&
+               (m_data1 == val.m_data1) &&
                (m_data2 == val.m_data2) &&
                (m_data3 == val.m_data3);
     }
@@ -183,7 +199,7 @@ public:
             
             using THead = SeqHead<TOperSeqCont>;
             using TTail = SeqTail<TOperSeqCont>;
-            THead::template EvalRegister<TTail>(m_evalBuf, m_data1, m_data2, m_data3);
+            THead::template EvalRegister<TTail>(m_evalBuf, *this);
         }
         return m_evalBuf.ConstHandle();
     }

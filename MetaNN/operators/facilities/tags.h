@@ -31,4 +31,9 @@ namespace TernaryOpTags
     struct Interpolate;
     struct NegativeLogLikelihoodDerivative;
 };
+
+namespace ConvRelated
+{
+    struct Conv2D;
+}
 }

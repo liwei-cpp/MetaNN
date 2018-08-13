@@ -25,6 +25,7 @@
 #include <MetaNN/operators/abs.h>
 #include <MetaNN/operators/add.h>
 #include <MetaNN/operators/collapse.h>
+#include <MetaNN/operators/conv.h>
 #include <MetaNN/operators/divide.h>
 #include <MetaNN/operators/dot.h>
 #include <MetaNN/operators/element_mul.h>
