@@ -65,6 +65,16 @@ public:
     {
         return m_data;
     }
+    
+    const auto& AuxParams() const
+    {
+        return static_cast<const OperAuxParams<TOpTag, Cate>&>(*this);
+    }
+    
+    const auto& Ogranizer() const
+    {
+        return static_cast<const OperOrganizer<TOpTag, Cate>&>(*this);
+    }
 
 private:
     TData m_data;
@@ -135,6 +145,16 @@ public:
     const TData2& Operand2() const
     {
         return m_data2;
+    }
+    
+    const auto& AuxParams() const
+    {
+        return static_cast<const OperAuxParams<TOpTag, Cate>&>(*this);
+    }
+    
+    const auto& Ogranizer() const
+    {
+        return static_cast<const OperOrganizer<TOpTag, Cate>&>(*this);
     }
 
 private:
@@ -217,6 +237,16 @@ public:
     const TData3& Operand3() const
     {
         return m_data3;
+    }
+    
+    const auto& AuxParams() const
+    {
+        return static_cast<const OperAuxParams<TOpTag, Cate>&>(*this);
+    }
+    
+    const auto& Ogranizer() const
+    {
+        return static_cast<const OperOrganizer<TOpTag, Cate>&>(*this);
     }
 
 private:

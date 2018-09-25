@@ -37,6 +37,8 @@
 #include "operators/test_tanh.h"
 #include "operators/test_tanh_derivative.h"
 #include "operators/test_transpose.h"
+#include "operators/test_conv_2d.h"
+
 #include "layers/elementary/test_abs_layer.h"
 #include "layers/elementary/test_add_layer.h"
 #include "layers/elementary/test_bias_layer.h"
@@ -100,6 +102,7 @@ int main(int argc, char **argv)
     test_tanh();
     test_tanh_derivative();
     test_transpose();
+    test_conv_2d();
     
     test_abs_layer();
     test_add_layer();

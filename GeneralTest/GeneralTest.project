@@ -138,6 +138,7 @@
       <File Name="operators/test_abs.h"/>
       <File Name="operators/test_add.h"/>
       <File Name="operators/test_collapse.h"/>
+      <File Name="operators/test_conv_2d.h"/>
       <File Name="operators/test_divide.h"/>
       <File Name="operators/test_dot.h"/>
       <File Name="operators/test_element_mul.h"/>
@@ -161,7 +162,6 @@
       <File Name="operators/test_tanh.cpp"/>
       <File Name="operators/test_tanh_derivative.cpp"/>
       <File Name="operators/test_transpose.cpp"/>
-      <File Name="operators/test_element_mul.cpp"/>
       <File Name="operators/test_interpolate.cpp"/>
       <File Name="operators/test_negative_log_likelihood.cpp"/>
       <File Name="operators/test_negative_log_likelihood_derivative.cpp"/>
@@ -171,8 +171,10 @@
       <File Name="operators/test_abs.cpp"/>
       <File Name="operators/test_add.cpp"/>
       <File Name="operators/test_collapse.cpp"/>
+      <File Name="operators/test_conv_2d.cpp"/>
       <File Name="operators/test_divide.cpp"/>
       <File Name="operators/test_dot.cpp"/>
+      <File Name="operators/test_element_mul.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
