@@ -39,33 +39,6 @@ void test_softmax_derivative1()
         assert(fabs(t_r(0, i) - helper(0, i)) < 0.0001);
     }
 
-    mSout = GenMatrix<float>(111, 113, 1.1f, 0.0001f);
-    mGrad = Matrix<float, CheckDevice>(111, 113);
-    mGrad.Shrink(27, 28, 41, 45);
-    mSout.Shrink(17, 18, 31, 35);
-    t = VecSoftmaxDerivative(mGrad, mSout);
-    t_r = Evaluate(t);
-
-    helper = Matrix<float, CheckDevice>(4, 4);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j < 4; ++j)
-        {
-            if (i == j)
-            {
-                helper.SetValue(i, j, mSout(0, i) * (1 - mSout(0, i)));
-            }
-            else
-            {
-                helper.SetValue(i, j, -mSout(0, i) * mSout(0, j));
-            }
-        }
-    }
-    helper = Evaluate(Dot(mGrad, helper));
-    for (size_t i = 0; i < 4; ++i)
-    {
-        assert(fabs(t_r(0, i) - helper(0, i)) < 0.0001);
-    }
     cout << "done" << endl;
 }
 

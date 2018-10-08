@@ -25,27 +25,6 @@ void test_interpolate1()
             assert(fabs(res_r(i, j) - h) < 0.0001);
         }
     }
-
-    rm1 = GenMatrix<float>(111, 113, 0, 0.0001f);
-    rm2 = GenMatrix<float>(111, 113, 1, 0.0002f);
-    rm3 = GenMatrix<float>(111, 113, 3, 0.0007f);
-
-    rm1.Shrink(31, 35, 17, 22);
-    rm2.Shrink(41, 45, 27, 32);
-    rm3.Shrink(51, 55, 37, 42);
-
-    res = Interpolate(rm1, rm2, rm3);
-    res_r = Evaluate(res);
-
-    auto rm4 = GenMatrix<float>(111, 113, 5, 0.001f);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<5; ++j)
-        {
-            float h = rm1(i, j) * rm3(i, j) + rm2(i, j) * (1 - rm3(i, j));
-            assert(fabs(res_r(i, j) - h) < 0.0001);
-        }
-    }
     cout << "done" << endl;
 }
 

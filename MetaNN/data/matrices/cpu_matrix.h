@@ -79,17 +79,6 @@ public:
         return (m_mem.RawMemory())[p_rowId * m_rowLen + p_colId];
     }
 
-    void Shrink(size_t p_rowB, size_t p_rowE, size_t p_colB, size_t p_colE)
-    {
-        assert((p_rowB < m_rowNum) && (p_colB < m_colNum));
-        assert((p_rowE <= m_rowNum) && (p_colE <= m_colNum));
-        auto pos = m_mem.RawMemory() + p_rowB * m_rowLen + p_colB;
-        
-        m_mem.SetStartPoint(pos);
-        m_rowNum = p_rowE - p_rowB;
-        m_colNum = p_colE - p_colB;
-    }
-
     auto EvalRegister() const
     {
         return MakeConstEvalHandle(*this);

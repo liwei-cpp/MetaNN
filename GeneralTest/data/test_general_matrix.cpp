@@ -42,28 +42,6 @@ void TestMatrix1()
         for (size_t j=0; j<20; ++j)
             assert(rm2(i, j) == c++);
     }
-
-    auto rm3 = rm;
-    rm3.Shrink(3, 7, 5, 15);
-
-    for (size_t i=0; i<rm3.RowNum(); ++i)
-    {
-        for (size_t j = 0; j<rm3.ColNum(); ++j)
-        {
-            assert(rm3(i, j) == rm(i+3, j+5));
-        }
-    }
-
-    auto evalHandle = rm.EvalRegister();
-    auto cm = evalHandle.Data();
-
-    for (size_t i=0; i<cm.RowNum(); ++i)
-    {
-        for (size_t j = 0; j<cm.ColNum(); ++j)
-        {
-            assert(cm(i, j) == rm(i, j));
-        }
-    }
     cout << "done" << endl;
 }
 

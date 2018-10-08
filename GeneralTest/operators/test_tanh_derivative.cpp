@@ -24,20 +24,6 @@ void test_tanh_derivative1()
         }
     }
 
-    rm1 = GenMatrix<float>(111, 113, 1, 0.001f);
-    rm2 = GenMatrix<float>(111, 113, 0, 0.003f);
-    rm1.Shrink(31, 35, 17, 22);
-    rm2.Shrink(30, 34, 18, 23);
-    t = TanhDerivative(rm1, rm2);
-    t_r = Evaluate(t);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<5; ++j)
-        {
-            float aim = rm1(i, j) * (1 - rm2(i, j) * rm2(i, j));
-            assert(fabs(t_r(i, j) - aim) < 0.0001);
-        }
-    }
     cout << "done" << endl;
 }
 

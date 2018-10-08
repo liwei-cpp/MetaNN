@@ -27,21 +27,6 @@ void test_softmax1()
         assert(fabs(t_r(0, i) - exp(rm1(0, i)) / sum) < 0.0001);
     }
 
-    rm1 = GenMatrix<float>(111, 113, 2, 0.001f);
-    rm1.Shrink(17, 18, 31, 51);
-    t = VecSoftmax(rm1);
-    t_r = Evaluate(t);
-
-    sum = 0;
-    for (size_t i = 0; i < 20; ++i)
-    {
-        sum += exp(rm1(0, i));
-    }
-
-    for (size_t i = 0; i < 20; ++i)
-    {
-        assert(fabs(t_r(0, i) - exp(rm1(0, i)) / sum) < 0.0001);
-    }
     cout << "done" << endl;
 }
 

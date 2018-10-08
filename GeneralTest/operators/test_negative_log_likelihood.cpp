@@ -26,22 +26,6 @@ void test_negative_log_likelihood1()
     }
     assert(fabs(t_r.Value() - check) < 0.0001);
 
-
-    rm1 = GenMatrix<float>(111, 113, 1.1f, 0.0001f);
-    rm1.Shrink(31, 35, 17, 22);
-    t = NegativeLogLikelihood(rm1, rm2);
-    t_r = Evaluate(t);
-
-    check = 0;
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<5; ++j)
-        {
-            check -= rm1(i, j) * log(rm2(i, j));
-        }
-    }
-    assert(fabs(t_r.Value() - check) < 0.0001);
-
     cout << "done" << endl;
 }
 

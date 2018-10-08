@@ -24,20 +24,6 @@ void test_add1()
             assert(add_r(i, j) == rm1(i, j) + rm2(i, j));
         }
     }
-
-    rm1 = GenMatrix<int>(111, 113, 1, 2);
-    rm2 = GenMatrix<int>(111, 113, 2, 3);
-    rm1.Shrink(31, 35, 17, 22);
-    rm2.Shrink(41, 45, 27, 32);
-    add = rm1 + rm2;
-    add_r = Evaluate(add);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j < 5; ++j)
-        {
-            assert(add_r(i, j) == rm1(i, j) + rm2(i, j));
-        }
-    }
     cout << "done" << endl;
 }
 
@@ -52,18 +38,6 @@ void test_add2()
         for (size_t j = 0; j<5; ++j)
         {
             assert(add_r(i, j) == rm1(i, j) + 2);
-        }
-    }
-
-    rm1 = GenMatrix<int>(111, 113, 2, 3);
-    rm1.Shrink(31, 35, 17, 22);
-    add = Scalar<int>(3) + rm1;
-    add_r = Evaluate(add);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<5; ++j)
-        {
-            assert(add_r(i, j) == rm1(i, j) + 3);
         }
     }
     cout << "done" << endl;

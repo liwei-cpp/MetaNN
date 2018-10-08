@@ -22,17 +22,6 @@ void test_transpose1()
         }
     }
 
-    rm1 = GenMatrix<int>(111, 113, 2, 3);
-    rm1.Shrink(31, 35, 17, 22);
-    tr = Transpose(rm1);
-    tr_r = Evaluate(tr);
-    for (size_t i = 0; i < 5; ++i)
-    {
-        for (size_t j = 0; j<4; ++j)
-        {
-            assert(tr_r(i, j) == rm1(j, i));
-        }
-    }
     cout << "done" << endl;
 }
 

@@ -23,21 +23,6 @@ void test_div1()
             assert(fabs(div_r(i, j) - rm1(i, j) / rm2(i, j)) < 0.001);
         }
     }
-
-    rm1 = GenMatrix<float>(111, 113, 1, 1);
-    rm2 = GenMatrix<float>(111, 113, 2, 3);
-    rm1.Shrink(31, 35, 17, 22);
-    rm2.Shrink(41, 45, 27, 32);
-    div = rm1 / rm2;
-
-    div_r = Evaluate(div);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<5; ++j)
-        {
-            assert(fabs(div_r(i, j) - rm1(i, j) / rm2(i, j)) < 0.001);
-        }
-    }
     cout << "done" << endl;
 }
 
@@ -52,19 +37,6 @@ void test_div2()
         for (size_t j = 0; j<5; ++j)
         {
             assert(fabs(div_r(i, j) - rm1(i, j) / 2) < 0.001);
-        }
-    }
-
-    rm1 = GenMatrix<float>(111, 113, 2, 3);
-    rm1.Shrink(31, 35, 17, 22);
-    auto div1 = Scalar<float>(3) / rm1;
-
-    div_r = Evaluate(div1);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<5; ++j)
-        {
-            assert(fabs(div_r(i, j) - 3 / rm1(i, j)) < 0.001);
         }
     }
     cout << "done" << endl;

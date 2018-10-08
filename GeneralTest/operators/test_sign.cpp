@@ -28,22 +28,6 @@ void test_sign1()
             assert(fabs(t_r(i, j) - aim) < 0.0001);
         }
     }
-
-    rm1 = GenMatrix<float>(111, 113, -22, 0.0001f);
-    rm1.Shrink(31, 35, 17, 22);
-    t = Sign(rm1);
-    t_r = Evaluate(t);
-
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<5; ++j)
-        {
-            float aim = 0;
-            if (rm1(i, j) != 0)
-                aim = (rm1(i, j) > 0) ? 1 : -1;
-            assert(fabs(t_r(i, j) - aim) < 0.0001);
-        }
-    }
     cout << "done" << endl;
 }
 

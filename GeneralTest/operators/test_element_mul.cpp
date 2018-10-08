@@ -22,20 +22,6 @@ void test_mul1()
             assert(mul_r(i, j) == rm1(i, j) * rm2(i, j));
         }
     }
-
-    rm1 = GenMatrix<int>(111, 113, 4, 2);
-    rm2 = GenMatrix<int>(111, 113, 1, 1);
-    rm1.Shrink(31, 35, 17, 22);
-    rm2.Shrink(41, 45, 27, 32);
-    mul = rm1 * rm2;
-    mul_r = Evaluate(mul);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<5; ++j)
-        {
-            assert(mul_r(i, j) == rm1(i, j) * rm2(i, j));
-        }
-    }
     cout << "done" << endl;
 }
 
@@ -50,19 +36,6 @@ void test_mul2()
         for (size_t j = 0; j<5; ++j)
         {
             assert(mul_r(i, j) == rm1(i, j) * 2);
-        }
-    }
-
-    rm1 = GenMatrix<int>(111, 113, 2, 3);
-    rm1.Shrink(31, 35, 17, 22);
-    mul = Scalar<int>(3) * rm1;
-
-    mul_r = Evaluate(mul);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<5; ++j)
-        {
-            assert(mul_r(i, j) == rm1(i, j) * 3);
         }
     }
     cout << "done" << endl;

@@ -20,11 +20,6 @@ public:
         , m_memStart(p_memStart)
     {}
 
-    void SetStartPoint(ElementType* pos)
-    {
-        m_memStart = pos;
-    }
-
     auto RawMemory() const { return m_memStart; }
 
     const std::shared_ptr<ElementType> SharedPtr() const

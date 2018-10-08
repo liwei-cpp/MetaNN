@@ -27,35 +27,6 @@ void test_dot_1()
             assert(h == mul_r(i, j));
         }
     }
-
-    auto rm2 = GenMatrix<int>(111, 113, 0, 1);
-    auto cm2 = GenMatrix<int>(111, 113, 2, 3);
-    rm2.Shrink(31, 35, 17, 22);
-    cm2.Shrink(31, 36, 41, 44);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j < 5; ++j)
-        {
-            rm2.SetValue(i, j, rm(i, j));
-        }
-    }
-    for (size_t i = 0; i < 5; ++i)
-    {
-        for (size_t j = 0; j < 3; ++j)
-        {
-            cm2.SetValue(i, j, cm(i, j));
-        }
-    }
-    auto mul2 = Dot(rm2, cm2);
-    auto mul2_r = Evaluate(mul2);
-
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<3; ++j)
-        {
-            assert(mul2_r(i, j) == mul_r(i, j));
-        }
-    }
     cout << "done" << endl;
 }
 

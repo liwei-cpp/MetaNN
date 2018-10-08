@@ -23,18 +23,6 @@ void test_tanh1()
         }
     }
 
-    rm1 = GenMatrix<float>(111, 113, 2, 0.001f);
-    rm1.Shrink(31, 35, 17, 22);
-    t = Tanh(rm1);
-    t_r = Evaluate(t);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j<5; ++j)
-        {
-            float aim = tanh(rm1(i, j));
-            assert(fabs(t_r(i, j) - aim) < 0.0001);
-        }
-    }
     cout << "done" << endl;
 }
 

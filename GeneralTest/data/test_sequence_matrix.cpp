@@ -43,26 +43,6 @@ void test_sequence_matrix1()
             }
         }
     }
-    
-    auto data2 = data;
-    data2.Shrink(3, 7, 11, 22);
-    
-    assert(!data.AvailableForWrite());
-    assert(!data2.AvailableForWrite());
-    assert(data2.Length() == 10);
-    assert(data2.RowNum() == 4);
-    assert(data2.ColNum() == 11);
-    
-    for (size_t i = 0; i < 10; ++i)
-    {
-        for (size_t j = 3; j < 7; ++j)
-        {
-            for (size_t k = 11; k < 22; ++k)
-            {
-                assert(data2[i](j - 3, k - 11) == (int)(i * 1000 + j * 100 + k));
-            }
-        }
-    }
     cout << "done" << endl;
 }
 
@@ -102,38 +82,6 @@ void test_sequence_matrix2()
             assert(rm1[0](i, j) == me1(i, j));
             assert(rm1[1](i, j) == me2(i, j));
             assert(rm1[2](i, j) == me3(i, j));
-        }
-    }
-
-    rm1.Shrink(3, 7, 11, 16);
-    assert(rm1.RowNum() == 4);
-    assert(rm1.ColNum() == 5);
-    assert(rm1.Length() == 3);
-    me1.Shrink(3, 7, 11, 16);
-    me2.Shrink(3, 7, 11, 16);
-    me3.Shrink(3, 7, 11, 16);
-    for (size_t i = 0; i < 4; ++i)
-    {
-        for (size_t j = 0; j < 5; ++j)
-        {
-            assert(rm1[0](i, j) == me1(i, j));
-            assert(rm1[1](i, j) == me2(i, j));
-            assert(rm1[2](i, j) == me3(i, j));
-        }
-    }
-
-    auto evalHandle = rm1.EvalRegister();
-    EvalPlan<DeviceTags::CPU>::Eval();
-    auto rm2 = evalHandle.Data();
-
-    for (size_t k = 0; k < 3; ++k)
-    {
-        for (size_t i = 0; i < 4; ++i)
-        {
-            for (size_t j = 0; j < 5; ++j)
-            {
-                assert(rm1[k](i, j) == rm2[k](i, j));
-            }
         }
     }
     cout << "done" << endl;
