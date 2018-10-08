@@ -40,7 +40,7 @@ private:
 
         void operator () (void* p_val) const
         {
-            std::lock_guard<std::mutex> guard(GetMutex());
+            std::lock_guard<std::mutex> guard(m_mutex);
             m_refPool.push_back(p_val);
         }
     private:
@@ -62,7 +62,7 @@ public:
             p_elemSize = ((p_elemSize >> 10) + 1) << 10;
         }
 
-        std::lock_guard<std::mutex> guard(GetMutex());
+        std::lock_guard<std::mutex> guard(m_mutex);
 
         static AllocHelper allocateHelper;
         auto& slot = allocateHelper.memBuffer[p_elemSize];
@@ -80,10 +80,6 @@ public:
     }
     
 private:
-    static std::mutex& GetMutex()
-    {
-        static std::mutex inst;
-        return inst;
-    }
+    inline static std::mutex m_mutex;
 };
 }
