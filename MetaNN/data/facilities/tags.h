@@ -13,6 +13,7 @@ namespace CategoryTags
 
     template <typename> struct Batch;
     template <typename> struct Sequence;
+    template <typename> struct BatchSequence;
 
     using BatchScalar = Batch<Scalar>;
     using BatchMatrix = Batch<Matrix>;
@@ -21,6 +22,10 @@ namespace CategoryTags
     using ScalarSequence = Sequence<Scalar>;
     using MatrixSequence = Sequence<Matrix>;
     using ThreeDArraySequence = Sequence<ThreeDArray>;
+    
+    using BatchScalarSequence = BatchSequence<Scalar>;
+    using BatchMatrixSequence = BatchSequence<Matrix>;
+    using BatchThreeDArraySequence = BatchSequence<ThreeDArray>;
 }
 
 /// device types
