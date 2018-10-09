@@ -15,7 +15,6 @@ void FillWithDist(Matrix<TElem, DeviceTags::CPU>& data, TDist& dist, TEngine& en
     auto mem = LowerAccess(data);
     const size_t rowNum = data.RowNum();
     const size_t colNum = data.ColNum();
-    const size_t tgtPackNum = mem.RowLen();
     auto r = mem.MutableRawMemory();
     
     for (size_t i = 0; i < rowNum; ++i)
@@ -24,7 +23,7 @@ void FillWithDist(Matrix<TElem, DeviceTags::CPU>& data, TDist& dist, TEngine& en
         {
             r[j] = (TElem)(dist(engine));
         }
-        r += tgtPackNum;
+        r += colNum;
     }
 }
 }

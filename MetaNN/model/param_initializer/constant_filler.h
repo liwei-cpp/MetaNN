@@ -19,7 +19,6 @@ void Fill(Matrix<TElem, DeviceTags::CPU>& mat, const double& val)
     auto mem = LowerAccess(mat);
     const size_t rowNum = mat.RowNum();
     const size_t colNum = mat.ColNum();
-    const size_t tgtPackNum = mem.RowLen();
     auto r = mem.MutableRawMemory();
     
     for (size_t i = 0; i < rowNum; ++i)
@@ -28,7 +27,7 @@ void Fill(Matrix<TElem, DeviceTags::CPU>& mat, const double& val)
         {
             r[j] = static_cast<TElem>(val);
         }
-        r += tgtPackNum;
+        r += colNum;
     }
 }
 }

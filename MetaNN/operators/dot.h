@@ -82,7 +82,6 @@ public:
         auto& res = m_evalOutput.MutableData();
         
         auto mem_res = LowerAccess(res);
-        const size_t tgtPackNum = mem_res.RowLen();
         
         TElem* r = mem_res.MutableRawMemory();
 
@@ -97,7 +96,6 @@ public:
                 }
                 ++r;
             }
-            r += tgtPackNum - colNum;
         }
         m_evalOutput.SetEval();
     }
@@ -142,7 +140,6 @@ public:
         for (size_t cur_batch = 0; cur_batch < batchNum; ++cur_batch)
         {
             auto mem_res = LowerAccess(res[cur_batch]);
-            const size_t tgtPackNum = mem_res.RowLen();
         
             TElem* r = mem_res.MutableRawMemory();
             auto cur_v1 = p_v1[cur_batch];
@@ -159,7 +156,6 @@ public:
                     }
                     ++r;
                 }
-                r += tgtPackNum - colNum;
             }
         }
         m_evalOutput.SetEval();

@@ -21,8 +21,6 @@ public:
         , m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
         , m_batchNum(p_batchNum)
-        , m_rowLen(p_colNum)
-        , m_rawMatrixSize(p_rowNum * p_colNum)
     {}
 
     bool operator== (const LinearTable& val) const
@@ -30,9 +28,7 @@ public:
         return (m_mem == val.m_mem) &&
                (m_rowNum == val.m_rowNum) &&
                (m_colNum == val.m_colNum) &&
-               (m_batchNum == val.m_batchNum) &&
-               (m_rowLen == val.m_rowLen) &&
-               (m_rawMatrixSize == val.m_rawMatrixSize);
+               (m_batchNum == val.m_batchNum);
     }
 
     size_t RowNum() const { return m_rowNum; }
@@ -47,7 +43,7 @@ public:
                (p_colId < m_colNum) &&
                (p_batchId < m_batchNum));
         
-        size_t pos = p_batchId * m_rawMatrixSize + p_rowId * m_rowLen + p_colId;
+        size_t pos = (p_batchId * m_rowNum + p_rowId) * m_colNum + p_colId;
         (m_mem.RawMemory())[pos] = val;
     }
 
@@ -55,9 +51,8 @@ public:
     {
         assert(p_batchId < m_batchNum);
         
-        auto pos = m_mem.RawMemory() + p_batchId * m_rawMatrixSize;
-        return Matrix<TElement, TDevice>(m_mem.SharedPtr(), pos,
-                                         m_rowNum, m_colNum, m_rowLen);
+        auto pos = m_mem.RawMemory() + p_batchId * m_rowNum * m_colNum;
+        return Matrix<TElement, TDevice>(m_mem.SharedPtr(), pos, m_rowNum, m_colNum);
     }
     
 protected:
@@ -68,8 +63,6 @@ private:
     size_t m_rowNum;
     size_t m_colNum;
     size_t m_batchNum;
-    size_t m_rowLen;
-    size_t m_rawMatrixSize;
 };
 
 template <typename TElem, typename TDevice>
@@ -87,16 +80,6 @@ struct LowerAccessImpl<LinearTable<TElem, TDevice, CategoryTags::Matrix>>
     const auto RawMemory() const
     {
         return m_rawData.m_mem.RawMemory();
-    }
-
-    size_t RowLen() const
-    {
-        return m_rawData.m_rowLen;
-    }
-    
-    size_t RawMatrixSize() const
-    {
-        return m_rawData.m_rawMatrixSize;
     }
 
 private:

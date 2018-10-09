@@ -32,12 +32,7 @@ public:
     {
         m_resHandle.Allocate(m_rowNum, m_colNum);
         auto lowLayer = LowerAccess(m_resHandle.MutableData());
-        const size_t rowLen = lowLayer.RowLen();
         auto mem = lowLayer.MutableRawMemory();
-        if (rowLen != m_colNum)
-        {
-            throw std::runtime_error("Gap among matrix rows");
-        }
         
         memset(mem, 0, sizeof(TElement) * m_colNum * m_rowNum);
         m_resHandle.SetEval();

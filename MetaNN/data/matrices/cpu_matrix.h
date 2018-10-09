@@ -27,26 +27,22 @@ public:
         : m_mem(p_rowNum * p_colNum)
         , m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
-        , m_rowLen(p_colNum)
     {}
     
     Matrix(std::shared_ptr<ElementType> p_mem,
             ElementType* p_memStart,
             size_t p_rowNum,
-            size_t p_colNum,
-            size_t p_rowLen)
+            size_t p_colNum)
         : m_mem(p_mem, p_memStart)
         , m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
-        , m_rowLen(p_rowLen)
     {}
 
     bool operator== (const Matrix& val) const
     {
         return (m_mem == val.m_mem) &&
                (m_rowNum == val.m_rowNum) &&
-               (m_colNum == val.m_colNum) &&
-               (m_rowLen == val.m_rowLen);
+               (m_colNum == val.m_colNum);
     }
 
     template <typename TOtherType>
@@ -70,13 +66,13 @@ public:
     {
         assert(AvailableForWrite());
         assert((p_rowId < m_rowNum) && (p_colId < m_colNum));
-        (m_mem.RawMemory())[p_rowId * m_rowLen + p_colId] = val;
+        (m_mem.RawMemory())[p_rowId * m_colNum + p_colId] = val;
     }
 
     const auto operator () (size_t p_rowId, size_t p_colId) const
     {
         assert((p_rowId < m_rowNum) && (p_colId < m_colNum));
-        return (m_mem.RawMemory())[p_rowId * m_rowLen + p_colId];
+        return (m_mem.RawMemory())[p_rowId * m_colNum + p_colId];
     }
 
     auto EvalRegister() const
@@ -88,7 +84,6 @@ private:
     ContinuousMemory<ElementType, DeviceType> m_mem;
     size_t m_rowNum;
     size_t m_colNum;
-    size_t m_rowLen;
 };
 
 template<typename TElem>
@@ -106,11 +101,6 @@ struct LowerAccessImpl<Matrix<TElem, DeviceTags::CPU>>
     const auto RawMemory() const
     {
         return m_matrix.m_mem.RawMemory();
-    }
-
-    size_t RowLen() const
-    {
-        return m_matrix.m_rowLen;
     }
 
 private:

@@ -19,24 +19,9 @@ void DataCopy(const Matrix<TElem, DeviceTags::CPU>& src,
     const auto mem_src = LowerAccess(src);
     auto mem_dst = LowerAccess(dst);
 
-    const size_t srcPackNum = mem_src.RowLen();
-    const size_t dstPackNum = mem_dst.RowLen();
-
     const TElem* r1 = mem_src.RawMemory();
     TElem* r = mem_dst.MutableRawMemory();
         
-    if ((srcPackNum == colNum) && (dstPackNum == colNum))
-    {
-        memcpy(r, r1, sizeof(TElem) * rowNum * colNum);
-    }
-    else
-    {
-        for (size_t i = 0; i < rowNum; ++i)
-        {
-            memcpy(r, r1, sizeof(TElem) * colNum);
-            r += dstPackNum;
-            r1 += srcPackNum;
-        }
-    }
+    memcpy(r, r1, sizeof(TElem) * rowNum * colNum);
 }
 }

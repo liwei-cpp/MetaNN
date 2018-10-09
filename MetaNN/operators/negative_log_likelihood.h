@@ -59,9 +59,6 @@ public:
         auto mem_v1 = LowerAccess(p_tar);
         auto mem_v2 = LowerAccess(p_pre);
 
-        const size_t src1PackNum = mem_v1.RowLen();
-        const size_t src2PackNum = mem_v2.RowLen();
-
         const TElem* r1 = mem_v1.RawMemory();
         const TElem* r2 = mem_v2.RawMemory();
 
@@ -71,8 +68,8 @@ public:
             {
                 res -= r1[j] * log(r2[j]);
             }
-            r1 += src1PackNum;
-            r2 += src2PackNum;
+            r1 += colNum;
+            r2 += colNum;
         }
         
         m_evalOutput.MutableData().Value() = res;
@@ -122,9 +119,6 @@ public:
             auto mem_v1 = LowerAccess(p_tar[curBatch]);
             auto mem_v2 = LowerAccess(p_pre[curBatch]);
 
-            const size_t src1PackNum = mem_v1.RowLen();
-            const size_t src2PackNum = mem_v2.RowLen();
-
             const TElem* r1 = mem_v1.RawMemory();
             const TElem* r2 = mem_v2.RawMemory();
 
@@ -134,8 +128,8 @@ public:
                 {
                     res -= r1[j] * log(r2[j]);
                 }
-                r1 += src1PackNum;
-                r2 += src2PackNum;
+                r1 += colNum;
+                r2 += colNum;
             }
         
             aim.SetValue(curBatch, res);

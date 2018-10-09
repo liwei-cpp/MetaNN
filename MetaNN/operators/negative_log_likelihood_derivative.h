@@ -125,10 +125,6 @@ public:
         auto mem_v2 = LowerAccess(p_pre);
         auto mem_res = LowerAccess(res);
 
-        const size_t src1PackNum = mem_v1.RowLen();
-        const size_t src2PackNum = mem_v2.RowLen();
-        const size_t tgtPackNum = mem_res.RowLen();
-
         const ElementType* r1 = mem_v1.RawMemory();
         const ElementType* r2 = mem_v2.RawMemory();
         ElementType* r = mem_res.MutableRawMemory();
@@ -139,9 +135,9 @@ public:
             {
                 r[j] = p_grad.Value() * (-r1[j] / r2[j]);
             }
-            r1 += src1PackNum;
-            r2 += src2PackNum;
-            r += tgtPackNum;
+            r1 += colNum;
+            r2 += colNum;
+            r += colNum;
         }
         m_evalOutput.SetEval();
     }
@@ -196,10 +192,6 @@ public:
             auto mem_v2 = LowerAccess(p_pre[curBatch]);
             auto mem_res = LowerAccess(res[curBatch]);
 
-            const size_t src1PackNum = mem_v1.RowLen();
-            const size_t src2PackNum = mem_v2.RowLen();
-            const size_t tgtPackNum = mem_res.RowLen();
-
             const ElementType* r1 = mem_v1.RawMemory();
             const ElementType* r2 = mem_v2.RawMemory();
             ElementType* r = mem_res.MutableRawMemory();
@@ -210,9 +202,9 @@ public:
                 {
                     r[j] = p_grad[curBatch] * (-r1[j] / r2[j]);
                 }
-                r1 += src1PackNum;
-                r2 += src2PackNum;
-                r += tgtPackNum;
+                r1 += colNum;
+                r2 += colNum;
+                r += colNum;
             }
         }
         m_evalOutput.SetEval();

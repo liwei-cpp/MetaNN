@@ -36,7 +36,6 @@ public:
         m_resHandle.Allocate(m_rowNum, m_colNum);
         auto& mutableData = m_resHandle.MutableData();
         auto lowLayer = LowerAccess(mutableData);
-        const size_t rowLen = lowLayer.RowLen();
         auto mem = lowLayer.MutableRawMemory();
         for (size_t i = 0; i < m_rowNum; ++i)
         {
@@ -44,7 +43,7 @@ public:
             {
                 mem[j] = m_val;
             }
-            mem += rowLen;
+            mem += m_colNum;
         }
         m_resHandle.SetEval();
     }
