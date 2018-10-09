@@ -71,8 +71,8 @@ public:
     {
         assert(p_batchId < m_batchNum);
         
-        auto pos = m_mem.RawMemory() + p_batchId * m_pageNum * m_rowNum * m_colNum;
-        return ThreeDArray<TElement, TDevice>(m_mem.SharedPtr(), pos,
+        auto pos = p_batchId * m_pageNum * m_rowNum * m_colNum;
+        return ThreeDArray<TElement, TDevice>(m_mem.Shift(pos),
                                               m_pageNum, m_rowNum, m_colNum);
     }
     

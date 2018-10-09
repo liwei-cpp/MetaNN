@@ -34,6 +34,17 @@ public:
         , m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
     {}
+    
+    ThreeDArray(ContinuousMemory<ElementType, DeviceType> p_mem,
+                size_t p_pageNum,
+                size_t p_rowNum,
+                size_t p_colNum)
+        : m_mem(std::move(p_mem))
+        , m_pageNum(p_pageNum)
+        , m_rowNum(p_rowNum)
+        , m_colNum(p_colNum)
+    {}
+
 
     bool operator== (const ThreeDArray& val) const
     {
@@ -79,25 +90,12 @@ public:
     {
         return MakeConstEvalHandle(*this);
     }
-    
-private:
-    ThreeDArray(std::shared_ptr<ElementType> p_mem,
-                ElementType* p_memStart,
-                size_t p_pageNum,
-                size_t p_rowNum,
-                size_t p_colNum)
-        : m_mem(p_mem, p_memStart)
-        , m_pageNum(p_pageNum)
-        , m_rowNum(p_rowNum)
-        , m_colNum(p_colNum)
-    {}
-    
+
 private:
     ContinuousMemory<ElementType, DeviceType> m_mem;
     size_t m_pageNum;
     size_t m_rowNum;
     size_t m_colNum;
-    size_t m_rowLen;
 };
 
 template<typename TElem>

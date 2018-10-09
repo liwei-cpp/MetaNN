@@ -51,8 +51,8 @@ public:
     {
         assert(p_batchId < m_batchNum);
         
-        auto pos = m_mem.RawMemory() + p_batchId * m_rowNum * m_colNum;
-        return Matrix<TElement, TDevice>(m_mem.SharedPtr(), pos, m_rowNum, m_colNum);
+        auto pos = p_batchId * m_rowNum * m_colNum;
+        return Matrix<TElement, TDevice>(m_mem.Shift(pos), m_rowNum, m_colNum);
     }
     
 protected:

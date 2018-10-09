@@ -29,11 +29,10 @@ public:
         , m_colNum(p_colNum)
     {}
     
-    Matrix(std::shared_ptr<ElementType> p_mem,
-            ElementType* p_memStart,
-            size_t p_rowNum,
-            size_t p_colNum)
-        : m_mem(p_mem, p_memStart)
+    Matrix(ContinuousMemory<ElementType, DeviceType> p_mem,
+           size_t p_rowNum,
+           size_t p_colNum)
+        : m_mem(std::move(p_mem))
         , m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
     {}
