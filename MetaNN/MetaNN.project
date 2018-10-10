@@ -109,6 +109,7 @@
       <File Name="data/facilities/lower_access.h"/>
       <File Name="data/facilities/tags.h"/>
       <File Name="data/facilities/traits.h"/>
+      <File Name="data/facilities/shape.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="matrices">
       <File Name="data/matrices/cpu_matrix.h"/>
@@ -127,6 +128,9 @@
     </VirtualDirectory>
     <File Name="data/batch.h"/>
     <File Name="data/sequence.h"/>
+    <VirtualDirectory Name="cardinal">
+      <VirtualDirectory Name="scalar"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="data_copy">
     <File Name="data_copy/data_copy.h"/>

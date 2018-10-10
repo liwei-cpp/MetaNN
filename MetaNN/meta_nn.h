@@ -1,5 +1,7 @@
 #pragma once
 
+#include <MetaNN/data/facilities/shape.h>
+
 #include <MetaNN/policies/policy_operations.h>
 #include <MetaNN/policies/policy_selector.h>
 #include <MetaNN/policies/change_policy.h>
