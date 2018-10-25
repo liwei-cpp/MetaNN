@@ -24,7 +24,7 @@ public:
     }
     
     template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const
+    bool operator== (const TOtherShape& val) const noexcept
     {
         static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
         return Compare(val);
@@ -32,9 +32,9 @@ public:
     
 protected:
     template <typename TOtherShape>
-    bool Compare(const TOtherShape& val) const
+    bool Compare(const TOtherShape& val) const noexcept
     {
-        return Count() == val.Count();
+        return true;
     }
 };
 
@@ -60,7 +60,7 @@ public:
     }
     
     template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const
+    bool operator== (const TOtherShape& val) const noexcept
     {
         static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
         return Compare(val);
@@ -68,7 +68,7 @@ public:
     
 protected:
     template <typename TOtherShape>
-    bool Compare(const TOtherShape& val) const
+    bool Compare(const TOtherShape& val) const noexcept
     {
         return (RowNum() == val.RowNum()) && (ColNum() == val.ColNum());
     }
@@ -99,7 +99,7 @@ public:
     }
     
     template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const
+    bool operator== (const TOtherShape& val) const noexcept
     {
         static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
         return Compare(val);
@@ -141,7 +141,7 @@ public:
     }
     
     template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const
+    bool operator== (const TOtherShape& val) const noexcept
     {
         static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
         return (BatchNum() == val.BatchNum()) && Compare(val);
@@ -175,7 +175,7 @@ public:
     }
     
     template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const
+    bool operator== (const TOtherShape& val) const noexcept
     {
         static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
         return (Length() == val.Length()) && Compare(val);
