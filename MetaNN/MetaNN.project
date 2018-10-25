@@ -119,7 +119,6 @@
       <File Name="data/matrices/zero_matrix.h"/>
     </VirtualDirectory>
     <File Name="data/dynamic.h"/>
-    <File Name="data/scalar.h"/>
     <VirtualDirectory Name="linear_table">
       <File Name="data/linear_table/scalar.h"/>
       <File Name="data/linear_table/linear_table.h"/>
@@ -128,8 +127,14 @@
     </VirtualDirectory>
     <File Name="data/batch.h"/>
     <File Name="data/sequence.h"/>
+    <File Name="data/data.h"/>
     <VirtualDirectory Name="cardinal">
-      <VirtualDirectory Name="scalar"/>
+      <VirtualDirectory Name="scalar">
+        <File Name="data/cardinal/scalar/scalar_pack.h"/>
+        <File Name="data/cardinal/scalar/scalar_cpu.h"/>
+        <File Name="data/cardinal/scalar/scalar_base.h"/>
+      </VirtualDirectory>
+      <File Name="data/cardinal/cardinal_pack.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="data_copy">

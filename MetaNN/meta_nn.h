@@ -8,9 +8,8 @@
 #include <MetaNN/facilities/var_type_dict.h>
 #include <MetaNN/layers/facilities/policies.h>
 
+#include <MetaNN/data/data.h>
 #include <MetaNN/data/dynamic.h>
-
-#include <MetaNN/data/scalar.h>
 
 #include <MetaNN/data/matrices/cpu_matrix.h>
 #include <MetaNN/data/matrices/trival_matrix.h>

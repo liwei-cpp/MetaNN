@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MetaNN/data/scalar.h>
+#include <MetaNN/data/data.h>
 #include <MetaNN/data/facilities/tags.h>
 #include <MetaNN/evaluate/facilities/eval_buffer.h>
 #include <memory>
