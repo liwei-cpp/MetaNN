@@ -29,11 +29,6 @@ public:
         return m_mem.use_count() == 1;
     }
     
-    size_t UseCount() const
-    {
-        return m_mem.use_count();
-    }
-
     bool operator== (const ContinuousMemory& val) const noexcept
     {
         return (m_mem == val.m_mem);
