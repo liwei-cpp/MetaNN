@@ -14,7 +14,6 @@
 #include <MetaNN/data/matrices/cpu_matrix.h>
 #include <MetaNN/data/matrices/trival_matrix.h>
 #include <MetaNN/data/matrices/one_hot_vector.h>
-#include <MetaNN/data/matrices/zero_matrix.h>
 
 #include <MetaNN/data/3d_array/cpu_3d_array.h>
 

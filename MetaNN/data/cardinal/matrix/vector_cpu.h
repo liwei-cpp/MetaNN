@@ -20,13 +20,12 @@ public:
                   
     using ElementType = TElem;
     using DeviceType = DeviceTags::CPU;
-    using ShapeType = Shape<CategoryTags::Matrix>;
     
     friend struct LowerAccessImpl<Vector<TElem, DeviceTags::CPU>>;
 
 public:
     explicit Vector(size_t size = 0)
-        : ShapeType(1, size)
+        : Shape<CategoryTags::Matrix>(1, size)
         , m_mem(size)
     {}
     

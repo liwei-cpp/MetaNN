@@ -1,6 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/data/cardinal/matrix/matrix_base.h>
 #include <MetaNN/evaluate/facilities/eval_buffer.h>
 #include <MetaNN/evaluate/facilities/eval_group.h>
@@ -46,7 +47,7 @@ private:
 }
 
 template <typename TElem, typename TDevice>
-class ZeroMatrix
+class ZeroMatrix : public Shape<CategoryTags::Matrix>
 {
 public:
     using ElementType = TElem;
@@ -54,16 +55,16 @@ public:
     
 public:
     ZeroMatrix(size_t p_rowNum, size_t p_colNum)
-        : m_rowNum(p_rowNum)
-        , m_colNum(p_colNum) {}
+        : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
+    {}
 
     bool operator== (const ZeroMatrix& val) const
     {
-        return (m_rowNum == val.m_rowNum) &&
-               (m_colNum == val.m_colNum);
+        return (GetShape() == val.GetShape());
     }
 
-    template <typename TOtherType>
+    template <typename TOtherType,
+              typename = std::enable_if_t<!std::is_same_v<std::decay_t<TOtherType>, ZeroMatrix>>>
     bool operator== (const TOtherType&) const
     {
         return false;
@@ -75,10 +76,6 @@ public:
         return !(operator==(val));
     }
 
-    size_t RowNum() const { return m_rowNum; }
-
-    size_t ColNum() const { return m_colNum; }
-
     auto EvalRegister() const
     {
         using TEvalUnit = NSZeroMatrix::EvalUnit<ElementType, DeviceType>;
@@ -87,15 +84,13 @@ public:
         {
             auto evalHandle = m_evalBuf.Handle();
             decltype(auto) outPtr = evalHandle.DataPtr();
-            TEvalUnit unit(std::move(evalHandle), m_rowNum, m_colNum);
+            TEvalUnit unit(std::move(evalHandle), RowNum(), ColNum());
             EvalPlan<DeviceType>::template Register<TEvalGroup>(std::move(unit), outPtr, {});
         }
         return m_evalBuf.ConstHandle();
     }
     
 private:
-    size_t m_rowNum;
-    size_t m_colNum;
     EvalBuffer<Matrix<ElementType, DeviceType>> m_evalBuf;
 };
 

@@ -20,20 +20,19 @@ public:
                   
     using ElementType = TElem;
     using DeviceType = DeviceTags::CPU;
-    using ShapeType = Shape<CategoryTags::Matrix>;
     
     friend struct LowerAccessImpl<Matrix<TElem, DeviceTags::CPU>>;
     
 public:
     Matrix(size_t p_rowNum = 0, size_t p_colNum = 0)
-        : ShapeType(p_rowNum, p_colNum)
+        : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
         , m_mem(p_rowNum * p_colNum)
     {}
     
     Matrix(ContinuousMemory<ElementType, DeviceType> p_mem,
            size_t p_rowNum,
            size_t p_colNum)
-        : ShapeType(p_rowNum, p_colNum)
+        : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
         , m_mem(std::move(p_mem))
     {}
     

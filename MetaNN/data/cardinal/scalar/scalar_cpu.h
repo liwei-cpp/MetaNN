@@ -12,7 +12,6 @@ class Scalar<TElem, DeviceTags::CPU> : public Shape<CategoryTags::Scalar>
 public:
     using ElementType = TElem;
     using DeviceType = DeviceTags::CPU;
-    using ShapeType = Shape<CategoryTags::Scalar>;
     
 public:
     Scalar(ElementType elem = ElementType())
