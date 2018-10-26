@@ -31,7 +31,7 @@ public:
     
     bool operator== (const Scalar& val) const noexcept
     {
-        return (ShapeType::operator==(val)) &&
+        return (Shape() == val.Shape()) &&
                (m_elem == val.m_elem);
     }
 

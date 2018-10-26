@@ -70,7 +70,7 @@ public:
     size_t RowNum() const { return m_rowNum; }
     size_t ColNum() const { return m_colNum; }
 
-    bool AvailableForWrite() const { return m_mem.UseCount() == 1; }
+    bool AvailableForWrite() const { return m_mem.IsShared(); }
 
     void SetValue(size_t p_pageId, size_t p_rowId, size_t p_colId, ElementType val)
     {

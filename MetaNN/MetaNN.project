@@ -112,8 +112,6 @@
       <File Name="data/facilities/shape.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="matrices">
-      <File Name="data/matrices/cpu_matrix.h"/>
-      <File Name="data/matrices/matrices.h"/>
       <File Name="data/matrices/one_hot_vector.h"/>
       <File Name="data/matrices/trival_matrix.h"/>
       <File Name="data/matrices/zero_matrix.h"/>
@@ -135,6 +133,11 @@
         <File Name="data/cardinal/scalar/scalar_base.h"/>
       </VirtualDirectory>
       <File Name="data/cardinal/cardinal_pack.h"/>
+      <VirtualDirectory Name="matrix">
+        <File Name="data/cardinal/matrix/matrix_pack.h"/>
+        <File Name="data/cardinal/matrix/matrix_base.h"/>
+        <File Name="data/cardinal/matrix/matrix_cpu.h"/>
+      </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="data_copy">

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MetaNN/data/matrices/matrices.h>
+#include <MetaNN/data/cardinal/matrix/matrix_base.h>
 #include <MetaNN/evaluate/facilities/eval_buffer.h>
 #include <MetaNN/evaluate/facilities/eval_group.h>
 #include <MetaNN/evaluate/facilities/eval_handle.h>

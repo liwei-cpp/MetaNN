@@ -1,7 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/linear_table/linear_table.h>
-#include <MetaNN/data/matrices/matrices.h>
+#include <MetaNN/data/cardinal/matrix/matrix_base.h>
 #include <vector>
 
 namespace MetaNN
@@ -34,7 +34,7 @@ public:
     size_t RowNum() const { return m_rowNum; }
     size_t ColNum() const { return m_colNum; }
 
-    bool AvailableForWrite() const { return m_mem.UseCount() == 1; }
+    bool AvailableForWrite() const { return m_mem.IsShared(); }
 
     void SetValue(size_t p_batchId, size_t p_rowId, size_t p_colId, ElementType val)
     {

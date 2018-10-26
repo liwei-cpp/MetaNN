@@ -23,7 +23,7 @@ public:
         : m_mem(length)
         , m_len(length) {}
 
-    bool AvailableForWrite() const { return m_mem.UseCount() == 1; }
+    bool AvailableForWrite() const { return m_mem.IsShared(); }
 
     void SetValue(size_t p_id, ElementType val)
     {

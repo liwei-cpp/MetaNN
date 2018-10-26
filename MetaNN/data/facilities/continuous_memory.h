@@ -24,6 +24,11 @@ public:
         return m_mem.get();
     }
 
+    bool IsShared() const
+    {
+        return m_mem.use_count() == 1;
+    }
+    
     size_t UseCount() const
     {
         return m_mem.use_count();
