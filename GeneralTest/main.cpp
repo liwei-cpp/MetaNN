@@ -8,6 +8,7 @@
 #include "data/test_duplicate.h"
 #include "data/test_scalar.h"
 #include "data/test_general_matrix.h"
+#include "data/test_general_vector.h"
 #include "data/test_one_hot_vector.h"
 #include "data/test_trival_matrix.h"
 #include "data/test_zero_matrix.h"
@@ -69,6 +70,7 @@ int main(int argc, char **argv)
     
 	test_scalar();
     test_general_matrix();
+    test_general_vector();
     test_one_hot_vector();
     test_trival_matrix();
     test_zero_matrix();

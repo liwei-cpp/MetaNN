@@ -30,6 +30,11 @@ public:
         return Compare(val);
     }
     
+    const Shape<CategoryTags::Scalar>& GetShape() const noexcept
+    {
+        return *this;
+    }
+    
 protected:
     template <typename TOtherShape>
     bool Compare(const TOtherShape& val) const noexcept
@@ -64,6 +69,11 @@ public:
     {
         static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
         return Compare(val);
+    }
+    
+    const Shape<CategoryTags::Matrix>& GetShape() const noexcept
+    {
+        return *this;
     }
     
 protected:
@@ -103,6 +113,11 @@ public:
     {
         static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
         return Compare(val);
+    }
+    
+    const Shape<CategoryTags::ThreeDArray>& GetShape() const noexcept
+    {
+        return *this;
     }
     
 protected:
@@ -147,6 +162,11 @@ public:
         return (BatchNum() == val.BatchNum()) && Compare(val);
     }
     
+    const Shape<CategoryTags::Batch<TSubCate>>& GetShape() const noexcept
+    {
+        return *this;
+    }
+    
 private:
     size_t m_batchNum;
 };
@@ -179,6 +199,11 @@ public:
     {
         static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
         return (Length() == val.Length()) && Compare(val);
+    }
+    
+    const Shape<CategoryTags::Sequence<TSubCate>>& GetShape() const noexcept
+    {
+        return *this;
     }
     
 private:
@@ -223,6 +248,11 @@ public:
         if (!std::equal(m_seqLenCont.begin(), m_seqLenCont.end(), compCont.begin()))
             return false;
         return Compare(val);
+    }
+    
+    const Shape<CategoryTags::BatchSequence<TSubCate>>& GetShape() const noexcept
+    {
+        return *this;
     }
     
 private:

@@ -137,6 +137,8 @@
         <File Name="data/cardinal/matrix/matrix_pack.h"/>
         <File Name="data/cardinal/matrix/matrix_base.h"/>
         <File Name="data/cardinal/matrix/matrix_cpu.h"/>
+        <File Name="data/cardinal/matrix/vector_base.h"/>
+        <File Name="data/cardinal/matrix/vector_cpu.h"/>
       </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>

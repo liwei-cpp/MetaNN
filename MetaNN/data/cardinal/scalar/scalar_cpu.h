@@ -12,9 +12,8 @@ class Scalar<TElem, DeviceTags::CPU> : public Shape<CategoryTags::Scalar>
 public:
     using ElementType = TElem;
     using DeviceType = DeviceTags::CPU;
-    
-private:
     using ShapeType = Shape<CategoryTags::Scalar>;
+    
 public:
     Scalar(ElementType elem = ElementType())
         : m_elem(elem) {}
@@ -31,7 +30,7 @@ public:
     
     bool operator== (const Scalar& val) const noexcept
     {
-        return (Shape() == val.Shape()) &&
+        return (GetShape() == val.GetShape()) &&
                (m_elem == val.m_elem);
     }
 
@@ -52,12 +51,7 @@ public:
     {
         return MakeConstEvalHandle(*this);
     }
-    
-    const auto& Shape() const noexcept
-    {
-        return static_cast<const ShapeType&>(*this);
-    }
-    
+
 private:
     ElementType m_elem;
 };
