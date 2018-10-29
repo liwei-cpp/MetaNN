@@ -51,7 +51,7 @@ private:
 }
 
 template <typename TElem, typename TDevice>
-class OneHotVector : public Shape<CategoryTags::Matrix>
+class OneHotVector : public Shape_<CategoryTags::Matrix>
 {
 public:
     using ElementType = TElem;
@@ -59,7 +59,7 @@ public:
 
 public:
     OneHotVector(size_t p_colNum, size_t p_hotPos)
-        : Shape<CategoryTags::Matrix>(1, p_colNum)
+        : Shape_<CategoryTags::Matrix>(1, p_colNum)
         , m_hotPos(p_hotPos)
     {
         assert(p_hotPos < ColNum());
@@ -67,7 +67,7 @@ public:
 
     bool operator== (const OneHotVector& val) const
     {
-        return (GetShape() == val.GetShape()) &&
+        return (Shape() == val.Shape()) &&
                (m_hotPos == val.m_hotPos);
     }
 

@@ -47,7 +47,7 @@ private:
 }
 
 template <typename TElem, typename TDevice>
-class ZeroMatrix : public Shape<CategoryTags::Matrix>
+class ZeroMatrix : public Shape_<CategoryTags::Matrix>
 {
 public:
     using ElementType = TElem;
@@ -55,12 +55,12 @@ public:
     
 public:
     ZeroMatrix(size_t p_rowNum, size_t p_colNum)
-        : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
+        : Shape_<CategoryTags::Matrix>(p_rowNum, p_colNum)
     {}
 
     bool operator== (const ZeroMatrix& val) const
     {
-        return (GetShape() == val.GetShape());
+        return (Shape() == val.Shape());
     }
 
     template <typename TOtherType,

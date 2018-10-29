@@ -58,7 +58,7 @@ private:
 }
 
 template<typename TElem, typename TDevice, typename TScalar>
-class TrivalMatrix : public Shape<CategoryTags::Matrix>
+class TrivalMatrix : public Shape_<CategoryTags::Matrix>
 {
 public:
     using ElementType = TElem;
@@ -67,13 +67,13 @@ public:
 public:
     TrivalMatrix(size_t p_rowNum, size_t p_colNum,
                  TScalar p_val)
-        : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
+        : Shape_<CategoryTags::Matrix>(p_rowNum, p_colNum)
         , m_val(p_val)
     {}
 
     bool operator== (const TrivalMatrix& val) const
     {
-        return (GetShape() == val.GetShape()) &&
+        return (Shape() == val.Shape()) &&
                (m_val == val.m_val);
     }
 

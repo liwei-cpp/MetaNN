@@ -10,10 +10,10 @@
 namespace MetaNN
 {
 template <typename T>
-class Shape;
+class Shape_;
 
 template <>
-class Shape<CategoryTags::Scalar>
+class Shape_<CategoryTags::Scalar>
 {
 public:
     using ShapeCategory = CategoryTags::Scalar;
@@ -30,7 +30,7 @@ public:
         return Compare(val);
     }
     
-    const Shape<CategoryTags::Scalar>& GetShape() const noexcept
+    const Shape_<CategoryTags::Scalar>& Shape() const noexcept
     {
         return *this;
     }
@@ -44,13 +44,13 @@ protected:
 };
 
 template <>
-class Shape<CategoryTags::Matrix>
+class Shape_<CategoryTags::Matrix>
 {
 public:
     using ShapeCategory = CategoryTags::Matrix;
     
 public:
-    Shape(size_t p_rowNum, size_t p_colNum)
+    Shape_(size_t p_rowNum, size_t p_colNum)
         : m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
     {}
@@ -71,7 +71,7 @@ public:
         return Compare(val);
     }
     
-    const Shape<CategoryTags::Matrix>& GetShape() const noexcept
+    const Shape_<CategoryTags::Matrix>& Shape() const noexcept
     {
         return *this;
     }
@@ -89,14 +89,14 @@ private:
 };
 
 template <>
-class Shape<CategoryTags::ThreeDArray> : public Shape<CategoryTags::Matrix>
+class Shape_<CategoryTags::ThreeDArray> : public Shape_<CategoryTags::Matrix>
 {
 public:
     using ShapeCategory = CategoryTags::ThreeDArray;
     
 public:
-    Shape(size_t p_pageNum, size_t p_rowNum, size_t p_colNum)
-        : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
+    Shape_(size_t p_pageNum, size_t p_rowNum, size_t p_colNum)
+        : Shape_<CategoryTags::Matrix>(p_rowNum, p_colNum)
         , m_pageNum(p_pageNum)
     {}
     
@@ -105,7 +105,7 @@ public:
     
     size_t Count() const noexcept
     {
-        return m_pageNum * Shape<CategoryTags::Matrix>::Count();
+        return m_pageNum * Shape_<CategoryTags::Matrix>::Count();
     }
     
     template <typename TOtherShape>
@@ -115,7 +115,7 @@ public:
         return Compare(val);
     }
     
-    const Shape<CategoryTags::ThreeDArray>& GetShape() const noexcept
+    const Shape_<CategoryTags::ThreeDArray>& Shape() const noexcept
     {
         return *this;
     }
@@ -125,7 +125,7 @@ protected:
     bool Compare(const TOtherShape& val) const
     {
         return (PageNum() == val.PageNum()) &&
-               Shape<CategoryTags::Matrix>::Compare(val);
+               Shape_<CategoryTags::Matrix>::Compare(val);
     }
     
 private:
@@ -133,26 +133,26 @@ private:
 };
 
 template <typename TSubCate>
-class Shape<CategoryTags::Batch<TSubCate>> : public Shape<TSubCate>
+class Shape_<CategoryTags::Batch<TSubCate>> : public Shape_<TSubCate>
 {
 public:
     using ShapeCategory = CategoryTags::Batch<TSubCate>;
     
 public:
     template <typename...TParams>
-    Shape(size_t p_batchNum, TParams&&... params)
-        : Shape<TSubCate>(std::forward<TParams>(params)...)
+    Shape_(size_t p_batchNum, TParams&&... params)
+        : Shape_<TSubCate>(std::forward<TParams>(params)...)
         , m_batchNum(p_batchNum)
     {}
     
-    Shape() = delete;
+    Shape_() = delete;
     
 public:
     size_t BatchNum() const noexcept { return m_batchNum; }
     
     size_t Count() const noexcept
     {
-        return BatchNum() * Shape<TSubCate>::Count();
+        return BatchNum() * Shape_<TSubCate>::Count();
     }
     
     template <typename TOtherShape>
@@ -162,7 +162,7 @@ public:
         return (BatchNum() == val.BatchNum()) && Compare(val);
     }
     
-    const Shape<CategoryTags::Batch<TSubCate>>& GetShape() const noexcept
+    const Shape_<CategoryTags::Batch<TSubCate>>& Shape() const noexcept
     {
         return *this;
     }
@@ -172,26 +172,26 @@ private:
 };
 
 template <typename TSubCate>
-class Shape<CategoryTags::Sequence<TSubCate>> : public Shape<TSubCate>
+class Shape_<CategoryTags::Sequence<TSubCate>> : public Shape_<TSubCate>
 {
 public:
     using ShapeCategory = CategoryTags::Sequence<TSubCate>;
     
 public:
     template <typename...TParams>
-    Shape(size_t p_seqLen, TParams&&... params)
-        : Shape<TSubCate>(std::forward<TParams>(params)...)
+    Shape_(size_t p_seqLen, TParams&&... params)
+        : Shape_<TSubCate>(std::forward<TParams>(params)...)
         , m_seqLen(p_seqLen)
     {}
     
-    Shape() = delete;
+    Shape_() = delete;
     
 public:
     size_t Length() const noexcept { return m_seqLen; }
     
     size_t Count() const noexcept
     {
-        return Length() * Shape<TSubCate>::Count();
+        return Length() * Shape_<TSubCate>::Count();
     }
     
     template <typename TOtherShape>
@@ -201,7 +201,7 @@ public:
         return (Length() == val.Length()) && Compare(val);
     }
     
-    const Shape<CategoryTags::Sequence<TSubCate>>& GetShape() const noexcept
+    const Shape_<CategoryTags::Sequence<TSubCate>>& Shape() const noexcept
     {
         return *this;
     }
@@ -211,19 +211,19 @@ private:
 };
 
 template <typename TSubCate>
-class Shape<CategoryTags::BatchSequence<TSubCate>> : public Shape<TSubCate>
+class Shape_<CategoryTags::BatchSequence<TSubCate>> : public Shape_<TSubCate>
 {
 public:
     using ShapeCategory = CategoryTags::BatchSequence<TSubCate>;
     
 public:
     template <typename TI, typename...TParams>
-    Shape(TI b, TI e, TParams&&... params)
-        : Shape<TSubCate>(std::forward<TParams>(params)...)
+    Shape_(TI b, TI e, TParams&&... params)
+        : Shape_<TSubCate>(std::forward<TParams>(params)...)
         , m_seqLenCont(b, e)
     {}
     
-    Shape() = delete;
+    Shape_() = delete;
     
 public:
     const auto& SeqLenContainer() const noexcept
@@ -234,7 +234,7 @@ public:
     size_t Count() const noexcept
     {
         return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.end(), 0) *
-               Shape<TSubCate>::Count();
+               Shape_<TSubCate>::Count();
     }
     
     template <typename TOtherShape>
@@ -250,7 +250,7 @@ public:
         return Compare(val);
     }
     
-    const Shape<CategoryTags::BatchSequence<TSubCate>>& GetShape() const noexcept
+    const Shape_<CategoryTags::BatchSequence<TSubCate>>& Shape() const noexcept
     {
         return *this;
     }

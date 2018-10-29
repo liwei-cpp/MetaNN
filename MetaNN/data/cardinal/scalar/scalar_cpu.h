@@ -5,7 +5,7 @@
 namespace MetaNN
 {
 template <typename TElem>
-class Scalar<TElem, DeviceTags::CPU> : public Shape<CategoryTags::Scalar>
+class Scalar<TElem, DeviceTags::CPU> : public Shape_<CategoryTags::Scalar>
 {
     static_assert(std::is_same<RemConstRef<TElem>, TElem>::value);
     
@@ -29,7 +29,7 @@ public:
     
     bool operator== (const Scalar& val) const noexcept
     {
-        return (GetShape() == val.GetShape()) &&
+        return (Shape() == val.Shape()) &&
                (m_elem == val.m_elem);
     }
 

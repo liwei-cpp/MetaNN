@@ -12,7 +12,7 @@
 namespace MetaNN
 {
 template <typename TElem>
-class Matrix<TElem, DeviceTags::CPU> : public Shape<CategoryTags::Matrix>
+class Matrix<TElem, DeviceTags::CPU> : public Shape_<CategoryTags::Matrix>
 {    
 public:
     static_assert(std::is_same<RemConstRef<TElem>, TElem>::value,
@@ -25,20 +25,20 @@ public:
     
 public:
     Matrix(size_t p_rowNum = 0, size_t p_colNum = 0)
-        : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
+        : Shape_<CategoryTags::Matrix>(p_rowNum, p_colNum)
         , m_mem(p_rowNum * p_colNum)
     {}
     
     Matrix(ContinuousMemory<ElementType, DeviceType> p_mem,
            size_t p_rowNum,
            size_t p_colNum)
-        : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
+        : Shape_<CategoryTags::Matrix>(p_rowNum, p_colNum)
         , m_mem(std::move(p_mem))
     {}
     
     bool operator== (const Matrix& val) const
     {
-        return (GetShape() == val.GetShape()) &&
+        return (Shape() == val.Shape()) &&
                (m_mem == val.m_mem);
     }
 

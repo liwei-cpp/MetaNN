@@ -12,7 +12,7 @@
 namespace MetaNN
 {
 template <typename TElem>
-class Vector<TElem, DeviceTags::CPU> : public Shape<CategoryTags::Matrix>
+class Vector<TElem, DeviceTags::CPU> : public Shape_<CategoryTags::Matrix>
 {    
 public:
     static_assert(std::is_same<RemConstRef<TElem>, TElem>::value,
@@ -25,13 +25,13 @@ public:
 
 public:
     explicit Vector(size_t size = 0)
-        : Shape<CategoryTags::Matrix>(1, size)
+        : Shape_<CategoryTags::Matrix>(1, size)
         , m_mem(size)
     {}
     
     bool operator== (const Vector& val) const
     {
-        return (GetShape() == val.GetShape()) &&
+        return (Shape() == val.Shape()) &&
                (m_mem == val.m_mem);
     }
 
