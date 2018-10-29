@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MetaNN/data/matrices/cpu_matrix.h>
+#include <MetaNN/data/data.h>
 #include <stdexcept>
 
 namespace MetaNN

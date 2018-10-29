@@ -11,10 +11,6 @@
 #include <MetaNN/data/data.h>
 #include <MetaNN/data/dynamic.h>
 
-#include <MetaNN/data/matrices/cpu_matrix.h>
-#include <MetaNN/data/matrices/trival_matrix.h>
-#include <MetaNN/data/matrices/one_hot_vector.h>
-
 #include <MetaNN/data/3d_array/cpu_3d_array.h>
 
 #include <MetaNN/data/batch.h>
