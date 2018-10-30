@@ -1,7 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/linear_table/linear_table.h>
-#include <MetaNN/data/3d_array/3d_array.h>
+#include <MetaNN/data/cardinal/3d_array/3d_array_base.h>
 #include <vector>
 
 namespace MetaNN

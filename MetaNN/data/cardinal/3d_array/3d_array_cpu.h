@@ -1,18 +1,17 @@
 #pragma once
 
-#include <MetaNN/data/linear_table/linear_table.h>
-#include <MetaNN/data/3d_array/3d_array.h>
+#include <MetaNN/data/cardinal/3d_array/3d_array_base.h>
 #include <MetaNN/data/facilities/continuous_memory.h>
 #include <MetaNN/data/facilities/lower_access.h>
+#include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/evaluate/facilities/eval_handle.h>
 #include <cassert>
-#include <cstring>
 #include <type_traits>
 
 namespace MetaNN
 {
 template <typename TElem>
-class ThreeDArray<TElem, DeviceTags::CPU>
+class ThreeDArray<TElem, DeviceTags::CPU> : public Shape_<CategoryTags::ThreeDArray>
 {    
 public:
     static_assert(std::is_same<RemConstRef<TElem>, TElem>::value,
@@ -22,39 +21,30 @@ public:
     using DeviceType = DeviceTags::CPU;
     
     friend struct LowerAccessImpl<ThreeDArray<TElem, DeviceTags::CPU>>;
-    friend class LinearTable<TElem, DeviceTags::CPU, CategoryTags::ThreeDArray>;
 
 public:
-    ThreeDArray()
-        : ThreeDArray(0, 0, 0) {}
-        
-    ThreeDArray(size_t p_pageNum, size_t p_rowNum, size_t p_colNum)
-        : m_mem(p_pageNum * p_rowNum * p_colNum)
-        , m_pageNum(p_pageNum)
-        , m_rowNum(p_rowNum)
-        , m_colNum(p_colNum)
+    ThreeDArray(size_t p_pageNum = 0, size_t p_rowNum = 0, size_t p_colNum = 0)
+        : Shape_<CategoryTags::ThreeDArray>(p_pageNum, p_rowNum, p_colNum)
+        , m_mem(p_pageNum * p_rowNum * p_colNum)
     {}
     
     ThreeDArray(ContinuousMemory<ElementType, DeviceType> p_mem,
                 size_t p_pageNum,
                 size_t p_rowNum,
                 size_t p_colNum)
-        : m_mem(std::move(p_mem))
-        , m_pageNum(p_pageNum)
-        , m_rowNum(p_rowNum)
-        , m_colNum(p_colNum)
+        : Shape_<CategoryTags::ThreeDArray>(p_pageNum, p_rowNum, p_colNum)
+        , m_mem(std::move(p_mem))
     {}
 
 
     bool operator== (const ThreeDArray& val) const
     {
-        return (m_mem == val.m_mem) &&
-               (m_pageNum == val.m_pageNum) && 
-               (m_rowNum == val.m_rowNum) &&
-               (m_colNum == val.m_colNum);
+        return (Shape() == val.Shape()) &&
+               (m_mem == val.m_mem);
     }
 
-    template <typename TOtherType>
+    template <typename TOtherType,
+              typename = std::enable_if_t<!std::is_same_v<std::decay_t<TOtherType>, ThreeDArray>>>
     bool operator== (const TOtherType&) const
     {
         return false;
@@ -66,24 +56,20 @@ public:
         return !(operator==(val));
     }
 
-    size_t PageNum() const { return m_pageNum; }
-    size_t RowNum() const { return m_rowNum; }
-    size_t ColNum() const { return m_colNum; }
-
     bool AvailableForWrite() const { return m_mem.IsShared(); }
 
     void SetValue(size_t p_pageId, size_t p_rowId, size_t p_colId, ElementType val)
     {
         assert(AvailableForWrite());
-        assert((p_pageId < m_pageNum) && (p_rowId < m_rowNum) && (p_colId < m_colNum));
+        assert((p_pageId < PageNum()) && (p_rowId < RowNum()) && (p_colId < ColNum()));
         
-        (m_mem.RawMemory())[(p_pageId * m_rowNum + p_rowId) * m_colNum + p_colId] = val;
+        (m_mem.RawMemory())[(p_pageId * RowNum() + p_rowId) * ColNum() + p_colId] = val;
     }
 
     const auto operator () (size_t p_pageId, size_t p_rowId, size_t p_colId) const
     {
-        assert((p_pageId < m_pageNum) && (p_rowId < m_rowNum) && (p_colId < m_colNum));
-        return (m_mem.RawMemory())[(p_pageId * m_rowNum + p_rowId) * m_colNum + p_colId];
+        assert((p_pageId < PageNum()) && (p_rowId < RowNum()) && (p_colId < ColNum()));
+        return (m_mem.RawMemory())[(p_pageId * RowNum() + p_rowId) * ColNum() + p_colId];
     }
 
     auto EvalRegister() const
@@ -93,29 +79,26 @@ public:
 
 private:
     ContinuousMemory<ElementType, DeviceType> m_mem;
-    size_t m_pageNum;
-    size_t m_rowNum;
-    size_t m_colNum;
 };
 
 template<typename TElem>
 struct LowerAccessImpl<ThreeDArray<TElem, DeviceTags::CPU>>
 {
     LowerAccessImpl(ThreeDArray<TElem, DeviceTags::CPU> p)
-        : m_matrix(std::move(p))
+        : m_data(std::move(p))
     {}
 
     auto MutableRawMemory()
     {
-        return m_matrix.m_mem.RawMemory();
+        return m_data.m_mem.RawMemory();
     }
 
     const auto RawMemory() const
     {
-        return m_matrix.m_mem.RawMemory();
+        return m_data.m_mem.RawMemory();
     }
 
 private:
-    ThreeDArray<TElem, DeviceTags::CPU> m_matrix;
+    ThreeDArray<TElem, DeviceTags::CPU> m_data;
 };
 }

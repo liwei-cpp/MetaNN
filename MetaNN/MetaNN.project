@@ -95,10 +95,6 @@
     <File Name="meta_nn.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data">
-    <VirtualDirectory Name="3d_array">
-      <File Name="data/3d_array/3d_array.h"/>
-      <File Name="data/3d_array/cpu_3d_array.h"/>
-    </VirtualDirectory>
     <VirtualDirectory Name="batch">
       <File Name="data/batch/array.h"/>
       <File Name="data/batch/duplicate.h"/>
@@ -137,6 +133,11 @@
         <File Name="data/cardinal/matrix/zero_matrix.h"/>
         <File Name="data/cardinal/matrix/trival_matrix.h"/>
         <File Name="data/cardinal/matrix/one_hot_vector.h"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="3d_array">
+        <File Name="data/cardinal/3d_array/3d_array_base.h"/>
+        <File Name="data/cardinal/3d_array/3d_array_pack.h"/>
+        <File Name="data/cardinal/3d_array/3d_array_cpu.h"/>
       </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>
