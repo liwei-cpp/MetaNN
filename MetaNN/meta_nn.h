@@ -11,8 +11,6 @@
 #include <MetaNN/data/data.h>
 #include <MetaNN/data/dynamic.h>
 
-#include <MetaNN/data/batch.h>
-#include <MetaNN/data/sequence.h>
 #include <MetaNN/data/batch/array.h>
 #include <MetaNN/data/batch/duplicate.h>
 

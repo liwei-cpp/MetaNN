@@ -1,16 +1,18 @@
 #pragma once
 
-#include <MetaNN/data/linear_table/linear_table.h>
+#include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/data/facilities/continuous_memory.h>
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/data/facilities/tags.h>
-#include <MetaNN/evaluate/facilities/eval_handle.h>
+#include <MetaNN/data/facilities/lower_access.h>
+#include <MetaNN/data/linear_table/linear_table_base.h>
 #include <cassert>
 
 namespace MetaNN
 {
-template <typename TElem>
-class LinearTable<TElem, DeviceTags::CPU, CategoryTags::Scalar>
+template <typename TElem, template <typename> class TCateWrapper>
+class LinearTable<TElem, DeviceTags::CPU, TCateWrapper<CategoryTags::Scalar>>
+    : public Shape_<TCateWrapper<CategoryTags::Scalar>>
 {
 public:
     using ElementType = TElem;
@@ -20,30 +22,35 @@ public:
     
 public:
     LinearTable(size_t length = 0)
-        : m_mem(length)
-        , m_len(length) {}
+        : Shape_<TCateWrapper<CategoryTags::Scalar>>(length)
+        , m_mem(length) {}
 
     bool AvailableForWrite() const { return m_mem.IsShared(); }
 
     void SetValue(size_t p_id, ElementType val)
     {
+        using TShape = Shape_<TCateWrapper<CategoryTags::Scalar>>;
         assert(AvailableForWrite());
-        assert(p_id < m_len);
+        assert(p_id < NSLinearTable::WrapperDim(TShape::Shape()));
         (m_mem.RawMemory())[p_id] = val;
     }
     
     const auto operator[](size_t p_id) const
     {
-        assert(p_id < m_len);
+        using TShape = Shape_<TCateWrapper<CategoryTags::Scalar>>;
+        assert(p_id < NSLinearTable::WrapperDim(TShape::Shape()));
         return (m_mem.RawMemory())[p_id];
     }
    
     bool operator== (const LinearTable& val) const
     {
-        return (m_mem == val.m_mem) && (m_len == val.m_len);
+        using TShape = Shape_<TCateWrapper<CategoryTags::Scalar>>;
+        return (TShape::Shape() == val.Shape()) &&
+               (m_mem == val.m_mem);
     }
 
-    template <typename TOtherType>
+    template <typename TOtherType,
+              typename = std::enable_if_t<!std::is_same_v<std::decay_t<TOtherType>, LinearTable>>>
     bool operator== (const TOtherType&) const
     {
         return false;
@@ -55,17 +62,19 @@ public:
         return !(operator==(val));
     }
     
-protected:
-    size_t Count() const { return m_len; }
+    auto EvalRegister() const
+    {
+        return MakeConstEvalHandle(*this);
+    }
+
 private:
     ContinuousMemory<ElementType, DeviceType> m_mem;
-    size_t m_len;
 };
 
-template<typename TElem>
-struct LowerAccessImpl<LinearTable<TElem, DeviceTags::CPU, CategoryTags::Scalar>>
+template<typename TElem, template <typename> class TCateWrapper>
+struct LowerAccessImpl<LinearTable<TElem, DeviceTags::CPU, TCateWrapper<CategoryTags::Scalar>>>
 {
-    LowerAccessImpl(LinearTable<TElem, DeviceTags::CPU, CategoryTags::Scalar> p)
+    LowerAccessImpl(LinearTable<TElem, DeviceTags::CPU, TCateWrapper<CategoryTags::Scalar>> p)
         : m_data(std::move(p))
     {}
 
@@ -80,6 +89,6 @@ struct LowerAccessImpl<LinearTable<TElem, DeviceTags::CPU, CategoryTags::Scalar>
     }
 
 private:
-    LinearTable<TElem, DeviceTags::CPU, CategoryTags::Scalar> m_data;
+    LinearTable<TElem, DeviceTags::CPU, TCateWrapper<CategoryTags::Scalar>> m_data;
 };
 }

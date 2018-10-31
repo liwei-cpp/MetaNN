@@ -98,6 +98,8 @@
     <VirtualDirectory Name="batch">
       <File Name="data/batch/array.h"/>
       <File Name="data/batch/duplicate.h"/>
+      <File Name="data/batch/batch.h"/>
+      <File Name="data/batch/batch_pack.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
       <File Name="data/facilities/allocators.h"/>
@@ -106,16 +108,16 @@
       <File Name="data/facilities/tags.h"/>
       <File Name="data/facilities/traits.h"/>
       <File Name="data/facilities/shape.h"/>
+      <VirtualDirectory Name="linear_table"/>
     </VirtualDirectory>
     <File Name="data/dynamic.h"/>
     <VirtualDirectory Name="linear_table">
       <File Name="data/linear_table/scalar.h"/>
-      <File Name="data/linear_table/linear_table.h"/>
       <File Name="data/linear_table/matrix.h"/>
+      <File Name="data/linear_table/linear_table_pack.h"/>
+      <File Name="data/linear_table/linear_table_base.h"/>
       <File Name="data/linear_table/3d_array.h"/>
     </VirtualDirectory>
-    <File Name="data/batch.h"/>
-    <File Name="data/sequence.h"/>
     <File Name="data/data.h"/>
     <VirtualDirectory Name="cardinal">
       <VirtualDirectory Name="scalar">
@@ -139,6 +141,10 @@
         <File Name="data/cardinal/3d_array/3d_array_pack.h"/>
         <File Name="data/cardinal/3d_array/3d_array_cpu.h"/>
       </VirtualDirectory>
+    </VirtualDirectory>
+    <VirtualDirectory Name="sequence">
+      <File Name="data/sequence/sequence.h"/>
+      <File Name="data/sequence/sequence_pack.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="data_copy">

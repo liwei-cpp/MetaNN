@@ -9,7 +9,7 @@ template <typename TElem, typename TDevice> class Matrix;
 template <typename TElem, typename TDevice> class Scalar;
 template <typename TElem, typename TDevice> class ThreeDArray;
 
-template<typename TElement, typename TDevice, typename TCategory> class Batch;
+template<typename TElem, typename TDevice, typename TCategory> class LinearTable;
 
 template <typename TCategory, typename TElem, typename TDevice>
 struct PrincipalDataType_;
@@ -35,19 +35,19 @@ struct PrincipalDataType_<CategoryTags::ThreeDArray, TElem, TDevice>
 template <typename TElem, typename TDevice>
 struct PrincipalDataType_<CategoryTags::BatchMatrix, TElem, TDevice>
 {
-    using type = Batch<TElem, TDevice, CategoryTags::Matrix>;
+    using type = LinearTable<TElem, TDevice, CategoryTags::BatchMatrix>;
 };
 
 template <typename TElem, typename TDevice>
 struct PrincipalDataType_<CategoryTags::BatchScalar, TElem, TDevice>
 {
-    using type = Batch<TElem, TDevice, CategoryTags::Scalar>;
+    using type = LinearTable<TElem, TDevice, CategoryTags::BatchScalar>;
 };
 
 template <typename TElem, typename TDevice>
 struct PrincipalDataType_<CategoryTags::BatchThreeDArray, TElem, TDevice>
 {
-    using type = Batch<TElem, TDevice, CategoryTags::ThreeDArray>;
+    using type = LinearTable<TElem, TDevice, CategoryTags::BatchThreeDArray>;
 };
 
 template <typename TCategory, typename TElem, typename TDevice>

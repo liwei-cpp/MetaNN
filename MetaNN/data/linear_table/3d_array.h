@@ -1,43 +1,39 @@
 #pragma once
 
-#include <MetaNN/data/linear_table/linear_table.h>
-#include <MetaNN/data/cardinal/3d_array/3d_array_base.h>
-#include <vector>
+#include <MetaNN/data/facilities/shape.h>
+#include <MetaNN/data/facilities/continuous_memory.h>
+#include <MetaNN/data/facilities/traits.h>
+#include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/data/linear_table/linear_table_base.h>
+#include <cassert>
 
 namespace MetaNN
 {
-template <typename TElement, typename TDevice>
-class LinearTable<TElement, TDevice, CategoryTags::ThreeDArray>
+template <typename TElement, template <typename> class TCateWrapper>
+class LinearTable<TElement, DeviceTags::CPU, TCateWrapper<CategoryTags::ThreeDArray>>
+    : public Shape_<TCateWrapper<CategoryTags::ThreeDArray>>
 {
 public:
     using ElementType = TElement;
-    using DeviceType = TDevice;
+    using DeviceType = DeviceTags::CPU;
     
-    friend struct LowerAccessImpl<LinearTable<TElement, TDevice, CategoryTags::ThreeDArray>>;
+    friend struct LowerAccessImpl<LinearTable<TElement, DeviceTags::CPU, CategoryTags::ThreeDArray>>;
     
 public:
-    LinearTable()
-        : LinearTable(0, 0, 0, 0)
-    {}
-    
-    LinearTable(size_t p_batchNum, size_t p_pageNum, size_t p_rowNum, size_t p_colNum)
-        : m_mem(p_pageNum * p_rowNum * p_colNum * p_batchNum)
-        , m_pageNum(p_pageNum)
-        , m_rowNum(p_rowNum)
-        , m_colNum(p_colNum)
-        , m_batchNum(p_batchNum)
+    LinearTable(size_t p_batchNum = 0, size_t p_pageNum = 0, size_t p_rowNum = 0, size_t p_colNum = 0)
+        : Shape_<TCateWrapper<CategoryTags::ThreeDArray>>(p_batchNum, p_pageNum, p_rowNum, p_colNum)
+        , m_mem(p_pageNum * p_rowNum * p_colNum * p_batchNum)
     {}
 
     bool operator== (const LinearTable& val) const
     {
-        return (m_mem == val.m_mem) &&
-               (m_pageNum == val.m_pageNum) &&
-               (m_rowNum == val.m_rowNum) &&
-               (m_colNum == val.m_colNum) &&
-               (m_batchNum == val.m_batchNum);
+        using TShape = Shape_<TCateWrapper<CategoryTags::ThreeDArray>>;
+        return (TShape::Shape() == val.Shape()) &&
+               (m_mem == val.m_mem);
     }
 
-    template <typename TOtherType>
+    template <typename TOtherType,
+              typename = std::enable_if_t<!std::is_same_v<std::decay_t<TOtherType>, LinearTable>>>
     bool operator== (const TOtherType&) const
     {
         return false;
@@ -49,47 +45,53 @@ public:
         return !(operator==(val));
     }
 
-    size_t PageNum() const { return m_pageNum; }
-    size_t RowNum() const { return m_rowNum; }
-    size_t ColNum() const { return m_colNum; }
-
     bool AvailableForWrite() const { return m_mem.IsShared(); }
 
     void SetValue(size_t p_batchId, size_t p_pageId, size_t p_rowId, size_t p_colId, ElementType val)
     {
-        assert(AvailableForWrite());
-        assert((p_pageId < m_pageNum) &&
-               (p_rowId < m_rowNum) &&
-               (p_colId < m_colNum) &&
-               (p_batchId < m_batchNum));
+        using TShape = Shape_<TCateWrapper<CategoryTags::ThreeDArray>>;
+        const size_t pageNum = TShape::PageNum();
+        const size_t rowNum = TShape::RowNum();
+        const size_t colNum = TShape::ColNum();
+        const auto& wrapperDim = NSLinearTable::WrapperDim(TShape::Shape());
         
-        size_t pos = ((p_batchId * m_pageNum + p_pageId) * m_rowNum + p_rowId) * m_colNum + p_colId;
+        assert(AvailableForWrite());
+        assert((p_pageId < pageNum) &&
+               (p_rowId < rowNum) &&
+               (p_colId < colNum) &&
+               (p_batchId < wrapperDim));
+        
+        size_t pos = ((p_batchId * pageNum + p_pageId) * rowNum + p_rowId) * colNum + p_colId;
         (m_mem.RawMemory())[pos] = val;
     }
 
     const auto operator [] (size_t p_batchId) const
     {
-        assert(p_batchId < m_batchNum);
+        using TShape = Shape_<TCateWrapper<CategoryTags::ThreeDArray>>;
+        const size_t pageNum = TShape::PageNum();
+        const size_t rowNum = TShape::RowNum();
+        const size_t colNum = TShape::ColNum();
+        const auto& wrapperDim = NSLinearTable::WrapperDim(TShape::Shape());
         
-        auto pos = p_batchId * m_pageNum * m_rowNum * m_colNum;
-        return ThreeDArray<TElement, TDevice>(m_mem.Shift(pos),
-                                              m_pageNum, m_rowNum, m_colNum);
+        assert(p_batchId < wrapperDim);
+        
+        auto pos = p_batchId * pageNum * rowNum * colNum;
+        return ThreeDArray<ElementType, DeviceType>(m_mem.Shift(pos),
+                                                    pageNum, rowNum, colNum);
     }
-    
-protected:
-    size_t Count() const { return m_batchNum; }
+
+    auto EvalRegister() const
+    {
+        return MakeConstEvalHandle(*this);
+    }
 private:
     ContinuousMemory<ElementType, DeviceType> m_mem;
-    size_t m_pageNum;
-    size_t m_rowNum;
-    size_t m_colNum;
-    size_t m_batchNum;
 };
 
-template <typename TElem, typename TDevice>
-struct LowerAccessImpl<LinearTable<TElem, TDevice, CategoryTags::ThreeDArray>>
+template <typename TElem, template <typename> class TCateWrapper>
+struct LowerAccessImpl<LinearTable<TElem, DeviceTags::CPU, TCateWrapper<CategoryTags::ThreeDArray>>>
 {
-    LowerAccessImpl(LinearTable<TElem, TDevice, CategoryTags::ThreeDArray> p)
+    LowerAccessImpl(LinearTable<TElem, DeviceTags::CPU, TCateWrapper<CategoryTags::ThreeDArray>> p)
         : m_rawData(std::move(p))
     {}
 
@@ -104,6 +106,6 @@ struct LowerAccessImpl<LinearTable<TElem, TDevice, CategoryTags::ThreeDArray>>
     }
 
 private:
-    LinearTable<TElem, TDevice, CategoryTags::ThreeDArray> m_rawData;
+    LinearTable<TElem, DeviceTags::CPU, TCateWrapper<CategoryTags::ThreeDArray>> m_rawData;
 };
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <MetaNN/data/linear_table/linear_table_pack.h>
 #include <MetaNN/data/facilities/tags.h>
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_buffer.h>

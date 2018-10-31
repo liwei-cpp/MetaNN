@@ -159,14 +159,14 @@ public:
     bool operator== (const TOtherShape& val) const noexcept
     {
         static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
-        return (BatchNum() == val.BatchNum()) && Compare(val);
+        return (BatchNum() == val.BatchNum()) && (Shape_<TSubCate>::Compare(val));
     }
     
     const Shape_<CategoryTags::Batch<TSubCate>>& Shape() const noexcept
     {
         return *this;
     }
-    
+
 private:
     size_t m_batchNum;
 };
@@ -198,7 +198,7 @@ public:
     bool operator== (const TOtherShape& val) const noexcept
     {
         static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
-        return (Length() == val.Length()) && Compare(val);
+        return (Length() == val.Length()) && (Shape_<TSubCate>::Compare(val));
     }
     
     const Shape_<CategoryTags::Sequence<TSubCate>>& Shape() const noexcept
@@ -247,7 +247,7 @@ public:
             return false;
         if (!std::equal(m_seqLenCont.begin(), m_seqLenCont.end(), compCont.begin()))
             return false;
-        return Compare(val);
+        return Shape_<TSubCate>::Compare(val);
     }
     
     const Shape_<CategoryTags::BatchSequence<TSubCate>>& Shape() const noexcept

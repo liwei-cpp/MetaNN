@@ -1,74 +1,95 @@
 #pragma once
 
-#include <MetaNN/data/linear_table/linear_table.h>
 #include <MetaNN/data/cardinal/matrix/matrix_base.h>
-#include <vector>
+#include <MetaNN/data/facilities/shape.h>
+#include <MetaNN/data/facilities/continuous_memory.h>
+#include <MetaNN/data/facilities/traits.h>
+#include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/data/linear_table/linear_table_base.h>
+#include <cassert>
 
 namespace MetaNN
 {
-template <typename TElement, typename TDevice>
-class LinearTable<TElement, TDevice, CategoryTags::Matrix>
+template <typename TElement, template <typename> class TCateWrapper>
+class LinearTable<TElement, DeviceTags::CPU, TCateWrapper<CategoryTags::Matrix>>
+    : public Shape_<TCateWrapper<CategoryTags::Matrix>>
 {
 public:
     using ElementType = TElement;
-    using DeviceType = TDevice;
+    using DeviceType = DeviceTags::CPU;
     
-    friend struct LowerAccessImpl<LinearTable<TElement, TDevice, CategoryTags::Matrix>>;
+    friend struct LowerAccessImpl<LinearTable<TElement, DeviceTags::CPU, CategoryTags::Matrix>>;
     
 public:
     LinearTable(size_t p_batchNum = 0, size_t p_rowNum = 0, size_t p_colNum = 0)
-        : m_mem(p_rowNum * p_colNum * p_batchNum)
-        , m_rowNum(p_rowNum)
-        , m_colNum(p_colNum)
-        , m_batchNum(p_batchNum)
+        : Shape_<TCateWrapper<CategoryTags::Matrix>>(p_batchNum, p_rowNum, p_colNum)
+        , m_mem(p_rowNum * p_colNum * p_batchNum)
     {}
 
     bool operator== (const LinearTable& val) const
     {
-        return (m_mem == val.m_mem) &&
-               (m_rowNum == val.m_rowNum) &&
-               (m_colNum == val.m_colNum) &&
-               (m_batchNum == val.m_batchNum);
+        using TShape = Shape_<TCateWrapper<CategoryTags::Matrix>>;
+        return (TShape::Shape() == val.Shape()) &&
+               (m_mem == val.m_mem);
+    }
+    
+    template <typename TOtherType,
+              typename = std::enable_if_t<!std::is_same_v<std::decay_t<TOtherType>, LinearTable>>>
+    bool operator== (const TOtherType&) const
+    {
+        return false;
     }
 
-    size_t RowNum() const { return m_rowNum; }
-    size_t ColNum() const { return m_colNum; }
+    template <typename TData>
+    bool operator!= (const TData& val) const
+    {
+        return !(operator==(val));
+    }
 
     bool AvailableForWrite() const { return m_mem.IsShared(); }
 
     void SetValue(size_t p_batchId, size_t p_rowId, size_t p_colId, ElementType val)
     {
-        assert(AvailableForWrite());
-        assert((p_rowId < m_rowNum) &&
-               (p_colId < m_colNum) &&
-               (p_batchId < m_batchNum));
+        using TShape = Shape_<TCateWrapper<CategoryTags::Matrix>>;
+        const size_t rowNum = TShape::RowNum();
+        const size_t colNum = TShape::ColNum();
+        const auto& wrapperDim = NSLinearTable::WrapperDim(TShape::Shape());
         
-        size_t pos = (p_batchId * m_rowNum + p_rowId) * m_colNum + p_colId;
+        assert(AvailableForWrite());
+        assert((p_rowId < rowNum) &&
+               (p_colId < colNum) &&
+               (p_batchId < wrapperDim));
+        
+        size_t pos = (p_batchId * rowNum + p_rowId) * colNum + p_colId;
         (m_mem.RawMemory())[pos] = val;
     }
 
     const auto operator [] (size_t p_batchId) const
     {
-        assert(p_batchId < m_batchNum);
+        using TShape = Shape_<TCateWrapper<CategoryTags::Matrix>>;
+        const size_t rowNum = TShape::RowNum();
+        const size_t colNum = TShape::ColNum();
+        const auto& wrapperDim = NSLinearTable::WrapperDim(TShape::Shape());
         
-        auto pos = p_batchId * m_rowNum * m_colNum;
-        return Matrix<TElement, TDevice>(m_mem.Shift(pos), m_rowNum, m_colNum);
+        assert(p_batchId < wrapperDim);
+        
+        auto pos = p_batchId * rowNum * colNum;
+        return Matrix<ElementType, DeviceType>(m_mem.Shift(pos), rowNum, colNum);
     }
     
-protected:
-    size_t Count() const { return m_batchNum; }
+    auto EvalRegister() const
+    {
+        return MakeConstEvalHandle(*this);
+    }
     
 private:
     ContinuousMemory<ElementType, DeviceType> m_mem;
-    size_t m_rowNum;
-    size_t m_colNum;
-    size_t m_batchNum;
 };
 
-template <typename TElem, typename TDevice>
-struct LowerAccessImpl<LinearTable<TElem, TDevice, CategoryTags::Matrix>>
+template <typename TElem, template <typename> class TCateWrapper>
+struct LowerAccessImpl<LinearTable<TElem, DeviceTags::CPU, TCateWrapper<CategoryTags::Matrix>>>
 {
-    LowerAccessImpl(LinearTable<TElem, TDevice, CategoryTags::Matrix> p)
+    LowerAccessImpl(LinearTable<TElem, DeviceTags::CPU, TCateWrapper<CategoryTags::Matrix>> p)
         : m_rawData(std::move(p))
     {}
 
@@ -83,6 +104,6 @@ struct LowerAccessImpl<LinearTable<TElem, TDevice, CategoryTags::Matrix>>
     }
 
 private:
-    LinearTable<TElem, TDevice, CategoryTags::Matrix> m_rawData;
+    LinearTable<TElem, DeviceTags::CPU, TCateWrapper<CategoryTags::Matrix>> m_rawData;
 };
 }
