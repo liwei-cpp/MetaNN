@@ -1,6 +1,7 @@
 #pragma once
 #include <MetaNN/data/facilities/tags.h>
 #include <MetaNN/facilities/traits.h>
+#include <iterator>
 #include <type_traits>
 
 namespace MetaNN
@@ -54,9 +55,26 @@ template <typename TCategory, typename TElem, typename TDevice>
 using PrincipalDataType = typename PrincipalDataType_<TCategory, TElem, TDevice>::type;
 
 template <typename T>
+struct HasCategoryTag_
+{   
+};
+
+template <typename T>
+constexpr bool HasCategoryTag = HasCategoryTag_<T>::value;
+
+template <typename T>
 struct DataCategory_
 {
-    using type = CategoryTags::Invalid;
+    template <typename R>
+    static typename R::CategoryTag Test(typename R::CategoryTag*);
+    
+    template <typename R>
+    static CategoryTags::Invalid Test(...);
+
+    using typeCand = decltype(Test<T>(nullptr));
+    using type = std::conditional_t<IsValidCategoryTag<typeCand>,
+                                    typeCand,
+                                    CategoryTags::Invalid>;
 };
 
 template <typename T>
@@ -91,6 +109,9 @@ struct DataCategory_<const T&&>
 
 template <typename T>
 using DataCategory = typename DataCategory_<T>::type;
+
+template <typename T>
+constexpr bool IsInvalid = std::is_same_v<DataCategory<T>, CategoryTags::Invalid>;
 
 template <typename T>
 constexpr bool IsScalar = std::is_same_v<DataCategory<T>, CategoryTags::Scalar>;
@@ -133,4 +154,23 @@ struct IsIterator_
 
 template <typename T>
 constexpr bool IsIterator = IsIterator_<T>::value;
+
+template <typename T1, typename T2,
+          typename = std::enable_if_t<!IsInvalid<T1>>,
+          typename = std::enable_if_t<!IsInvalid<T2>>,
+          typename = std::enable_if_t<!std::is_same_v<T1, T2>>
+         >
+bool operator== (const T1&, const T2&)
+{
+    return false;
+}
+
+template <typename T1, typename T2,
+          typename = std::enable_if_t<!IsInvalid<T1>>,
+          typename = std::enable_if_t<!IsInvalid<T2>>
+         >
+bool operator!= (const T1& val1, const T2& val2)
+{
+    return !(val1 == val2);
+}
 }

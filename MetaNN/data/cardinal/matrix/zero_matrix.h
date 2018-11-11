@@ -1,79 +1,71 @@
 #pragma once
 
+#include <cstring>
 #include <MetaNN/data/facilities/tags.h>
 #include <MetaNN/data/facilities/shape.h>
-#include <MetaNN/data/cardinal/matrix/matrix_base.h>
+#include <MetaNN/data/cardinal/matrix/matrix.h>
 #include <MetaNN/evaluate/facilities/eval_buffer.h>
 #include <MetaNN/evaluate/facilities/eval_group.h>
-#include <MetaNN/evaluate/facilities/eval_handle.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <cassert>
-#include <stdexcept>
 
 namespace MetaNN
 {
 namespace NSZeroMatrix
 {
-template <typename TElem, typename TDevice>
-class EvalUnit;
-
-template <typename TElement>
-class EvalUnit<TElement, DeviceTags::CPU>
-    : public BaseEvalUnit<DeviceTags::CPU>
+template <typename TElement, typename TDevice>
+class EvalUnit : public BaseEvalUnit<TDevice>
 {
 public:
-    EvalUnit(EvalHandle<Matrix<TElement, DeviceTags::CPU>> resBuf,
-             size_t rowNum, size_t colNum)
+    EvalUnit(EvalHandle<Matrix<TElement, TDevice>> resBuf,
+             Shape<CategoryTags::Matrix> p_shape)
         : m_resHandle(std::move(resBuf))
-        , m_rowNum(rowNum)
-        , m_colNum(colNum) {}
+        , m_shape(std::move(p_shape))
+    {}
 
     void Eval() override
     {
-        m_resHandle.Allocate(m_rowNum, m_colNum);
+        m_resHandle.Allocate(m_shape);
         auto lowLayer = LowerAccess(m_resHandle.MutableData());
         auto mem = lowLayer.MutableRawMemory();
         
-        memset(mem, 0, sizeof(TElement) * m_colNum * m_rowNum);
+        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, 
+                      "Memset not support for other device tag.");
+        memset(mem, 0, sizeof(TElement) * m_shape.Count());
         m_resHandle.SetEval();
     }
 
 private:
-    EvalHandle<Matrix<TElement, DeviceTags::CPU>> m_resHandle;
-    size_t m_rowNum;
-    size_t m_colNum;
+    EvalHandle<Matrix<TElement, TDevice>> m_resHandle;
+    const Shape<CategoryTags::Matrix> m_shape;
 };
 }
 
 template <typename TElem, typename TDevice>
-class ZeroMatrix : public Shape_<CategoryTags::Matrix>
+class ZeroMatrix
 {
 public:
+    using CategoryTag = CategoryTags::Matrix;
     using ElementType = TElem;
     using DeviceType = TDevice;
-    
+
 public:
-    ZeroMatrix(size_t p_rowNum, size_t p_colNum)
-        : Shape_<CategoryTags::Matrix>(p_rowNum, p_colNum)
+    explicit ZeroMatrix(size_t rowNum, size_t colNum)
+        : m_shape(rowNum, colNum)
     {}
+    
+    explicit ZeroMatrix(MetaNN::Shape<CategoryTag> p_shape = MetaNN::Shape<CategoryTag>())
+        : m_shape(std::move(p_shape))
+    {}
+    
+    const auto& Shape() const noexcept
+    {
+        return m_shape;
+    }
 
     bool operator== (const ZeroMatrix& val) const
     {
-        return (Shape() == val.Shape());
-    }
-
-    template <typename TOtherType,
-              typename = std::enable_if_t<!std::is_same_v<std::decay_t<TOtherType>, ZeroMatrix>>>
-    bool operator== (const TOtherType&) const
-    {
-        return false;
-    }
-
-    template <typename TData>
-    bool operator!= (const TData& val) const
-    {
-        return !(operator==(val));
+        return (m_shape == val.m_shape);
     }
 
     auto EvalRegister() const
@@ -84,19 +76,14 @@ public:
         {
             auto evalHandle = m_evalBuf.Handle();
             decltype(auto) outPtr = evalHandle.DataPtr();
-            TEvalUnit unit(std::move(evalHandle), RowNum(), ColNum());
+            TEvalUnit unit(std::move(evalHandle), m_shape);
             EvalPlan<DeviceType>::template Register<TEvalGroup>(std::move(unit), outPtr, {});
         }
         return m_evalBuf.ConstHandle();
     }
     
 private:
+    MetaNN::Shape<CategoryTag> m_shape;
     EvalBuffer<Matrix<ElementType, DeviceType>> m_evalBuf;
-};
-
-template <typename TElem, typename TDevice>
-struct DataCategory_<ZeroMatrix<TElem, TDevice>>
-{
-    using type = CategoryTags::Matrix;
 };
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/allocators.h>
+#include <MetaNN/facilities/traits.h>
 namespace MetaNN
 {
 template <typename TElem, typename TDevice>

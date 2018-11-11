@@ -9,48 +9,38 @@
 
 namespace MetaNN
 {
+namespace NSShape
+{
 template <typename T>
-class Shape_;
+constexpr bool IsCardinalTag = std::is_same_v<T, CategoryTags::Scalar> ||
+                               std::is_same_v<T, CategoryTags::Matrix> ||
+                               std::is_same_v<T, CategoryTags::ThreeDArray>;
+}
+
+template <typename T>
+class Shape;
 
 template <>
-class Shape_<CategoryTags::Scalar>
+class Shape<CategoryTags::Scalar>
 {
 public:
-    using ShapeCategory = CategoryTags::Scalar;
-    
+    explicit Shape() = default;
     constexpr size_t Count() const noexcept
     {
         return 1;
     }
     
-    template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const noexcept
-    {
-        static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
-        return Compare(val);
-    }
-    
-    const Shape_<CategoryTags::Scalar>& Shape() const noexcept
-    {
-        return *this;
-    }
-    
-protected:
-    template <typename TOtherShape>
-    bool Compare(const TOtherShape& val) const noexcept
+    bool operator== (const Shape&) const noexcept
     {
         return true;
-    }
+    }    
 };
 
 template <>
-class Shape_<CategoryTags::Matrix>
+class Shape<CategoryTags::Matrix>
 {
 public:
-    using ShapeCategory = CategoryTags::Matrix;
-    
-public:
-    Shape_(size_t p_rowNum, size_t p_colNum)
+    explicit Shape(size_t p_rowNum = 0, size_t p_colNum = 0)
         : m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
     {}
@@ -64,21 +54,7 @@ public:
         return m_rowNum * m_colNum;
     }
     
-    template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const noexcept
-    {
-        static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
-        return Compare(val);
-    }
-    
-    const Shape_<CategoryTags::Matrix>& Shape() const noexcept
-    {
-        return *this;
-    }
-    
-protected:
-    template <typename TOtherShape>
-    bool Compare(const TOtherShape& val) const noexcept
+    bool operator== (const Shape& val) const noexcept
     {
         return (RowNum() == val.RowNum()) && (ColNum() == val.ColNum());
     }
@@ -89,14 +65,11 @@ private:
 };
 
 template <>
-class Shape_<CategoryTags::ThreeDArray> : public Shape_<CategoryTags::Matrix>
+class Shape<CategoryTags::ThreeDArray> : public Shape<CategoryTags::Matrix>
 {
 public:
-    using ShapeCategory = CategoryTags::ThreeDArray;
-    
-public:
-    Shape_(size_t p_pageNum, size_t p_rowNum, size_t p_colNum)
-        : Shape_<CategoryTags::Matrix>(p_rowNum, p_colNum)
+    explicit Shape(size_t p_pageNum = 0, size_t p_rowNum = 0, size_t p_colNum = 0)
+        : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
         , m_pageNum(p_pageNum)
     {}
     
@@ -105,27 +78,13 @@ public:
     
     size_t Count() const noexcept
     {
-        return m_pageNum * Shape_<CategoryTags::Matrix>::Count();
+        return m_pageNum * Shape<CategoryTags::Matrix>::Count();
     }
     
-    template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const noexcept
-    {
-        static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
-        return Compare(val);
-    }
-    
-    const Shape_<CategoryTags::ThreeDArray>& Shape() const noexcept
-    {
-        return *this;
-    }
-    
-protected:
-    template <typename TOtherShape>
-    bool Compare(const TOtherShape& val) const
+    bool operator== (const Shape& val) const noexcept
     {
         return (PageNum() == val.PageNum()) &&
-               Shape_<CategoryTags::Matrix>::Compare(val);
+               Shape<CategoryTags::Matrix>::operator==(val);
     }
     
 private:
@@ -133,38 +92,29 @@ private:
 };
 
 template <typename TSubCate>
-class Shape_<CategoryTags::Batch<TSubCate>> : public Shape_<TSubCate>
+class Shape<CategoryTags::Batch<TSubCate>> : public Shape<TSubCate>
 {
-public:
-    using ShapeCategory = CategoryTags::Batch<TSubCate>;
+    static_assert(NSShape::IsCardinalTag<TSubCate>);
     
 public:
     template <typename...TParams>
-    Shape_(size_t p_batchNum, TParams&&... params)
-        : Shape_<TSubCate>(std::forward<TParams>(params)...)
+    explicit Shape(size_t p_batchNum = 0, TParams&&... params)
+        : Shape<TSubCate>(std::forward<TParams>(params)...)
         , m_batchNum(p_batchNum)
     {}
-    
-    Shape_() = delete;
     
 public:
     size_t BatchNum() const noexcept { return m_batchNum; }
     
     size_t Count() const noexcept
     {
-        return BatchNum() * Shape_<TSubCate>::Count();
+        return BatchNum() * Shape<TSubCate>::Count();
     }
     
-    template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const noexcept
+    bool operator== (const Shape& val) const noexcept
     {
-        static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
-        return (BatchNum() == val.BatchNum()) && (Shape_<TSubCate>::Compare(val));
-    }
-    
-    const Shape_<CategoryTags::Batch<TSubCate>>& Shape() const noexcept
-    {
-        return *this;
+        return (BatchNum() == val.BatchNum()) &&
+               (Shape<TSubCate>::operator==(val));
     }
 
 private:
@@ -172,38 +122,29 @@ private:
 };
 
 template <typename TSubCate>
-class Shape_<CategoryTags::Sequence<TSubCate>> : public Shape_<TSubCate>
+class Shape<CategoryTags::Sequence<TSubCate>> : public Shape<TSubCate>
 {
-public:
-    using ShapeCategory = CategoryTags::Sequence<TSubCate>;
+    static_assert(NSShape::IsCardinalTag<TSubCate>);
     
 public:
     template <typename...TParams>
-    Shape_(size_t p_seqLen, TParams&&... params)
-        : Shape_<TSubCate>(std::forward<TParams>(params)...)
+    explicit Shape(size_t p_seqLen = 0, TParams&&... params)
+        : Shape<TSubCate>(std::forward<TParams>(params)...)
         , m_seqLen(p_seqLen)
     {}
-    
-    Shape_() = delete;
     
 public:
     size_t Length() const noexcept { return m_seqLen; }
     
     size_t Count() const noexcept
     {
-        return Length() * Shape_<TSubCate>::Count();
+        return Length() * Shape<TSubCate>::Count();
     }
     
-    template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const noexcept
+    bool operator== (const Shape& val) const noexcept
     {
-        static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
-        return (Length() == val.Length()) && (Shape_<TSubCate>::Compare(val));
-    }
-    
-    const Shape_<CategoryTags::Sequence<TSubCate>>& Shape() const noexcept
-    {
-        return *this;
+        return (Length() == val.Length()) && 
+               (Shape<TSubCate>::operator==(val));
     }
     
 private:
@@ -211,19 +152,16 @@ private:
 };
 
 template <typename TSubCate>
-class Shape_<CategoryTags::BatchSequence<TSubCate>> : public Shape_<TSubCate>
+class Shape<CategoryTags::BatchSequence<TSubCate>> : public Shape<TSubCate>
 {
-public:
-    using ShapeCategory = CategoryTags::BatchSequence<TSubCate>;
+    static_assert(NSShape::IsCardinalTag<TSubCate>);
     
 public:
     template <typename TI, typename...TParams>
-    Shape_(TI b, TI e, TParams&&... params)
-        : Shape_<TSubCate>(std::forward<TParams>(params)...)
+    explicit Shape(TI b, TI e, TParams&&... params)
+        : Shape<TSubCate>(std::forward<TParams>(params)...)
         , m_seqLenCont(b, e)
     {}
-    
-    Shape_() = delete;
     
 public:
     const auto& SeqLenContainer() const noexcept
@@ -234,25 +172,13 @@ public:
     size_t Count() const noexcept
     {
         return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.end(), 0) *
-               Shape_<TSubCate>::Count();
+               Shape<TSubCate>::Count();
     }
     
-    template <typename TOtherShape>
-    bool operator== (const TOtherShape& val) const
+    bool operator== (const Shape& val) const
     {
-        static_assert(std::is_same_v<ShapeCategory, typename TOtherShape::ShapeCategory>);
-        
-        const auto& compCont = val.SeqLenContainer();
-        if (m_seqLenCont.size() != compCont.size())
-            return false;
-        if (!std::equal(m_seqLenCont.begin(), m_seqLenCont.end(), compCont.begin()))
-            return false;
-        return Shape_<TSubCate>::Compare(val);
-    }
-    
-    const Shape_<CategoryTags::BatchSequence<TSubCate>>& Shape() const noexcept
-    {
-        return *this;
+        return (m_seqLenCont == val.m_seqLenCont) &&
+               (Shape<TSubCate>::operator==(val));
     }
     
 private:

@@ -1,22 +1,35 @@
 #pragma once
-#include <MetaNN/data/cardinal/scalar/scalar_base.h>
+
 #include <MetaNN/data/facilities/shape.h>
+#include <MetaNN/data/facilities/traits.h>
+#include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/evaluate/facilities/eval_handle.h>
 
 namespace MetaNN
 {
+template <typename TElem, typename TDevice = DeviceTags::CPU>
+class Scalar;
+
 template <typename TElem>
-class Scalar<TElem, DeviceTags::CPU> : public Shape_<CategoryTags::Scalar>
+class Scalar<TElem, DeviceTags::CPU>
 {
     static_assert(std::is_same<RemConstRef<TElem>, TElem>::value);
     
 public:
+    using CategoryTag = CategoryTags::Scalar;
     using ElementType = TElem;
     using DeviceType = DeviceTags::CPU;
     
 public:
     Scalar(ElementType elem = ElementType())
-        : m_elem(elem) {}
-     
+        : m_shape()
+        , m_elem(elem) {}
+    
+    const auto& Shape() const noexcept
+    {
+        return m_shape;
+    }
+    
     auto& Value() noexcept
     {
         return m_elem;
@@ -33,25 +46,13 @@ public:
                (m_elem == val.m_elem);
     }
 
-    template <typename TOtherType,
-              typename = std::enable_if_t<!std::is_same_v<std::decay_t<TOtherType>, Scalar>>>
-    bool operator== (const TOtherType&) const noexcept
-    {
-        return false;
-    }
-
-    template <typename TData>
-    bool operator!= (const TData& val) const noexcept
-    {
-        return !(operator==(val));
-    }
-    
     auto EvalRegister() const
     {
         return MakeConstEvalHandle(*this);
     }
 
 private:
+    MetaNN::Shape<CategoryTag> m_shape;
     ElementType m_elem;
 };
 }
