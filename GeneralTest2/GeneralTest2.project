@@ -1,10 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="GeneralTest2" Version="10.0.0" InternalType="Console">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00010001N0005Debug000000000000]]>
+    </Plugin>
+  </Plugins>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="_root">
     <File Name="main.cpp"/>
     <File Name="calculate_tags.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="data">
+    <VirtualDirectory Name="cardinal">
+      <VirtualDirectory Name="scalar">
+        <File Name="data/cardinal/scalar/test_scalar.cpp"/>
+        <File Name="data/cardinal/scalar/test_scalar.h"/>
+        <File Name="data/cardinal/scalar/test_scalar_pack.h"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="matrix">
+        <File Name="data/cardinal/matrix/test_matrix.h"/>
+        <File Name="data/cardinal/matrix/test_matrix.cpp"/>
+        <File Name="data/cardinal/matrix/test_matrix_pack.h"/>
+        <File Name="data/cardinal/matrix/test_zero_matrix.h"/>
+        <File Name="data/cardinal/matrix/test_zero_matrix.cpp"/>
+        <File Name="data/cardinal/matrix/test_trival_matrix.cpp"/>
+        <File Name="data/cardinal/matrix/test_trival_matrix.h"/>
+        <File Name="data/cardinal/matrix/test_vector.h"/>
+        <File Name="data/cardinal/matrix/test_vector.cpp"/>
+        <File Name="data/cardinal/matrix/test_one_hot_vector.h"/>
+        <File Name="data/cardinal/matrix/test_one_hot_vector.cpp"/>
+      </VirtualDirectory>
+      <File Name="data/cardinal/test_cardinal_pack.h"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -16,7 +44,7 @@
       </Linker>
       <ResourceCompiler Options=""/>
     </GlobalSettings>
-    <Configuration Name="Debug" CompilerType="GCC" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+    <Configuration Name="Debug" CompilerType="" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g;-O0;-Wall;-std=c++17" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <IncludePath Value=".."/>
@@ -98,21 +126,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="data">
-    <VirtualDirectory Name="cardinal">
-      <VirtualDirectory Name="scalar">
-        <File Name="data/cardinal/scalar/test_scalar.cpp"/>
-        <File Name="data/cardinal/scalar/test_scalar.h"/>
-      </VirtualDirectory>
-      <VirtualDirectory Name="matrix">
-        <File Name="data/cardinal/matrix/test_matrix.h"/>
-        <File Name="data/cardinal/matrix/test_matrix.cpp"/>
-        <File Name="data/cardinal/matrix/test_matrix_pack.h"/>
-        <File Name="data/cardinal/matrix/test_zero_matrix.h"/>
-        <File Name="data/cardinal/matrix/test_zero_matrix.cpp"/>
-        <File Name="data/cardinal/matrix/test_trival_matrix.cpp"/>
-        <File Name="data/cardinal/matrix/test_trival_matrix.h"/>
-      </VirtualDirectory>
-    </VirtualDirectory>
-  </VirtualDirectory>
 </CodeLite_Project>

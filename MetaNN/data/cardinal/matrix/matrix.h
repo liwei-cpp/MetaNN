@@ -78,7 +78,7 @@ public:
         return MakeConstEvalHandle(*this);
     }
     
-private:
+protected:
     MetaNN::Shape<CategoryTag> m_shape;
     ContinuousMemory<ElementType, DeviceType> m_mem;
 };

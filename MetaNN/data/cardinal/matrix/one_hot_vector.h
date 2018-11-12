@@ -1,29 +1,20 @@
 #pragma once
-
-#include <MetaNN/data/cardinal/matrix/matrix_base.h>
-#include <MetaNN/data/facilities/shape.h>
+#include <MetaNN/data/cardinal/matrix/matrix.h>
 #include <MetaNN/evaluate/facilities/eval_buffer.h>
 #include <MetaNN/evaluate/facilities/eval_group.h>
 #include <MetaNN/evaluate/facilities/eval_handle.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
 
-#include <cassert>
-#include <memory>
-
 namespace MetaNN
 {
 namespace NSOneHotVector
 {
 template <typename TElem, typename TDevice>
-class EvalUnit;
-
-template <typename TElement>
-class EvalUnit<TElement, DeviceTags::CPU>
-    : public BaseEvalUnit<DeviceTags::CPU>
+class EvalUnit : public BaseEvalUnit<TDevice>
 {
 public:
-    EvalUnit(EvalHandle<Matrix<TElement, DeviceTags::CPU>> resBuf,
+    EvalUnit(EvalHandle<Matrix<TElem, TDevice>> resBuf,
              size_t colNum, size_t val)
         : m_resHandle(std::move(resBuf))
         , m_colNum(colNum)
@@ -31,59 +22,66 @@ public:
     {
         assert(m_val < m_colNum);
     }
-
-    void Eval() override
+    
+    void Eval() override final
     {
         auto& mutableData = m_resHandle.MutableData();
         m_resHandle.Allocate(1, m_colNum);
+        
+        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>,
+                      "Currently only CPU is supported.");
         auto lowLayer = LowerAccess(mutableData);
         auto mem = lowLayer.MutableRawMemory();
-        memset(mem, 0, sizeof(TElement) * m_colNum);
+        memset(mem, 0, sizeof(TElem) * m_colNum);
         mem[m_val] = 1;
         m_resHandle.SetEval();
     }
 
 private:
-    EvalHandle<Matrix<TElement, DeviceTags::CPU>> m_resHandle;
+    EvalHandle<Matrix<TElem, TDevice>> m_resHandle;
     size_t m_colNum;
     size_t m_val;
 };
 }
 
 template <typename TElem, typename TDevice>
-class OneHotVector : public Shape_<CategoryTags::Matrix>
+class OneHotVector
 {
 public:
+    using CategoryTag = CategoryTags::Matrix;
     using ElementType = TElem;
     using DeviceType = TDevice;
 
 public:
-    OneHotVector(size_t p_colNum, size_t p_hotPos)
-        : Shape_<CategoryTags::Matrix>(1, p_colNum)
+    explicit OneHotVector(size_t colNum, size_t p_hotPos)
+        : OneHotVector(MetaNN::Shape<CategoryTag>{1, colNum}, p_hotPos)
+    {}
+    
+    explicit OneHotVector(MetaNN::Shape<CategoryTag> p_shape, size_t p_hotPos)
+        : m_shape(std::move(p_shape))
         , m_hotPos(p_hotPos)
     {
-        assert(p_hotPos < ColNum());
+        if (m_shape.RowNum() != 1)
+        {
+            throw std::runtime_error("One hot vector must have 1 row.");
+        }
+        if (p_hotPos >= m_shape.ColNum())
+        {
+            throw std::runtime_error("One hot vector hot position setting error.");
+        }
     }
-
+    
+    const auto& Shape() const noexcept
+    {
+        return m_shape;
+    }
+    
     bool operator== (const OneHotVector& val) const
     {
-        return (Shape() == val.Shape()) &&
+        return (m_shape == val.m_shape) &&
                (m_hotPos == val.m_hotPos);
     }
-
-    template <typename TOtherType,
-              typename = std::enable_if_t<!std::is_same_v<std::decay_t<TOtherType>, OneHotVector>>>
-    bool operator== (const TOtherType&) const
-    {
-        return false;
-    }
-
-    template <typename TData>
-    bool operator!= (const TData& val) const
-    {
-        return !(operator==(val));
-    }
-
+    
     auto EvalRegister() const
     {
         using TEvalUnit = NSOneHotVector::EvalUnit<ElementType, DeviceType>;
@@ -92,7 +90,7 @@ public:
         {
             auto evalHandle = m_evalBuf.Handle();
             decltype(auto) outputPtr = evalHandle.DataPtr();
-            TEvalUnit unit(std::move(evalHandle), ColNum(), m_hotPos);
+            TEvalUnit unit(std::move(evalHandle), m_shape.ColNum(), m_hotPos);
             EvalPlan<DeviceType>::template Register<TEvalGroup>(std::move(unit), outputPtr, {});
         }
         return m_evalBuf.ConstHandle();
@@ -104,13 +102,8 @@ public:
     }
 
 private:
+    MetaNN::Shape<CategoryTag> m_shape;
     size_t m_hotPos;
-    EvalBuffer<Matrix<ElementType, DeviceType>> m_evalBuf;
-};
-
-template <typename TElem, typename TDevice>
-struct DataCategory_<OneHotVector<TElem, TDevice>>
-{
-    using type = CategoryTags::Matrix;
+    EvalBuffer<Matrix<TElem, TDevice>> m_evalBuf;
 };
 }

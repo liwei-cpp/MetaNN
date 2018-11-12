@@ -1,1 +1,1 @@
-./Release/main.cpp.o ./Release/data_cardinal_scalar_test_scalar.cpp.o ./Release/data_cardinal_matrix_test_matrix.cpp.o ./Release/data_cardinal_matrix_test_zero_matrix.cpp.o ./Release/data_cardinal_matrix_test_trival_matrix.cpp.o
+./Debug/main.cpp.o ./Debug/data_cardinal_scalar_test_scalar.cpp.o ./Debug/data_cardinal_matrix_test_matrix.cpp.o ./Debug/data_cardinal_matrix_test_zero_matrix.cpp.o ./Debug/data_cardinal_matrix_test_trival_matrix.cpp.o ./Debug/data_cardinal_matrix_test_vector.cpp.o ./Debug/data_cardinal_matrix_test_one_hot_vector.cpp.o
