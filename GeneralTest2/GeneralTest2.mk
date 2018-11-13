@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=liwei
-Date                   :=12/11/18
+Date                   :=13/11/18
 CodeLitePath           :=/home/liwei/.codelite
 LinkerName             :=g++
 SharedObjectLinkerName :=g++ -shared -fPIC
@@ -60,7 +60,7 @@ AS       := as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_zero_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_trival_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_one_hot_vector.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_zero_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_trival_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_one_hot_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(ObjectSuffix) 
 
 
 
@@ -146,6 +146,14 @@ $(IntermediateDirectory)/data_cardinal_matrix_test_one_hot_vector.cpp$(DependSuf
 
 $(IntermediateDirectory)/data_cardinal_matrix_test_one_hot_vector.cpp$(PreprocessSuffix): data/cardinal/matrix/test_one_hot_vector.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/data_cardinal_matrix_test_one_hot_vector.cpp$(PreprocessSuffix) data/cardinal/matrix/test_one_hot_vector.cpp
+
+$(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(ObjectSuffix): data/cardinal/3d_array/test_3d_array.cpp $(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/data/cardinal/3d_array/test_3d_array.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(DependSuffix): data/cardinal/3d_array/test_3d_array.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(DependSuffix) -MM data/cardinal/3d_array/test_3d_array.cpp
+
+$(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(PreprocessSuffix): data/cardinal/3d_array/test_3d_array.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(PreprocessSuffix) data/cardinal/3d_array/test_3d_array.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

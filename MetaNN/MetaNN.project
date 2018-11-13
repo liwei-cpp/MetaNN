@@ -134,9 +134,8 @@
         <File Name="data/cardinal/matrix/vector.h"/>
       </VirtualDirectory>
       <VirtualDirectory Name="3d_array">
-        <File Name="data/cardinal/3d_array/3d_array_base.h"/>
         <File Name="data/cardinal/3d_array/3d_array_pack.h"/>
-        <File Name="data/cardinal/3d_array/3d_array_cpu.h"/>
+        <File Name="data/cardinal/3d_array/3d_array.h"/>
       </VirtualDirectory>
     </VirtualDirectory>
     <VirtualDirectory Name="sequence">

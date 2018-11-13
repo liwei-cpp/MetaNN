@@ -32,6 +32,11 @@
         <File Name="data/cardinal/matrix/test_one_hot_vector.cpp"/>
       </VirtualDirectory>
       <File Name="data/cardinal/test_cardinal_pack.h"/>
+      <VirtualDirectory Name="3d_array">
+        <File Name="data/cardinal/3d_array/test_3d_array.h"/>
+        <File Name="data/cardinal/3d_array/test_3d_array.cpp"/>
+        <File Name="data/cardinal/3d_array/test_3d_array_pack.h"/>
+      </VirtualDirectory>
     </VirtualDirectory>
   </VirtualDirectory>
   <Settings Type="Executable">
