@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <stdexcept>
 
 namespace MetaNN
 {
@@ -30,10 +31,15 @@ public:
         return 1;
     }
     
+    constexpr size_t Index2Count() const noexcept
+    {
+        return 0;
+    }
+    
     bool operator== (const Shape&) const noexcept
     {
         return true;
-    }    
+    }
 };
 
 template <>
@@ -52,6 +58,15 @@ public:
     size_t Count() const noexcept
     {
         return m_rowNum * m_colNum;
+    }
+    
+    size_t Index2Count(size_t rowID, size_t colID) const
+    {
+        if ((rowID >= m_rowNum) || (colID >= m_colNum))
+        {
+            throw std::runtime_error("Invalid index for Shape<CategoryTags::Matrix>");
+        }
+        return rowID * m_colNum + colID;
     }
     
     bool operator== (const Shape& val) const noexcept
@@ -79,6 +94,17 @@ public:
     size_t Count() const noexcept
     {
         return m_pageNum * Shape<CategoryTags::Matrix>::Count();
+    }
+    
+    size_t Index2Count(size_t pageID, size_t rowID, size_t colID) const
+    {
+        if (pageID >= m_pageNum)
+        {
+            throw std::runtime_error("Invalid index for Shape<CategoryTags::ThreeDArray>");
+        }
+        
+        const auto& baseShape = static_cast<const Shape<CategoryTags::Matrix>&>(*this);
+        return pageID * baseShape.Count() + baseShape.Index2Count(rowID, colID);
     }
     
     bool operator== (const Shape& val) const noexcept
@@ -111,6 +137,18 @@ public:
         return BatchNum() * Shape<TSubCate>::Count();
     }
     
+    template <typename... TIndexParams>
+    size_t Index2Count(size_t batchID, TIndexParams... indexParams) const
+    {
+        if (batchID >= m_batchNum)
+        {
+            throw std::runtime_error("Invalid index for Shape<CategoryTags::Batch>");
+        }
+        
+        const auto& baseShape = static_cast<const Shape<TSubCate>&>(*this);
+        return batchID * baseShape.Count() + baseShape.Index2Count(indexParams...);
+    }
+    
     bool operator== (const Shape& val) const noexcept
     {
         return (BatchNum() == val.BatchNum()) &&
@@ -139,6 +177,18 @@ public:
     size_t Count() const noexcept
     {
         return Length() * Shape<TSubCate>::Count();
+    }
+    
+    template <typename... TIndexParams>
+    size_t Index2Count(size_t seqID, TIndexParams... indexParams) const
+    {
+        if (seqID >= m_seqLen)
+        {
+            throw std::runtime_error("Invalid index for Shape<CategoryTags::Sequence>");
+        }
+        
+        const auto& baseShape = static_cast<const Shape<TSubCate>&>(*this);
+        return seqID * baseShape.Count() + baseShape.Index2Count(indexParams...);
     }
     
     bool operator== (const Shape& val) const noexcept
@@ -173,6 +223,25 @@ public:
     {
         return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.end(), 0) *
                Shape<TSubCate>::Count();
+    }
+    
+    template <typename... TIndexParams>
+    size_t Index2Count(size_t batchID, size_t seqID, TIndexParams... indexParams) const
+    {
+        if (batchID >= m_seqLenCont.size())
+        {
+            throw std::runtime_error("Invalid batch index for Shape<CategoryTags::BatchSequence>");
+        }
+        
+        if (seqID >= m_seqLenCont[batchID])
+        {
+            throw std::runtime_error("Invalid sequence index for Shape<CategoryTags::BatchSequence>");
+        }
+        
+        size_t res = std::accumulate(m_seqLenCont.begin(), m_seqLenCont.begin() + batchID, seqID);
+        
+        const auto& baseShape = static_cast<const Shape<TSubCate>&>(*this);
+        return seqID * baseShape.Count() + baseShape.Index2Count(indexParams...);
     }
     
     bool operator== (const Shape& val) const

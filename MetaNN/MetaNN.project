@@ -117,6 +117,7 @@
       <File Name="data/linear_table/linear_table_pack.h"/>
       <File Name="data/linear_table/linear_table_base.h"/>
       <File Name="data/linear_table/3d_array.h"/>
+      <File Name="data/linear_table/static_array.h"/>
     </VirtualDirectory>
     <File Name="data/data.h"/>
     <VirtualDirectory Name="cardinal">

@@ -60,8 +60,8 @@ public:
         static_assert(std::is_same_v<DeviceType, DeviceTags::CPU>,
                       "Only CPU supports this method.");
         assert(AvailableForWrite());
-        assert((p_pageId < m_shape.PageNum()) && (p_rowId < m_shape.RowNum()) && (p_colId < m_shape.ColNum()));
-        (m_mem.RawMemory())[(p_pageId * m_shape.RowNum() + p_rowId) * m_shape.ColNum() + p_colId] = val;
+        const size_t pos = m_shape.Index2Count(p_pageId, p_rowId, p_colId);
+        (m_mem.RawMemory())[pos] = val;
     }
 
     const auto operator () (size_t p_pageId, size_t p_rowId, size_t p_colId) const
@@ -69,8 +69,8 @@ public:
         static_assert(std::is_same_v<DeviceType, DeviceTags::CPU>,
                       "Only CPU supports this method.");
 
-        assert((p_pageId < m_shape.PageNum()) && (p_rowId < m_shape.RowNum()) && (p_colId < m_shape.ColNum()));
-        return (m_mem.RawMemory())[(p_pageId * m_shape.RowNum() + p_rowId) * m_shape.ColNum() + p_colId];
+        const size_t pos = m_shape.Index2Count(p_pageId, p_rowId, p_colId);
+        return (m_mem.RawMemory())[pos];
     }
 
     auto EvalRegister() const
