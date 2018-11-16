@@ -2,7 +2,7 @@
 <CodeLite_Project Name="GeneralTest2" Version="10.0.0" InternalType="Console">
   <Plugins>
     <Plugin Name="qmake">
-      <![CDATA[00010001N0005Debug000000000000]]>
+      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
     </Plugin>
   </Plugins>
   <Description/>
@@ -37,6 +37,11 @@
         <File Name="data/cardinal/3d_array/test_3d_array.cpp"/>
         <File Name="data/cardinal/3d_array/test_3d_array_pack.h"/>
       </VirtualDirectory>
+    </VirtualDirectory>
+    <VirtualDirectory Name="batch">
+      <File Name="data/batch/test_static_batch.h"/>
+      <File Name="data/batch/test_static_batch.cpp"/>
+      <File Name="data/batch/test_batch_pack.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <Settings Type="Executable">
@@ -93,7 +98,6 @@
       <Compiler Options="-O2;-Wall;-std=c++17" C_Options="-O2;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
         <IncludePath Value=".."/>
-        <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>

@@ -1,5 +1,12 @@
 #pragma once
 
+#include <type_traits>
+#include <MetaNN/data/facilities/continuous_memory.h>
+#include <MetaNN/data/facilities/lower_access.h>
+#include <MetaNN/data/facilities/shape.h>
+#include <MetaNN/data/facilities/traits.h>
+#include <MetaNN/facilities/traits.h>
+
 namespace MetaNN
 {
 template <typename TElement, typename TDevice,
@@ -24,10 +31,15 @@ public:
     }
 
 public:
-    StaticArray(MetaNN::Shape<CategoryTag> p_shape)
+    explicit StaticArray(MetaNN::Shape<CategoryTag> p_shape = MetaNN::Shape<CategoryTag>())
         : m_shape(std::move(p_shape))
         , m_mem(m_shape.Count())
     {}
+    
+    const auto& Shape() const noexcept
+    {
+        return m_shape;
+    }
     
     bool operator== (const StaticArray& val) const
     {
@@ -38,13 +50,13 @@ public:
     bool AvailableForWrite() const { return m_mem.IsShared(); }
 
     template <typename... TPosParams>
-    void SetValue(TPosParams... posParams, ElementType val)
+    void SetValue(ElementType val, TPosParams... posParams)
     {
         static_assert(std::is_same_v<DeviceType, DeviceTags::CPU>,
                       "Only CPU supports this method.");
                       
         assert(AvailableForWrite());
-        const size_t pos = m_shape.Index2Pos(posParams...);
+        const size_t pos = m_shape.Index2Count(posParams...);
         (m_mem.RawMemory())[pos] = val;
     }
     
@@ -69,7 +81,7 @@ public:
         }
         else
         {
-            using AimType = PrincipalDataType<CategoryTag, ElementType, DeviceType>;
+            using AimType = PrincipalDataType<TCardinalCate, ElementType, DeviceType>;
             const MetaNN::Shape<TCardinalCate>& aimShape = static_cast<const MetaNN::Shape<TCardinalCate>&>(m_shape);
             
             const size_t pos = id * aimShape.Count();
@@ -87,7 +99,6 @@ public:
     }
     
 private:
-protected:
     MetaNN::Shape<CategoryTag> m_shape;
     ContinuousMemory<ElementType, DeviceType> m_mem;
 };

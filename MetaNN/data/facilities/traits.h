@@ -10,7 +10,9 @@ template <typename TElem, typename TDevice> class Matrix;
 template <typename TElem, typename TDevice> class Scalar;
 template <typename TElem, typename TDevice> class ThreeDArray;
 
-template<typename TElem, typename TDevice, typename TCategory> class LinearTable;
+template <typename TElement, typename TDevice,
+          template<typename>class TCateWrapper, typename TCardinalCate>
+class StaticArray;
 
 template <typename TCategory, typename TElem, typename TDevice>
 struct PrincipalDataType_;
@@ -36,19 +38,19 @@ struct PrincipalDataType_<CategoryTags::ThreeDArray, TElem, TDevice>
 template <typename TElem, typename TDevice>
 struct PrincipalDataType_<CategoryTags::BatchMatrix, TElem, TDevice>
 {
-    using type = LinearTable<TElem, TDevice, CategoryTags::BatchMatrix>;
+    using type = StaticArray<TElem, TDevice, CategoryTags::Batch, CategoryTags::Matrix>;
 };
 
 template <typename TElem, typename TDevice>
 struct PrincipalDataType_<CategoryTags::BatchScalar, TElem, TDevice>
 {
-    using type = LinearTable<TElem, TDevice, CategoryTags::BatchScalar>;
+    using type = StaticArray<TElem, TDevice, CategoryTags::Batch, CategoryTags::Scalar>;
 };
 
 template <typename TElem, typename TDevice>
 struct PrincipalDataType_<CategoryTags::BatchThreeDArray, TElem, TDevice>
 {
-    using type = LinearTable<TElem, TDevice, CategoryTags::BatchThreeDArray>;
+    using type = StaticArray<TElem, TDevice, CategoryTags::Batch, CategoryTags::ThreeDArray>;
 };
 
 template <typename TCategory, typename TElem, typename TDevice>

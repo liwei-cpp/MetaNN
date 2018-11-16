@@ -1,7 +1,9 @@
 #include <data/cardinal/test_cardinal_pack.h>
+#include <data/batch/test_batch_pack.h>
 
 int main()
 {
 	Test::Data::Cardinal::test_cardinal_pack();
+    Test::Data::Batch::test_batch_pack();
 	return 0;
 }

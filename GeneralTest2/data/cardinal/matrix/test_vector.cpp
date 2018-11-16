@@ -27,7 +27,7 @@ namespace
         int c = 0;
         for (size_t j=0; j<20; ++j)
         {
-            rm.SetValue(j, (float)(c++));
+            rm.SetValue((float)(c++), j);
         }
 
         const Vector<CheckElement, CheckDevice> rm2 = rm;

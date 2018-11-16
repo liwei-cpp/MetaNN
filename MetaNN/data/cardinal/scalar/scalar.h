@@ -1,5 +1,5 @@
 #pragma once
-
+#include <MetaNN/data/facilities/continuous_memory.h>
 #include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/data/facilities/tags.h>
@@ -24,6 +24,13 @@ public:
     Scalar(ElementType elem = ElementType())
         : m_shape()
         , m_elem(elem) {}
+        
+    template <typename...TShapeParams>
+    explicit Scalar(ContinuousMemory<ElementType, DeviceType> p_mem,
+                    TShapeParams&&... shapeParams)
+        : m_shape(std::forward<TShapeParams>(shapeParams)...)
+        , m_elem((p_mem.RawMemory())[0])
+    {}
     
     const auto& Shape() const noexcept
     {

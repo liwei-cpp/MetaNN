@@ -28,9 +28,9 @@ public:
         }
     }
     
-    void SetValue(size_t p_colId, typename TBase::ElementType val)
+    void SetValue(typename TBase::ElementType val, size_t p_colId)
     {
-        TBase::SetValue(0, p_colId, val);
+        TBase::SetValue(val, 0, p_colId);
     }
 
     const auto operator () (size_t p_colId) const

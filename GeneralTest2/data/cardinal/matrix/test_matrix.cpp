@@ -29,7 +29,7 @@ namespace
         {
             for (size_t j=0; j<20; ++j)
             {
-                rm.SetValue(i, j, (float)(c++));
+                rm.SetValue((float)(c++), i, j);
             }
         }
 
@@ -52,7 +52,7 @@ namespace
         {
             for (size_t j = 0; j < 20; ++j)
             {
-                rm1.SetValue(i, j, (float)(c++));
+                rm1.SetValue((float)(c++), i, j);
             }
         }
 
@@ -61,7 +61,7 @@ namespace
         {
             for (size_t j = 0; j < 7; ++j)
             {
-                rm2.SetValue(i, j, (float)(c++));
+                rm2.SetValue((float)(c++), i, j);
             }
         }
         cout << "done" << endl;

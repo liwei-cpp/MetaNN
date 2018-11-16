@@ -4,13 +4,13 @@
   <Project Name="GeneralTest" Path="GeneralTest/GeneralTest.project" Active="No"/>
   <Project Name="GeneralTest2" Path="GeneralTest2/GeneralTest2.project" Active="Yes"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="no">
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
       <Project Name="MetaNN" ConfigName="Debug"/>
       <Project Name="GeneralTest" ConfigName="Debug"/>
       <Project Name="GeneralTest2" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="yes">
+    <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
       <Project Name="MetaNN" ConfigName="Release"/>
       <Project Name="GeneralTest" ConfigName="Release"/>

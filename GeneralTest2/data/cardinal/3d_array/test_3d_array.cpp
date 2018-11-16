@@ -33,7 +33,7 @@ namespace
             {
                 for (size_t j=0; j<20; ++j)
                 {
-                    rm.SetValue(p, i, j, (float)(c++));
+                    rm.SetValue((float)(c++), p, i, j);
                 }
             }
         }
