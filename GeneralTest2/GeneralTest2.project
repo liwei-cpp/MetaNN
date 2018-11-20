@@ -48,6 +48,12 @@
       <File Name="data/sequence/test_static_sequence.cpp"/>
       <File Name="data/sequence/test_sequence_pack.h"/>
     </VirtualDirectory>
+    <VirtualDirectory Name="batch_sequence">
+      <File Name="data/batch_sequence/test_static_batch_sequence.h"/>
+      <File Name="data/batch_sequence/test_static_batch_sequence.cpp"/>
+      <File Name="data/batch_sequence/test_batch_sequence_pack.h"/>
+    </VirtualDirectory>
+    <File Name="data/test_data.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

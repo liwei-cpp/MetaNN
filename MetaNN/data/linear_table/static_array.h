@@ -36,6 +36,13 @@ public:
         , m_mem(m_shape.Count())
     {}
     
+    template <typename...TShapeParams>
+    explicit StaticArray(ContinuousMemory<ElementType, DeviceType> p_mem,
+                         TShapeParams&&... shapeParams)
+        : m_shape(std::forward<TShapeParams>(shapeParams)...)
+        , m_mem(std::move(p_mem))
+    {}
+    
     const auto& Shape() const noexcept
     {
         return m_shape;
@@ -75,7 +82,7 @@ public:
             const MetaNN::Shape<TCardinalCate>& cardinalShape = static_cast<const MetaNN::Shape<TCardinalCate>&>(m_shape);
             pos *= cardinalShape.Count();
             
-            using AimType = PrincipalDataType<CategoryTags::Sequence<CategoryTag>, ElementType, DeviceType>;
+            using AimType = PrincipalDataType<CategoryTags::Sequence<TCardinalCate>, ElementType, DeviceType>;
             const MetaNN::Shape<CategoryTags::Sequence<TCardinalCate>> aimShape(seqLenCont[id], cardinalShape);
             return AimType(m_mem.Shift(pos), aimShape);
         }

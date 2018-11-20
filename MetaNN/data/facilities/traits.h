@@ -53,6 +53,43 @@ struct PrincipalDataType_<CategoryTags::BatchThreeDArray, TElem, TDevice>
     using type = StaticArray<TElem, TDevice, CategoryTags::Batch, CategoryTags::ThreeDArray>;
 };
 
+template <typename TElem, typename TDevice>
+struct PrincipalDataType_<CategoryTags::MatrixSequence, TElem, TDevice>
+{
+    using type = StaticArray<TElem, TDevice, CategoryTags::Sequence, CategoryTags::Matrix>;
+};
+
+template <typename TElem, typename TDevice>
+struct PrincipalDataType_<CategoryTags::ScalarSequence, TElem, TDevice>
+{
+    using type = StaticArray<TElem, TDevice, CategoryTags::Sequence, CategoryTags::Scalar>;
+};
+
+template <typename TElem, typename TDevice>
+struct PrincipalDataType_<CategoryTags::ThreeDArraySequence, TElem, TDevice>
+{
+    using type = StaticArray<TElem, TDevice, CategoryTags::Sequence, CategoryTags::ThreeDArray>;
+};
+
+// batch sequence
+template <typename TElem, typename TDevice>
+struct PrincipalDataType_<CategoryTags::BatchMatrixSequence, TElem, TDevice>
+{
+    using type = StaticArray<TElem, TDevice, CategoryTags::BatchSequence, CategoryTags::Matrix>;
+};
+
+template <typename TElem, typename TDevice>
+struct PrincipalDataType_<CategoryTags::BatchScalarSequence, TElem, TDevice>
+{
+    using type = StaticArray<TElem, TDevice, CategoryTags::BatchSequence, CategoryTags::Scalar>;
+};
+
+template <typename TElem, typename TDevice>
+struct PrincipalDataType_<CategoryTags::BatchThreeDArraySequence, TElem, TDevice>
+{
+    using type = StaticArray<TElem, TDevice, CategoryTags::BatchSequence, CategoryTags::ThreeDArray>;
+};
+
 template <typename TCategory, typename TElem, typename TDevice>
 using PrincipalDataType = typename PrincipalDataType_<TCategory, TElem, TDevice>::type;
 
@@ -141,6 +178,15 @@ constexpr bool IsScalarSequence = std::is_same_v<DataCategory<T>, CategoryTags::
 
 template <typename T>
 constexpr bool IsThreeDArraySequence = std::is_same_v<DataCategory<T>, CategoryTags::ThreeDArraySequence>;
+
+template <typename T>
+constexpr bool IsBatchMatrixSequence = std::is_same_v<DataCategory<T>, CategoryTags::BatchMatrixSequence>;
+
+template <typename T>
+constexpr bool IsBatchScalarSequence = std::is_same_v<DataCategory<T>, CategoryTags::BatchScalarSequence>;
+
+template <typename T>
+constexpr bool IsBatchThreeDArraySequence = std::is_same_v<DataCategory<T>, CategoryTags::BatchThreeDArraySequence>;
 
 template <typename T>
 struct IsIterator_

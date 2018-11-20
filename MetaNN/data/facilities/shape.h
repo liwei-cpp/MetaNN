@@ -207,11 +207,14 @@ class Shape<CategoryTags::BatchSequence<TSubCate>> : public Shape<TSubCate>
     static_assert(NSShape::IsCardinalTag<TSubCate>);
     
 public:
-    template <typename TI, typename...TParams>
-    explicit Shape(TI b, TI e, TParams&&... params)
+    template <typename TSeq = std::vector<size_t>, typename...TParams>
+    explicit Shape(const TSeq& seq = TSeq{}, TParams&&... params)
         : Shape<TSubCate>(std::forward<TParams>(params)...)
-        , m_seqLenCont(b, e)
-    {}
+    {
+        m_seqLenCont.reserve(seq.size());
+        for (auto v : seq)
+            m_seqLenCont.push_back(v);
+    }
     
 public:
     const auto& SeqLenContainer() const noexcept
@@ -241,7 +244,7 @@ public:
         size_t res = std::accumulate(m_seqLenCont.begin(), m_seqLenCont.begin() + batchID, seqID);
         
         const auto& baseShape = static_cast<const Shape<TSubCate>&>(*this);
-        return seqID * baseShape.Count() + baseShape.Index2Count(indexParams...);
+        return res * baseShape.Count() + baseShape.Index2Count(indexParams...);
     }
     
     bool operator== (const Shape& val) const
