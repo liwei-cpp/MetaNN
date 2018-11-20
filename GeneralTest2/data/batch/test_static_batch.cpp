@@ -10,16 +10,16 @@ namespace
     void test_batch_scalar_case1()
     {
         cout << "Test static batch scalar case 1...\t";
-        static_assert(IsBatchScalar<Batch<CheckElement, CheckDevice, CategoryTags::Scalar>>, "Test Error");
-        static_assert(IsBatchScalar<Batch<CheckElement, CheckDevice, CategoryTags::Scalar>&>, "Test Error");
-        static_assert(IsBatchScalar<Batch<CheckElement, CheckDevice, CategoryTags::Scalar>&&>, "Test Error");
-        static_assert(IsBatchScalar<const Batch<CheckElement, CheckDevice, CategoryTags::Scalar>&>, "Test Error");
-        static_assert(IsBatchScalar<const Batch<CheckElement, CheckDevice, CategoryTags::Scalar>&&>, "Test Error");
+        static_assert(IsBatchScalar<BatchScalar<CheckElement, CheckDevice>>);
+        static_assert(IsBatchScalar<BatchScalar<CheckElement, CheckDevice>&>);
+        static_assert(IsBatchScalar<BatchScalar<CheckElement, CheckDevice>&&>);
+        static_assert(IsBatchScalar<const BatchScalar<CheckElement, CheckDevice>&>);
+        static_assert(IsBatchScalar<const BatchScalar<CheckElement, CheckDevice>&&>);
 
-        Batch<CheckElement, CheckDevice, CategoryTags::Scalar> check;
+        BatchScalar<CheckElement, CheckDevice> check;
         assert(check.Shape().BatchNum() == 0);
 
-        check = Batch<CheckElement, CheckDevice, CategoryTags::Scalar>::Create(13);
+        check = BatchScalar<CheckElement, CheckDevice>::Create(13);
         assert(check.Shape().BatchNum() == 13);
 
         int c = 0;
@@ -28,7 +28,7 @@ namespace
             check.SetValue((float)(c++), i);
         }
 
-        const Batch<CheckElement, CheckDevice, CategoryTags::Scalar> c2 = check;
+        const BatchScalar<CheckElement, CheckDevice> c2 = check;
         c = 0;
         for (size_t i=0; i<13; ++i)
         {
@@ -48,13 +48,13 @@ namespace
     void test_batch_matrix_case1()
     {
         cout << "Test static batch matrix case 1...\t";
-        static_assert(IsBatchMatrix<Batch<int, CheckDevice, CategoryTags::Matrix>>);
-        static_assert(IsBatchMatrix<Batch<int, CheckDevice, CategoryTags::Matrix> &>);
-        static_assert(IsBatchMatrix<Batch<int, CheckDevice, CategoryTags::Matrix> &&>);
-        static_assert(IsBatchMatrix<const Batch<int, CheckDevice, CategoryTags::Matrix> &>);
-        static_assert(IsBatchMatrix<const Batch<int, CheckDevice, CategoryTags::Matrix> &&>);
+        static_assert(IsBatchMatrix<BatchMatrix<int, CheckDevice>>);
+        static_assert(IsBatchMatrix<BatchMatrix<int, CheckDevice> &>);
+        static_assert(IsBatchMatrix<BatchMatrix<int, CheckDevice> &&>);
+        static_assert(IsBatchMatrix<const BatchMatrix<int, CheckDevice> &>);
+        static_assert(IsBatchMatrix<const BatchMatrix<int, CheckDevice> &&>);
     
-        auto data = Batch<int, CheckDevice, CategoryTags::Matrix>::Create(10, 13, 35);
+        auto data = BatchMatrix<int, CheckDevice>::Create(10, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape().BatchNum() == 10);
         assert(data.Shape().RowNum() == 13);
@@ -86,13 +86,8 @@ namespace
     void test_batch_matrix_case2()
     {
         cout << "Test static batch matrix case 2...\t";
-        static_assert(IsBatchMatrix<Batch<CheckElement, CheckDevice, CategoryTags::Matrix>>);
-        static_assert(IsBatchMatrix<Batch<CheckElement, CheckDevice, CategoryTags::Matrix> &>);
-        static_assert(IsBatchMatrix<Batch<CheckElement, CheckDevice, CategoryTags::Matrix> &&>);
-        static_assert(IsBatchMatrix<const Batch<CheckElement, CheckDevice, CategoryTags::Matrix> &>);
-        static_assert(IsBatchMatrix<const Batch<CheckElement, CheckDevice, CategoryTags::Matrix> &&>);
-
-        auto rm1 = Batch<CheckElement, CheckDevice, CategoryTags::Matrix>::Create(3, 10, 20);
+        
+        auto rm1 = BatchMatrix<CheckElement, CheckDevice>::Create(3, 10, 20);
         assert(rm1.Shape().BatchNum() == 3);
 
         int c = 0;
@@ -127,13 +122,13 @@ namespace
     void test_batch_3d_array_case1()
     {
         cout << "Test static batch 3d array case 1...\t";
-        static_assert(IsBatchThreeDArray<Batch<int, CheckDevice, CategoryTags::ThreeDArray>>);
-        static_assert(IsBatchThreeDArray<Batch<int, CheckDevice, CategoryTags::ThreeDArray> &>);
-        static_assert(IsBatchThreeDArray<Batch<int, CheckDevice, CategoryTags::ThreeDArray> &&>);
-        static_assert(IsBatchThreeDArray<const Batch<int, CheckDevice, CategoryTags::ThreeDArray> &>);
-        static_assert(IsBatchThreeDArray<const Batch<int, CheckDevice, CategoryTags::ThreeDArray> &&>);
+        static_assert(IsBatchThreeDArray<BatchThreeDArray<int, CheckDevice>>);
+        static_assert(IsBatchThreeDArray<BatchThreeDArray<int, CheckDevice> &>);
+        static_assert(IsBatchThreeDArray<BatchThreeDArray<int, CheckDevice> &&>);
+        static_assert(IsBatchThreeDArray<const BatchThreeDArray<int, CheckDevice> &>);
+        static_assert(IsBatchThreeDArray<const BatchThreeDArray<int, CheckDevice> &&>);
     
-        auto data = Batch<int, CheckDevice, CategoryTags::ThreeDArray>::Create(10, 7, 13, 35);
+        auto data = BatchThreeDArray<int, CheckDevice>::Create(10, 7, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape().BatchNum() == 10);
         assert(data.Shape().PageNum() == 7);

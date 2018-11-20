@@ -4,6 +4,12 @@
 
 namespace MetaNN
 {
-template<typename TElem, typename TDevice, typename TCategory>
-using Sequence = StaticArray<TElem, TDevice, CategoryTags::Sequence, TCategory>;
+template<typename TElem, typename TDevice>
+using ScalarSequence = StaticArray<TElem, TDevice, CategoryTags::Sequence, CategoryTags::Scalar>;
+
+template<typename TElem, typename TDevice>
+using MatrixSequence = StaticArray<TElem, TDevice, CategoryTags::Sequence, CategoryTags::Matrix>;
+
+template<typename TElem, typename TDevice>
+using ThreeDArraySequence = StaticArray<TElem, TDevice, CategoryTags::Sequence, CategoryTags::ThreeDArray>;
 }

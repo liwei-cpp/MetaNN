@@ -120,9 +120,9 @@ namespace
         assert(rm1.Shape().SeqLenContainer()[1] == 1);
         assert(rm1.Shape().SeqLenContainer()[2] == 100);
 
-        auto me1 = Sequence<CheckElement, CheckDevice, CategoryTags::Matrix>::Create(13, 10, 20);
-        auto me2 = Sequence<CheckElement, CheckDevice, CategoryTags::Matrix>::Create(1, 10, 20);
-        auto me3 = Sequence<CheckElement, CheckDevice, CategoryTags::Matrix>::Create(100, 10, 20);
+        auto me1 = MatrixSequence<CheckElement, CheckDevice>::Create(13, 10, 20);
+        auto me2 = MatrixSequence<CheckElement, CheckDevice>::Create(1, 10, 20);
+        auto me3 = MatrixSequence<CheckElement, CheckDevice>::Create(100, 10, 20);
         
         int c = 0;
         for (size_t len = 0; len < 13; ++len)

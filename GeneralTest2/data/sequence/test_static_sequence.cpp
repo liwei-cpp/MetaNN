@@ -10,16 +10,16 @@ namespace
     void test_scalar_sequence_case1()
     {
         cout << "Test static scalar sequence case 1...\t";
-        static_assert(IsScalarSequence<Sequence<CheckElement, CheckDevice, CategoryTags::Scalar>>);
-        static_assert(IsScalarSequence<Sequence<CheckElement, CheckDevice, CategoryTags::Scalar>&>);
-        static_assert(IsScalarSequence<Sequence<CheckElement, CheckDevice, CategoryTags::Scalar>&&>);
-        static_assert(IsScalarSequence<const Sequence<CheckElement, CheckDevice, CategoryTags::Scalar>&>);
-        static_assert(IsScalarSequence<const Sequence<CheckElement, CheckDevice, CategoryTags::Scalar>&&>);
+        static_assert(IsScalarSequence<ScalarSequence<CheckElement, CheckDevice>>);
+        static_assert(IsScalarSequence<ScalarSequence<CheckElement, CheckDevice>&>);
+        static_assert(IsScalarSequence<ScalarSequence<CheckElement, CheckDevice>&&>);
+        static_assert(IsScalarSequence<const ScalarSequence<CheckElement, CheckDevice>&>);
+        static_assert(IsScalarSequence<const ScalarSequence<CheckElement, CheckDevice>&&>);
 
-        Sequence<CheckElement, CheckDevice, CategoryTags::Scalar> check;
+        ScalarSequence<CheckElement, CheckDevice> check;
         assert(check.Shape().Length() == 0);
 
-        check = Sequence<CheckElement, CheckDevice, CategoryTags::Scalar>::Create(13);
+        check = ScalarSequence<CheckElement, CheckDevice>::Create(13);
         assert(check.Shape().Length() == 13);
 
         int c = 0;
@@ -28,7 +28,7 @@ namespace
             check.SetValue((float)(c++), i);
         }
 
-        const Sequence<CheckElement, CheckDevice, CategoryTags::Scalar> c2 = check;
+        const ScalarSequence<CheckElement, CheckDevice> c2 = check;
         c = 0;
         for (size_t i=0; i<13; ++i)
         {
@@ -48,13 +48,13 @@ namespace
     void test_matrix_sequence_case1()
     {
         cout << "Test static matrix sequence case 1...\t";
-        static_assert(IsMatrixSequence<Sequence<int, CheckDevice, CategoryTags::Matrix>>);
-        static_assert(IsMatrixSequence<Sequence<int, CheckDevice, CategoryTags::Matrix> &>);
-        static_assert(IsMatrixSequence<Sequence<int, CheckDevice, CategoryTags::Matrix> &&>);
-        static_assert(IsMatrixSequence<const Sequence<int, CheckDevice, CategoryTags::Matrix> &>);
-        static_assert(IsMatrixSequence<const Sequence<int, CheckDevice, CategoryTags::Matrix> &&>);
+        static_assert(IsMatrixSequence<MatrixSequence<int, CheckDevice>>);
+        static_assert(IsMatrixSequence<MatrixSequence<int, CheckDevice> &>);
+        static_assert(IsMatrixSequence<MatrixSequence<int, CheckDevice> &&>);
+        static_assert(IsMatrixSequence<const MatrixSequence<int, CheckDevice> &>);
+        static_assert(IsMatrixSequence<const MatrixSequence<int, CheckDevice> &&>);
     
-        auto data = Sequence<int, CheckDevice, CategoryTags::Matrix>::Create(10, 13, 35);
+        auto data = MatrixSequence<int, CheckDevice>::Create(10, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape().Length() == 10);
         assert(data.Shape().RowNum() == 13);
@@ -87,7 +87,7 @@ namespace
     {
         cout << "Test static matrix sequence case 2...\t";
         
-        auto rm1 = Sequence<CheckElement, CheckDevice, CategoryTags::Matrix>::Create(3, 10, 20);
+        auto rm1 = MatrixSequence<CheckElement, CheckDevice>::Create(3, 10, 20);
         assert(rm1.Shape().Length() == 3);
 
         int c = 0;
@@ -122,13 +122,13 @@ namespace
     void test_3d_array_sequence_case1()
     {
         cout << "Test static 3d array sequence case 1...\t";
-        static_assert(IsThreeDArraySequence<Sequence<int, CheckDevice, CategoryTags::ThreeDArray>>);
-        static_assert(IsThreeDArraySequence<Sequence<int, CheckDevice, CategoryTags::ThreeDArray> &>);
-        static_assert(IsThreeDArraySequence<Sequence<int, CheckDevice, CategoryTags::ThreeDArray> &&>);
-        static_assert(IsThreeDArraySequence<const Sequence<int, CheckDevice, CategoryTags::ThreeDArray> &>);
-        static_assert(IsThreeDArraySequence<const Sequence<int, CheckDevice, CategoryTags::ThreeDArray> &&>);
+        static_assert(IsThreeDArraySequence<ThreeDArraySequence<int, CheckDevice>>);
+        static_assert(IsThreeDArraySequence<ThreeDArraySequence<int, CheckDevice> &>);
+        static_assert(IsThreeDArraySequence<ThreeDArraySequence<int, CheckDevice> &&>);
+        static_assert(IsThreeDArraySequence<const ThreeDArraySequence<int, CheckDevice> &>);
+        static_assert(IsThreeDArraySequence<const ThreeDArraySequence<int, CheckDevice> &&>);
     
-        auto data = Sequence<int, CheckDevice, CategoryTags::ThreeDArray>::Create(10, 7, 13, 35);
+        auto data = ThreeDArraySequence<int, CheckDevice>::Create(10, 7, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape().Length() == 10);
         assert(data.Shape().PageNum() == 7);
