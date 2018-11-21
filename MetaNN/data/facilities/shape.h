@@ -132,6 +132,8 @@ public:
 public:
     size_t BatchNum() const noexcept { return m_batchNum; }
     
+    size_t& BatchNum() noexcept { return m_batchNum; }
+    
     size_t Count() const noexcept
     {
         return BatchNum() * Shape<TSubCate>::Count();
@@ -154,6 +156,11 @@ public:
         return (BatchNum() == val.BatchNum()) &&
                (Shape<TSubCate>::operator==(val));
     }
+    
+    const Shape<TSubCate>& Cardinal() const noexcept
+    {
+        return static_cast<const Shape<TSubCate>&>(*this);
+    }
 
 private:
     size_t m_batchNum;
@@ -173,6 +180,8 @@ public:
     
 public:
     size_t Length() const noexcept { return m_seqLen; }
+    
+    size_t& Length() noexcept { return m_seqLen; }
     
     size_t Count() const noexcept
     {
@@ -197,6 +206,11 @@ public:
                (Shape<TSubCate>::operator==(val));
     }
     
+    const Shape<TSubCate>& Cardinal() const noexcept
+    {
+        return static_cast<const Shape<TSubCate>&>(*this);
+    }
+    
 private:
     size_t m_seqLen;
 };
@@ -218,6 +232,11 @@ public:
     
 public:
     const auto& SeqLenContainer() const noexcept
+    {
+        return m_seqLenCont;
+    }
+    
+    auto& SeqLenContainer() noexcept
     {
         return m_seqLenCont;
     }
@@ -251,6 +270,11 @@ public:
     {
         return (m_seqLenCont == val.m_seqLenCont) &&
                (Shape<TSubCate>::operator==(val));
+    }
+    
+    const Shape<TSubCate>& Cardinal() const noexcept
+    {
+        return static_cast<const Shape<TSubCate>&>(*this);
     }
     
 private:

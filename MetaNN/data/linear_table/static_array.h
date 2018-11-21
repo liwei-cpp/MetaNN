@@ -79,7 +79,7 @@ public:
             
             size_t pos = std::accumulate(seqLenCont.begin(), seqLenCont.begin() + id, 0);
             
-            const MetaNN::Shape<TCardinalCate>& cardinalShape = static_cast<const MetaNN::Shape<TCardinalCate>&>(m_shape);
+            const MetaNN::Shape<TCardinalCate>& cardinalShape = m_shape.Cardinal();
             pos *= cardinalShape.Count();
             
             using AimType = PrincipalDataType<CategoryTags::Sequence<TCardinalCate>, ElementType, DeviceType>;
@@ -89,7 +89,7 @@ public:
         else
         {
             using AimType = PrincipalDataType<TCardinalCate, ElementType, DeviceType>;
-            const MetaNN::Shape<TCardinalCate>& aimShape = static_cast<const MetaNN::Shape<TCardinalCate>&>(m_shape);
+            const MetaNN::Shape<TCardinalCate>& aimShape = m_shape.Cardinal();
             
             const size_t pos = id * aimShape.Count();
             if (pos >= m_shape.Count())
