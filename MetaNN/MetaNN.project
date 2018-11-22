@@ -97,10 +97,10 @@
   </VirtualDirectory>
   <VirtualDirectory Name="data">
     <VirtualDirectory Name="batch">
-      <File Name="data/batch/array.h"/>
       <File Name="data/batch/duplicate.h"/>
       <File Name="data/batch/batch.h"/>
       <File Name="data/batch/batch_pack.h"/>
+      <File Name="data/batch/batch_sequence.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
       <File Name="data/facilities/allocators.h"/>
@@ -139,10 +139,6 @@
     <VirtualDirectory Name="sequence">
       <File Name="data/sequence/sequence.h"/>
       <File Name="data/sequence/sequence_pack.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="batch_sequence">
-      <File Name="data/batch_sequence/batch_sequence.h"/>
-      <File Name="data/batch_sequence/batch_sequence_pack.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="data_copy">

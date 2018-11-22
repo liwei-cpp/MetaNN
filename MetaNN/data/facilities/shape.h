@@ -46,7 +46,10 @@ template <>
 class Shape<CategoryTags::Matrix>
 {
 public:
-    explicit Shape(size_t p_rowNum = 0, size_t p_colNum = 0)
+    explicit Shape()
+        : Shape(0, 0) {}
+    
+    explicit Shape(size_t p_rowNum, size_t p_colNum)
         : m_rowNum(p_rowNum)
         , m_colNum(p_colNum)
     {}
@@ -83,7 +86,10 @@ template <>
 class Shape<CategoryTags::ThreeDArray> : public Shape<CategoryTags::Matrix>
 {
 public:
-    explicit Shape(size_t p_pageNum = 0, size_t p_rowNum = 0, size_t p_colNum = 0)
+    explicit Shape()
+        : Shape(0, 0, 0) {}
+        
+    explicit Shape(size_t p_pageNum, size_t p_rowNum, size_t p_colNum)
         : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
         , m_pageNum(p_pageNum)
     {}
@@ -280,4 +286,10 @@ public:
 private:
     std::vector<size_t> m_seqLenCont;
 };
+
+template <typename TCate>
+bool operator != (const Shape<TCate> val1, const Shape<TCate> val2)
+{
+    return !(val1 == val2);
+}
 }

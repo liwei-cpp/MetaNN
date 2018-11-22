@@ -12,4 +12,15 @@ using BatchMatrix = StaticArray<TElem, TDevice, CategoryTags::Batch, CategoryTag
 
 template<typename TElem, typename TDevice>
 using BatchThreeDArray = StaticArray<TElem, TDevice, CategoryTags::Batch, CategoryTags::ThreeDArray>;
+
+template <typename TData>
+using DynamicBatch = DynamicArray<TData, CategoryTags::Batch>;
+
+template <typename TIterator>
+auto MakeDynamicBatch(TIterator beg, TIterator end)
+{
+    using TData = typename std::iterator_traits<TIterator>::value_type;
+    using RawData = RemConstRef<TData>;
+    return DynamicBatch<RawData>(beg, end);
+}
 }

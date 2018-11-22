@@ -111,14 +111,21 @@ public:
         for (size_t i = 0; i < m_inputs.size(); ++i)
         {
             const auto& curItem = m_inputs[i].Data();
-            auto lowerItem = LowerAccess(curItem);
-            const TElem* itemMem = lowerItem.RawMemory();
-            memcpy(resMem, itemMem, sizeof(TElem) * curItem.Count());
-            startPoint += curItem.Count();
-            resMem += curItem.Count();
+            if constexpr (IsScalar<decltype(curItem)>)
+            {
+                *resMem = curItem.Value();
+            }
+            else
+            {
+                auto lowerItem = LowerAccess(curItem);
+                const TElem* itemMem = lowerItem.RawMemory();
+                memcpy(resMem, itemMem, sizeof(TElem) * curItem.Shape().Count());                
+            }
+            startPoint += curItem.Shape().Count();
+            resMem += curItem.Shape().Count();
         }
         
-        assert(startPoint == res.Count());
+        assert(startPoint == res.Shape().Count());
         m_output.SetEval();
     }
     
@@ -236,9 +243,9 @@ public:
             using TOpEvalHandle = std::decay_t<decltype(std::declval<TData>().EvalRegister())>;
             std::vector<TOpEvalHandle> handleBuf;
             std::vector<const void*> depVec;
-            handleBuf.reserve(m_buffer.size());
-            depVec.reserve(m_buffer.size());
-            for (size_t i = 0; i < m_buffer.size(); ++i)
+            handleBuf.reserve(m_buffer->size());
+            depVec.reserve(m_buffer->size());
+            for (size_t i = 0; i < m_buffer->size(); ++i)
             {
                 handleBuf.push_back((*m_buffer)[i].EvalRegister());
                 depVec.push_back(handleBuf.back().DataPtr());
@@ -261,13 +268,4 @@ private:
     std::shared_ptr<std::vector<TData>> m_buffer = std::make_shared<std::vector<TData>>();
     EvalBuffer<PrincipleType> m_evalBuf;
 };
-
-template <template<typename>class CateWrapper, typename TIterator>
-auto MakeDynamicArray(TIterator beg, TIterator end)
-{
-    using TData = typename std::iterator_traits<TIterator>::value_type;
-    using RawData = RemConstRef<TData>;
-    
-    return DynamicArray<RawData, CateWrapper>(beg, end);
-}
 }
