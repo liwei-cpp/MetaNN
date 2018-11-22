@@ -49,6 +49,8 @@
       <File Name="data/sequence/test_static_sequence.h"/>
       <File Name="data/sequence/test_static_sequence.cpp"/>
       <File Name="data/sequence/test_sequence_pack.h"/>
+      <File Name="data/sequence/test_dynamic_sequence.h"/>
+      <File Name="data/sequence/test_dynamic_sequence.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="batch_sequence">
       <File Name="data/batch_sequence/test_static_batch_sequence.h"/>
