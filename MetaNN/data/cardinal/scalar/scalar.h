@@ -19,22 +19,27 @@ public:
     using CategoryTag = CategoryTags::Scalar;
     using ElementType = TElem;
     using DeviceType = DeviceTags::CPU;
+
+public:
+    static Scalar CreateWithShape()
+    {
+        return Scalar{};
+    }
     
 public:
     Scalar(ElementType elem = ElementType())
-        : m_shape()
-        , m_elem(elem) {}
+        : m_elem(elem) {}
         
     template <typename...TShapeParams>
     explicit Scalar(ContinuousMemory<ElementType, DeviceType> p_mem,
                     TShapeParams&&... shapeParams)
-        : m_shape(std::forward<TShapeParams>(shapeParams)...)
-        , m_elem((p_mem.RawMemory())[0])
+        : m_elem((p_mem.RawMemory())[0])
     {}
     
     const auto& Shape() const noexcept
     {
-        return m_shape;
+        const static MetaNN::Shape<CategoryTag> shape;
+        return shape;
     }
     
     auto& Value() noexcept
@@ -49,8 +54,7 @@ public:
     
     bool operator== (const Scalar& val) const noexcept
     {
-        return (Shape() == val.Shape()) &&
-               (m_elem == val.m_elem);
+        return (m_elem == val.m_elem);
     }
 
     auto EvalRegister() const
@@ -59,7 +63,6 @@ public:
     }
 
 private:
-    MetaNN::Shape<CategoryTag> m_shape;
     ElementType m_elem;
 };
 }

@@ -15,11 +15,13 @@ public:
     friend struct LowerAccessImpl<Vector>;
 
 public:
-    explicit Vector(size_t colNum)
-        : TBase(1, colNum)
-    {}
+    static Vector CreateWithShape(size_t colNum)
+    {
+        return Vector(MetaNN::Shape<CategoryTags::Matrix>(1, colNum));
+    }
     
-    explicit Vector(MetaNN::Shape<typename TBase::CategoryTag> p_shape = MetaNN::Shape<typename TBase::CategoryTag>())
+public:
+    explicit Vector(MetaNN::Shape<CategoryTags::Matrix> p_shape = MetaNN::Shape<CategoryTags::Matrix>())
         : TBase(std::move(p_shape))
     {
         if (TBase::Shape().RowNum() > 1)

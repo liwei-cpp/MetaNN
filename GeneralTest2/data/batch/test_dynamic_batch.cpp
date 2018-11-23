@@ -43,20 +43,20 @@ namespace
         cout << "Test dynamic batch matrix case 1...\t";
         using TCardinal = Matrix<CheckElement, CheckDevice>;
         
-        static_assert(IsBatchMatrix<DynamicBatch<TCardinal>>, "Test Error");
-        static_assert(IsBatchMatrix<DynamicBatch<TCardinal> &>, "Test Error");
-        static_assert(IsBatchMatrix<DynamicBatch<TCardinal> &&>, "Test Error");
-        static_assert(IsBatchMatrix<const DynamicBatch<TCardinal> &>, "Test Error");
-        static_assert(IsBatchMatrix<const DynamicBatch<TCardinal> &&>, "Test Error");
+        static_assert(IsBatchMatrix<DynamicBatch<TCardinal>>);
+        static_assert(IsBatchMatrix<DynamicBatch<TCardinal> &>);
+        static_assert(IsBatchMatrix<DynamicBatch<TCardinal> &&>);
+        static_assert(IsBatchMatrix<const DynamicBatch<TCardinal> &>);
+        static_assert(IsBatchMatrix<const DynamicBatch<TCardinal> &&>);
 
-        auto rm1 = DynamicBatch<TCardinal>::Create(10, 20);
+        auto rm1 = DynamicBatch<TCardinal>::CreateWithShape(10, 20);
         assert(rm1.Shape().BatchNum() == 0);
         assert(rm1.IsEmpty());
 
         int c = 0;
-        auto me1 = Matrix<CheckElement, CheckDevice>(10, 20);
-        auto me2 = Matrix<CheckElement, CheckDevice>(10, 20);
-        auto me3 = Matrix<CheckElement, CheckDevice>(10, 20);
+        auto me1 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
+        auto me2 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
+        auto me3 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
         for (size_t i = 0; i < 10; ++i)
         {
             for (size_t j = 0; j < 20; ++j)
@@ -99,14 +99,14 @@ namespace
         static_assert(IsBatchThreeDArray<const DynamicBatch<TCardinal> &>);
         static_assert(IsBatchThreeDArray<const DynamicBatch<TCardinal> &&>);
 
-        auto rm1 = DynamicBatch<TCardinal>::Create(7, 10, 20);
+        auto rm1 = DynamicBatch<TCardinal>::CreateWithShape(7, 10, 20);
         assert(rm1.Shape().BatchNum() == 0);
         assert(rm1.IsEmpty());
 
         int c = 0;
-        auto me1 = TCardinal(7, 10, 20);
-        auto me2 = TCardinal(7, 10, 20);
-        auto me3 = TCardinal(7, 10, 20);
+        auto me1 = TCardinal::CreateWithShape(7, 10, 20);
+        auto me2 = TCardinal::CreateWithShape(7, 10, 20);
+        auto me3 = TCardinal::CreateWithShape(7, 10, 20);
         
         for (size_t p = 0; p < 7; ++p)
         {

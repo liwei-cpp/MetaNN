@@ -154,10 +154,9 @@ private:
     
 public:
     template<typename...TShapeParams>
-    static DynamicArray Create(TShapeParams&&... shapeParams)
+    static DynamicArray CreateWithShape(TShapeParams&&... shapeParams)
     {
-        MetaNN::Shape<CardinalTag> shape(std::forward<TShapeParams>(shapeParams)...);
-        return DynamicArray(std::move(shape));
+        return DynamicArray(MetaNN::Shape<CardinalTag>(std::forward<TShapeParams>(shapeParams)...));
     }
     
 public:

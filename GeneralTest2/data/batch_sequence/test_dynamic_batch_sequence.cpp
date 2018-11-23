@@ -23,16 +23,16 @@ namespace
 
         // check contains 4 sequences, with length = 13, 1, 100, 87
         int c = 0;
-        auto item1 = TItem::Create(13);
+        auto item1 = TItem::CreateWithShape(13);
         for (size_t i = 0; i < 13; ++i) item1.SetValue((float)(c++), i);
         
-        auto item2 = TItem::Create(1);
+        auto item2 = TItem::CreateWithShape(1);
         for (size_t i = 0; i < 1; ++i) item2.SetValue((float)(c++), i);
         
-        auto item3 = TItem::Create(100);
+        auto item3 = TItem::CreateWithShape(100);
         for (size_t i = 0; i < 100; ++i) item3.SetValue((float)(c++), i);
         
-        auto item4 = TItem::Create(87);
+        auto item4 = TItem::CreateWithShape(87);
         for (size_t i = 0; i < 87; ++i) item4.SetValue((float)(c++), i);
         
         check.PushBack(item1); check.PushBack(item2); check.PushBack(item3); check.PushBack(item4);
@@ -66,15 +66,15 @@ namespace
         static_assert(IsBatchMatrixSequence<const DynamicBatch<TItem> &>);
         static_assert(IsBatchMatrixSequence<const DynamicBatch<TItem> &&>);
 
-        auto check = DynamicBatch<TItem>::Create(13, 35);
+        auto check = DynamicBatch<TItem>::CreateWithShape(13, 35);
         assert(check.Shape().SeqLenContainer().empty());
         
         // check contains 4 sequences, with length = 13, 1, 100, 87
         int c = 0;
-        auto item1 = TItem::Create(13, 13, 35);
-        auto item2 = TItem::Create(1, 13, 35);
-        auto item3 = TItem::Create(100, 13, 35);
-        auto item4 = TItem::Create(87, 13, 35);
+        auto item1 = TItem::CreateWithShape(13, 13, 35);
+        auto item2 = TItem::CreateWithShape(1, 13, 35);
+        auto item3 = TItem::CreateWithShape(100, 13, 35);
+        auto item4 = TItem::CreateWithShape(87, 13, 35);
         for (size_t i = 0; i < 13; ++i)
         {
             for (size_t j = 0; j < 35; ++j)
@@ -127,14 +127,14 @@ namespace
         static_assert(IsBatchThreeDArraySequence<const DynamicBatch<TItem> &>);
         static_assert(IsBatchThreeDArraySequence<const DynamicBatch<TItem> &&>);
 
-        auto check = DynamicBatch<TItem>::Create(7, 13, 35);
+        auto check = DynamicBatch<TItem>::CreateWithShape(7, 13, 35);
         assert(check.Shape().SeqLenContainer().empty());
         
         int c = 0;
-        auto item1 = TItem::Create(13, 7, 13, 35);
-        auto item2 = TItem::Create(1, 7, 13, 35);
-        auto item3 = TItem::Create(100, 7, 13, 35);
-        auto item4 = TItem::Create(87, 7, 13, 35);
+        auto item1 = TItem::CreateWithShape(13, 7, 13, 35);
+        auto item2 = TItem::CreateWithShape(1, 7, 13, 35);
+        auto item3 = TItem::CreateWithShape(100, 7, 13, 35);
+        auto item4 = TItem::CreateWithShape(87, 7, 13, 35);
         for (size_t p = 0; p < 7; ++p)
         {
             for (size_t i = 0; i < 13; ++i)

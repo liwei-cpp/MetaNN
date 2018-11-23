@@ -19,7 +19,7 @@ namespace
         ScalarSequence<CheckElement, CheckDevice> check;
         assert(check.Shape().Length() == 0);
 
-        check = ScalarSequence<CheckElement, CheckDevice>::Create(13);
+        check = ScalarSequence<CheckElement, CheckDevice>::CreateWithShape(13);
         assert(check.Shape().Length() == 13);
 
         int c = 0;
@@ -54,7 +54,7 @@ namespace
         static_assert(IsMatrixSequence<const MatrixSequence<int, CheckDevice> &>);
         static_assert(IsMatrixSequence<const MatrixSequence<int, CheckDevice> &&>);
     
-        auto data = MatrixSequence<int, CheckDevice>::Create(10, 13, 35);
+        auto data = MatrixSequence<int, CheckDevice>::CreateWithShape(10, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape().Length() == 10);
         assert(data.Shape().RowNum() == 13);
@@ -87,13 +87,13 @@ namespace
     {
         cout << "Test static matrix sequence case 2...\t";
         
-        auto rm1 = MatrixSequence<CheckElement, CheckDevice>::Create(3, 10, 20);
+        auto rm1 = MatrixSequence<CheckElement, CheckDevice>::CreateWithShape(3, 10, 20);
         assert(rm1.Shape().Length() == 3);
 
         int c = 0;
-        auto me1 = Matrix<CheckElement, CheckDevice>(10, 20);
-        auto me2 = Matrix<CheckElement, CheckDevice>(10, 20);
-        auto me3 = Matrix<CheckElement, CheckDevice>(10, 20);
+        auto me1 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
+        auto me2 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
+        auto me3 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
         for (size_t i = 0; i < 10; ++i)
         {
             for (size_t j = 0; j < 20; ++j)
@@ -128,7 +128,7 @@ namespace
         static_assert(IsThreeDArraySequence<const ThreeDArraySequence<int, CheckDevice> &>);
         static_assert(IsThreeDArraySequence<const ThreeDArraySequence<int, CheckDevice> &&>);
     
-        auto data = ThreeDArraySequence<int, CheckDevice>::Create(10, 7, 13, 35);
+        auto data = ThreeDArraySequence<int, CheckDevice>::CreateWithShape(10, 7, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape().Length() == 10);
         assert(data.Shape().PageNum() == 7);

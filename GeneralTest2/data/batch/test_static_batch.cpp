@@ -19,7 +19,7 @@ namespace
         BatchScalar<CheckElement, CheckDevice> check;
         assert(check.Shape().BatchNum() == 0);
 
-        check = BatchScalar<CheckElement, CheckDevice>::Create(13);
+        check = BatchScalar<CheckElement, CheckDevice>::CreateWithShape(13);
         assert(check.Shape().BatchNum() == 13);
 
         int c = 0;
@@ -54,7 +54,7 @@ namespace
         static_assert(IsBatchMatrix<const BatchMatrix<int, CheckDevice> &>);
         static_assert(IsBatchMatrix<const BatchMatrix<int, CheckDevice> &&>);
     
-        auto data = BatchMatrix<int, CheckDevice>::Create(10, 13, 35);
+        auto data = BatchMatrix<int, CheckDevice>::CreateWithShape(10, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape().BatchNum() == 10);
         assert(data.Shape().RowNum() == 13);
@@ -87,13 +87,13 @@ namespace
     {
         cout << "Test static batch matrix case 2...\t";
         
-        auto rm1 = BatchMatrix<CheckElement, CheckDevice>::Create(3, 10, 20);
+        auto rm1 = BatchMatrix<CheckElement, CheckDevice>::CreateWithShape(3, 10, 20);
         assert(rm1.Shape().BatchNum() == 3);
 
         int c = 0;
-        auto me1 = Matrix<CheckElement, CheckDevice>(10, 20);
-        auto me2 = Matrix<CheckElement, CheckDevice>(10, 20);
-        auto me3 = Matrix<CheckElement, CheckDevice>(10, 20);
+        auto me1 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
+        auto me2 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
+        auto me3 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
         for (size_t i = 0; i < 10; ++i)
         {
             for (size_t j = 0; j < 20; ++j)
@@ -128,7 +128,7 @@ namespace
         static_assert(IsBatchThreeDArray<const BatchThreeDArray<int, CheckDevice> &>);
         static_assert(IsBatchThreeDArray<const BatchThreeDArray<int, CheckDevice> &&>);
     
-        auto data = BatchThreeDArray<int, CheckDevice>::Create(10, 7, 13, 35);
+        auto data = BatchThreeDArray<int, CheckDevice>::CreateWithShape(10, 7, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape().BatchNum() == 10);
         assert(data.Shape().PageNum() == 7);

@@ -22,11 +22,12 @@ public:
     friend struct LowerAccessImpl<ThreeDArray>;
     
 public:
-    explicit ThreeDArray(size_t p_pageNum, size_t rowNum, size_t colNum)
-        : m_shape(p_pageNum, rowNum, colNum)
-        , m_mem(m_shape.Count())
-    {}
-    
+    static ThreeDArray CreateWithShape(size_t p_pageNum, size_t rowNum, size_t colNum)
+    {
+        return ThreeDArray(MetaNN::Shape<CategoryTag>(p_pageNum, rowNum, colNum));
+    }
+
+public:
     explicit ThreeDArray(MetaNN::Shape<CategoryTag> p_shape = MetaNN::Shape<CategoryTag>())
         : m_shape(std::move(p_shape))
         , m_mem(m_shape.Count())

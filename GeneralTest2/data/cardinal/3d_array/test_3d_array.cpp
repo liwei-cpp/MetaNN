@@ -21,7 +21,7 @@ namespace
         assert(rm.Shape().RowNum() == 0);
         assert(rm.Shape().ColNum() == 0);
 
-        rm = ThreeDArray<CheckElement, CheckDevice>(5, 10, 20);
+        rm = ThreeDArray<CheckElement, CheckDevice>::CreateWithShape(5, 10, 20);
         assert(rm.Shape().PageNum() == 5);
         assert(rm.Shape().RowNum() == 10);
         assert(rm.Shape().ColNum() == 20);

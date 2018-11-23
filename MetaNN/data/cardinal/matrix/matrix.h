@@ -22,11 +22,12 @@ public:
     friend struct LowerAccessImpl<Matrix>;
 
 public:
-    explicit Matrix(size_t rowNum, size_t colNum)
-        : m_shape(rowNum, colNum)
-        , m_mem(m_shape.Count())
-    {}
+    static Matrix CreateWithShape(size_t rowNum, size_t colNum)
+    {
+        return Matrix(MetaNN::Shape<CategoryTag>(rowNum, colNum));
+    }
     
+public:
     explicit Matrix(MetaNN::Shape<CategoryTag> p_shape = MetaNN::Shape<CategoryTag>())
         : m_shape(std::move(p_shape))
         , m_mem(m_shape.Count())

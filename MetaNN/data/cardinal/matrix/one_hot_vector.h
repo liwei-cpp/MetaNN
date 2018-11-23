@@ -26,7 +26,7 @@ public:
     void Eval() override final
     {
         auto& mutableData = m_resHandle.MutableData();
-        m_resHandle.Allocate(1, m_colNum);
+        m_resHandle.Allocate(MetaNN::Shape<CategoryTags::Matrix>{1, m_colNum});
         
         static_assert(std::is_same_v<TDevice, DeviceTags::CPU>,
                       "Currently only CPU is supported.");

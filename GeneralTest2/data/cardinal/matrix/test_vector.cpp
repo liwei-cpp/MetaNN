@@ -20,7 +20,7 @@ namespace
         assert(rm.Shape().RowNum() == 0);
         assert(rm.Shape().ColNum() == 0);
 
-        rm = Vector<CheckElement, CheckDevice>(20);
+        rm = Vector<CheckElement, CheckDevice>::CreateWithShape(20);
         assert(rm.Shape().RowNum() == 1);
         assert(rm.Shape().ColNum() == 20);
 
@@ -40,7 +40,7 @@ namespace
     void test_vector_case2()
     {
         cout << "Test vector case 2...\t";
-        auto rm1 = Vector<CheckElement, CheckDevice>(20);
+        auto rm1 = Vector<CheckElement, CheckDevice>::CreateWithShape(20);
         int c = 0;
         for (size_t j = 0; j < 20; ++j)
         {

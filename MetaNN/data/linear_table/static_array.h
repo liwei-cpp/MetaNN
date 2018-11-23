@@ -24,10 +24,9 @@ public:
 
 public:
     template<typename...TShapeParams>
-    static StaticArray Create(TShapeParams&&... shapeParams)
+    static StaticArray CreateWithShape(TShapeParams&&... shapeParams)
     {
-        MetaNN::Shape<CategoryTag> shape(std::forward<TShapeParams>(shapeParams)...);
-        return StaticArray(std::move(shape));
+        return StaticArray(MetaNN::Shape<CategoryTag>(std::forward<TShapeParams>(shapeParams)...));
     }
 
 public:
