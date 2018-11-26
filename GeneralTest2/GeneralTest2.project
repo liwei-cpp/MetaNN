@@ -60,6 +60,8 @@
       <File Name="data/batch_sequence/test_dynamic_batch_sequence.cpp"/>
     </VirtualDirectory>
     <File Name="data/test_data.h"/>
+    <File Name="data/test_dynamic.h"/>
+    <File Name="data/test_dynamic.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
