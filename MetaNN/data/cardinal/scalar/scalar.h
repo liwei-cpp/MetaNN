@@ -42,9 +42,9 @@ public:
         return shape;
     }
     
-    auto& Value() noexcept
+    void SetValue(ElementType val)
     {
-        return m_elem;
+        m_elem = val;
     }
    
     auto Value() const noexcept
