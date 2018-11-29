@@ -209,7 +209,6 @@
     <File Name="operators/interpolate.h"/>
     <File Name="operators/negative_log_likelihood.h"/>
     <File Name="operators/negative_log_likelihood_derivative.h"/>
-    <File Name="operators/operators.h"/>
     <File Name="operators/sigmoid.h"/>
     <File Name="operators/sigmoid_derivative.h"/>
     <File Name="operators/sign.h"/>
@@ -220,12 +219,9 @@
     <File Name="operators/tanh_derivative.h"/>
     <File Name="operators/transpose.h"/>
     <VirtualDirectory Name="facilities">
-      <File Name="operators/facilities/category_cal.h"/>
-      <File Name="operators/facilities/oper_seq.h"/>
       <File Name="operators/facilities/organizer.h"/>
       <File Name="operators/facilities/tags.h"/>
-      <File Name="operators/facilities/traits.h"/>
-      <File Name="operators/facilities/oper_aux_params.h"/>
+      <File Name="operators/facilities/operator_frame.h"/>
     </VirtualDirectory>
     <File Name="operators/conv.h"/>
   </VirtualDirectory>
