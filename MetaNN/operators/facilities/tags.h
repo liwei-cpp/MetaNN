@@ -1,7 +1,10 @@
 #pragma once
 
-namespace MetaNN
+namespace MetaNN::OpTags
 {
+    // Data transform
+    struct Duplicate;
+    
 namespace UnaryOpTags
 {
     struct Abs;

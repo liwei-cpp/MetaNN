@@ -42,7 +42,8 @@ public:
     
     bool operator== (const Operator& val) const
     {
-        return (Shape() == val.Shape()) &&
+        // Note: shape is deduced from m_auxParams and m_operands, so if they are same, then shape is same.
+        return (m_auxParams == val.m_auxParams) &&
                (m_operands == val.m_operands);
     }
 

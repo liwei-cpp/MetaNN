@@ -224,6 +224,7 @@
       <File Name="operators/facilities/operator_frame.h"/>
     </VirtualDirectory>
     <File Name="operators/conv.h"/>
+    <File Name="operators/duplicate.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/change_policy.h"/>
