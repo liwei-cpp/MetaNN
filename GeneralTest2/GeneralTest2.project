@@ -10,6 +10,7 @@
   <VirtualDirectory Name="_root">
     <File Name="main.cpp"/>
     <File Name="calculate_tags.h"/>
+    <File Name="data_gen.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data">
     <VirtualDirectory Name="cardinal">
@@ -154,4 +155,9 @@
       </Completion>
     </Configuration>
   </Settings>
+  <VirtualDirectory Name="operators">
+    <File Name="operators/test_duplicate.h"/>
+    <File Name="operators/test_duplicate.cpp"/>
+    <File Name="operators/test_operators.h"/>
+  </VirtualDirectory>
 </CodeLite_Project>

@@ -17,6 +17,7 @@ namespace OperDuplicate
 template <typename TOriData, typename TShape>
 static constexpr bool valid = (IsScalar<TOriData>) ||
 
+                              (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
                               (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
                               (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Batch<CategoryTags::Matrix>>>) ||
                               (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Batch<CategoryTags::ThreeDArray>>>) ||
@@ -25,6 +26,7 @@ static constexpr bool valid = (IsScalar<TOriData>) ||
                               (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::BatchSequence<CategoryTags::Matrix>>>) ||
                               (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::BatchSequence<CategoryTags::ThreeDArray>>>) ||
 
+                              (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
                               (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Batch<CategoryTags::ThreeDArray>>>) ||
                               (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Sequence<CategoryTags::ThreeDArray>>>) ||
                               (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::BatchSequence<CategoryTags::ThreeDArray>>>);
@@ -82,12 +84,12 @@ public:
         const size_t outCount = out.Shape().Count();
                 
         static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, "Currently only CPU is supported");
-        using ElementType = typename decltype(out)::ElementType;
+        using ElementType = ElementTypePicker<decltype(out)>;
         
         auto low_out = LowerAccess(out);
         ElementType* mem_out = low_out.MutableRawMemory();
         
-        using InputCategory = typename decltype(in)::CategoryTag;
+        using InputCategory = DataCategory<decltype(in)>;
         if constexpr(std::is_same_v<InputCategory, CategoryTags::Scalar>)
         {
             ElementType elem = in.Value();
@@ -193,11 +195,24 @@ template <typename TOriData, typename TShape,
           std::enable_if_t<OperDuplicate::valid<TOriData, RemConstRef<TShape>>>* = nullptr>
 auto Duplicate(TOriData&& data, TShape&& shape)
 {
-    if (!OperDuplicate::ShapeMatch(data.Shape(), shape))
+    using OriShape = RemConstRef<decltype(data.Shape())>;
+    using NewShape = RemConstRef<TShape>;
+    if constexpr (std::is_same_v<OriShape, NewShape>)
     {
-        throw std::runtime_error("Cannot duplicate for un-match shape.");
+        if (data.Shape() != shape)
+        {
+            throw std::runtime_error("Plain duplicate need identical shape.");
+        }
+        return std::forward<TOriData>(data);
     }
-    return OperDuplicate::CreateOpTemplate(std::forward<TOriData>(data),
-                                           std::forward<TShape>(shape));
+    else
+    {
+        if (!OperDuplicate::ShapeMatch(data.Shape(), shape))
+        {
+            throw std::runtime_error("Cannot duplicate for un-match shape.");
+        }
+        return OperDuplicate::CreateOpTemplate(std::forward<TOriData>(data),
+                                               std::forward<TShape>(shape));
+    }
 }
 }

@@ -150,6 +150,12 @@ template <typename T>
 using DataCategory = typename DataCategory_<T>::type;
 
 template <typename T>
+using ElementTypePicker = typename RemConstRef<T>::ElementType;
+
+template <typename T>
+using DeciveTypePicker = typename RemConstRef<T>::DeciveType;
+
+template <typename T>
 constexpr bool IsInvalid = std::is_same_v<DataCategory<T>, CategoryTags::Invalid>;
 
 template <typename T>
