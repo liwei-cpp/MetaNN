@@ -393,6 +393,230 @@ namespace
         }
         cout << "done" << endl;
     }
+    
+    void test_matrix_duplicate_case3()
+    {
+        cout << "Test duplicate: matrix -> batch matrix\t";
+        
+        auto ori = GenMatrix<CheckElement>(7, 3);
+        auto dup = Duplicate(ori, Shape<CategoryTags::BatchMatrix>(10, 7, 3));
+        static_assert(std::is_same_v<DataCategory<decltype(dup)>, CategoryTags::BatchMatrix>);
+        assert(dup.Shape().BatchNum() == 10);
+        assert(dup.Shape().RowNum() == 7);
+        assert(dup.Shape().ColNum() == 3);
+        
+        auto eval = Evaluate(dup);
+        assert(eval.Shape().BatchNum() == 10);
+        assert(eval.Shape().RowNum() == 7);
+        assert(eval.Shape().ColNum() == 3);
+        for (size_t p = 0; p < 10; ++p)
+        {
+            for (size_t i = 0; i < 7; ++i)
+            {
+                for (size_t j = 0; j < 3; ++j)
+                {
+                    assert(fabs(eval[p](i, j) - ori(i, j)) < 0.001);
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_matrix_duplicate_case4()
+    {
+        cout << "Test duplicate: matrix -> batch 3d-array\t";
+        
+        auto ori = GenMatrix<CheckElement>(7, 3);
+        auto dup = Duplicate(ori, Shape<CategoryTags::BatchThreeDArray>(10, 5, 7, 3));
+        static_assert(std::is_same_v<DataCategory<decltype(dup)>, CategoryTags::BatchThreeDArray>);
+        assert(dup.Shape().BatchNum() == 10);
+        assert(dup.Shape().PageNum() == 5);
+        assert(dup.Shape().RowNum() == 7);
+        assert(dup.Shape().ColNum() == 3);
+        
+        auto eval = Evaluate(dup);
+        assert(eval.Shape().BatchNum() == 10);
+        assert(eval.Shape().PageNum() == 5);
+        assert(eval.Shape().RowNum() == 7);
+        assert(eval.Shape().ColNum() == 3);
+        for (size_t b = 0; b < 10; ++b)
+        {
+            for (size_t p = 0; p < 5; ++p)
+            {
+                for (size_t i = 0; i < 7; ++i)
+                {
+                    for (size_t j = 0; j < 3; ++j)
+                    {
+                        assert(fabs(eval[b](p, i, j) - ori(i, j)) < 0.001);
+                    }
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_matrix_duplicate_case5()
+    {
+        cout << "Test duplicate: matrix -> matrix sequence\t";
+        
+        auto ori = GenMatrix<CheckElement>(7, 3);
+        auto dup = Duplicate(ori, Shape<CategoryTags::MatrixSequence>(10, 7, 3));
+        static_assert(std::is_same_v<DataCategory<decltype(dup)>, CategoryTags::MatrixSequence>);
+        assert(dup.Shape().Length() == 10);
+        assert(dup.Shape().RowNum() == 7);
+        assert(dup.Shape().ColNum() == 3);
+        
+        auto eval = Evaluate(dup);
+        assert(eval.Shape().Length() == 10);
+        assert(eval.Shape().RowNum() == 7);
+        assert(eval.Shape().ColNum() == 3);
+        for (size_t p = 0; p < 10; ++p)
+        {
+            for (size_t i = 0; i < 7; ++i)
+            {
+                for (size_t j = 0; j < 3; ++j)
+                {
+                    assert(fabs(eval[p](i, j) - ori(i, j)) < 0.001);
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_matrix_duplicate_case6()
+    {
+        cout << "Test duplicate: matrix -> 3d-array sequence\t";
+        
+        auto ori = GenMatrix<CheckElement>(7, 3);
+        auto dup = Duplicate(ori, Shape<CategoryTags::ThreeDArraySequence>(10, 5, 7, 3));
+        static_assert(std::is_same_v<DataCategory<decltype(dup)>, CategoryTags::ThreeDArraySequence>);
+        assert(dup.Shape().Length() == 10);
+        assert(dup.Shape().PageNum() == 5);
+        assert(dup.Shape().RowNum() == 7);
+        assert(dup.Shape().ColNum() == 3);
+        
+        auto eval = Evaluate(dup);
+        assert(eval.Shape().Length() == 10);
+        assert(eval.Shape().PageNum() == 5);
+        assert(eval.Shape().RowNum() == 7);
+        assert(eval.Shape().ColNum() == 3);
+        for (size_t b = 0; b < 10; ++b)
+        {
+            for (size_t p = 0; p < 5; ++p)
+            {
+                for (size_t i = 0; i < 7; ++i)
+                {
+                    for (size_t j = 0; j < 3; ++j)
+                    {
+                        assert(fabs(eval[b](p, i, j) - ori(i, j)) < 0.001);
+                    }
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_matrix_duplicate_case7()
+    {
+        cout << "Test duplicate: matrix -> batch matrix sequence\t";
+        
+        std::vector seqLen = {3, 7, 11};
+        auto ori = GenMatrix<CheckElement>(7, 3);
+        auto dup = Duplicate(ori, Shape<CategoryTags::BatchMatrixSequence>(seqLen, 7, 3));
+        static_assert(std::is_same_v<DataCategory<decltype(dup)>, CategoryTags::BatchMatrixSequence>);
+        assert(dup.Shape().SeqLenContainer().size() == 3);
+        assert(dup.Shape().SeqLenContainer()[0] == 3);
+        assert(dup.Shape().SeqLenContainer()[1] == 7);
+        assert(dup.Shape().SeqLenContainer()[2] == 11);
+        assert(dup.Shape().RowNum() == 7);
+        assert(dup.Shape().ColNum() == 3);
+        
+        auto eval = Evaluate(dup);
+        assert(eval.Shape().SeqLenContainer().size() == 3);
+        assert(eval.Shape().SeqLenContainer()[0] == 3);
+        assert(eval.Shape().SeqLenContainer()[1] == 7);
+        assert(eval.Shape().SeqLenContainer()[2] == 11);
+        assert(eval.Shape().RowNum() == 7);
+        assert(eval.Shape().ColNum() == 3);
+        
+        for (size_t i = 0; i < 7; ++i)
+        {
+            for (size_t j = 0; j < 3; ++j)
+            {
+                for (size_t p = 0; p < 3; ++p)
+                {
+                    assert(fabs(eval[0][p](i, j) - ori(i, j)) < 0.001);
+                }
+                for (size_t p = 0; p < 7; ++p)
+                {
+                    assert(fabs(eval[1][p](i, j) - ori(i, j)) < 0.001);
+                }
+                for (size_t p = 0; p < 11; ++p)
+                {
+                    assert(fabs(eval[2][p](i, j) - ori(i, j)) < 0.001);
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_matrix_duplicate_case8()
+    {
+        cout << "Test duplicate: matrix -> batch 3d-array sequence\t";
+        
+        std::vector seqLen = {3, 7, 11};
+        auto ori = GenMatrix<CheckElement>(7, 3);
+        auto dup = Duplicate(ori, Shape<CategoryTags::BatchThreeDArraySequence>(seqLen, 5, 7, 3));
+        static_assert(std::is_same_v<DataCategory<decltype(dup)>, CategoryTags::BatchThreeDArraySequence>);
+        assert(dup.Shape().SeqLenContainer().size() == 3);
+        assert(dup.Shape().SeqLenContainer()[0] == 3);
+        assert(dup.Shape().SeqLenContainer()[1] == 7);
+        assert(dup.Shape().SeqLenContainer()[2] == 11);
+        assert(dup.Shape().PageNum() == 5);
+        assert(dup.Shape().RowNum() == 7);
+        assert(dup.Shape().ColNum() == 3);
+        
+        auto eval = Evaluate(dup);
+        assert(eval.Shape().SeqLenContainer().size() == 3);
+        assert(eval.Shape().SeqLenContainer()[0] == 3);
+        assert(eval.Shape().SeqLenContainer()[1] == 7);
+        assert(eval.Shape().SeqLenContainer()[2] == 11);
+        assert(eval.Shape().PageNum() == 5);
+        assert(eval.Shape().RowNum() == 7);
+        assert(eval.Shape().ColNum() == 3);
+        for (size_t p = 0; p < 5; ++p)
+        {
+            for (size_t i = 0; i < 7; ++i)
+            {
+                for (size_t j = 0; j < 3; ++j)
+                {
+                    for (size_t s = 0; s < 3; ++s)
+                    {
+                        assert(fabs(eval[0][s](p, i, j) - ori(i, j)) < 0.001);
+                    }
+                    for (size_t s = 0; s < 7; ++s)
+                    {
+                        assert(fabs(eval[1][s](p, i, j) - ori(i, j)) < 0.001);
+                    }
+                    for (size_t s = 0; s < 11; ++s)
+                    {
+                        assert(fabs(eval[2][s](p, i, j) - ori(i, j)) < 0.001);
+                    }
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_3d_array_duplicate_case1()
+    {
+        cout << "Test duplicate: 3d-array -> 3d-array (plain duplicate)\t";
+        
+        auto ori = ThreeDArray<CheckElement, CheckDevice>::CreateWithShape(5, 7, 3);
+        auto dup = Duplicate(ori, ori.Shape());
+        assert(dup == ori);
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Operators
@@ -414,5 +638,13 @@ namespace Test::Operators
         
         test_matrix_duplicate_case1();
         test_matrix_duplicate_case2();
+        test_matrix_duplicate_case3();
+        test_matrix_duplicate_case4();
+        test_matrix_duplicate_case5();
+        test_matrix_duplicate_case6();
+        test_matrix_duplicate_case7();
+        test_matrix_duplicate_case8();
+        
+        test_3d_array_duplicate_case1();
     }
 }
