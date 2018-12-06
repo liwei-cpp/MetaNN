@@ -1,4 +1,4 @@
 #pragma once
 
-#include <MetaNN/operators/duplicate.h>
 #include <MetaNN/data/data.h>
+#include <MetaNN/operators/operators.h>

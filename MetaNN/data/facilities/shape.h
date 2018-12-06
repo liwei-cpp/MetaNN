@@ -287,6 +287,69 @@ private:
     std::vector<size_t> m_seqLenCont;
 };
 
+template <>
+class Shape<CategoryTags::BatchSequence<CategoryTags::Scalar>>
+{
+public:
+    template <typename TSeq = std::vector<size_t>>
+    explicit Shape(const TSeq& seq, Shape<CategoryTags::Scalar>)
+        : Shape(seq) {}
+    
+    template <typename TSeq = std::vector<size_t>>
+    explicit Shape(const TSeq& seq = TSeq{})
+    {
+        m_seqLenCont.reserve(seq.size());
+        for (auto v : seq)
+            m_seqLenCont.push_back(v);
+    }
+    
+public:
+    const auto& SeqLenContainer() const noexcept
+    {
+        return m_seqLenCont;
+    }
+    
+    auto& SeqLenContainer() noexcept
+    {
+        return m_seqLenCont;
+    }
+    
+    size_t Count() const noexcept
+    {
+        return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.end(), 0);
+    }
+    
+    template <typename... TIndexParams>
+    size_t Index2Count(size_t batchID, size_t seqID, TIndexParams... indexParams) const
+    {
+        if (batchID >= m_seqLenCont.size())
+        {
+            throw std::runtime_error("Invalid batch index for Shape<CategoryTags::BatchSequence>");
+        }
+        
+        if (seqID >= m_seqLenCont[batchID])
+        {
+            throw std::runtime_error("Invalid sequence index for Shape<CategoryTags::BatchSequence>");
+        }
+        
+        return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.begin() + batchID, seqID);
+    }
+    
+    bool operator== (const Shape& val) const
+    {
+        return (m_seqLenCont == val.m_seqLenCont);
+    }
+    
+    const Shape<CategoryTags::Scalar>& Cardinal() const noexcept
+    {
+        static Shape<CategoryTags::Scalar> inst;
+        return inst;
+    }
+    
+private:
+    std::vector<size_t> m_seqLenCont;
+};
+
 template <typename TCate>
 bool operator != (const Shape<TCate> val1, const Shape<TCate> val2)
 {

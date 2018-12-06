@@ -97,7 +97,6 @@
   </VirtualDirectory>
   <VirtualDirectory Name="data">
     <VirtualDirectory Name="batch">
-      <File Name="data/batch/duplicate.h"/>
       <File Name="data/batch/batch.h"/>
       <File Name="data/batch/batch_pack.h"/>
       <File Name="data/batch/batch_sequence.h"/>
@@ -225,6 +224,7 @@
     </VirtualDirectory>
     <File Name="operators/conv.h"/>
     <File Name="operators/duplicate.h"/>
+    <File Name="operators/operators.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/change_policy.h"/>
