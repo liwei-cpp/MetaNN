@@ -27,9 +27,12 @@ public:
     }
     
 public:
+    Scalar(MetaNN::Shape<CategoryTag> p_shape)
+        : Scalar() {}
+
     Scalar(ElementType elem = ElementType())
         : m_elem(elem) {}
-        
+                
     template <typename...TShapeParams>
     explicit Scalar(ContinuousMemory<ElementType, DeviceType> p_mem,
                     TShapeParams&&... shapeParams)

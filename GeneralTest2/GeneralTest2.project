@@ -159,5 +159,7 @@
     <File Name="operators/test_duplicate.h"/>
     <File Name="operators/test_duplicate.cpp"/>
     <File Name="operators/test_operators.h"/>
+    <File Name="operators/test_collapse.h"/>
+    <File Name="operators/test_collapse.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

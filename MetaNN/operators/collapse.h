@@ -100,7 +100,7 @@ public:
             assert(inCount % outCount == 0);
             
             // copy the first bucket for initialization, accumulate the other parts.
-            const size_t loopCount = outCount / inCount;
+            const size_t loopCount = inCount / outCount;
             memcpy(mem_out, mem_in, sizeof(ElementType) * outCount);
             mem_in += outCount;
             for (size_t i = 1; i < loopCount; ++i)
