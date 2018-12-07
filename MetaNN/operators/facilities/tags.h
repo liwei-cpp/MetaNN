@@ -4,6 +4,7 @@ namespace MetaNN::OpTags
 {
     // Data transform
     struct Duplicate;
+    struct Collapse;
     
 namespace UnaryOpTags
 {

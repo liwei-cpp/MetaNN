@@ -1,115 +1,220 @@
 #pragma once
 
+#include <MetaNN/data/facilities/shape.h>
+#include <MetaNN/data/facilities/traits.h>
+#include <MetaNN/evaluate/facilities/eval_plan.h>
+#include <MetaNN/operators/facilities/tags.h>
+#include <MetaNN/operators/facilities/operator_frame.h>
+#include <cassert>
+#include <cstring>
+#include <type_traits>
+#include <utility>
+
 namespace MetaNN
 {
-template <>
-struct OperCategory_<UnaryOpTags::Collapse, CategoryTags::BatchMatrix>
+namespace OperCollapse
 {
-    using type = CategoryTags::Matrix;
+template <typename TOriData, typename TShape>
+static constexpr bool valid = (std::is_same_v<TShape, Shape<CategoryTags::Scalar>>) ||
+
+                              (IsMatrix<TOriData>                   && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+                              (IsThreeDArray<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+                              (IsBatchMatrix<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+                              (IsBatchThreeDArray<TOriData>         && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+                              (IsMatrixSequence<TOriData>           && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+                              (IsThreeDArraySequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+                              (IsBatchMatrixSequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+                              (IsBatchThreeDArraySequence<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+
+                              (IsThreeDArray<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
+                              (IsBatchThreeDArray<TOriData>         && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
+                              (IsThreeDArraySequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
+                              (IsBatchThreeDArraySequence<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>);
+template<typename TOriShape>
+bool ShapeMatch(const TOriShape&, const Shape<CategoryTags::Scalar>&)
+{
+    return true;
 };
 
-namespace NSCollapse
+template<typename TOriShape>
+bool ShapeMatch(const TOriShape& ori, const Shape<CategoryTags::Matrix>& aim)
 {
-namespace NSCaseGen
-{
-template <typename TOperand, typename TElem, typename TDevice>
-class EvalUnit;
+    return ((ori.RowNum() == aim.RowNum()) && (ori.ColNum() == aim.ColNum()));
+};
 
-template <typename TOperand, typename TElem>
-class EvalUnit<TOperand, TElem, DeviceTags::CPU>
-    : public BaseEvalUnit<DeviceTags::CPU>
+template<typename TOriShape>
+bool ShapeMatch(const TOriShape& ori, const Shape<CategoryTags::ThreeDArray>& aim)
+{
+    return ((ori.RowNum() == aim.RowNum()) &&
+            (ori.ColNum() == aim.ColNum()) &&
+            (ori.PageNum() == aim.PageNum()));
+};
+
+template <typename TOriData, typename TShape>
+static auto CreateOpTemplate(TOriData&& data, TShape&& shape)
+{
+    using RawDataType = RemConstRef<TOriData>;
+    using RawShapeType = RemConstRef<TShape>;
+        
+    using ResType = Operator<OpTags::Collapse, RawDataType, RawShapeType>;
+    return ResType(std::forward<TOriData>(data),
+                   std::forward<TShape>(shape));
+}
+
+template <typename TInputHandle, typename TShape, typename TOutputHandle, typename TDevice>
+class EvalUnit : public BaseEvalUnit<TDevice>
 {
 public:
-    using ElementType = TElem;
-    using DeviceType = DeviceTags::CPU;
-
-    EvalUnit(TOperand evalInput,
-             EvalHandle<Matrix<ElementType, DeviceType>> evalOutput)
-        : m_evalInput(std::move(evalInput))
-        , m_evalOutput(std::move(evalOutput)) {}
-
-    void Eval() override
+    EvalUnit(TInputHandle oriHandle, TShape shape, TOutputHandle outputHandle)
+        : m_inputHandle(std::move(oriHandle))
+        , m_shape(std::move(shape))
+        , m_outputHandle(std::move(outputHandle))
+    {}
+    
+    void Eval() override final
     {
-        const auto& p_v = m_evalInput.Data();
-
-        const size_t rowNum = p_v.RowNum();
-        const size_t colNum = p_v.ColNum();
-        const size_t batchNum = p_v.BatchNum();
-        m_evalOutput.Allocate(rowNum, colNum);
+        m_outputHandle.Allocate(m_shape);
         
-        auto& res = m_evalOutput.MutableData();
+        const auto& in = m_inputHandle.Data();
+        const size_t inCount = in.Shape().Count();
 
-        for (size_t j = 0; j < rowNum; ++j)
+        auto& out = m_outputHandle.MutableData();
+        const size_t outCount = out.Shape().Count();
+                
+        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, "Currently only CPU is supported");
+        using ElementType = ElementTypePicker<decltype(in)>;
+        
+        auto low_in = LowerAccess(in);
+        ElementType* mem_in = low_in.MutableRawMemory();
+        
+        using OutputCategory = DataCategory<decltype(out)>;
+        if constexpr(std::is_same_v<OutputCategory, CategoryTags::Scalar>)
         {
-            for (size_t k = 0; k < colNum; ++k)
+            ElementType elem = std::accumulate(mem_in, mem_in + inCount, ElementType{});
+            out.SetValue(elem);
+        }
+        else
+        {
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+            assert(inCount % outCount == 0);
+            
+            // copy the first bucket for initialization, accumulate the other parts.
+            const size_t loopCount = outCount / inCount;
+            memcpy(mem_out, mem_in, sizeof(ElementType) * outCount);
+            mem_in += outCount;
+            for (size_t i = 1; i < loopCount; ++i)
             {
-                TElem tmp = 0;
-                for (size_t i = 0; i < batchNum; ++i)
+                for (size_t j = 0; j < outCount; ++j)
                 {
-                    tmp += p_v[i](j, k);
+                    mem_out[j] += mem_in[j];
                 }
-                res.SetValue(j, k, tmp);
+                mem_in += outCount;
             }
         }
-        m_evalOutput.SetEval();
+        m_outputHandle.SetEval();
     }
-
+    
 private:
-    TOperand m_evalInput;
-    EvalHandle<Matrix<ElementType, DeviceType>> m_evalOutput;
+    const TInputHandle m_inputHandle;
+    const TShape m_shape;
+    TOutputHandle m_outputHandle;
 };
 
 struct Calculator
 {
-    template <typename TCaseTail, typename TEvalRes, typename TOp>
-    static void EvalRegister(TEvalRes& evalRes, const TOp& oper)
+    template <typename TEvalRes, typename TOriData, typename TShape>
+    static void EvalRegister(TEvalRes& evalRes, const TOriData& oriData, const TShape& shape)
     {
-        static_assert(std::is_same<TCaseTail, OperSeqContainer<>>::value,
-                      "General Case is not the last one");
-                      
-        using ElementType = typename TEvalRes::DataType::ElementType;
         using DeviceType = typename TEvalRes::DataType::DeviceType;
+
+        auto handle = oriData.EvalRegister();
+        auto outHandle = evalRes.Handle();
         
-        const auto& data = oper.Operand();
-        auto handle = data.EvalRegister();
-        using UnitType = EvalUnit<decltype(handle), ElementType, DeviceType>;
+        using UnitType = EvalUnit<decltype(handle), TShape, decltype(outHandle), DeviceType>;
         using GroupType = TrivalEvalGroup<UnitType>;
 
-        auto outHandle = evalRes.Handle();
         const void* dataPtr = outHandle.DataPtr();
         const void* depVec = handle.DataPtr();
-        
-        UnitType unit(std::move(handle), std::move(outHandle));
+        UnitType unit(std::move(handle), shape, std::move(outHandle));
         EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, {depVec});
     }
 };
 }
-}
 
-template <>
-struct OperSeq_<UnaryOpTags::Collapse>
+// Note: since operator<OpTags::Duplicate> cannot deduce its category from operands,
+// so here involve a partial specification.
+template <typename TOriData, typename TCategory>
+class Operator<OpTags::Collapse, TOriData, Shape<TCategory>>
 {
-    using type = OperSeqContainer<NSCollapse::NSCaseGen::Calculator>;
-};
-
-struct OperCollapse
-{
-    template <typename T>
-    static constexpr bool valid = IsBatchMatrix<T>;
+    static_assert(std::is_same_v<RemConstRef<TOriData>, TOriData>, "TOriData is not an available type.");
     
-    template <typename T>
-    static auto Eval(T&& p_m)
+public:
+    using CategoryTag = TCategory;
+    using ElementType = typename TOriData::ElementType;
+    using DeviceType = typename TOriData::DeviceType;
+    
+public:
+    Operator(TOriData data, MetaNN::Shape<TCategory> shape)
+        : m_oriData(std::move(data))
+        , m_shape(std::move(shape))
+    {}
+
+    const auto& Shape() const noexcept
     {
-        using rawM = RemConstRef<T>;
-        using ResType = UnaryOp<UnaryOpTags::Collapse, rawM>;
-        return ResType(std::forward<T>(p_m));
+        return m_shape;
     }
+    
+    bool operator== (const Operator& val) const
+    {
+        return (m_oriData == val.m_oriData) &&
+               (m_shape == val.m_shape);
+    }
+
+    auto EvalRegister() const
+    {
+        if (!m_evalBuf.IsEvaluated())
+        {
+            OperCollapse::Calculator::EvalRegister(m_evalBuf, m_oriData, m_shape);
+        }
+        return m_evalBuf.ConstHandle();
+    }
+
+    const auto& Operand() const noexcept
+    {
+        return m_oriData;
+    }
+
+private:
+    const TOriData m_oriData;
+    const MetaNN::Shape<CategoryTag> m_shape;
+    
+    using TPrincipal = PrincipalDataType<CategoryTag, ElementType, DeviceType>;
+    EvalBuffer<TPrincipal> m_evalBuf;
 };
 
-template <typename TP,
-          std::enable_if_t<OperCollapse::valid<TP>>* = nullptr>
-auto Collapse(TP&& p_m)
+template <typename TOriData, typename TShape,
+          std::enable_if_t<OperCollapse::valid<TOriData, RemConstRef<TShape>>>* = nullptr>
+auto Collapse(TOriData&& data, TShape&& shape)
 {
-    return OperCollapse::Eval(std::forward<TP>(p_m));
+    using OriShape = RemConstRef<decltype(data.Shape())>;
+    using NewShape = RemConstRef<TShape>;
+    if constexpr (std::is_same_v<OriShape, NewShape>)
+    {
+        if (data.Shape() != shape)
+        {
+            throw std::runtime_error("Plain duplicate need identical shape.");
+        }
+        return std::forward<TOriData>(data);
+    }
+    else
+    {
+        if (!OperCollapse::ShapeMatch(data.Shape(), shape))
+        {
+            throw std::runtime_error("Cannot duplicate for un-match shape.");
+        }
+        return OperCollapse::CreateOpTemplate(std::forward<TOriData>(data),
+                                              std::forward<TShape>(shape));
+    }
 }
 }
