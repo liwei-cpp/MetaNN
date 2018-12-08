@@ -78,37 +78,25 @@ public:
         m_outputHandle.Allocate(m_shape);
         
         const auto& in = m_inputHandle.Data();
-        const size_t inCount = in.Shape().Count();
-
         auto& out = m_outputHandle.MutableData();
-        const size_t outCount = out.Shape().Count();
-                
-        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, "Currently only CPU is supported");
         using ElementType = ElementTypePicker<decltype(out)>;
         
+        const size_t inCount = in.Shape().Count();
+        auto low_in = LowerAccess(in);
+        ElementType* mem_in = low_in.MutableRawMemory();
+
+        const size_t outCount = out.Shape().Count();
         auto low_out = LowerAccess(out);
         ElementType* mem_out = low_out.MutableRawMemory();
-        
-        using InputCategory = DataCategory<decltype(in)>;
-        if constexpr(std::is_same_v<InputCategory, CategoryTags::Scalar>)
+                
+        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, "Currently only CPU is supported");
+
+        assert(outCount % inCount == 0);
+        const size_t loopCount = outCount / inCount;
+        for (size_t i = 0; i < loopCount; ++i)
         {
-            ElementType elem = in.Value();
-            for (size_t i = 0; i < outCount; ++i)
-            {
-                mem_out[i] = elem;
-            }
-        }
-        else
-        {
-            auto low_in = LowerAccess(in);
-            ElementType* mem_in = low_in.MutableRawMemory();
-            assert(outCount % inCount == 0);
-            const size_t loopCount = outCount / inCount;
-            for (size_t i = 0; i < loopCount; ++i)
-            {
-                memcpy(mem_out, mem_in, sizeof(ElementType) * inCount);
-                mem_out += inCount;
-            }
+            memcpy(mem_out, mem_in, sizeof(ElementType) * inCount);
+            mem_out += inCount;
         }
         m_outputHandle.SetEval();
     }

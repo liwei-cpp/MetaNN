@@ -1,5 +1,6 @@
 #pragma once
 #include <MetaNN/data/facilities/continuous_memory.h>
+#include <MetaNN/data/facilities/lower_access.h>
 #include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/data/facilities/tags.h>
@@ -19,6 +20,8 @@ public:
     using CategoryTag = CategoryTags::Scalar;
     using ElementType = TElem;
     using DeviceType = DeviceTags::CPU;
+    
+    friend struct LowerAccessImpl<Scalar>;
 
 public:
     static Scalar CreateWithShape()
@@ -27,16 +30,19 @@ public:
     }
     
 public:
-    Scalar(MetaNN::Shape<CategoryTag> p_shape)
+    explicit Scalar(MetaNN::Shape<CategoryTag> p_shape)
         : Scalar() {}
 
     Scalar(ElementType elem = ElementType())
-        : m_elem(elem) {}
+        : m_mem(1)
+    {
+        SetValue(elem);
+    }
                 
     template <typename...TShapeParams>
     explicit Scalar(ContinuousMemory<ElementType, DeviceType> p_mem,
-                    TShapeParams&&... shapeParams)
-        : m_elem((p_mem.RawMemory())[0])
+                    TShapeParams&&...)
+        : m_mem(std::move(p_mem))
     {}
     
     const auto& Shape() const noexcept
@@ -45,19 +51,25 @@ public:
         return shape;
     }
     
+    bool AvailableForWrite() const
+    {
+        return m_mem.IsShared();
+    }
+    
     void SetValue(ElementType val)
     {
-        m_elem = val;
+        assert(AvailableForWrite());
+        (m_mem.RawMemory())[0] = val;
     }
    
     auto Value() const noexcept
     {
-        return m_elem;
+        return (m_mem.RawMemory())[0];
     }
     
     bool operator== (const Scalar& val) const noexcept
     {
-        return (m_elem == val.m_elem);
+        return (Value() == val.Value());
     }
 
     auto EvalRegister() const
@@ -66,6 +78,27 @@ public:
     }
 
 private:
-    ElementType m_elem;
+    ContinuousMemory<ElementType, DeviceType> m_mem;
+};
+
+template<typename TElem, typename TDevice>
+struct LowerAccessImpl<Scalar<TElem, TDevice>>
+{
+    LowerAccessImpl(Scalar<TElem, TDevice> p)
+        : m_data(std::move(p))
+    {}
+
+    auto MutableRawMemory()
+    {
+        return m_data.m_mem.RawMemory();
+    }
+
+    const auto RawMemory() const
+    {
+        return m_data.m_mem.RawMemory();
+    }
+
+private:
+    Scalar<TElem, TDevice> m_data;
 };
 }

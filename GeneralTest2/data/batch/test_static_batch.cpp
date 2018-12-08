@@ -32,7 +32,7 @@ namespace
         c = 0;
         for (size_t i=0; i<13; ++i)
         {
-            assert(c2[i] == (float)(c++));
+            assert(c2[i].Value() == (float)(c++));
         }
 
         auto evalHandle = check.EvalRegister();

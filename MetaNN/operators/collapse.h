@@ -76,41 +76,32 @@ public:
         m_outputHandle.Allocate(m_shape);
         
         const auto& in = m_inputHandle.Data();
-        const size_t inCount = in.Shape().Count();
-
         auto& out = m_outputHandle.MutableData();
-        const size_t outCount = out.Shape().Count();
-                
-        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, "Currently only CPU is supported");
         using ElementType = ElementTypePicker<decltype(in)>;
         
+        const size_t inCount = in.Shape().Count();
         auto low_in = LowerAccess(in);
         ElementType* mem_in = low_in.MutableRawMemory();
         
-        using OutputCategory = DataCategory<decltype(out)>;
-        if constexpr(std::is_same_v<OutputCategory, CategoryTags::Scalar>)
+        const size_t outCount = out.Shape().Count();
+        auto low_out = LowerAccess(out);
+        ElementType* mem_out = low_out.MutableRawMemory();
+        
+        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, "Currently only CPU is supported");
+        
+        assert(inCount % outCount == 0);
+
+        // copy the first bucket for initialization, accumulate the other parts.
+        const size_t loopCount = inCount / outCount;
+        memcpy(mem_out, mem_in, sizeof(ElementType) * outCount);
+        mem_in += outCount;
+        for (size_t i = 1; i < loopCount; ++i)
         {
-            ElementType elem = std::accumulate(mem_in, mem_in + inCount, ElementType{});
-            out.SetValue(elem);
-        }
-        else
-        {
-            auto low_out = LowerAccess(out);
-            ElementType* mem_out = low_out.MutableRawMemory();
-            assert(inCount % outCount == 0);
-            
-            // copy the first bucket for initialization, accumulate the other parts.
-            const size_t loopCount = inCount / outCount;
-            memcpy(mem_out, mem_in, sizeof(ElementType) * outCount);
-            mem_in += outCount;
-            for (size_t i = 1; i < loopCount; ++i)
+            for (size_t j = 0; j < outCount; ++j)
             {
-                for (size_t j = 0; j < outCount; ++j)
-                {
-                    mem_out[j] += mem_in[j];
-                }
-                mem_in += outCount;
+                mem_out[j] += mem_in[j];
             }
+            mem_in += outCount;
         }
         m_outputHandle.SetEval();
     }
