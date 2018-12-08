@@ -7,9 +7,10 @@
 
 namespace MetaNN
 {
-template <typename TOpTag, typename THeadOp, typename...TOperands>
+template <typename TOpTag, typename...TOperands>
 class Operator
 {
+    static_assert(sizeof...(TOperands) > 0, "Operator not support zero operands.");
     static_assert((std::is_same_v<RemConstRef<TOperands>, TOperands> && ...),
                   "TOperands is not available types");
 public:
@@ -18,17 +19,23 @@ public:
     using DeviceType = typename OperDeviceType_<TOpTag, TOperands...>::type;
     
 public:
-    Operator(TOperands&&... p_operands)
+    explicit Operator(TOperands... p_operands)
         : Operator(OperAuxParams<TOpTag, CategoryTag>{},
-                   std::forward<TOperands>(p_operands)...)
+                   std::move(p_operands)...)
     {}
     
-    Operator(OperAuxParams<TOpTag, CategoryTag> auxParams,
-             TOperands&&... p_operands)
+    explicit Operator(OperAuxParams<TOpTag, CategoryTag> auxParams,
+                      TOperands... p_operands)
         : m_auxParams(std::move(auxParams))
         , m_shapeInfo(m_auxParams, p_operands...)
-        , m_operands({std::forward<TOperands>(p_operands)...})
+        , m_operands({std::move(p_operands)...})
     {}
+    
+    template <size_t id>
+    const auto& GetOperand() const
+    {
+        return std::get<id>(m_operands);
+    }
     
     const auto& AuxParams() const
     {
@@ -61,9 +68,9 @@ public:
     }
     
 private:
-    const OperAuxParams<TOpTag, CategoryTag> m_auxParams;
-    const OperShapeInfo<TOpTag, CategoryTag> m_shapeInfo;
-    const std::tuple<TOperands...> m_operands;
+    OperAuxParams<TOpTag, CategoryTag> m_auxParams;
+    OperShapeInfo<TOpTag, CategoryTag> m_shapeInfo;
+    std::tuple<TOperands...> m_operands;
     
     using TPrincipal = PrincipalDataType<CategoryTag, ElementType, DeviceType>;
     EvalBuffer<TPrincipal> m_evalBuf;

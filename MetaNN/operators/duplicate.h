@@ -180,7 +180,7 @@ private:
 };
 
 template <typename TOriData, typename TShape,
-          std::enable_if_t<OperDuplicate::valid<TOriData, RemConstRef<TShape>>>* = nullptr>
+          typename = std::enable_if_t<OperDuplicate::valid<TOriData, RemConstRef<TShape>>>>
 auto Duplicate(TOriData&& data, TShape&& shape)
 {
     using OriShape = RemConstRef<decltype(data.Shape())>;

@@ -185,7 +185,7 @@ private:
 };
 
 template <typename TOriData, typename TShape,
-          std::enable_if_t<OperCollapse::valid<TOriData, RemConstRef<TShape>>>* = nullptr>
+          typename = std::enable_if_t<OperCollapse::valid<TOriData, RemConstRef<TShape>>>>
 auto Collapse(TOriData&& data, TShape&& shape)
 {
     using OriShape = RemConstRef<decltype(data.Shape())>;

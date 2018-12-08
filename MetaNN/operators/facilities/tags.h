@@ -6,9 +6,11 @@ namespace MetaNN::OpTags
     struct Duplicate;
     struct Collapse;
     
+    // Element-wise operator
+    struct Abs;
+    
 namespace UnaryOpTags
 {
-    struct Abs;
     struct Sigmoid;
     struct Sign;
     struct Tanh;

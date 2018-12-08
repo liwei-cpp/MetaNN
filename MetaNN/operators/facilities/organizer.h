@@ -79,7 +79,7 @@ public:
     }
     
 private:
-    const MetaNN::Shape<TCate>& m_shape;
+    MetaNN::Shape<TCate> m_shape;
 };
 
 
