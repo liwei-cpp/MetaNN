@@ -8,11 +8,11 @@ namespace MetaNN::OpTags
     
     // Element-wise operator
     struct Abs;
+    struct Sign;
     
 namespace UnaryOpTags
 {
     struct Sigmoid;
-    struct Sign;
     struct Tanh;
     struct Transpose;
     struct Collapse;

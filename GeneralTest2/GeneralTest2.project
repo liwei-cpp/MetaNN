@@ -163,5 +163,7 @@
     <File Name="operators/test_collapse.cpp"/>
     <File Name="operators/test_abs.h"/>
     <File Name="operators/test_abs.cpp"/>
+    <File Name="operators/test_sign.h"/>
+    <File Name="operators/test_sign.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

@@ -3,6 +3,7 @@
 #include <operators/test_collapse.h>
 
 #include <operators/test_abs.h>
+#include <operators/test_sign.h>
 
 namespace Test::Operators
 {
@@ -12,5 +13,6 @@ namespace Test::Operators
         test_collapse();
         
         test_abs();
+        test_sign();
     }
 }

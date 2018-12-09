@@ -6,3 +6,4 @@
 
 // Element-wise operator
 #include <MetaNN/operators/abs.h>
+#include <MetaNN/operators/sign.h>
