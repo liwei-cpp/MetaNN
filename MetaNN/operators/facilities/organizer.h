@@ -69,7 +69,7 @@ public:
     OperShapeInfo(const OperAuxParams<TOpTag, TCate>&, const THead& head, const TRemain&... rem)
         : m_shape(head.Shape())
     {
-        static_assert((std::is_same_v<decltype(m_shape), decltype(rem.Shape())> && ...));
+        static_assert((std::is_same_v<decltype(head.Shape()), decltype(rem.Shape())> && ...));
         assert(((m_shape == rem.Shape()) && ...));
     }
     

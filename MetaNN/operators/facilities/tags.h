@@ -6,8 +6,9 @@ namespace MetaNN::OpTags
     struct Duplicate;
     struct Collapse;
     
-    // Element-wise operator
+    // Elementwise operator
     struct Abs;
+    struct Add;
     struct Sign;
     
 namespace UnaryOpTags
@@ -21,7 +22,6 @@ namespace UnaryOpTags
 
 namespace BinaryOpTags
 {
-    struct Add;
     struct Substract;
     struct ElementMul;
     struct Divide;

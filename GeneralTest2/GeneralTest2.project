@@ -165,5 +165,7 @@
     <File Name="operators/test_abs.cpp"/>
     <File Name="operators/test_sign.h"/>
     <File Name="operators/test_sign.cpp"/>
+    <File Name="operators/test_add.h"/>
+    <File Name="operators/test_add.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>
