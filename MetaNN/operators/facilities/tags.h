@@ -9,7 +9,10 @@ namespace MetaNN::OpTags
     // Elementwise operator
     struct Abs;
     struct Add;
+    struct Divide;
+    struct Multiply;
     struct Sign;
+    struct Substract;
     
 namespace UnaryOpTags
 {
@@ -22,9 +25,6 @@ namespace UnaryOpTags
 
 namespace BinaryOpTags
 {
-    struct Substract;
-    struct ElementMul;
-    struct Divide;
     struct Dot;
     struct NegativeLogLikelihood;
     struct SigmoidDerivative;

@@ -204,7 +204,6 @@
     <File Name="operators/collapse.h"/>
     <File Name="operators/divide.h"/>
     <File Name="operators/dot.h"/>
-    <File Name="operators/element_mul.h"/>
     <File Name="operators/interpolate.h"/>
     <File Name="operators/negative_log_likelihood.h"/>
     <File Name="operators/negative_log_likelihood_derivative.h"/>
@@ -225,6 +224,7 @@
     <File Name="operators/conv.h"/>
     <File Name="operators/duplicate.h"/>
     <File Name="operators/operators.h"/>
+    <File Name="operators/multiply.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/change_policy.h"/>

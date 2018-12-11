@@ -9,7 +9,7 @@
 
 namespace MetaNN
 {
-namespace OperatorDivide
+namespace OperatorMultiply
 {
 template <typename TOp1, typename TOp2>
 static constexpr bool valid = (!IsInvalid<TOp1>) &&
@@ -21,12 +21,12 @@ static auto CreateOpTemplate(TOp1&& p1, TOp2&& p2)
 {
     if (p1.Shape() != p2.Shape())
     {
-        throw std::runtime_error("Divide error: operands' shape mismatch.");
+        throw std::runtime_error("Multiply error: operands' shape mismatch.");
     }
     
     using rawOp1 = RemConstRef<TOp1>;
     using rawOp2 = RemConstRef<TOp2>;
-    using ResType = Operator<OpTags::Divide, rawOp1, rawOp2>;
+    using ResType = Operator<OpTags::Multiply, rawOp1, rawOp2>;
     return ResType(std::forward<TOp1>(p1), std::forward<TOp2>(p2));
 }
 
@@ -68,7 +68,7 @@ public:
         
         for (size_t i = 0; i < count; ++i)
         {
-            mem_out[i] = mem_in1[i] / mem_in2[i];
+            mem_out[i] = mem_in1[i] * mem_in2[i];
         }
         m_outputHandle.SetEval();
     }
@@ -108,15 +108,15 @@ struct Calculator
 }
 
 template <>
-struct OperSeq_<OpTags::Divide>
+struct OperSeq_<OpTags::Multiply>
 {
-    using type = OperSeqContainer<OperatorDivide::NSCaseGen::Calculator>;
+    using type = OperSeqContainer<OperatorMultiply::NSCaseGen::Calculator>;
 };
 
 template <typename TP1, typename TP2,
-          typename = std::enable_if_t<OperatorDivide::valid<TP1, TP2>>>
-auto operator/ (TP1&& p_m1, TP2&& p_m2)
+          typename = std::enable_if_t<OperatorMultiply::valid<TP1, TP2>>>
+auto operator* (TP1&& p_m1, TP2&& p_m2)
 {
-    return OperatorDivide::CreateOpTemplate(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2));
+    return OperatorMultiply::CreateOpTemplate(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2));
 }
 }

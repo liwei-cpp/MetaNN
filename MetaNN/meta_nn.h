@@ -20,7 +20,7 @@
 #include <MetaNN/operators/conv.h>
 #include <MetaNN/operators/divide.h>
 #include <MetaNN/operators/dot.h>
-#include <MetaNN/operators/element_mul.h>
+#include <MetaNN/operators/multiply.h>
 #include <MetaNN/operators/interpolate.h>
 #include <MetaNN/operators/negative_log_likelihood.h>
 #include <MetaNN/operators/negative_log_likelihood_derivative.h>

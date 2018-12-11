@@ -167,5 +167,11 @@
     <File Name="operators/test_sign.cpp"/>
     <File Name="operators/test_add.h"/>
     <File Name="operators/test_add.cpp"/>
+    <File Name="operators/test_substract.h"/>
+    <File Name="operators/test_substract.cpp"/>
+    <File Name="operators/test_multiply.h"/>
+    <File Name="operators/test_multiply.cpp"/>
+    <File Name="operators/test_divide.h"/>
+    <File Name="operators/test_divide.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>
