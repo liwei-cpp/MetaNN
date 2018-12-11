@@ -225,6 +225,8 @@
     <File Name="operators/duplicate.h"/>
     <File Name="operators/operators.h"/>
     <File Name="operators/multiply.h"/>
+    <File Name="operators/acos.h"/>
+    <File Name="operators/acos_grad.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/change_policy.h"/>

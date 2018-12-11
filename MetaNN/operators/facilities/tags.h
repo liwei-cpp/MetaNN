@@ -8,6 +8,7 @@ namespace MetaNN::OpTags
     
     // Elementwise operator
     struct Abs;
+    struct Acos;    struct AcosGrad;
     struct Add;
     struct Divide;
     struct Multiply;

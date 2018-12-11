@@ -173,5 +173,9 @@
     <File Name="operators/test_multiply.cpp"/>
     <File Name="operators/test_divide.h"/>
     <File Name="operators/test_divide.cpp"/>
+    <File Name="operators/test_acos.h"/>
+    <File Name="operators/test_acos.cpp"/>
+    <File Name="operators/test_acos_grad.h"/>
+    <File Name="operators/test_acos_grad.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>
