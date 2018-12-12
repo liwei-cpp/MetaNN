@@ -76,10 +76,11 @@ inline auto GenBatchMatrix(size_t p, size_t r, size_t c, TElem start = 0, TElem 
 }
 
 template <typename TElem>
-inline auto GenBatchThreeDArray(size_t b, size_t p, size_t r, size_t c, TElem start = 0, TElem scale = 1)
+inline auto GenBatchThreeDArray(size_t b, size_t p, size_t r, size_t c, TElem start = 0, TElem step = 1)
 {
     using namespace MetaNN;
     auto res = BatchThreeDArray<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(b, p, r, c);
+    TElem cur{};
     for (size_t l = 0; l < b; ++l)
     {
         for (size_t k = 0; k < p; ++k)
@@ -88,8 +89,8 @@ inline auto GenBatchThreeDArray(size_t b, size_t p, size_t r, size_t c, TElem st
             {
                 for (size_t j = 0; j < c; ++j)
                 {
-                    res.SetValue((TElem)(start * scale), l, k, i, j);
-                    start += 1.0f;
+                    res.SetValue((TElem)(start + cur), l, k, i, j);
+                    cur += step;
                 }
             }
         }

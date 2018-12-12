@@ -177,5 +177,9 @@
     <File Name="operators/test_acos.cpp"/>
     <File Name="operators/test_acos_grad.h"/>
     <File Name="operators/test_acos_grad.cpp"/>
+    <File Name="operators/test_sigmoid.h"/>
+    <File Name="operators/test_sigmoid.cpp"/>
+    <File Name="operators/test_sigmoid_grad.h"/>
+    <File Name="operators/test_sigmoid_grad.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

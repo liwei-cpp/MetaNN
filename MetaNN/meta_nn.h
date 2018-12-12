@@ -25,7 +25,7 @@
 #include <MetaNN/operators/negative_log_likelihood.h>
 #include <MetaNN/operators/negative_log_likelihood_derivative.h>
 #include <MetaNN/operators/sigmoid.h>
-#include <MetaNN/operators/sigmoid_derivative.h>
+#include <MetaNN/operators/sigmoid_grad.h>
 #include <MetaNN/operators/sign.h>
 #include <MetaNN/operators/softmax.h>
 #include <MetaNN/operators/softmax_derivative.h>

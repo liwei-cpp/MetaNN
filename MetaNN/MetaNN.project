@@ -208,7 +208,6 @@
     <File Name="operators/negative_log_likelihood.h"/>
     <File Name="operators/negative_log_likelihood_derivative.h"/>
     <File Name="operators/sigmoid.h"/>
-    <File Name="operators/sigmoid_derivative.h"/>
     <File Name="operators/sign.h"/>
     <File Name="operators/softmax.h"/>
     <File Name="operators/softmax_derivative.h"/>
@@ -227,6 +226,7 @@
     <File Name="operators/multiply.h"/>
     <File Name="operators/acos.h"/>
     <File Name="operators/acos_grad.h"/>
+    <File Name="operators/sigmoid_grad.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/change_policy.h"/>

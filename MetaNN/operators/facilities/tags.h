@@ -12,12 +12,12 @@ namespace MetaNN::OpTags
     struct Add;
     struct Divide;
     struct Multiply;
+    struct Sigmoid; struct SigmoidGrad;
     struct Sign;
     struct Substract;
     
 namespace UnaryOpTags
 {
-    struct Sigmoid;
     struct Tanh;
     struct Transpose;
     struct Collapse;

@@ -8,6 +8,8 @@
 #include <operators/test_add.h>
 #include <operators/test_divide.h>
 #include <operators/test_multiply.h>
+#include <operators/test_sigmoid.h>
+#include <operators/test_sigmoid_grad.h>
 #include <operators/test_sign.h>
 #include <operators/test_substract.h>
 
@@ -19,8 +21,8 @@ namespace Test::Operators
         test_collapse();
         
         test_abs();
-        test_acos();
-        test_acos_grad();
+        test_acos();        test_acos_grad();
+        test_sigmoid();     test_sigmoid_grad();
         test_add();
         test_divide();
         test_multiply();
