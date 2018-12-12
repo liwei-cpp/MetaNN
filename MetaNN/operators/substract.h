@@ -9,28 +9,7 @@
 
 namespace MetaNN
 {
-namespace OperSubstract
-{
-template <typename TOp1, typename TOp2>
-static constexpr bool valid = (!IsInvalid<TOp1>) &&
-                              (!IsInvalid<TOp2>) &&
-                              (std::is_same_v<DataCategory<TOp1>, DataCategory<TOp2>>);
-
-template <typename TOp1, typename TOp2>
-static auto CreateOpTemplate(TOp1&& p1, TOp2&& p2)
-{
-    if (p1.Shape() != p2.Shape())
-    {
-        throw std::runtime_error("Substract error: operands' shape mismatch.");
-    }
-    
-    using rawOp1 = RemConstRef<TOp1>;
-    using rawOp2 = RemConstRef<TOp2>;
-    using ResType = Operator<OpTags::Substract, rawOp1, rawOp2>;
-    return ResType(std::forward<TOp1>(p1), std::forward<TOp2>(p2));
-}
-
-namespace NSCaseGen
+namespace OperSubstract::NSCaseGen
 {
 template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle, typename TDevice>
 class EvalUnit : public BaseEvalUnit<TDevice>
@@ -105,7 +84,6 @@ struct Calculator
     }
 };
 }
-}
 
 template <>
 struct OperSeq_<OpTags::Substract>
@@ -114,9 +92,17 @@ struct OperSeq_<OpTags::Substract>
 };
 
 template <typename TP1, typename TP2,
-          typename = std::enable_if_t<OperSubstract::valid<TP1, TP2>>>
+          typename = std::enable_if_t<IsValidOper<OpTags::Substract, TP1, TP2>>>
 auto operator- (TP1&& p_m1, TP2&& p_m2)
 {
-    return OperSubstract::CreateOpTemplate(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2));
+    if (p_m1.Shape() != p_m2.Shape())
+    {
+        throw std::runtime_error("Substract error: operands' shape mismatch.");
+    }
+    
+    using rawOp1 = RemConstRef<TP1>;
+    using rawOp2 = RemConstRef<TP2>;
+    using ResType = Operator<OpTags::Substract, rawOp1, rawOp2>;
+    return ResType(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2));
 }
 }

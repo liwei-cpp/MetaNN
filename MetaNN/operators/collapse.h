@@ -12,24 +12,26 @@
 
 namespace MetaNN
 {
+template <typename TOriData, typename TShape>
+constexpr bool IsValidOper<OpTags::Collapse, TOriData, TShape>
+    = (std::is_same_v<TShape, Shape<CategoryTags::Scalar>>) ||
+
+      (IsMatrix<TOriData>                   && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsThreeDArray<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsBatchMatrix<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsBatchThreeDArray<TOriData>         && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsMatrixSequence<TOriData>           && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsThreeDArraySequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsBatchMatrixSequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsBatchThreeDArraySequence<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+
+      (IsThreeDArray<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
+      (IsBatchThreeDArray<TOriData>         && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
+      (IsThreeDArraySequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
+      (IsBatchThreeDArraySequence<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>);
+
 namespace OperCollapse
 {
-template <typename TOriData, typename TShape>
-static constexpr bool valid = (std::is_same_v<TShape, Shape<CategoryTags::Scalar>>) ||
-
-                              (IsMatrix<TOriData>                   && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
-                              (IsThreeDArray<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
-                              (IsBatchMatrix<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
-                              (IsBatchThreeDArray<TOriData>         && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
-                              (IsMatrixSequence<TOriData>           && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
-                              (IsThreeDArraySequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
-                              (IsBatchMatrixSequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
-                              (IsBatchThreeDArraySequence<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
-
-                              (IsThreeDArray<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
-                              (IsBatchThreeDArray<TOriData>         && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
-                              (IsThreeDArraySequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
-                              (IsBatchThreeDArraySequence<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>);
 template<typename TOriShape>
 bool ShapeMatch(const TOriShape&, const Shape<CategoryTags::Scalar>&)
 {
@@ -185,7 +187,7 @@ private:
 };
 
 template <typename TOriData, typename TShape,
-          typename = std::enable_if_t<OperCollapse::valid<TOriData, RemConstRef<TShape>>>>
+          typename = std::enable_if_t<IsValidOper<OpTags::Collapse, TOriData, RemConstRef<TShape>>>>
 auto Collapse(TOriData&& data, TShape&& shape)
 {
     using OriShape = RemConstRef<decltype(data.Shape())>;

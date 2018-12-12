@@ -11,20 +11,7 @@
 
 namespace MetaNN
 {
-namespace OperAcosGrad
-{
-template <typename TOperand>
-static constexpr bool valid = !IsInvalid<TOperand>;
-
-template <typename T>
-static auto CreateOpTemplate(T&& p_m)
-{
-    using rawM = RemConstRef<T>;
-    using ResType = Operator<OpTags::AcosGrad, rawM>;
-    return ResType(std::forward<T>(p_m));
-}
-
-namespace NSCaseGen
+namespace OperAcosGrad::NSCaseGen
 {
 template <typename TInputHandle, typename TOutputHandle, typename TDevice>
 class EvalUnit : public BaseEvalUnit<TDevice>
@@ -90,7 +77,6 @@ struct Calculator
     }
 };
 }
-}
 
 template <>
 struct OperSeq_<OpTags::AcosGrad>
@@ -99,9 +85,12 @@ struct OperSeq_<OpTags::AcosGrad>
 };
 
 template <typename TP,
-          typename = std::enable_if_t<OperAcosGrad::valid<TP>>>
+          typename = std::enable_if_t<IsValidOper<OpTags::AcosGrad, TP>>>
 auto AcosGrad(TP&& p_m)
 {
-    return OperAcosGrad::CreateOpTemplate(std::forward<TP>(p_m));
+    using rawM = RemConstRef<TP>;
+    using ResType = Operator<OpTags::AcosGrad, rawM>;
+    return ResType(std::forward<TP>(p_m));
+
 }
 }
