@@ -12,11 +12,12 @@ namespace
     {
         cout << "Test acos-grad case 1 (scalar)\t";
         {
+            Scalar<CheckElement, CheckDevice> grad(1.5);
             Scalar<CheckElement, CheckDevice> ori(0.3348);
-            auto op = AcosGrad(ori);
+            auto op = AcosGrad(grad, ori);
             auto res = Evaluate(op);
             
-            auto check = -1 / std::sqrt(1 - 0.3348 * 0.3348);
+            auto check = -1.5 / std::sqrt(1 - 0.3348 * 0.3348);
             assert(fabs(res.Value() - check) < 0.001f);
         }
         cout << "done" << endl;
@@ -25,8 +26,9 @@ namespace
     void test_acos_grad_case2()
     {
         cout << "Test acos-grad case 2 (matrix)\t";
+        auto grad = GenMatrix<CheckElement>(10, 7);
         auto ori = GenMatrix<CheckElement>(10, 7, -0.5, 0.01);
-        auto op = AcosGrad(ori);
+        auto op = AcosGrad(grad, ori);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape().RowNum() == 10);
         assert(op.Shape().ColNum() == 7);
@@ -40,7 +42,7 @@ namespace
         {
             for (size_t k = 0; k < 7; ++k)
             {
-                auto check = -1 / std::sqrt(1 - ori(i, k) * ori(i, k));
+                auto check = -grad(i, k) / std::sqrt(1 - ori(i, k) * ori(i, k));
                 assert(fabs(res(i, k) - check) < 0.001f);
             }
         }
@@ -50,8 +52,9 @@ namespace
     void test_acos_grad_case3()
     {
         cout << "Test acos-grad case 3 (3d-array)\t";
+        auto grad = GenThreeDArray<CheckElement>(2, 10, 7);
         auto ori = GenThreeDArray<CheckElement>(2, 10, 7, -0.9, 0.01);
-        auto op = AcosGrad(ori);
+        auto op = AcosGrad(grad, ori);
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape().PageNum() == 2);
         assert(op.Shape().RowNum() == 10);
@@ -69,7 +72,7 @@ namespace
             {
                 for (size_t k = 0; k < 7; ++k)
                 {
-                    auto check = -1 / std::sqrt(1 - ori(p, i, k) * ori(p, i, k));
+                    auto check = -grad(p, i, k) / std::sqrt(1 - ori(p, i, k) * ori(p, i, k));
                     assert(fabs(res(p, i, k) - check) < 0.001f);
                 }
             }
@@ -80,8 +83,9 @@ namespace
     void test_acos_grad_case4()
     {
         cout << "Test acos-grad case 4 (batch scalar)\t";
+        auto grad = GenBatchScalar<CheckElement>(10);
         auto ori = GenBatchScalar<CheckElement>(10, -0.9, 0.1);
-        auto op = AcosGrad(ori);
+        auto op = AcosGrad(grad, ori);
         static_assert(IsBatchScalar<decltype(op)>);
         assert(op.Shape().BatchNum() == 10);
         
@@ -91,7 +95,7 @@ namespace
         
         for (size_t i = 0; i < 10; ++i)
         {
-            auto check = -1 / std::sqrt(1 - ori[i].Value() * ori[i].Value());
+            auto check = -grad[i].Value() / std::sqrt(1 - ori[i].Value() * ori[i].Value());
             assert(fabs(res[i].Value() - check) < 0.001f);
         }
         cout << "done" << endl;
@@ -100,8 +104,9 @@ namespace
     void test_acos_grad_case5()
     {
         cout << "Test acos-grad case 5 (batch matrix)\t";
+        auto grad = GenBatchMatrix<CheckElement>(2, 10, 7);
         auto ori = GenBatchMatrix<CheckElement>(2, 10, 7, -0.9, 0.01);
-        auto op = AcosGrad(ori);
+        auto op = AcosGrad(grad, ori);
         static_assert(IsBatchMatrix<decltype(op)>);
         assert(op.Shape().BatchNum() == 2);
         assert(op.Shape().RowNum() == 10);
@@ -119,7 +124,7 @@ namespace
             {
                 for (size_t k = 0; k < 7; ++k)
                 {
-                    auto check = -1 / std::sqrt(1 - ori[p](i, k) * ori[p](i, k));
+                    auto check = -grad[p](i, k) / std::sqrt(1 - ori[p](i, k) * ori[p](i, k));
                     assert(fabs(res[p](i, k) - check) < 0.001f);
                 }
             }
