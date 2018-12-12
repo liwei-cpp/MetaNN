@@ -9,6 +9,7 @@
 #include <MetaNN/operators/acos.h>
 #include <MetaNN/operators/acos_grad.h>
 #include <MetaNN/operators/add.h>
+#include <MetaNN/operators/asin.h>
 #include <MetaNN/operators/divide.h>
 #include <MetaNN/operators/multiply.h>
 #include <MetaNN/operators/sigmoid.h>

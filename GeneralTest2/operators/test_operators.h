@@ -6,6 +6,7 @@
 #include <operators/test_acos.h>
 #include <operators/test_acos_grad.h>
 #include <operators/test_add.h>
+#include <operators/test_asin.h>
 #include <operators/test_divide.h>
 #include <operators/test_multiply.h>
 #include <operators/test_sigmoid.h>
@@ -22,10 +23,11 @@ namespace Test::Operators
         
         test_abs();
         test_acos();        test_acos_grad();
-        test_sigmoid();     test_sigmoid_grad();
         test_add();
+        test_asin();
         test_divide();
         test_multiply();
+        test_sigmoid();     test_sigmoid_grad();
         test_sign();
         test_substract();
     }

@@ -181,5 +181,7 @@
     <File Name="operators/test_sigmoid.cpp"/>
     <File Name="operators/test_sigmoid_grad.h"/>
     <File Name="operators/test_sigmoid_grad.cpp"/>
+    <File Name="operators/test_asin.h"/>
+    <File Name="operators/test_asin.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

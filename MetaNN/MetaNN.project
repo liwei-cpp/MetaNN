@@ -227,6 +227,7 @@
     <File Name="operators/acos.h"/>
     <File Name="operators/acos_grad.h"/>
     <File Name="operators/sigmoid_grad.h"/>
+    <File Name="operators/asin.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/change_policy.h"/>
