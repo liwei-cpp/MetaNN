@@ -17,10 +17,6 @@ class EvalHandle
     };
     
 public:
-    EvalHandle()
-        : m_data(std::make_shared<DataWithEvalInfo>())
-    {}
-
     bool IsEvaluated() const noexcept
     {
         return m_data->m_eval;
@@ -69,7 +65,7 @@ public:
     }
 
 private:
-    std::shared_ptr<DataWithEvalInfo> m_data;
+    std::shared_ptr<DataWithEvalInfo> m_data = std::make_shared<DataWithEvalInfo>();
 };
 
 template <typename TData>

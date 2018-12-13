@@ -37,6 +37,12 @@ public:
         return std::get<id>(m_operands);
     }
     
+    
+    const auto& GetOperandTuple() const noexcept
+    {
+        return m_operands;
+    }
+    
     const auto& AuxParams() const
     {
         return m_auxParams;

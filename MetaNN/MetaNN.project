@@ -219,6 +219,7 @@
       <File Name="operators/facilities/organizer.h"/>
       <File Name="operators/facilities/tags.h"/>
       <File Name="operators/facilities/operator_frame.h"/>
+      <File Name="operators/facilities/tail_calculator.h"/>
     </VirtualDirectory>
     <File Name="operators/conv.h"/>
     <File Name="operators/duplicate.h"/>

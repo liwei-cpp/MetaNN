@@ -52,17 +52,6 @@ bool ShapeMatch(const TOriShape& ori, const Shape<CategoryTags::ThreeDArray>& ai
             (ori.PageNum() == aim.PageNum()));
 };
 
-template <typename TOriData, typename TShape>
-static auto CreateOpTemplate(TOriData&& data, TShape&& shape)
-{
-    using RawDataType = RemConstRef<TOriData>;
-    using RawShapeType = RemConstRef<TShape>;
-        
-    using ResType = Operator<OpTags::Collapse, RawDataType, RawShapeType>;
-    return ResType(std::forward<TOriData>(data),
-                   std::forward<TShape>(shape));
-}
-
 template <typename TInputHandle, typename TShape, typename TOutputHandle, typename TDevice>
 class EvalUnit : public BaseEvalUnit<TDevice>
 {
@@ -206,8 +195,13 @@ auto Collapse(TOriData&& data, TShape&& shape)
         {
             throw std::runtime_error("Cannot duplicate for un-match shape.");
         }
-        return OperCollapse::CreateOpTemplate(std::forward<TOriData>(data),
-                                              std::forward<TShape>(shape));
+        
+        using RawDataType = RemConstRef<TOriData>;
+        using RawShapeType = RemConstRef<TShape>;
+        
+        using ResType = Operator<OpTags::Collapse, RawDataType, RawShapeType>;
+        return ResType(std::forward<TOriData>(data),
+                       std::forward<TShape>(shape));
     }
 }
 }
