@@ -13,7 +13,7 @@ namespace MetaNN
 namespace OperAbs::NSCaseGen
 {
 template <typename TInputHandle, typename TOutputHandle, typename TDevice>
-class EvalUnit : public BaseEvalUnit<TDevice>
+class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
 public:
     EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle)

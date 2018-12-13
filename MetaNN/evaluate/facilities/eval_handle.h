@@ -3,6 +3,7 @@
 #include <cassert>
 #include <memory>
 #include <stdexcept>
+#include <type_traits>
 
 namespace MetaNN
 {
@@ -207,4 +208,7 @@ public:
 private:
     std::shared_ptr<TBaseData> m_data;
 };
+
+template<typename THandle>
+using DeviceTypeFromHandle = typename RemConstRef<decltype(std::declval<THandle>().Data())>::DeviceType;
 }
