@@ -22,7 +22,7 @@ namespace
     
     void test_asin_case2()
     {
-        cout << "Test acos case 2 (matrix)\t";
+        cout << "Test asin case 2 (matrix)\t";
         auto ori = GenMatrix<CheckElement>(10, 7, -1, 0.01);
         auto op = Asin(ori);
         static_assert(IsMatrix<decltype(op)>);
@@ -47,7 +47,7 @@ namespace
     
     void test_asin_case3()
     {
-        cout << "Test acos case 3 (3d-array)\t";
+        cout << "Test asin case 3 (3d-array)\t";
         auto ori = GenThreeDArray<CheckElement>(2, 10, 7, -1, 0.01);
         auto op = Asin(ori);
         static_assert(IsThreeDArray<decltype(op)>);
@@ -77,7 +77,7 @@ namespace
     
     void test_asin_case4()
     {
-        cout << "Test acos case 4 (batch scalar)\t";
+        cout << "Test asin case 4 (batch scalar)\t";
         auto ori = GenBatchScalar<CheckElement>(10, -1, 0.1);
         auto op = Asin(ori);
         static_assert(IsBatchScalar<decltype(op)>);

@@ -9,17 +9,17 @@ namespace MetaNN::OpTags
     // Elementwise operator
     struct Abs;
     struct Acos;    struct AcosGrad;
-    struct Asin;
     struct Add;
+    struct Asin;    struct AsinGrad;
     struct Divide;
     struct Multiply;
     struct Sigmoid; struct SigmoidGrad;
     struct Sign;
     struct Substract;
+    struct Tanh;
     
 namespace UnaryOpTags
 {
-    struct Tanh;
     struct Transpose;
     struct Collapse;
     struct VecSoftmax;
