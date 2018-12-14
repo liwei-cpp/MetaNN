@@ -2,6 +2,7 @@
 #include <operators/test_duplicate.h>
 #include <operators/test_collapse.h>
 
+// elementwise operators
 #include <operators/test_abs.h>
 #include <operators/test_acos.h>
 #include <operators/test_acos_grad.h>
@@ -15,6 +16,10 @@
 #include <operators/test_sign.h>
 #include <operators/test_substract.h>
 #include <operators/test_tanh.h>
+#include <operators/test_tanh_grad.h>
+
+// mutation operators
+#include <operators/test_transpose.h>
 
 namespace Test::Operators
 {
@@ -32,6 +37,8 @@ namespace Test::Operators
         test_sigmoid();     test_sigmoid_grad();
         test_sign();
         test_substract();
-        test_tanh();
+        test_tanh();        test_tanh_grad();
+        
+        test_transpose();
     }
 }

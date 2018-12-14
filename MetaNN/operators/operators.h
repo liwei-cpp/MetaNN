@@ -18,3 +18,5 @@
 #include <MetaNN/operators/sign.h>
 #include <MetaNN/operators/substract.h>
 #include <MetaNN/operators/tanh.h>
+#include <MetaNN/operators/tanh_grad.h>
+#include <MetaNN/operators/transpose.h>

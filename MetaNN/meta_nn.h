@@ -31,7 +31,7 @@
 #include <MetaNN/operators/softmax_derivative.h>
 #include <MetaNN/operators/substract.h>
 #include <MetaNN/operators/tanh.h>
-#include <MetaNN/operators/tanh_derivative.h>
+#include <MetaNN/operators/tanh_grad.h>
 #include <MetaNN/operators/transpose.h>
 
 #include <MetaNN/data_copy/data_copy.h>

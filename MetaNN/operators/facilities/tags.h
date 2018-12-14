@@ -16,12 +16,14 @@ namespace MetaNN::OpTags
     struct Sigmoid; struct SigmoidGrad;
     struct Sign;
     struct Substract;
-    struct Tanh;
+    struct Tanh;    struct TanhGrad;
+    
+    // Mutating operators
+    struct Transpose;
     
 namespace UnaryOpTags
 {
     struct Transpose;
-    struct Collapse;
     struct VecSoftmax;
 };
 
@@ -30,7 +32,6 @@ namespace BinaryOpTags
     struct Dot;
     struct NegativeLogLikelihood;
     struct SigmoidDerivative;
-    struct TanhDerivative;
     struct VecSoftmaxDerivative;
 };
 

@@ -58,6 +58,9 @@ public:
     size_t RowNum() const noexcept { return m_rowNum; }
     size_t ColNum() const noexcept { return m_colNum; }
     
+    size_t& RowNum() noexcept { return m_rowNum; }
+    size_t& ColNum() noexcept { return m_colNum; }
+    
     size_t Count() const noexcept
     {
         return m_rowNum * m_colNum;

@@ -213,7 +213,6 @@
     <File Name="operators/softmax_derivative.h"/>
     <File Name="operators/substract.h"/>
     <File Name="operators/tanh.h"/>
-    <File Name="operators/tanh_derivative.h"/>
     <File Name="operators/transpose.h"/>
     <VirtualDirectory Name="facilities">
       <File Name="operators/facilities/organizer.h"/>
@@ -230,6 +229,7 @@
     <File Name="operators/sigmoid_grad.h"/>
     <File Name="operators/asin.h"/>
     <File Name="operators/asin_grad.h"/>
+    <File Name="operators/tanh_grad.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/change_policy.h"/>
