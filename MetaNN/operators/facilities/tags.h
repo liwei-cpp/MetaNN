@@ -21,6 +21,8 @@ namespace MetaNN::OpTags
     // Mutating operators
     struct Transpose;
     
+    struct Dot;
+    
 namespace UnaryOpTags
 {
     struct Transpose;
@@ -29,7 +31,6 @@ namespace UnaryOpTags
 
 namespace BinaryOpTags
 {
-    struct Dot;
     struct NegativeLogLikelihood;
     struct SigmoidDerivative;
     struct VecSoftmaxDerivative;

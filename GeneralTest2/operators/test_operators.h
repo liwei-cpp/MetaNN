@@ -21,6 +21,8 @@
 // mutation operators
 #include <operators/test_transpose.h>
 
+#include <operators/test_dot.h>
+
 namespace Test::Operators
 {
     void test_operators()
@@ -40,5 +42,7 @@ namespace Test::Operators
         test_tanh();        test_tanh_grad();
         
         test_transpose();
+        
+        test_dot();
     }
 }

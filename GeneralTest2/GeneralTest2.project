@@ -191,5 +191,7 @@
     <File Name="operators/test_tanh_grad.cpp"/>
     <File Name="operators/test_transpose.h"/>
     <File Name="operators/test_transpose.cpp"/>
+    <File Name="operators/test_dot.h"/>
+    <File Name="operators/test_dot.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

@@ -1,271 +1,141 @@
 #pragma once
 
+#include <MetaNN/data/facilities/traits.h>
+#include <MetaNN/evaluate/facilities/eval_plan.h>
+#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/operators/facilities/tags.h>
+#include <MetaNN/operators/facilities/operator_frame.h>
+#include <cassert>
+#include <type_traits>
+
 namespace MetaNN
 {
-template <>
-class OperOrganizer<BinaryOpTags::Dot, CategoryTags::Matrix>
+namespace OperDot::NSCaseGen
+{
+template <typename TInputHandle1,
+          typename TInputHandle2,
+          typename TOutputHandle>
+class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
 public:
-    template <typename TD1, typename TD2>
-    OperOrganizer(const TD1& data1, const TD2& data2)
-        : m_rowNum(data1.RowNum())
-        , m_colNum(data2.ColNum())
+    EvalUnit(TInputHandle1 operand1,
+             TInputHandle2 operand2,
+             TOutputHandle outputHandle)
+        : m_operand1(std::move(operand1))
+        , m_operand2(std::move(operand2))
+        , m_outputHandle(std::move(outputHandle))
+    {}
+    
+    void Eval() override final
     {
-        assert(data1.ColNum() == data2.RowNum());
-    }
+        const auto& in1 = m_operand1.Data();
+        const auto& in2 = m_operand2.Data();
 
-    size_t RowNum() const { return m_rowNum; }
-    size_t ColNum() const { return m_colNum; }
-
-private:
-    size_t m_rowNum;
-    size_t m_colNum;
-};
-
-template <>
-class OperOrganizer<BinaryOpTags::Dot, CategoryTags::BatchMatrix>
-{
-public:
-    template <typename TD1, typename TD2>
-    OperOrganizer(const TD1& data1, const TD2& data2)
-        : m_rowNum(data1.RowNum())
-        , m_colNum(data2.ColNum())
-        , m_batchNum(data1.BatchNum())
-    {
-        assert(data1.ColNum() == data2.RowNum());
-        assert(data1.BatchNum() == data2.BatchNum());
-    }
-
-    size_t RowNum() const { return m_rowNum; }
-    size_t ColNum() const { return m_colNum; }
-    size_t BatchNum() const { return m_batchNum; }
-
-private:
-    size_t m_rowNum;
-    size_t m_colNum;
-    size_t m_batchNum;
-};
-
-namespace NSDot
-{
-namespace NSCaseGen
-{
-template <typename TOperHandle1, typename TOperHandle2, typename TElem, typename TDevice, typename TCate>
-class EvalUnit;
-
-template <typename TOperHandle1, typename TOperHandle2, typename TElem>
-class EvalUnit<TOperHandle1, TOperHandle2, TElem, DeviceTags::CPU, CategoryTags::Matrix>
-    : public BaseEvalUnit<DeviceTags::CPU>
-{
-public:
-    using ElementType = TElem;
-    using DeviceType = DeviceTags::CPU;
-
-    EvalUnit(TOperHandle1 oper1,
-             TOperHandle2 oper2,
-             EvalHandle<Matrix<ElementType, DeviceType>> evalOutput)
-        : m_oper1(std::move(oper1))
-        , m_oper2(std::move(oper2))
-        , m_evalOutput(evalOutput) { }
-
-    void Eval() override
-    {
-        const auto& p_v1 = m_oper1.Data();
-        const auto& p_v2 = m_oper2.Data();
-
-        const size_t rowNum = p_v1.RowNum();
-        const size_t colNum = p_v2.ColNum();
-        const size_t midNum = p_v1.ColNum();
-        assert(p_v2.RowNum() == midNum);
+        auto aimShape = in1.Shape();
+        aimShape.ColNum() = in2.Shape().ColNum();
+        m_outputHandle.Allocate(aimShape);
+        auto& out = m_outputHandle.MutableData();
         
-        m_evalOutput.Allocate(rowNum, colNum);
-        auto& res = m_evalOutput.MutableData();
+        using ElementType = ElementTypePicker<decltype(out)>;
         
-        auto mem_res = LowerAccess(res);
+        const size_t m = in1.Shape().RowNum();
+        const size_t k = in1.Shape().ColNum();
+        const size_t n = in2.Shape().ColNum();
+        assert(k == in2.Shape().RowNum());
         
-        TElem* r = mem_res.MutableRawMemory();
+        const size_t loopCount = in1.Shape().Count() / m / k;
+        assert(loopCount == in2.Shape().Count() / k / n);
+        
+        auto low_in1 = LowerAccess(in1);
+        ElementType* mem_in1 = low_in1.MutableRawMemory();
+        
+        auto low_in2 = LowerAccess(in2);
+        ElementType* mem_in2 = low_in2.MutableRawMemory();
 
-        for (size_t i = 0; i < rowNum; ++i)
+        auto low_out = LowerAccess(out);
+        ElementType* mem_out = low_out.MutableRawMemory();
+                
+        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+        
+        for (size_t loop = 0; loop < loopCount; ++loop)
         {
-            for (size_t j = 0; j < colNum; ++j)
+            for (size_t i = 0; i < m; ++i)
             {
-                *r = TElem();
-                for (size_t k = 0; k < midNum; ++k)
+                for (size_t j = 0; j < n; ++j)
                 {
-                    *r += p_v1(i, k) * p_v2(k, j);
-                }
-                ++r;
-            }
-        }
-        m_evalOutput.SetEval();
-    }
-
-private:
-    TOperHandle1 m_oper1;
-    TOperHandle2 m_oper2;
-    EvalHandle<Matrix<ElementType, DeviceType>> m_evalOutput;
-};
-
-template <typename TOperHandle1, typename TOperHandle2, typename TElem>
-class EvalUnit<TOperHandle1, TOperHandle2, TElem, DeviceTags::CPU, CategoryTags::BatchMatrix>
-    : public BaseEvalUnit<DeviceTags::CPU>
-{
-public:
-    using ElementType = TElem;
-    using DeviceType = DeviceTags::CPU;
-
-    EvalUnit(TOperHandle1 oper1,
-             TOperHandle2 oper2,
-             EvalHandle<Batch<ElementType, DeviceType, CategoryTags::Matrix>> evalOutput)
-        : m_oper1(std::move(oper1))
-        , m_oper2(std::move(oper2))
-        , m_evalOutput(evalOutput) { }
-
-    void Eval() override
-    {
-        const auto& p_v1 = m_oper1.Data();
-        const auto& p_v2 = m_oper2.Data();
-
-        const size_t rowNum = p_v1.RowNum();
-        const size_t colNum = p_v2.ColNum();
-        const size_t midNum = p_v1.ColNum();
-        const size_t batchNum = p_v1.BatchNum();
-        
-        assert(p_v2.RowNum() == midNum);
-        assert(p_v2.BatchNum() == batchNum);
-        
-        m_evalOutput.Allocate(batchNum, rowNum, colNum);
-        auto& res = m_evalOutput.MutableData();
-        
-        for (size_t cur_batch = 0; cur_batch < batchNum; ++cur_batch)
-        {
-            auto mem_res = LowerAccess(res[cur_batch]);
-        
-            TElem* r = mem_res.MutableRawMemory();
-            auto cur_v1 = p_v1[cur_batch];
-            auto cur_v2 = p_v2[cur_batch];
-
-            for (size_t i = 0; i < rowNum; ++i)
-            {
-                for (size_t j = 0; j < colNum; ++j)
-                {
-                    *r = TElem();
-                    for (size_t k = 0; k < midNum; ++k)
+                    mem_out[i * n + j] = 0;
+                    for (size_t l = 0; l < k; ++l)
                     {
-                        *r += cur_v1(i, k) * cur_v2(k, j);
+                        mem_out[i * n + j] += mem_in1[i * k + l] * mem_in2[l * n + j];
                     }
-                    ++r;
                 }
             }
+            mem_out += m * n;
+            mem_in1 += m * k;
+            mem_in2 += k * n;
         }
-        m_evalOutput.SetEval();
+        m_outputHandle.SetEval();
     }
-
+    
 private:
-    TOperHandle1 m_oper1;
-    TOperHandle2 m_oper2;
-    EvalHandle<Batch<ElementType, DeviceType, CategoryTags::Matrix>> m_evalOutput;
+    const TInputHandle1 m_operand1;
+    const TInputHandle2 m_operand2;
+    TOutputHandle m_outputHandle;
 };
+}
 
-struct Calculator
+template <typename TOperand>
+constexpr bool IsValidOper<OpTags::Dot, TOperand> =
+    IsMatrix<TOperand> ||
+    IsBatchMatrix<TOperand> ||
+    IsMatrixSequence<TOperand> ||
+    IsBatchMatrixSequence<TOperand>;
+
+template <typename TCate>
+class OperShapeInfo<OpTags::Dot, TCate>
 {
-    template <typename TCaseTail, typename TEvalRes, typename TOper>
-    static void EvalRegister(TEvalRes& evalRes, const TOper& oper)
+public:
+    template <typename TOperand1, typename TOperand2>
+    OperShapeInfo(const OperAuxParams<OpTags::Dot, TCate>&,
+                  const TOperand1& operand1,
+                  const TOperand2& operand2)
+        : m_shape(operand1.Shape())
     {
-        static_assert(std::is_same<TCaseTail, OperSeqContainer<>>::value,
-                      "General Case is not the last one");
-                      
-        using ElementType = typename TEvalRes::DataType::ElementType;
-        using DeviceType = typename TEvalRes::DataType::DeviceType;
-        using CategoryType = DataCategory<typename TEvalRes::DataType>;
-        
-        const auto& oper1 = oper.Operand1();
-        const auto& oper2 = oper.Operand2();
-        auto handle1 = oper1.EvalRegister();
-        auto handle2 = oper2.EvalRegister();
-        using UnitType = EvalUnit<decltype(handle1), decltype(handle2), ElementType, DeviceType, CategoryType>;
-        using GroupType = TrivalEvalGroup<UnitType>;
-
-        auto outHandle = evalRes.Handle();
-        const void* dataPtr = outHandle.DataPtr();
-        auto depVec = {handle1.DataPtr(), handle2.DataPtr()};
-        
-        UnitType unit(std::move(handle1), std::move(handle2), std::move(outHandle));
-        EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, std::move(depVec));
+        m_shape.ColNum() = operand2.Shape().ColNum();
     }
+    
+    const auto& Shape() const
+    {
+        return m_shape;
+    }
+    
+private:
+    MetaNN::Shape<TCate> m_shape;
 };
-}
-}
 
 template <>
-struct OperSeq_<BinaryOpTags::Dot>
+struct OperSeq_<OpTags::Dot>
 {
-    using type = OperSeqContainer<NSDot::NSCaseGen::Calculator>;
-};
-
-struct OperDot
-{
-    template <typename T1, typename T2>
-    static constexpr bool valid = (IsMatrix<T1> && IsMatrix<T2>) ||
-                                  (IsBatchMatrix<T1> && IsMatrix<T2>) ||
-                                  (IsMatrix<T1> && IsBatchMatrix<T2>) ||
-                                  (IsBatchMatrix<T1> && IsBatchMatrix<T2>);
-
-    template <typename T1, typename T2,
-              std::enable_if_t<std::is_same<DataCategory<T1>,
-                                            DataCategory<T2>>::value>* = nullptr>
-    static auto Eval(T1&& p_m1, T2&& p_m2)
-    {
-        using rawM1 = RemConstRef<T1>;
-        using rawM2 = RemConstRef<T2>;
-        static_assert(std::is_same<typename rawM1::ElementType, typename rawM2::ElementType>::value,
-                      "Matrices with different element types cannot dot directly");
-        static_assert(std::is_same<typename rawM1::DeviceType, typename rawM2::DeviceType>::value,
-                      "Matrices with different device types cannot dot directly");
-
-        using ResType = BinaryOp<BinaryOpTags::Dot, rawM1, rawM2>;
-        return ResType(std::forward<T1>(p_m1), std::forward<T2>(p_m2));
-    }
-    
-    template <typename T1, typename T2,
-              std::enable_if_t<IsBatchMatrix<T1>>* = nullptr,
-              std::enable_if_t<IsMatrix<T2>>* = nullptr>
-    static auto Eval(T1&& p_m1, T2&& p_m2)
-    {
-        using rawM1 = RemConstRef<T1>;
-        using rawM2 = RemConstRef<T2>;
-        static_assert(std::is_same<typename rawM1::ElementType, typename rawM2::ElementType>::value,
-                      "Matrices with different element types cannot dot directly");
-        static_assert(std::is_same<typename rawM1::DeviceType, typename rawM2::DeviceType>::value,
-                      "Matrices with different device types cannot dot directly");
-                      
-        Duplicate<rawM2> tmp(std::forward<T2>(p_m2), p_m1.BatchNum());
-        using ResType = BinaryOp<BinaryOpTags::Dot, rawM1, Duplicate<rawM2>>;
-        return ResType(std::forward<T1>(p_m1), std::move(tmp));
-    }
-    
-    template <typename T1, typename T2,
-              std::enable_if_t<IsMatrix<T1>>* = nullptr,
-              std::enable_if_t<IsBatchMatrix<T2>>* = nullptr>
-    static auto Eval(T1&& p_m1, T2&& p_m2)
-    {
-        using rawM1 = RemConstRef<T1>;
-        using rawM2 = RemConstRef<T2>;
-        static_assert(std::is_same<typename rawM1::ElementType, typename rawM2::ElementType>::value,
-                      "Matrices with different element types cannot dot directly");
-        static_assert(std::is_same<typename rawM1::DeviceType, typename rawM2::DeviceType>::value,
-                      "Matrices with different device types cannot dot directly");
-                      
-        Duplicate<rawM1> tmp(std::forward<T1>(p_m1), p_m2.BatchNum());
-        using ResType = BinaryOp<BinaryOpTags::Dot, Duplicate<rawM1>, rawM2>;
-        return ResType(std::move(tmp), std::forward<T2>(p_m2));
-    }
+    using type = OperSeqContainer<TailCalculator<OperDot::NSCaseGen::EvalUnit>>;
 };
 
 template <typename TP1, typename TP2,
-          std::enable_if_t<OperDot::valid<TP1, TP2>>* = nullptr>
+          typename = std::enable_if_t<IsValidOper<OpTags::Dot, TP1, TP2>>>
 auto Dot(TP1&& p_m1, TP2&& p_m2)
 {
-    return OperDot::Eval(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2));
+    if (p_m1.Shape().ColNum() != p_m2.Shape().RowNum())
+    {
+        throw std::runtime_error("Shape mismatch for Dot.");
+    }
+    auto checkShape = p_m1.Shape();
+    checkShape.RowNum() = p_m2.Shape().RowNum();
+    checkShape.ColNum() = p_m2.Shape().ColNum();
+    if (checkShape != p_m2.Shape())
+    {
+        throw std::runtime_error("Shape mismatch for Dot.");
+    }
+    
+    using ResType = Operator<OpTags::Dot, RemConstRef<TP1>, RemConstRef<TP2>>;
+    return ResType(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2));
 }
 }
