@@ -193,5 +193,7 @@
     <File Name="operators/test_transpose.cpp"/>
     <File Name="operators/test_dot.h"/>
     <File Name="operators/test_dot.cpp"/>
+    <File Name="operators/test_interpolate.h"/>
+    <File Name="operators/test_interpolate.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

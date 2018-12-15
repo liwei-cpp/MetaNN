@@ -12,6 +12,7 @@ namespace MetaNN::OpTags
     struct Add;
     struct Asin;    struct AsinGrad;
     struct Divide;
+    struct Interpolate;
     struct Multiply;
     struct Sigmoid; struct SigmoidGrad;
     struct Sign;
@@ -25,7 +26,6 @@ namespace MetaNN::OpTags
     
 namespace UnaryOpTags
 {
-    struct Transpose;
     struct VecSoftmax;
 };
 
@@ -38,7 +38,6 @@ namespace BinaryOpTags
 
 namespace TernaryOpTags
 {
-    struct Interpolate;
     struct NegativeLogLikelihoodDerivative;
 };
 

@@ -1,219 +1,88 @@
 #pragma once
 
+#include <MetaNN/data/facilities/traits.h>
+#include <MetaNN/evaluate/facilities/eval_plan.h>
+#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/operators/facilities/tags.h>
+#include <MetaNN/operators/facilities/tail_calculator.h>
+#include <stdexcept>
+
 namespace MetaNN
 {
-namespace NSInterpolate
+namespace OperInterpolate::NSCaseGen
 {
-namespace NSCaseGen
-{
-template <typename TOperHandle1, typename TOperHandle2, typename TOperHandle3,
-          typename TElem, typename TDevice, typename TCate>
-class EvalUnit;
-
-template <typename TOperHandle1, typename TOperHandle2, typename TOperHandle3, typename TElem>
-class EvalUnit<TOperHandle1, TOperHandle2, TOperHandle3, TElem, DeviceTags::CPU, CategoryTags::Matrix>
-    : public BaseEvalUnit<DeviceTags::CPU>
+template <typename TInputHandle1, typename TInputHandle2, typename TInputHandle3,
+          typename TOutputHandle>
+class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
 public:
-    using ElementType = TElem;
-    using DeviceType = DeviceTags::CPU;
-
-    EvalUnit(TOperHandle1 oper1, TOperHandle2 oper2, TOperHandle3 oper3,
-             EvalHandle<Matrix<TElem, DeviceTags::CPU>> evalOutput)
-        : m_oper1(std::move(oper1))
-        , m_oper2(std::move(oper2))
-        , m_oper3(std::move(oper3))
-        , m_evalOutput(evalOutput)
-    { }
-
-    void Eval() override
+    EvalUnit(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TInputHandle3 oriHandle3,
+             TOutputHandle outputHandle)
+        : m_inputHandle1(std::move(oriHandle1))
+        , m_inputHandle2(std::move(oriHandle2))
+        , m_inputHandle3(std::move(oriHandle3))
+        , m_outputHandle(std::move(outputHandle))
+    {}
+    
+    void Eval() override final
     {
-        const auto& p_v1 = m_oper1.Data();
-        const auto& p_v2 = m_oper2.Data();
-        const auto& p_v3 = m_oper3.Data();
-
-        const size_t rowNum = p_v1.RowNum();
-        const size_t colNum = p_v1.ColNum();
-        assert(p_v2.RowNum() == rowNum);
-        assert(p_v2.ColNum() == colNum);
-        assert(p_v3.RowNum() == rowNum);
-        assert(p_v3.ColNum() == colNum);
+        const auto& in1 = m_inputHandle1.Data();
+        const auto& in2 = m_inputHandle2.Data();
+        const auto& in3 = m_inputHandle3.Data();
+        assert(in1.Shape() == in2.Shape());
+        assert(in1.Shape() == in3.Shape());
         
-        m_evalOutput.Allocate(rowNum, colNum);
-        auto& res = m_evalOutput.MutableData();
+        m_outputHandle.Allocate(in1.Shape());
+        auto& out = m_outputHandle.MutableData();
+        
+        using ElementType = ElementTypePicker<decltype(out)>;
+        
+        const size_t count = in1.Shape().Count();
+        assert(count == out.Shape().Count());
+        
+        auto low_in1 = LowerAccess(in1);
+        ElementType* mem_in1 = low_in1.MutableRawMemory();
+        auto low_in2 = LowerAccess(in2);
+        ElementType* mem_in2 = low_in2.MutableRawMemory();
+        auto low_in3 = LowerAccess(in3);
+        ElementType* mem_in3 = low_in3.MutableRawMemory();
 
-        auto mem_v1 = LowerAccess(p_v1);
-        auto mem_v2 = LowerAccess(p_v2);
-        auto mem_v3 = LowerAccess(p_v3);
-        auto mem_res = LowerAccess(res);
-
-        const TElem* r1 = mem_v1.RawMemory();
-        const TElem* r2 = mem_v2.RawMemory();
-        const TElem* r3 = mem_v3.RawMemory();
-        TElem* r = mem_res.MutableRawMemory();
-
-        for (size_t i = 0; i < rowNum; ++i)
+        auto low_out = LowerAccess(out);
+        ElementType* mem_out = low_out.MutableRawMemory();
+                
+        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+        
+        for (size_t i = 0; i < count; ++i)
         {
-            for (size_t j = 0; j < colNum; ++j)
-            {
-                r[j] = r1[j] * r3[j] + r2[j] * (1 - r3[j]);
-            }
-            r1 += colNum;
-            r2 += colNum;
-            r3 += colNum;
-            r += colNum;
+            mem_out[i] = mem_in1[i] * mem_in3[i] + mem_in2[i] * (1 - mem_in3[i]);
         }
-        m_evalOutput.SetEval();
+        m_outputHandle.SetEval();
     }
-
+    
 private:
-    TOperHandle1 m_oper1;
-    TOperHandle2 m_oper2;
-    TOperHandle3 m_oper3;
-    EvalHandle<Matrix<TElem, DeviceTags::CPU>> m_evalOutput;
+    const TInputHandle1 m_inputHandle1;
+    const TInputHandle2 m_inputHandle2;
+    const TInputHandle3 m_inputHandle3;
+    TOutputHandle m_outputHandle;
 };
-
-template <typename TOperHandle1, typename TOperHandle2, typename TOperHandle3, typename TElem>
-class EvalUnit<TOperHandle1, TOperHandle2, TOperHandle3, TElem, DeviceTags::CPU, CategoryTags::BatchMatrix>
-    : public BaseEvalUnit<DeviceTags::CPU>
-{
-public:
-    using ElementType = TElem;
-    using DeviceType = DeviceTags::CPU;
-
-    EvalUnit(TOperHandle1 oper1, TOperHandle2 oper2, TOperHandle3 oper3,
-             EvalHandle<Batch<TElem, DeviceTags::CPU, CategoryTags::Matrix>> evalOutput)
-        : m_oper1(std::move(oper1))
-        , m_oper2(std::move(oper2))
-        , m_oper3(std::move(oper3))
-        , m_evalOutput(evalOutput)
-    { }
-
-    void Eval() override
-    {
-        const auto& p_v1 = m_oper1.Data();
-        const auto& p_v2 = m_oper2.Data();
-        const auto& p_v3 = m_oper3.Data();
-
-        const size_t rowNum = p_v1.RowNum();
-        const size_t colNum = p_v1.ColNum();
-        const size_t batchNum = p_v1.BatchNum();
-        
-        assert(p_v2.RowNum() == rowNum);
-        assert(p_v2.ColNum() == colNum);
-        assert(p_v2.BatchNum() == batchNum);
-        assert(p_v3.RowNum() == rowNum);
-        assert(p_v3.ColNum() == colNum);
-        assert(p_v3.BatchNum() == batchNum);
-        
-        m_evalOutput.Allocate(batchNum, rowNum, colNum);
-        auto& res = m_evalOutput.MutableData();
-        
-        for (size_t cur_batch = 0; cur_batch < batchNum; ++cur_batch)
-        {
-            auto mem_v1 = LowerAccess(p_v1[cur_batch]);
-            auto mem_v2 = LowerAccess(p_v2[cur_batch]);
-            auto mem_v3 = LowerAccess(p_v3[cur_batch]);
-            auto mem_res = LowerAccess(res[cur_batch]);
-
-            const auto* r1 = mem_v1.RawMemory();
-            const auto* r2 = mem_v2.RawMemory();
-            const auto* r3 = mem_v3.RawMemory();
-            auto* r = mem_res.MutableRawMemory();
-
-            for (size_t i = 0; i < rowNum; ++i)
-            {
-                for (size_t j = 0; j < colNum; ++j)
-                {
-                    r[j] = r1[j] * r3[j] + r2[j] * (1 - r3[j]);
-                }
-                r1 += colNum;
-                r2 += colNum;
-                r3 += colNum;
-                r += colNum;
-            }
-        }
-        m_evalOutput.SetEval();
-    }
-
-private:
-    TOperHandle1 m_oper1;
-    TOperHandle2 m_oper2;
-    TOperHandle3 m_oper3;
-    EvalHandle<Batch<TElem, DeviceTags::CPU, CategoryTags::Matrix>> m_evalOutput;
-};
-
-struct Calculator
-{
-    template <typename TCaseTail, typename TEvalRes, typename TOper>
-    static void EvalRegister(TEvalRes& evalRes, const TOper& oper)
-    {
-        static_assert(std::is_same<TCaseTail, OperSeqContainer<>>::value,
-                      "General Case is not the last one");
-                      
-        using ElementType = typename TEvalRes::DataType::ElementType;
-        using DeviceType = typename TEvalRes::DataType::DeviceType;
-        using CategoryType = DataCategory<typename TEvalRes::DataType>;
-
-        auto handle1 = oper.Operand1().EvalRegister();
-        auto handle2 = oper.Operand2().EvalRegister();
-        auto handle3 = oper.Operand3().EvalRegister();
-        using UnitType = EvalUnit<decltype(handle1), decltype(handle2), 
-                                  decltype(handle3), ElementType, DeviceType, CategoryType>;
-        using GroupType = TrivalEvalGroup<UnitType>;
-
-        auto outHandle = evalRes.Handle();
-        const void* dataPtr = outHandle.DataPtr();
-        auto depVec = {handle1.DataPtr(), handle2.DataPtr(), handle3.DataPtr()};
-        
-        UnitType unit(std::move(handle1), std::move(handle2), std::move(handle3), std::move(outHandle));
-        EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, std::move(depVec));
-    }
-};
-}
 }
 
 template <>
-struct OperSeq_<TernaryOpTags::Interpolate>
+struct OperSeq_<OpTags::Interpolate>
 {
-    using type = OperSeqContainer<NSInterpolate::NSCaseGen::Calculator>;
-};
-
-struct OperInterpolate
-{
-    template <typename T1, typename T2, typename T3>
-    static constexpr bool valid = (IsMatrix<T1> && IsMatrix<T2> && IsMatrix<T3>) ||
-                                  (IsBatchMatrix<T1> && IsBatchMatrix<T2> && IsBatchMatrix<T3>);
-    
-    template <typename T1, typename T2, typename T3,
-              std::enable_if_t<std::is_same<DataCategory<T1>, DataCategory<T2>>::value>* = nullptr,
-              std::enable_if_t<std::is_same<DataCategory<T2>, DataCategory<T3>>::value>* = nullptr>
-    static auto Eval(T1&& p_m1, T2&& p_m2, T3&& p_m3)
-    {
-        using rawM1 = RemConstRef<T1>;
-        using rawM2 = RemConstRef<T2>;
-        using rawM3 = RemConstRef<T3>;
-        static_assert(std::is_same<typename rawM1::ElementType, typename rawM2::ElementType>::value,
-                      "Matrices with different element types cannot interpolate directly");
-        static_assert(std::is_same<typename rawM1::DeviceType, typename rawM2::DeviceType>::value,
-                      "Matrices with different device types cannot interpolate directly");
-                      
-        static_assert(std::is_same<typename rawM1::ElementType, typename rawM3::ElementType>::value,
-                      "Matrices with different element types cannot interpolate directly");
-        static_assert(std::is_same<typename rawM1::DeviceType, typename rawM3::DeviceType>::value,
-                      "Matrices with different device types cannot interpolate directly");
-
-        using ResType = TernaryOp<TernaryOpTags::Interpolate, rawM1, rawM2, rawM3>;
-        return ResType(std::forward<T1>(p_m1), std::forward<T2>(p_m2), std::forward<T3>(p_m3));
-    }
+    using type = OperSeqContainer<TailCalculator<OperInterpolate::NSCaseGen::EvalUnit>>;
 };
 
 template <typename TP1, typename TP2, typename TP3,
-          std::enable_if_t<OperInterpolate::valid<TP1, TP2, TP3>>* = nullptr>
-auto Interpolate (TP1&& p_m1, TP2&& p_m2, TP3&& p_lambda)
+          typename = std::enable_if_t<IsValidOper<OpTags::Interpolate, TP1, TP2, TP3>>>
+auto Interpolate(TP1&& p_m1, TP2&& p_m2, TP3&& p_m3)
 {
-    return OperInterpolate::Eval(std::forward<TP1>(p_m1),
-                                 std::forward<TP2>(p_m2),
-                                 std::forward<TP3>(p_lambda));
+    if ((p_m1.Shape() != p_m2.Shape()) || (p_m1.Shape() != p_m3.Shape()))
+    {
+        throw std::runtime_error("Interpolate error: operands' shape mismatch.");
+    }
+    using ResType = Operator<OpTags::Interpolate,
+                             RemConstRef<TP1>, RemConstRef<TP2>, RemConstRef<TP3>>;
+    return ResType(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2), std::forward<TP3>(p_m3));
 }
 }

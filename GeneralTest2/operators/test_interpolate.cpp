@@ -8,26 +8,29 @@ using namespace MetaNN;
 
 namespace
 {
-    void test_add_case1()
+    void test_interpolate_case1()
     {
-        cout << "Test add case 1 (scalar)\t";
+        cout << "Test interpolate case 1 (scalar)\t";
         Scalar<CheckElement, CheckDevice> ori1(3);
         Scalar<CheckElement, CheckDevice> ori2(9);
-        auto op = ori1 + ori2;
+        Scalar<CheckElement, CheckDevice> lambda(0.3);
+        auto op = Interpolate(ori1, ori2, lambda);
         static_assert(IsScalar<decltype(op)>);
         
         auto res = Evaluate(op);
         static_assert(IsScalar<decltype(res)>);
-        assert(fabs(res.Value() - 12) < 0.001f);
+        CheckElement value = 3 * 0.3 + 9 * (1 - 0.3);
+        assert(fabs(res.Value() - value) < 0.001f);
         cout << "done" << endl;
     }
     
-    void test_add_case2()
+    void test_interpolate_case2()
     {
-        cout << "Test add case 2 (matrix)\t";
+        cout << "Test interpolate case 2 (matrix)\t";
         auto ori1 = GenMatrix<CheckElement>(10, 7, -100, 3);
         auto ori2 = GenMatrix<CheckElement>(10, 7, 1, 1.5);
-        auto op = ori1 + ori2;
+        auto lambda = GenMatrix<CheckElement>(10, 7, 0.1, -2);
+        auto op = Interpolate(ori1, ori2, lambda);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape().RowNum() == 10);
         assert(op.Shape().ColNum() == 7);
@@ -41,7 +44,7 @@ namespace
         {
             for (size_t k = 0; k < 7; ++k)
             {
-                auto check = ori1(i, k) + ori2(i, k);
+                auto check = ori1(i, k) * lambda(i, k) + ori2(i, k) * (1 - lambda(i, k));
                 assert(fabs(check - res(i, k)) < 0.001f);
             }
         }
@@ -51,9 +54,9 @@ namespace
 
 namespace Test::Operators
 {
-    void test_add()
+    void test_interpolate()
     {
-        test_add_case1();
-        test_add_case2();
+        test_interpolate_case1();
+        test_interpolate_case2();
     }
 }

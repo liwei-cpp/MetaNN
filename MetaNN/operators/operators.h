@@ -12,6 +12,7 @@
 #include <MetaNN/operators/asin.h>
 #include <MetaNN/operators/asin_grad.h>
 #include <MetaNN/operators/divide.h>
+#include <MetaNN/operators/interpolate.h>
 #include <MetaNN/operators/multiply.h>
 #include <MetaNN/operators/sigmoid.h>
 #include <MetaNN/operators/sigmoid_grad.h>

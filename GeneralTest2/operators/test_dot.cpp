@@ -131,11 +131,11 @@ namespace
         assert(res.Shape().RowNum() == 5);
         assert(res.Shape().ColNum() == 8);
         
-        for (size_t b = 0; b < 3; ++b)
+        for (size_t i = 0; i < 5; ++i)
         {
-            for (size_t i = 0; i < 5; ++i)
-            {
-                for (size_t j = 0; j < 8; ++j)
+            for (size_t j = 0; j < 8; ++j)
+            {        
+                for (size_t b = 0; b < 3; ++b)
                 {
                     CheckElement value = 0;
                     for (size_t k = 0; k < 3; ++k)
@@ -144,14 +144,7 @@ namespace
                     }
                     assert(fabs(value - res[0][b](i, j)) < 0.001f);
                 }
-            }
-        }
-        
-        for (size_t b = 0; b < 7; ++b)
-        {
-            for (size_t i = 0; i < 5; ++i)
-            {
-                for (size_t j = 0; j < 8; ++j)
+                for (size_t b = 0; b < 7; ++b)
                 {
                     CheckElement value = 0;
                     for (size_t k = 0; k < 3; ++k)
@@ -160,14 +153,7 @@ namespace
                     }
                     assert(fabs(value - res[1][b](i, j)) < 0.001f);
                 }
-            }
-        }
-        
-        for (size_t b = 0; b < 2; ++b)
-        {
-            for (size_t i = 0; i < 5; ++i)
-            {
-                for (size_t j = 0; j < 8; ++j)
+                for (size_t b = 0; b < 2; ++b)
                 {
                     CheckElement value = 0;
                     for (size_t k = 0; k < 3; ++k)
