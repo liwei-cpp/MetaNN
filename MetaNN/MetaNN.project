@@ -210,7 +210,6 @@
     <File Name="operators/sigmoid.h"/>
     <File Name="operators/sign.h"/>
     <File Name="operators/softmax.h"/>
-    <File Name="operators/softmax_derivative.h"/>
     <File Name="operators/substract.h"/>
     <File Name="operators/tanh.h"/>
     <File Name="operators/transpose.h"/>
@@ -230,6 +229,7 @@
     <File Name="operators/asin.h"/>
     <File Name="operators/asin_grad.h"/>
     <File Name="operators/tanh_grad.h"/>
+    <File Name="operators/softmax_grad.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/change_policy.h"/>

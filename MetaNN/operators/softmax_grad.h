@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include <MetaNN/operators/operators.h>
 #include <stdexcept>
 
@@ -284,186 +284,109 @@ struct Calculator
     }
 };
 }
+}
+*/
 
-namespace CaseGen
-{
-template <typename TOperHandle1, typename TOperHandle2, typename TElem, typename TDevice, typename TCate>
-class EvalUnit;
+#include <MetaNN/data/facilities/traits.h>
+#include <MetaNN/evaluate/facilities/eval_plan.h>
+#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/operators/facilities/tags.h>
+#include <MetaNN/operators/facilities/operator_frame.h>
+#include <stdexcept>
 
-template <typename TOperHandle1, typename TOperHandle2, typename TElem>
-class EvalUnit<TOperHandle1, TOperHandle2, TElem, DeviceTags::CPU, CategoryTags::Matrix>
-    : public BaseEvalUnit<DeviceTags::CPU>
+namespace MetaNN
 {
+namespace OperSoftmaxGrad::NSCaseGen
+{
+template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
+{
+    using ElementType = ElementTypeFromHandle<TOutputHandle>;
 public:
-    using ElementType = TElem;
-    using DeviceType = DeviceTags::CPU;
-
-    EvalUnit(TOperHandle1 oper1,
-             TOperHandle2 oper2,
-             EvalHandle<Matrix<ElementType, DeviceType>> evalOutput)
-        : m_oper1(std::move(oper1))
-        , m_oper2(std::move(oper2))
-        , m_evalOutput(evalOutput) { }
-
-    void Eval() override
+    EvalUnit(TGradHandle gradHandle, TInputHandle inputHandle, TOutputHandle outputHandle)
+        : m_gradHandle(std::move(gradHandle))
+        , m_inputHandle(std::move(inputHandle))
+        , m_outputHandle(std::move(outputHandle))
+    {}
+    
+    void Eval() override final
     {
-        const auto& p_grad = m_oper1.Data();
-        const auto& p_sout = m_oper2.Data();
-        size_t colNum = p_grad.ColNum();
-        assert(p_grad.RowNum() == 1);
-        assert(p_sout.RowNum() == 1);
-        assert(colNum == p_sout.ColNum());
-                
-        Matrix<ElementType, DeviceType> tmp(colNum, colNum);
-        for (size_t i = 0; i < colNum; ++i)
-        {
-            for (size_t j = 0; j < colNum; ++j)
-            {
-                tmp.SetValue(i, j, -1 * p_sout(0, i) * p_sout(0, j));
-            }
-            auto value = tmp(i, i);
-            tmp.SetValue(i, i, p_sout(0, i) + value);
-        }
-
-        auto tempHandle = tmp.EvalRegister();
-        using EvalUnit = NSDot::NSCaseGen::EvalUnit<decltype(m_oper1), decltype(tempHandle), ElementType, DeviceType,
-                                                    CategoryTags::Matrix>;
-        using GroupType = TrivalEvalGroup<EvalUnit>;
-
-        const void* dataPtr = m_evalOutput.DataPtr();
-        auto depVec = {m_oper1.DataPtr(), tempHandle.DataPtr()};
-        EvalUnit unit(m_oper1, std::move(tempHandle), std::move(m_evalOutput));
-        EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, std::move(depVec));
-    }
-
-private:
-    TOperHandle1 m_oper1;
-    TOperHandle2 m_oper2;
-    EvalHandle<Matrix<ElementType, DeviceType>> m_evalOutput;
-};
-
-template <typename TOperHandle1, typename TOperHandle2, typename TElem>
-class EvalUnit<TOperHandle1, TOperHandle2, TElem, DeviceTags::CPU, CategoryTags::BatchMatrix>
-    : public BaseEvalUnit<DeviceTags::CPU>
-{
-public:
-    using ElementType = TElem;
-    using DeviceType = DeviceTags::CPU;
-
-    EvalUnit(TOperHandle1 oper1,
-             TOperHandle2 oper2,
-             EvalHandle<Batch<ElementType, DeviceType, CategoryTags::Matrix>> evalOutput)
-        : m_oper1(std::move(oper1))
-        , m_oper2(std::move(oper2))
-        , m_evalOutput(std::move(evalOutput)) { }
-
-    void Eval() override
-    {
-        const auto& p_grad = m_oper1.Data();
-        const auto& p_sout = m_oper2.Data();
-        size_t colNum = p_grad.ColNum();
-        size_t batchNum = p_grad.BatchNum();
+        const auto& grad = m_gradHandle.Data();
+        const auto& in = m_inputHandle.Data();
+        assert(grad.Shape() == in.Shape());
         
-        assert(p_grad.RowNum() == 1);
-        assert(p_sout.RowNum() == 1);
-        assert(colNum == p_sout.ColNum());
-        assert(batchNum == p_sout.BatchNum());
+        m_outputHandle.Allocate(grad.Shape());
+        auto& out = m_outputHandle.MutableData();
+        
+        const size_t count = in.Shape().Count();
+        assert(count == out.Shape().Count());
+        const size_t matrixSize = in.Shape().RowNum() * in.Shape().ColNum();
+        assert(count % matrixSize == 0);
+        const size_t loopCount = count / matrixSize;
+        
+        auto low_grad = LowerAccess(grad);
+        ElementType* mem_grad = low_grad.MutableRawMemory();
+        auto low_in = LowerAccess(in);
+        ElementType* mem_in = low_in.MutableRawMemory();
+
+        auto low_out = LowerAccess(out);
+        ElementType* mem_out = low_out.MutableRawMemory();
                 
-        Batch<ElementType, DeviceType, CategoryTags::Matrix> tmp(batchNum, colNum, colNum);
-        for (size_t curBatch = 0; curBatch < batchNum; ++curBatch)
+        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+        
+        for (size_t i = 0; i < loopCount; ++i)
         {
-            for (size_t i = 0; i < colNum; ++i)
-            {
-                for (size_t j = 0; j < colNum; ++j)
-                {
-                    tmp.SetValue(curBatch, i, j, -1 * p_sout[curBatch](0, i) * p_sout[curBatch](0, j));
-                }
-                auto value = tmp[curBatch](i, i);
-                tmp.SetValue(curBatch, i, i, p_sout[curBatch](0, i) + value);
-            }
+            EvalSingleLoop(mem_out, mem_grad, mem_in, matrixSize);
+            mem_out += matrixSize;
+            mem_in += matrixSize;
+            mem_grad += matrixSize;
         }
-
-        auto tempHandle = tmp.EvalRegister();
-        using EvalUnit = NSDot::NSCaseGen::EvalUnit<decltype(m_oper1), decltype(tempHandle), ElementType, DeviceType,
-                                                    CategoryTags::BatchMatrix>;
-        using GroupType = TrivalEvalGroup<EvalUnit>;
-
-        const void* dataPtr = m_evalOutput.DataPtr();
-        auto depVec = {m_oper1.DataPtr(), tempHandle.DataPtr()};
-        EvalUnit unit(m_oper1, std::move(tempHandle), std::move(m_evalOutput));
-        EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, std::move(depVec));
+        m_outputHandle.SetEval();
     }
 
 private:
-    TOperHandle1 m_oper1;
-    TOperHandle2 m_oper2;
-    EvalHandle<Batch<ElementType, DeviceType, CategoryTags::Matrix>> m_evalOutput;
-};
-
-struct Calculator
-{
-    template <typename TCaseTail, typename TEvalRes, typename TOper>
-    static void EvalRegister(TEvalRes& evalRes, const TOper& oper)
+    void EvalSingleLoop(ElementType* out, ElementType* grad, ElementType* in, const size_t len)
     {
-        static_assert(std::is_same<TCaseTail, OperSeqContainer<>>::value,
-                      "General Case is not the last one");
-
-        const auto& oper1 = oper.Operand1();
-        const auto& oper2 = oper.Operand2();
-        auto handle1 = oper1.EvalRegister();
-        auto handle2 = oper2.EvalRegister();
-
-        using ElementType = typename TEvalRes::DataType::ElementType;
-        using DeviceType = typename TEvalRes::DataType::DeviceType;
-        using CategoryType = DataCategory<typename TEvalRes::DataType>;
-
-        using EvalUnit = EvalUnit<decltype(handle1), decltype(handle2), ElementType, DeviceType, CategoryType>;
-        using GroupType = TrivalEvalGroup<EvalUnit>;
-
-        auto outHandle = evalRes.Handle();
-        const void* dataPtr = outHandle.DataPtr();
-        auto depVec = {handle1.DataPtr(), handle2.DataPtr()};
-        EvalUnit unit(std::move(handle1), std::move(handle2), std::move(outHandle));
-        EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, std::move(depVec));
+        ElementType sum{};
+        for (size_t i = 0; i < len; ++i)
+        {
+            sum += grad[i] * in[i];
+        }
+        for (size_t i = 0; i < len; ++i)
+        {
+            out[i] = in[i] * (grad[i] - sum);
+        }
     }
+private:
+    const TGradHandle m_gradHandle;
+    const TInputHandle m_inputHandle;
+    TOutputHandle m_outputHandle;
 };
 }
-}
+
+template <typename TOperandGrad, typename TOperandInput>
+constexpr bool IsValidOper<OpTags::SoftmaxGrad, TOperandGrad, TOperandInput> =
+    (IsMatrix<TOperandGrad> && IsMatrix<TOperandInput>) ||
+    (IsBatchMatrix<TOperandGrad> && IsBatchMatrix<TOperandInput>);
 
 template <>
-struct OperSeq_<BinaryOpTags::VecSoftmaxDerivative>
+struct OperSeq_<OpTags::SoftmaxGrad>
 {
-    using type = OperSeqContainer<NSVecSoftmaxDerivative::CaseNLL::Calculator,
-                                  NSVecSoftmaxDerivative::CaseGen::Calculator>;
+    using type = OperSeqContainer<TailCalculator<OperSoftmaxGrad::NSCaseGen::EvalUnit>>;
 };
 
-struct OperVecSoftmaxDerivative
+template <typename TGrad, typename TInput,
+          typename = std::enable_if_t<IsValidOper<OpTags::SoftmaxGrad, TGrad, TInput>>>
+auto SoftmaxGrad(TGrad&& p_grad, TInput&& p_input)
 {
-    template <typename TGrad, typename TSOut>
-    static constexpr bool valid = (IsMatrix<TGrad> && IsMatrix<TSOut>) ||
-                                  (IsBatchMatrix<TGrad> && IsBatchMatrix<TSOut>);
-    
-    template <typename TGrad, typename TSOut>                              
-    static auto Eval(TGrad&& p_grad, TSOut&& p_sout)
+    if (p_grad.Shape() != p_input.Shape())
     {
-        using rawGrad = RemConstRef<TGrad>;
-        using rawSOut = RemConstRef<TSOut>;
-        
-        static_assert(std::is_same<typename rawGrad::ElementType, typename rawSOut::ElementType>::value,
-                      "Element type mismatch.");
-        static_assert(std::is_same<typename rawGrad::DeviceType, typename rawSOut::DeviceType>::value,
-                      "Device type mismatch.");
-
-        using ResType = BinaryOp<BinaryOpTags::VecSoftmaxDerivative, rawGrad, rawSOut>;
-        return ResType(std::forward<TGrad>(p_grad), std::forward<TSOut>(p_sout));
+        throw std::runtime_error("SoftmaxGrad error: operands' shape mismatch.");
     }
-};
-
-template <typename TGrad, typename TSOut,
-          std::enable_if_t<OperVecSoftmaxDerivative::valid<TGrad, TSOut>>* = nullptr>
-auto VecSoftmaxDerivative(TGrad&& p_grad, TSOut&& p_sout)
-{
-    return OperVecSoftmaxDerivative::Eval(std::forward<TGrad>(p_grad),
-                                          std::forward<TSOut>(p_sout));
+    
+    using rawOp1 = RemConstRef<TGrad>;
+    using rawOp2 = RemConstRef<TInput>;
+    using ResType = Operator<OpTags::SoftmaxGrad, rawOp1, rawOp2>;
+    return ResType(std::forward<TGrad>(p_grad), std::forward<TInput>(p_input));
 }
 }

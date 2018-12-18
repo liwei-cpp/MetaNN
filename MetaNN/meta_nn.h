@@ -28,7 +28,7 @@
 #include <MetaNN/operators/sigmoid_grad.h>
 #include <MetaNN/operators/sign.h>
 #include <MetaNN/operators/softmax.h>
-#include <MetaNN/operators/softmax_derivative.h>
+#include <MetaNN/operators/softmax_grad.h>
 #include <MetaNN/operators/substract.h>
 #include <MetaNN/operators/tanh.h>
 #include <MetaNN/operators/tanh_grad.h>

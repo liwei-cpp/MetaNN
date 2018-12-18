@@ -8,16 +8,16 @@ namespace MetaNN::OpTags
     
     // Elementwise operator
     struct Abs;
-    struct Acos;    struct AcosGrad;
+    struct Acos;        struct AcosGrad;
     struct Add;
-    struct Asin;    struct AsinGrad;
+    struct Asin;        struct AsinGrad;
     struct Divide;
     struct Interpolate;
     struct Multiply;
-    struct Sigmoid; struct SigmoidGrad;
+    struct Sigmoid;     struct SigmoidGrad;
     struct Sign;
     struct Substract;
-    struct Tanh;    struct TanhGrad;
+    struct Tanh;        struct TanhGrad;
     
     // Mutating operators
     struct Transpose;
@@ -26,13 +26,11 @@ namespace MetaNN::OpTags
     struct Dot;
     
     // non-linear activation operators
-    struct Softmax;
+    struct Softmax;     struct SoftmaxGrad;
     
 namespace BinaryOpTags
 {
     struct NegativeLogLikelihood;
-    struct SigmoidDerivative;
-    struct VecSoftmaxDerivative;
 };
 
 namespace TernaryOpTags

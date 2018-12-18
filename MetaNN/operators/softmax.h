@@ -77,9 +77,7 @@ private:
 template <typename TOperand>
 constexpr bool IsValidOper<OpTags::Softmax, TOperand> =
     IsMatrix<TOperand> ||
-    IsBatchMatrix<TOperand> ||
-    IsMatrixSequence<TOperand> ||
-    IsBatchMatrixSequence<TOperand>;
+    IsBatchMatrix<TOperand>;
 
 template <>
 struct OperSeq_<OpTags::Softmax>

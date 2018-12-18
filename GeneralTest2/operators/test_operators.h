@@ -27,6 +27,7 @@
 
 // non-linear activation operators
 #include <operators/test_softmax.h>
+#include <operators/test_softmax_grad.h>
 
 namespace Test::Operators
 {
@@ -56,5 +57,6 @@ namespace Test::Operators
         
         // non-linear activation operators
         test_softmax();
+        test_softmax_grad();
     }
 }
