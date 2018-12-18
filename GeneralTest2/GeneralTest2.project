@@ -195,5 +195,7 @@
     <File Name="operators/test_dot.cpp"/>
     <File Name="operators/test_interpolate.h"/>
     <File Name="operators/test_interpolate.cpp"/>
+    <File Name="operators/test_softmax.h"/>
+    <File Name="operators/test_softmax.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

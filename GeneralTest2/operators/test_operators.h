@@ -22,7 +22,11 @@
 // mutation operators
 #include <operators/test_transpose.h>
 
+// blas operators
 #include <operators/test_dot.h>
+
+// non-linear activation operators
+#include <operators/test_softmax.h>
 
 namespace Test::Operators
 {
@@ -31,6 +35,7 @@ namespace Test::Operators
         test_duplicate();
         test_collapse();
         
+        // elementwise operators
         test_abs();
         test_acos();        test_acos_grad();
         test_add();
@@ -43,8 +48,13 @@ namespace Test::Operators
         test_substract();
         test_tanh();        test_tanh_grad();
         
+        // mutation operators
         test_transpose();
         
+        // blas operators
         test_dot();
+        
+        // non-linear activation operators
+        test_softmax();
     }
 }

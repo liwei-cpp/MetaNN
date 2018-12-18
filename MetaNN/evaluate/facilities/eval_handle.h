@@ -207,4 +207,7 @@ private:
 
 template<typename THandle>
 using DeviceTypeFromHandle = typename RemConstRef<decltype(std::declval<THandle>().Data())>::DeviceType;
+
+template<typename THandle>
+using ElementTypeFromHandle = typename RemConstRef<decltype(std::declval<THandle>().Data())>::ElementType;
 }

@@ -22,13 +22,12 @@ namespace MetaNN::OpTags
     // Mutating operators
     struct Transpose;
     
+    // BLAS operators
     struct Dot;
     
-namespace UnaryOpTags
-{
-    struct VecSoftmax;
-};
-
+    // non-linear activation operators
+    struct Softmax;
+    
 namespace BinaryOpTags
 {
     struct NegativeLogLikelihood;
