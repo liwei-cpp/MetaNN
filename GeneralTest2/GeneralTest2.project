@@ -199,5 +199,10 @@
     <File Name="operators/test_softmax.cpp"/>
     <File Name="operators/test_softmax_grad.h"/>
     <File Name="operators/test_softmax_grad.cpp"/>
+    <VirtualDirectory Name="loss">
+      <File Name="operators/loss/test_nll_loss.h"/>
+      <File Name="operators/loss/test_nll_loss.cpp"/>
+      <File Name="operators/loss/test_loss_operators.h"/>
+    </VirtualDirectory>
   </VirtualDirectory>
 </CodeLite_Project>

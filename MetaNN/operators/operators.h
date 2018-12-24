@@ -29,3 +29,5 @@
 // non-linear activation operators
 #include <MetaNN/operators/softmax.h>
 #include <MetaNN/operators/softmax_grad.h>
+
+#include <MetaNN/operators/loss/loss_operators.h>

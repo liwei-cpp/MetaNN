@@ -28,11 +28,6 @@ namespace MetaNN::OpTags
     // non-linear activation operators
     struct Softmax;     struct SoftmaxGrad;
     
-namespace BinaryOpTags
-{
-    struct NegativeLogLikelihood;
-};
-
 namespace TernaryOpTags
 {
     struct NegativeLogLikelihoodDerivative;

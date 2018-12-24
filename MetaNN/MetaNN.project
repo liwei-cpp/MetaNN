@@ -205,7 +205,6 @@
     <File Name="operators/divide.h"/>
     <File Name="operators/dot.h"/>
     <File Name="operators/interpolate.h"/>
-    <File Name="operators/negative_log_likelihood.h"/>
     <File Name="operators/negative_log_likelihood_derivative.h"/>
     <File Name="operators/sigmoid.h"/>
     <File Name="operators/sign.h"/>
@@ -230,6 +229,14 @@
     <File Name="operators/asin_grad.h"/>
     <File Name="operators/tanh_grad.h"/>
     <File Name="operators/softmax_grad.h"/>
+    <VirtualDirectory Name="loss">
+      <VirtualDirectory Name="facilities">
+        <File Name="operators/loss/facilities/organizer.h"/>
+        <File Name="operators/loss/facilities/tags.h"/>
+      </VirtualDirectory>
+      <File Name="operators/loss/nll_loss.h"/>
+      <File Name="operators/loss/loss_operators.h"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/change_policy.h"/>

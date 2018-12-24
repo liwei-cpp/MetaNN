@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=liwei
-Date                   :=18/12/18
+Date                   :=24/12/18
 CodeLitePath           :=/home/liwei/.codelite
 LinkerName             :=g++
 SharedObjectLinkerName :=g++ -shared -fPIC
@@ -62,8 +62,8 @@ AS       := as
 CodeLiteDir:=/usr/share/codelite
 Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_test_dynamic.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_duplicate.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_collapse.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_abs.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_sign.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_add.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_substract.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_multiply.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_divide.cpp$(ObjectSuffix) \
 	$(IntermediateDirectory)/operators_test_acos.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_acos_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_sigmoid.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_sigmoid_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_asin.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_asin_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_tanh.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_tanh_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_transpose.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_dot.cpp$(ObjectSuffix) \
-	$(IntermediateDirectory)/operators_test_interpolate.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_softmax.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_softmax_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_test_static_batch.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_test_dynamic_batch.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_sequence_test_static_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_sequence_test_dynamic_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_sequence_test_static_batch_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_sequence_test_dynamic_batch_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(ObjectSuffix) \
-	$(IntermediateDirectory)/data_cardinal_matrix_test_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_zero_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_trival_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_one_hot_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(ObjectSuffix) 
+	$(IntermediateDirectory)/operators_test_interpolate.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_softmax.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_softmax_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_test_static_batch.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_test_dynamic_batch.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_sequence_test_static_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_sequence_test_dynamic_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_sequence_test_static_batch_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_sequence_test_dynamic_batch_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(ObjectSuffix) \
+	$(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_zero_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_trival_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_one_hot_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(ObjectSuffix) 
 
 
 
@@ -325,6 +325,14 @@ $(IntermediateDirectory)/data_batch_sequence_test_dynamic_batch_sequence.cpp$(De
 
 $(IntermediateDirectory)/data_batch_sequence_test_dynamic_batch_sequence.cpp$(PreprocessSuffix): data/batch_sequence/test_dynamic_batch_sequence.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/data_batch_sequence_test_dynamic_batch_sequence.cpp$(PreprocessSuffix) data/batch_sequence/test_dynamic_batch_sequence.cpp
+
+$(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(ObjectSuffix): operators/loss/test_nll_loss.cpp $(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/loss/test_nll_loss.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(DependSuffix): operators/loss/test_nll_loss.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(DependSuffix) -MM operators/loss/test_nll_loss.cpp
+
+$(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(PreprocessSuffix): operators/loss/test_nll_loss.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(PreprocessSuffix) operators/loss/test_nll_loss.cpp
 
 $(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(ObjectSuffix): data/cardinal/scalar/test_scalar.cpp $(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/data/cardinal/scalar/test_scalar.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(ObjectSuffix) $(IncludePath)

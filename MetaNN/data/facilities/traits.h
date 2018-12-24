@@ -195,6 +195,9 @@ template <typename T>
 constexpr bool IsBatchThreeDArraySequence = std::is_same_v<DataCategory<T>, CategoryTags::BatchThreeDArraySequence>;
 
 template <typename T>
+constexpr bool IsCardinal = IsScalar<T> || IsMatrix<T> || IsThreeDArray<T>;
+
+template <typename T>
 struct IsIterator_
 {   
     template <typename R>
