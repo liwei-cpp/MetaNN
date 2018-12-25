@@ -192,6 +192,7 @@
       <File Name="layers/facilities/interface_fun.h"/>
       <File Name="layers/facilities/policies.h"/>
       <File Name="layers/facilities/traits.h"/>
+      <File Name="layers/facilities/layer_io_map.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="recurrent">
       <File Name="layers/recurrent/gru_step.h"/>
@@ -205,7 +206,6 @@
     <File Name="operators/divide.h"/>
     <File Name="operators/dot.h"/>
     <File Name="operators/interpolate.h"/>
-    <File Name="operators/negative_log_likelihood_derivative.h"/>
     <File Name="operators/sigmoid.h"/>
     <File Name="operators/sign.h"/>
     <File Name="operators/softmax.h"/>

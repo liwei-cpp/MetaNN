@@ -2,19 +2,22 @@
 <CodeLite_Workspace Name="MetaNN" Database="" Version="10.0.0">
   <Project Name="MetaNN" Path="MetaNN/MetaNN.project" Active="No"/>
   <Project Name="GeneralTest" Path="GeneralTest/GeneralTest.project" Active="No"/>
-  <Project Name="GeneralTest2" Path="GeneralTest2/GeneralTest2.project" Active="Yes"/>
+  <Project Name="GeneralTest2" Path="GeneralTest2/GeneralTest2.project" Active="No"/>
+  <Project Name="LayerTest" Path="LayerTest/LayerTest.project" Active="Yes"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
       <Project Name="MetaNN" ConfigName="Debug"/>
       <Project Name="GeneralTest" ConfigName="Debug"/>
       <Project Name="GeneralTest2" ConfigName="Debug"/>
+      <Project Name="LayerTest" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="no">
+    <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
       <Project Name="MetaNN" ConfigName="Release"/>
       <Project Name="GeneralTest" ConfigName="Release"/>
       <Project Name="GeneralTest2" ConfigName="Release"/>
+      <Project Name="LayerTest" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>
