@@ -52,6 +52,8 @@ namespace MetaNN::ContMetaFun::Helper
     template <typename TK, typename TV>
     struct KVBinder
     {
+        using KeyType = TK;
+        using ValueType = TV;
         static TV apply(TK*);
     };
 // =========================================================================================

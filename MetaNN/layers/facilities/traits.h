@@ -1,14 +1,17 @@
 #pragma once
 
+/*
 #include <MetaNN/data/dynamic.h>
 #include <MetaNN/model/grad_col/grad_collector.h>
 #include <stack>
 #include <stdexcept>
+*/
+#include <type_traits>
+#include <MetaNN/facilities/var_type_dict.h>
 
-namespace MetaNN
+namespace MetaNN::LayerTraits
 {
-namespace LayerTraits
-{
+/*
 template <typename ElementType, typename DeviceType, typename CateType>
 struct LayerInternalBufType_
 {
@@ -56,5 +59,67 @@ void MatrixGradCollect(const TWeight& weight,
         col.Collect(weight, g);
     }
 }
+*/
+namespace NSLayerIOMapTrasfer
+{
+template <typename TVarTypeDict, typename... TKVs>
+struct CreateVarTypeDict_
+{
+    using type = TVarTypeDict;
+};
+
+template <template<typename...> class TVarTypeDictCont, typename... TProcessed, typename TCur, typename... TKVs>
+struct CreateVarTypeDict_<TVarTypeDictCont<TProcessed...>, TCur, TKVs...>
+{
+    using type = typename CreateVarTypeDict_<TVarTypeDictCont<TProcessed...,
+                                                              typename TCur::KeyType>,
+                                             TKVs...>::type;
+};
+
+template <typename TVarTypeDict>
+auto FillVarTypeDict(TVarTypeDict&& curDict)
+{
+    return std::forward<TVarTypeDict>(curDict);
 }
+
+template <typename TVarTypeDict, typename TCur, typename... TKVs>
+auto FillVarTypeDict(TVarTypeDict&& curDict)
+{
+    auto newDict = std::forward<TVarTypeDict>(curDict).template Set<typename TCur::KeyType>(std::declval<typename TCur::ValueType>());
+    return FillVarTypeDict<decltype(newDict), TKVs...>(std::move(newDict));
+}
+
+template <typename TVarTypeDict, typename SeqCont>
+struct VarTypeDict2IOMap_;
+
+template <typename TVarTypeDict, int... IDs>
+struct VarTypeDict2IOMap_<TVarTypeDict, ContMetaFun::Helper::IndexSequence<IDs...>>
+{
+    using type = LayerIOMap<LayerKV<typename TVarTypeDict::template KeyType<IDs>,
+                                    typename TVarTypeDict::template ValueType<IDs>
+                                   >...>;
+};
+}
+
+template <typename TLayer, typename TLayerIOMap>
+struct LayerIOMapTrasfer_;
+
+template <typename TLayer, typename... TKVs>
+struct LayerIOMapTrasfer_<TLayer, LayerIOMap<TKVs...>>
+{
+    using TVarTypeDictOri = NSLayerIOMapTrasfer::CreateVarTypeDict_<VarTypeDict<>, TKVs...>;
+    using RVarTypeDictOri = typename TVarTypeDictOri::type;
+    
+    using RVarTypeDictCre = decltype(RVarTypeDictOri::Create());
+    using TVarTypeDictFill = decltype(NSLayerIOMapTrasfer::FillVarTypeDict<RVarTypeDictCre, TKVs...>(RVarTypeDictOri::Create()));
+    
+    using TForwardRes = decltype(std::declval<TLayer>().FeedForward(std::declval<TVarTypeDictFill>()));
+    
+    using IndexSeq = ContMetaFun::Helper::MakeIndexSequence<TForwardRes::Length>;
+    
+    using type = typename NSLayerIOMapTrasfer::VarTypeDict2IOMap_<TForwardRes, IndexSeq>::type;
+};
+
+template <typename TLayer, typename TLayerIOMap>
+using LayerIOMapTrasfer = typename LayerIOMapTrasfer_<TLayer, TLayerIOMap>::type;
 }

@@ -47,7 +47,7 @@ template <typename ignore>
 struct impl;
 
 template <int... ignore>
-struct impl<MetaNN::ContMetaFun::Helper::IndexSequence<ignore...>>
+struct impl<ContMetaFun::Helper::IndexSequence<ignore...>>
 {
     template <typename nth>
     static nth apply(decltype(ignore, (void*)nullptr)..., nth*, ...);

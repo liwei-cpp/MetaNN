@@ -4,3 +4,4 @@
 #include <MetaNN/operators/operators.h>
 
 #include <MetaNN/layers/facilities/layer_io_map.h>
+#include <MetaNN/layers/facilities/traits.h>

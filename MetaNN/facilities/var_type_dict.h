@@ -32,7 +32,7 @@ struct VarTypeDict
         {
             constexpr static auto TagPos = ContMetaFun::Sequential::Order<VarTypeDict, TTag>;
             
-            using rawVal = std::decay_t<TVal>;
+            using rawVal = RemConstRef<TVal>;
             rawVal* tmp = new rawVal(std::forward<TVal>(val));
             m_tuple[TagPos] = std::shared_ptr<void>(tmp,
                                     [](void* ptr){
@@ -65,6 +65,11 @@ struct VarTypeDict
             AimType* res = static_cast<AimType*>(tmp);
             return std::move(*res);
         }
+        
+        constexpr static size_t Length = sizeof...(TTypes);
+        
+        template <size_t ID>
+        using KeyType = ContMetaFun::Sequential::At<VarTypeDict, ID>;
         
         template <typename TTag>
         using ValueType = ContMetaFun::Sequential::At<Values, ContMetaFun::Sequential::Order<VarTypeDict, TTag>>;

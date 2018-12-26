@@ -4,7 +4,7 @@
 namespace MetaNN
 {
     template <typename TKey, typename TValue>
-    struct LayerKV : ContMetaFun::Helper::KVBinder<TKey, TValue>
+    struct LayerKV : ContMetaFun::Helper::KVBinder<TKey, RemConstRef<TValue>>
     { };
     
     template <typename... TLayerKVs>
