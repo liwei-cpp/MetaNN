@@ -9,6 +9,8 @@
   <Dependencies/>
   <VirtualDirectory Name="_root">
     <File Name="main.cpp"/>
+    <File Name="data_gen.h"/>
+    <File Name="calculate_tags.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="facilities">
     <File Name="facilities/test_facilities.h"/>
@@ -106,4 +108,9 @@
       </Completion>
     </Configuration>
   </Settings>
+  <VirtualDirectory Name="elementary">
+    <File Name="elementary/test_abs_layer.h"/>
+    <File Name="elementary/test_abs_layer.cpp"/>
+    <File Name="elementary/test_elementary.h"/>
+  </VirtualDirectory>
 </CodeLite_Project>

@@ -193,6 +193,7 @@
       <File Name="layers/facilities/policies.h"/>
       <File Name="layers/facilities/traits.h"/>
       <File Name="layers/facilities/layer_io_map.h"/>
+      <File Name="layers/facilities/make_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="recurrent">
       <File Name="layers/recurrent/gru_step.h"/>

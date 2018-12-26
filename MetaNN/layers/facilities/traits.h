@@ -8,6 +8,7 @@
 */
 #include <type_traits>
 #include <MetaNN/facilities/var_type_dict.h>
+#include <MetaNN/layers/facilities/layer_io_map.h>
 
 namespace MetaNN::LayerTraits
 {
@@ -120,19 +121,22 @@ struct LayerIOMapTrasfer_<TLayer, LayerIOMap<TKVs...>>
     using type = typename NSLayerIOMapTrasfer::VarTypeDict2IOMap_<TForwardRes, IndexSeq>::type;
 };
 
+template <typename TLayer>
+using LayerInputMap = typename TLayer::InputTypeMap;
+
 template <typename TLayer, typename TLayerIOMap>
-using LayerIOMapTrasfer = typename LayerIOMapTrasfer_<TLayer, TLayerIOMap>::type;
+using LayerOutputMap = typename LayerIOMapTrasfer_<TLayer, typename TLayer::InputTypeMap>::type;
 
 template <bool IsAimDynamic, typename T>
 auto DynamicTransWithFlag(T&& val)
 {
-	if constexpr (IsAimDynamic)
-	{
-		return MakeDynamic(std::forward<T>(val));
-	}
-	else
-	{
-		return std::forward<T>(val);
-	}
+    if constexpr (IsAimDynamic)
+    {
+        return MakeDynamic(std::forward<T>(val));
+    }
+    else
+    {
+        return std::forward<T>(val);
+    }
 }
 }
