@@ -5,7 +5,6 @@
 #include <MetaNN/layers/facilities/traits.h>
 #include <MetaNN/policies/policy_operations.h>
 #include <MetaNN/policies/policy_selector.h>
-#include <stack>
 
 namespace MetaNN
 {
@@ -18,8 +17,8 @@ namespace MetaNN
     public:
         static constexpr bool IsFeedbackOutput = PolicySelect<FeedbackPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
-        using InputContainerType = LayerIO;
-        using OutputContainerType = LayerIO;
+        using InputType = LayerIO;
+        using OutputType = LayerIO;
         using InputTypeMap = TInputMap;
         
     private:
@@ -74,6 +73,6 @@ namespace MetaNN
             }
         }
     private:
-        std::stack<AimInputType> m_data;
+        LayerTraits::LayerInternalBuf<AimInputType, IsFeedbackOutput> m_data;
     };
 }

@@ -3,9 +3,10 @@
 /*
 #include <MetaNN/data/dynamic.h>
 #include <MetaNN/model/grad_col/grad_collector.h>
-#include <stack>
 #include <stdexcept>
 */
+
+#include <stack>
 #include <type_traits>
 #include <MetaNN/facilities/var_type_dict.h>
 #include <MetaNN/layers/facilities/layer_io_map.h>
@@ -126,6 +127,9 @@ using LayerInputMap = typename TLayer::InputTypeMap;
 
 template <typename TLayer, typename TLayerIOMap>
 using LayerOutputMap = typename LayerIOMapTrasfer_<TLayer, typename TLayer::InputTypeMap>::type;
+
+template <typename TStoreType, bool store>
+using LayerInternalBuf = std::conditional_t<store, std::stack<TStoreType>, NullParameter>;
 
 template <bool IsAimDynamic, typename T>
 auto DynamicTransWithFlag(T&& val)
