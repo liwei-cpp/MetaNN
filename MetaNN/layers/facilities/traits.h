@@ -1,11 +1,5 @@
 #pragma once
 
-/*
-#include <MetaNN/data/dynamic.h>
-#include <MetaNN/model/grad_col/grad_collector.h>
-#include <stdexcept>
-*/
-
 #include <stack>
 #include <type_traits>
 #include <MetaNN/facilities/var_type_dict.h>
@@ -14,41 +8,6 @@
 namespace MetaNN::LayerTraits
 {
 /*
-template <typename ElementType, typename DeviceType, typename CateType>
-struct LayerInternalBufType_
-{
-    using tmp2 = DynamicData<ElementType, DeviceType, CateType>;
-    using type = std::stack<tmp2, std::list<tmp2>>;
-};
-
-template <bool triger, bool batchMode, 
-          typename ElementType, typename DeviceType,
-          typename CateTypeSingle, typename CateTypeBatch>
-struct LayerInternalBuf_
-{
-    using type = typename std::conditional_t<batchMode,
-                                        LayerTraits::LayerInternalBufType_<ElementType, DeviceType,
-                                                                           CateTypeBatch>,
-                                        LayerTraits::LayerInternalBufType_<ElementType, DeviceType,
-                                                                           CateTypeSingle>>::type;
-};
-
-template <bool batchMode, 
-          typename ElementType, typename DeviceType,
-          typename CateTypeSingle, typename CateTypeBatch>
-struct LayerInternalBuf_<false, batchMode, ElementType, DeviceType, CateTypeSingle, CateTypeBatch>
-{
-    using type = NullParameter;
-};
-
-template <bool triger, bool batchMode, 
-          typename ElementType, typename DeviceType,
-          typename CateTypeSingle, typename CateTypeBatch>
-using LayerInternalBuf = typename LayerInternalBuf_<triger, batchMode, ElementType, DeviceType, CateTypeSingle, CateTypeBatch>::type;
-
-template <typename ElementType, typename DeviceType, typename CateType>
-using LayerInternalBufType = typename LayerInternalBufType_<ElementType, DeviceType, CateType>::type;    
-
 template <typename TWeight, typename TGrad, typename TGradCollector>
 void MatrixGradCollect(const TWeight& weight,
                        TGrad& grad,
@@ -142,5 +101,79 @@ auto DynamicTransWithFlag(T&& val)
     {
         return std::forward<T>(val);
     }
+}
+
+namespace NSShapePromote
+{
+    template <typename T>
+    constexpr size_t ShapeIndex = (size_t)-1;
+    
+    template <>
+    constexpr size_t ShapeIndex<Shape<CategoryTags::Scalar>> = 0;
+    
+    template <>
+    constexpr size_t ShapeIndex<Shape<CategoryTags::Matrix>> = 1;
+    
+    template <>
+    constexpr size_t ShapeIndex<Shape<CategoryTags::ThreeDArray>> = 2;
+    
+    template <typename TSubCate>
+    constexpr size_t ShapeIndex<Shape<CategoryTags::Batch<TSubCate>>> = 10 + ShapeIndex<Shape<TSubCate>>;
+    
+    template <typename TSubCate>
+    constexpr size_t ShapeIndex<Shape<CategoryTags::Sequence<TSubCate>>> = 10 + ShapeIndex<Shape<TSubCate>>;
+    
+    template <typename TSubCate>
+    constexpr size_t ShapeIndex<Shape<CategoryTags::BatchSequence<TSubCate>>> = 100 + ShapeIndex<Shape<TSubCate>>;
+    
+    template <typename TShape1, typename TShape2,
+              typename = std::enable_if_t<(ShapeIndex<TShape1> > ShapeIndex<TShape2>)>>
+    auto ShapePromoteHelper(const TShape1& shape1, const TShape2& shape2)
+    {
+        return ShapePromoteHelper(shape2, shape1);
+    }
+    
+    template <typename TShape>
+    auto ShapePromoteHelper(const Shape<CategoryTags::Scalar>&, const TShape& s2)
+    {
+        return s2;
+    }
+    
+    template <typename TShape,
+              typename = std::enable_if_t<(ShapeIndex<TShape> >= 1)>>
+    auto ShapePromoteHelper(const Shape<CategoryTags::Matrix>& s1, const TShape& s2)
+    {
+        if ((s1.RowNum() != s2.RowNum()) || (s1.ColNum() != s2.ColNum()))
+        {
+            throw std::runtime_error("Shape promote error: shape mismatch.");
+        }
+        return s2;
+    }
+    
+    template <typename TShape,
+              typename = std::enable_if_t<(ShapeIndex<TShape> >= 2)>>
+    auto ShapePromoteHelper(const Shape<CategoryTags::ThreeDArray>& s1, const TShape& s2)
+    {
+        if ((s1.RowNum() != s2.RowNum()) ||
+            (s1.ColNum() != s2.ColNum()) ||
+            (s1.PageNum() != s2.PageNum()))
+        {
+            throw std::runtime_error("Shape promote error: shape mismatch.");
+        }
+        return s2;
+    }
+}
+
+template <typename TShape>
+auto ShapePromote(const TShape& s)
+{
+    return s;
+}
+
+template <typename TShape1, typename TShape2, typename... TShapes>
+auto ShapePromote(const TShape1& s1, const TShape2& s2, const TShapes&... rem)
+{
+    auto res = NSShapePromote::ShapePromoteHelper(s1, s2);
+    return ShapePromote(res, rem...);
 }
 }
