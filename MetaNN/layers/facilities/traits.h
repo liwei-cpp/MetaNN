@@ -122,4 +122,17 @@ struct LayerIOMapTrasfer_<TLayer, LayerIOMap<TKVs...>>
 
 template <typename TLayer, typename TLayerIOMap>
 using LayerIOMapTrasfer = typename LayerIOMapTrasfer_<TLayer, TLayerIOMap>::type;
+
+template <bool IsAimDynamic, typename T>
+auto DynamicTransWithFlag(T&& val)
+{
+	if constexpr (IsAimDynamic)
+	{
+		return MakeDynamic(std::forward<T>(val));
+	}
+	else
+	{
+		return std::forward<T>(val);
+	}
+}
 }
