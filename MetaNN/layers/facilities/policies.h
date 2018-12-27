@@ -4,9 +4,9 @@
 #include <MetaNN/data/facilities/tags.h>
 namespace MetaNN
 {
-struct FeedbackPolicy
+struct GeneralPolicy
 {
-    using MajorClass = FeedbackPolicy;
+    using MajorClass = GeneralPolicy;
     
     struct IsUpdateValueCate;
     struct IsFeedbackOutputValueCate;
@@ -14,33 +14,10 @@ struct FeedbackPolicy
     static constexpr bool IsUpdate = false;
     static constexpr bool IsFeedbackOutput = false;
 };
-ValuePolicyObj(PUpdate,   FeedbackPolicy, IsUpdate, true);
-ValuePolicyObj(PNoUpdate, FeedbackPolicy, IsUpdate, false);
-ValuePolicyObj(PFeedbackOutput,   FeedbackPolicy, IsFeedbackOutput, true);
-ValuePolicyObj(PFeedbackNoOutput, FeedbackPolicy, IsFeedbackOutput, false);
-
-struct InputPolicy
-{
-    using MajorClass = InputPolicy;
-    
-    struct BatchModeValueCate;
-    static constexpr bool BatchMode = false;
-};
-ValuePolicyObj(PBatchMode,  InputPolicy, BatchMode, true);
-ValuePolicyObj(PNoBatchMode,InputPolicy, BatchMode, false);
-
-struct OperandPolicy
-{
-    using MajorClass = OperandPolicy;
-    
-    struct DeviceTypeCate : public MetaNN::DeviceTags {};
-    using Device = DeviceTypeCate::CPU;
-    
-    struct ElementTypeCate;
-    using Element = float;
-};
-TypePolicyObj(PCPUDevice, OperandPolicy, Device, CPU);
-TypePolicyTemplate(PElementTypeIs, OperandPolicy, Element);
+ValuePolicyObj(PUpdate,           GeneralPolicy, IsUpdate, true);
+ValuePolicyObj(PNoUpdate,         GeneralPolicy, IsUpdate, false);
+ValuePolicyObj(PFeedbackOutput,   GeneralPolicy, IsFeedbackOutput, true);
+ValuePolicyObj(PFeedbackNoOutput, GeneralPolicy, IsFeedbackOutput, false);
 
 struct SingleLayerPolicy
 {

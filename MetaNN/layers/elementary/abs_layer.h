@@ -15,7 +15,7 @@ namespace MetaNN
         using CurLayerPolicy = PlainPolicy<TPolicies>;
 
     public:
-        static constexpr bool IsFeedbackOutput = PolicySelect<FeedbackPolicy, CurLayerPolicy>::IsFeedbackOutput;
+        static constexpr bool IsFeedbackOutput = PolicySelect<GeneralPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         using InputType = LayerIO;
         using OutputType = LayerIO;

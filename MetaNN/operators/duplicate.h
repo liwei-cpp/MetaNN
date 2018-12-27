@@ -16,7 +16,6 @@ template <typename TOriData, typename TShape>
 constexpr bool IsValidOper<OpTags::Duplicate, TOriData, TShape>
     = (IsScalar<TOriData>) ||
 
-      (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
       (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
       (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Batch<CategoryTags::Matrix>>>) ||
       (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Batch<CategoryTags::ThreeDArray>>>) ||
@@ -25,10 +24,11 @@ constexpr bool IsValidOper<OpTags::Duplicate, TOriData, TShape>
       (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::BatchSequence<CategoryTags::Matrix>>>) ||
       (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::BatchSequence<CategoryTags::ThreeDArray>>>) ||
 
-      (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
       (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Batch<CategoryTags::ThreeDArray>>>) ||
       (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Sequence<CategoryTags::ThreeDArray>>>) ||
-      (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::BatchSequence<CategoryTags::ThreeDArray>>>);
+      (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::BatchSequence<CategoryTags::ThreeDArray>>>) ||
+      
+      std::is_same_v<RemConstRef<decltype(std::declval<TOriData>().Shape())>, TShape>;
       
 namespace OperDuplicate
 {

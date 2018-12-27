@@ -116,5 +116,7 @@
     <File Name="elementary/test_sigmoid_layer.cpp"/>
     <File Name="elementary/test_tanh_layer.h"/>
     <File Name="elementary/test_tanh_layer.cpp"/>
+    <File Name="elementary/test_add_layer.h"/>
+    <File Name="elementary/test_add_layer.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>
