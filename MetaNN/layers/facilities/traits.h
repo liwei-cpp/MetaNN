@@ -126,41 +126,50 @@ namespace NSShapePromote
     template <typename TSubCate>
     constexpr size_t ShapeIndex<Shape<CategoryTags::BatchSequence<TSubCate>>> = 100 + ShapeIndex<Shape<TSubCate>>;
     
-    template <typename TShape1, typename TShape2,
-              typename = std::enable_if_t<(ShapeIndex<TShape1> > ShapeIndex<TShape2>)>>
+    template <typename TShape1, typename TShape2>
     auto ShapePromoteHelper(const TShape1& shape1, const TShape2& shape2)
     {
-        return ShapePromoteHelper(shape2, shape1);
-    }
-    
-    template <typename TShape>
-    auto ShapePromoteHelper(const Shape<CategoryTags::Scalar>&, const TShape& s2)
-    {
-        return s2;
-    }
-    
-    template <typename TShape,
-              typename = std::enable_if_t<(ShapeIndex<TShape> >= 1)>>
-    auto ShapePromoteHelper(const Shape<CategoryTags::Matrix>& s1, const TShape& s2)
-    {
-        if ((s1.RowNum() != s2.RowNum()) || (s1.ColNum() != s2.ColNum()))
+        if constexpr (ShapeIndex<TShape1> > ShapeIndex<TShape2>)
         {
-            throw std::runtime_error("Shape promote error: shape mismatch.");
+            return ShapePromoteHelper(shape2, shape1);
         }
-        return s2;
-    }
-    
-    template <typename TShape,
-              typename = std::enable_if_t<(ShapeIndex<TShape> >= 2)>>
-    auto ShapePromoteHelper(const Shape<CategoryTags::ThreeDArray>& s1, const TShape& s2)
-    {
-        if ((s1.RowNum() != s2.RowNum()) ||
-            (s1.ColNum() != s2.ColNum()) ||
-            (s1.PageNum() != s2.PageNum()))
+        else if constexpr (ShapeIndex<TShape1> == ShapeIndex<TShape2>)
         {
-            throw std::runtime_error("Shape promote error: shape mismatch.");
+            if (shape1 != shape2)
+            {
+                throw std::runtime_error("Shape promote error: shape mismatch.");
+            }
+            return shape1;
         }
-        return s2;
+        else if constexpr ((std::is_same_v<TShape1, Shape<CategoryTags::Scalar>>) &&
+                           (ShapeIndex<TShape2> >= 0))
+        {
+            return shape2;
+        }
+        else if constexpr ((std::is_same_v<TShape1, Shape<CategoryTags::Matrix>>) &&
+                           (ShapeIndex<TShape2> >= 1))
+        {
+            if ((shape1.RowNum() != shape2.RowNum()) || (shape1.ColNum() != shape2.ColNum()))
+            {
+                throw std::runtime_error("Shape promote error: shape mismatch.");
+            }
+            return shape2;
+        }
+        else if constexpr ((std::is_same_v<TShape1, Shape<CategoryTags::ThreeDArray>>) &&
+                           (ShapeIndex<TShape2> >= 2))
+        {
+            if ((shape1.RowNum() != shape2.RowNum()) ||
+                (shape1.ColNum() != shape2.ColNum()) ||
+                (shape1.PageNum() != shape2.PageNum()))
+            {
+                throw std::runtime_error("Shape promote error: shape mismatch.");
+            }
+            return shape2;
+        }
+        else
+        {
+            static_assert(DependencyFalse<TShape1>);
+        }
     }
 }
 

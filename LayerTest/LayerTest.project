@@ -112,5 +112,9 @@
     <File Name="elementary/test_abs_layer.h"/>
     <File Name="elementary/test_abs_layer.cpp"/>
     <File Name="elementary/test_elementary.h"/>
+    <File Name="elementary/test_sigmoid_layer.h"/>
+    <File Name="elementary/test_sigmoid_layer.cpp"/>
+    <File Name="elementary/test_tanh_layer.h"/>
+    <File Name="elementary/test_tanh_layer.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

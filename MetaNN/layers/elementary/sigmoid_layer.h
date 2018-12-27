@@ -55,7 +55,7 @@ namespace MetaNN
                 }
                 auto grad = p_grad.template Get<LayerIO>();
                 auto& input = m_data.top();
-                auto res = LayerIO::Create().template Set<LayerIO>(SigmoidDerivative(grad, input));
+                auto res = LayerIO::Create().template Set<LayerIO>(SigmoidGrad(grad, input));
                 m_data.pop();
                 return res;
             }
