@@ -151,17 +151,15 @@ public:
 
 private:
     using PrincipleType = PrincipalDataType<CategoryTag, ElementType, DeviceType>;
-    
-public:
-    template<typename...TShapeParams>
-    static DynamicArray CreateWithShape(TShapeParams&&... shapeParams)
-    {
-        return DynamicArray(MetaNN::Shape<CardinalTag>(std::forward<TShapeParams>(shapeParams)...));
-    }
-    
+
 public:
     explicit DynamicArray(MetaNN::Shape<CardinalTag> p_shape = MetaNN::Shape<CardinalTag>())
         : m_shape(HelperBlob::ShapeInit(std::move(p_shape)))
+    {}
+    
+    template <typename... TShapeParams>
+    explicit DynamicArray(size_t val, TShapeParams&&... shapeParams)
+        : DynamicArray(MetaNN::Shape<CardinalTag>(val, std::forward<TShapeParams>(shapeParams)...))
     {}
     
     template <typename TIterator,

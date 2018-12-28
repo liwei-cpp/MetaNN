@@ -5,7 +5,7 @@ template <typename TElem>
 inline auto GenMatrix(std::size_t r, std::size_t c, TElem start = 0, TElem step = 1)
 {
     using namespace MetaNN;
-    auto res = Matrix<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(r, c);
+    Matrix<TElem, MetaNN::DeviceTags::CPU> res(r, c);
     
     TElem cur{};
     for (std::size_t i = 0; i < r; ++i)
@@ -23,7 +23,7 @@ template <typename TElem>
 inline auto GenThreeDArray(size_t p, size_t r, size_t c, TElem start = 0, TElem step = 1)
 {
     using namespace MetaNN;
-    auto res = ThreeDArray<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(p, r, c);
+    ThreeDArray<TElem, MetaNN::DeviceTags::CPU> res(p, r, c);
     
     TElem cur{};
     for (size_t k = 0; k < p; ++k)
@@ -44,7 +44,7 @@ template <typename TElem>
 inline auto GenBatchScalar(size_t len, TElem start = 0, TElem step = 1)
 {
     using namespace MetaNN;
-    auto res = BatchScalar<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(len);
+    BatchScalar<TElem, MetaNN::DeviceTags::CPU> res(len);
     TElem cur{};
     for (size_t k = 0; k < len; ++k)
     {
@@ -58,7 +58,7 @@ template <typename TElem>
 inline auto GenBatchMatrix(size_t p, size_t r, size_t c, TElem start = 0, TElem step = 1)
 {
     using namespace MetaNN;
-    auto res = BatchMatrix<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(p, r, c);
+    BatchMatrix<TElem, MetaNN::DeviceTags::CPU> res(p, r, c);
     
     TElem cur{};
     for (size_t k = 0; k < p; ++k)
@@ -79,7 +79,7 @@ template <typename TElem>
 inline auto GenBatchThreeDArray(size_t b, size_t p, size_t r, size_t c, TElem start = 0, TElem step = 1)
 {
     using namespace MetaNN;
-    auto res = BatchThreeDArray<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(b, p, r, c);
+    BatchThreeDArray<TElem, MetaNN::DeviceTags::CPU> res(b, p, r, c);
     TElem cur{};
     for (size_t l = 0; l < b; ++l)
     {
@@ -102,7 +102,7 @@ template <typename TElem>
 inline auto GenScalarSequence(size_t len, TElem start = 0, TElem scale = 1)
 {
     using namespace MetaNN;
-    auto res = ScalarSequence<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(len);
+    ScalarSequence<TElem, MetaNN::DeviceTags::CPU> res(len);
     for (size_t k = 0; k < len; ++k)
     {
         res.SetValue((TElem)(start * scale), k);
@@ -115,7 +115,7 @@ template <typename TElem>
 inline auto GenMatrixSequence(size_t p, size_t r, size_t c, TElem start = 0, TElem scale = 1)
 {
     using namespace MetaNN;
-    auto res = MatrixSequence<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(p, r, c);
+    MatrixSequence<TElem, MetaNN::DeviceTags::CPU> res(p, r, c);
     for (size_t k = 0; k < p; ++k)
     {
         for (size_t i = 0; i < r; ++i)
@@ -134,7 +134,7 @@ template <typename TElem>
 inline auto GenThreeDArraySequence(size_t b, size_t p, size_t r, size_t c, TElem start = 0, TElem scale = 1)
 {
     using namespace MetaNN;
-    auto res = ThreeDArraySequence<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(b, p, r, c);
+    ThreeDArraySequence<TElem, MetaNN::DeviceTags::CPU> res(b, p, r, c);
     for (size_t l = 0; l < b; ++l)
     {
         for (size_t k = 0; k < p; ++k)
@@ -156,7 +156,7 @@ template <typename TElem, typename TLen>
 inline auto GenBatchScalarSequence(const std::vector<TLen>& seqs, TElem start = 0, TElem scale = 1)
 {
     using namespace MetaNN;
-    auto res = BatchScalarSequence<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(seqs);
+    BatchScalarSequence<TElem, MetaNN::DeviceTags::CPU> res(seqs);
     for (size_t i = 0; i < seqs.size(); ++i)
     {
         for (size_t k = 0; k < (size_t)seqs[i]; ++k)
@@ -172,7 +172,7 @@ template <typename TElem, typename TLen>
 inline auto GenBatchMatrixSequence(const std::vector<TLen>& seqs, size_t rowNum, size_t colNum, TElem start = 0, TElem scale = 1)
 {
     using namespace MetaNN;
-    auto res = BatchMatrixSequence<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(seqs, rowNum, colNum);
+    BatchMatrixSequence<TElem, MetaNN::DeviceTags::CPU> res(seqs, rowNum, colNum);
     for (size_t i = 0; i < seqs.size(); ++i)
     {
         for (size_t k = 0; k < (size_t)seqs[i]; ++k)
@@ -194,7 +194,7 @@ template <typename TElem, typename TLen>
 inline auto GenBatchThreeDArraySequence(const std::vector<TLen>& seqs, size_t pageNum, size_t rowNum, size_t colNum, TElem start = 0, TElem scale = 1)
 {
     using namespace MetaNN;
-    auto res = BatchThreeDArraySequence<TElem, MetaNN::DeviceTags::CPU>::CreateWithShape(seqs, pageNum, rowNum, colNum);
+    BatchThreeDArraySequence<TElem, MetaNN::DeviceTags::CPU> res(seqs, pageNum, rowNum, colNum);
     for (size_t i = 0; i < seqs.size(); ++i)
     {
         for (size_t k = 0; k < (size_t)seqs[i]; ++k)

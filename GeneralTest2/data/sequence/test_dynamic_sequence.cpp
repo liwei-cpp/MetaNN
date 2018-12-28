@@ -49,14 +49,14 @@ namespace
         static_assert(IsMatrixSequence<const DynamicSequence<TCardinal> &>);
         static_assert(IsMatrixSequence<const DynamicSequence<TCardinal> &&>);
 
-        auto rm1 = DynamicSequence<TCardinal>::CreateWithShape(10, 20);
+        DynamicSequence<TCardinal> rm1(10, 20);
         assert(rm1.Shape().Length() == 0);
         assert(rm1.IsEmpty());
 
         int c = 0;
-        auto me1 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
-        auto me2 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
-        auto me3 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
+        Matrix<CheckElement, CheckDevice> me1(10, 20);
+        Matrix<CheckElement, CheckDevice> me2(10, 20);
+        Matrix<CheckElement, CheckDevice> me3(10, 20);
         for (size_t i = 0; i < 10; ++i)
         {
             for (size_t j = 0; j < 20; ++j)
@@ -99,14 +99,14 @@ namespace
         static_assert(IsThreeDArraySequence<const DynamicSequence<TCardinal> &>);
         static_assert(IsThreeDArraySequence<const DynamicSequence<TCardinal> &&>);
 
-        auto rm1 = DynamicSequence<TCardinal>::CreateWithShape(7, 10, 20);
+        DynamicSequence<TCardinal> rm1(7, 10, 20);
         assert(rm1.Shape().Length() == 0);
         assert(rm1.IsEmpty());
 
         int c = 0;
-        auto me1 = TCardinal::CreateWithShape(7, 10, 20);
-        auto me2 = TCardinal::CreateWithShape(7, 10, 20);
-        auto me3 = TCardinal::CreateWithShape(7, 10, 20);
+        TCardinal me1(7, 10, 20);
+        TCardinal me2(7, 10, 20);
+        TCardinal me3(7, 10, 20);
         
         for (size_t p = 0; p < 7; ++p)
         {

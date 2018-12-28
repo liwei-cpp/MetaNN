@@ -16,7 +16,7 @@ namespace
         static_assert(IsMatrix<const ZeroMatrix<CheckElement, CheckDevice> &>);
         static_assert(IsMatrix<const ZeroMatrix<CheckElement, CheckDevice> &&>);
 
-        auto rm = ZeroMatrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
+        ZeroMatrix<CheckElement, CheckDevice> rm(10, 20);
         assert(rm.Shape().RowNum() == 10);
         assert(rm.Shape().ColNum() == 20);
 

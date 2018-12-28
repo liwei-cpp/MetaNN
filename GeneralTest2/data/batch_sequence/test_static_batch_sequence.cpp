@@ -21,7 +21,7 @@ namespace
 
         // check contains 4 sequences, with length = 13, 1, 100, 87
         const std::vector<size_t> seqs = {13, 1, 100, 87};
-        check = BatchScalarSequence<CheckElement, CheckDevice>::CreateWithShape(seqs);
+        check = BatchScalarSequence<CheckElement, CheckDevice>(seqs);
         assert(check.Shape().SeqLenContainer()[0] == 13);
         assert(check.Shape().SeqLenContainer()[1] == 1);
         assert(check.Shape().SeqLenContainer()[2] == 100);
@@ -71,7 +71,7 @@ namespace
     
         // check contains 4 sequences, with length = 13, 1, 100, 87
         const std::vector<size_t> seqs = {13, 1, 100, 87};
-        auto data = BatchMatrixSequence<int, CheckDevice>::CreateWithShape(seqs, 13, 35);
+        BatchMatrixSequence<int, CheckDevice> data(seqs, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape().SeqLenContainer()[0] == 13);
         assert(data.Shape().SeqLenContainer()[1] == 1);
@@ -115,14 +115,14 @@ namespace
         cout << "Test static batch matrix sequence case 2...\t";
 
         const std::vector<size_t> seqs = {13, 1, 100};
-        auto rm1 = BatchMatrixSequence<CheckElement, CheckDevice>::CreateWithShape(seqs, 10, 20);
+        BatchMatrixSequence<CheckElement, CheckDevice> rm1(seqs, 10, 20);
         assert(rm1.Shape().SeqLenContainer()[0] == 13);
         assert(rm1.Shape().SeqLenContainer()[1] == 1);
         assert(rm1.Shape().SeqLenContainer()[2] == 100);
 
-        auto me1 = MatrixSequence<CheckElement, CheckDevice>::CreateWithShape(13, 10, 20);
-        auto me2 = MatrixSequence<CheckElement, CheckDevice>::CreateWithShape(1, 10, 20);
-        auto me3 = MatrixSequence<CheckElement, CheckDevice>::CreateWithShape(100, 10, 20);
+        MatrixSequence<CheckElement, CheckDevice> me1(13, 10, 20);
+        MatrixSequence<CheckElement, CheckDevice> me2(1, 10, 20);
+        MatrixSequence<CheckElement, CheckDevice> me3(100, 10, 20);
         
         int c = 0;
         for (size_t len = 0; len < 13; ++len)
@@ -202,7 +202,7 @@ namespace
         static_assert(IsBatchThreeDArraySequence<const BatchThreeDArraySequence<int, CheckDevice> &&>);
 
         const std::vector<size_t> seqs = {13, 1, 100};
-        auto data = BatchThreeDArraySequence<int, CheckDevice>::CreateWithShape(seqs, 7, 13, 35);
+        BatchThreeDArraySequence<int, CheckDevice> data(seqs, 7, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape().SeqLenContainer()[0] == 13);
         assert(data.Shape().SeqLenContainer()[1] == 1);

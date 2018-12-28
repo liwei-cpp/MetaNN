@@ -24,16 +24,11 @@ public:
     friend struct LowerAccessImpl<Scalar>;
 
 public:
-    static Scalar CreateWithShape()
-    {
-        return Scalar{};
-    }
-    
-public:
-    explicit Scalar(MetaNN::Shape<CategoryTag> p_shape)
-        : Scalar() {}
+    explicit Scalar(MetaNN::Shape<CategoryTag> p_shape = MetaNN::Shape<CategoryTag>())
+        : m_mem{1}
+    {}
 
-    Scalar(ElementType elem = ElementType())
+    Scalar(ElementType elem)
         : m_mem(1)
     {
         SetValue(elem);

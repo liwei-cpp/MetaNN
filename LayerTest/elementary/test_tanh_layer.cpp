@@ -18,7 +18,7 @@ namespace
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
         RootLayer layer;
-        auto in = Matrix<CheckElement, CheckDevice>::CreateWithShape(2, 1);
+        Matrix<CheckElement, CheckDevice> in(2, 1);
         in.SetValue(-0.27f, 0, 0);
         in.SetValue(-0.41f, 1, 0);
 
@@ -50,7 +50,7 @@ namespace
 
         RootLayer layer;
 
-        auto in = Matrix<CheckElement, CheckDevice>::CreateWithShape(2, 1);
+        Matrix<CheckElement, CheckDevice> in(2, 1);
         in.SetValue(-0.27f, 0, 0);
         in.SetValue(-0.41f, 1, 0);
 
@@ -63,7 +63,7 @@ namespace
         assert(fabs(res(0, 0) - tanh(-0.27f)) < 0.001);
         assert(fabs(res(1, 0) - tanh(-0.41f)) < 0.001);
 
-        auto grad = Matrix<CheckElement, CheckDevice>::CreateWithShape(2, 1);
+        Matrix<CheckElement, CheckDevice> grad(2, 1);
         grad.SetValue(0.1f, 0, 0);
         grad.SetValue(0.3f, 1, 0);
         auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));

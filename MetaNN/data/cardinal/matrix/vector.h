@@ -15,12 +15,6 @@ public:
     friend struct LowerAccessImpl<Vector>;
 
 public:
-    static Vector CreateWithShape(size_t colNum)
-    {
-        return Vector(MetaNN::Shape<CategoryTags::Matrix>(1, colNum));
-    }
-    
-public:
     explicit Vector(MetaNN::Shape<CategoryTags::Matrix> p_shape = MetaNN::Shape<CategoryTags::Matrix>())
         : TBase(std::move(p_shape))
     {
@@ -29,6 +23,10 @@ public:
             throw std::runtime_error("a vector should contains 1 row.");
         }
     }
+    
+    explicit Vector(size_t colNum)
+        : TBase(1, colNum)
+    {}
     
     void SetValue(typename TBase::ElementType val, size_t p_colId)
     {

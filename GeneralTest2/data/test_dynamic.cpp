@@ -47,7 +47,7 @@ namespace
         static_assert(IsDynamic<CheckType>);
         static_assert(IsMatrix<CheckType>);
         
-        auto internal = Matrix<CheckElement, CheckDevice>::CreateWithShape(11, 13);
+        Matrix<CheckElement, CheckDevice> internal(11, 13);
         CheckType dMatrix = MakeDynamic(internal);
         
         CheckType dMatrix2;
@@ -82,7 +82,7 @@ namespace
         static_assert(IsDynamic<CheckType>);
         static_assert(IsThreeDArray<CheckType>);
         
-        auto internal = ThreeDArray<CheckElement, CheckDevice>::CreateWithShape(7, 11, 13);
+        ThreeDArray<CheckElement, CheckDevice> internal(7, 11, 13);
         CheckType dChecker = MakeDynamic(internal);
         
         CheckType dChecker2;
@@ -118,7 +118,7 @@ namespace
         static_assert(IsDynamic<CheckType>);
         static_assert(IsBatchScalar<CheckType>);
         
-        auto internal = BatchScalar<CheckElement, CheckDevice>::CreateWithShape(11);
+        BatchScalar<CheckElement, CheckDevice> internal{11};
         for (size_t i = 0; i < 11; ++i)
         {
             internal.SetValue(i, i);
@@ -154,7 +154,7 @@ namespace
         static_assert(IsDynamic<CheckType>);
         static_assert(IsBatchMatrix<CheckType>);
         
-        auto internal = BatchMatrix<CheckElement, CheckDevice>::CreateWithShape(7, 11, 13);
+        BatchMatrix<CheckElement, CheckDevice> internal(7, 11, 13);
         CheckType dMatrix = MakeDynamic(internal);
         
         CheckType dMatrix2;
@@ -189,7 +189,7 @@ namespace
         static_assert(IsDynamic<CheckType>);
         static_assert(IsBatchThreeDArray<CheckType>);
         
-        auto internal = BatchThreeDArray<CheckElement, CheckDevice>::CreateWithShape(51, 7, 11, 13);
+        BatchThreeDArray<CheckElement, CheckDevice> internal(51, 7, 11, 13);
         CheckType dChecker = MakeDynamic(internal);
         
         CheckType dChecker2;
@@ -226,7 +226,7 @@ namespace
         static_assert(IsDynamic<CheckType>);
         static_assert(IsScalarSequence<CheckType>);
         
-        auto internal = ScalarSequence<CheckElement, CheckDevice>::CreateWithShape(11);
+        ScalarSequence<CheckElement, CheckDevice> internal(11);
         for (size_t i = 0; i < 11; ++i)
         {
             internal.SetValue(i, i);
@@ -262,7 +262,7 @@ namespace
         static_assert(IsDynamic<CheckType>);
         static_assert(IsMatrixSequence<CheckType>);
         
-        auto internal = MatrixSequence<CheckElement, CheckDevice>::CreateWithShape(7, 11, 13);
+        MatrixSequence<CheckElement, CheckDevice> internal(7, 11, 13);
         CheckType dMatrix = MakeDynamic(internal);
         
         CheckType dMatrix2;
@@ -297,7 +297,7 @@ namespace
         static_assert(IsDynamic<CheckType>);
         static_assert(IsThreeDArraySequence<CheckType>);
         
-        auto internal = ThreeDArraySequence<CheckElement, CheckDevice>::CreateWithShape(51, 7, 11, 13);
+        ThreeDArraySequence<CheckElement, CheckDevice> internal(51, 7, 11, 13);
         CheckType dChecker = MakeDynamic(internal);
         
         CheckType dChecker2;
@@ -335,8 +335,7 @@ namespace
         static_assert(IsBatchScalarSequence<CheckType>);
         
         std::vector lens{3, 5, 7, 11};
-        
-        auto internal = BatchScalarSequence<CheckElement, CheckDevice>::CreateWithShape(lens);
+        BatchScalarSequence<CheckElement, CheckDevice> internal(lens);
 
         CheckType dScalar = MakeDynamic(internal);
         
@@ -371,7 +370,7 @@ namespace
         static_assert(IsBatchMatrixSequence<CheckType>);
         
         std::vector lens{3, 5, 7, 11};
-        auto internal = BatchMatrixSequence<CheckElement, CheckDevice>::CreateWithShape(lens, 11, 13);
+        BatchMatrixSequence<CheckElement, CheckDevice> internal(lens, 11, 13);
         CheckType dMatrix = MakeDynamic(internal);
         
         CheckType dMatrix2;
@@ -409,7 +408,7 @@ namespace
         static_assert(IsBatchThreeDArraySequence<CheckType>);
         
         std::vector lens{3, 5, 7, 11};
-        auto internal = BatchThreeDArraySequence<CheckElement, CheckDevice>::CreateWithShape(lens, 7, 11, 13);
+        BatchThreeDArraySequence<CheckElement, CheckDevice> internal(lens, 7, 11, 13);
         CheckType dChecker = MakeDynamic(internal);
         
         CheckType dChecker2;

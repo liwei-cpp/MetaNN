@@ -156,7 +156,7 @@ namespace
 
         RootLayer layer;
     
-        auto x = Matrix<CheckElement, CheckDevice>::CreateWithShape(1, 4);
+        Matrix<CheckElement, CheckDevice> x(1, 4);
         x.SetValue(0, 0, 0); x.SetValue(-2, 0, 1); x.SetValue(3, 0, 2); x.SetValue(-4, 0, 3);
         auto x_out = layer.FeedForward(LayerIO::Create().Set<LayerIO>(x));
         auto x_out_eval = Evaluate(x_out.Get<LayerIO>());
@@ -165,7 +165,7 @@ namespace
         assert(fabs(x_out_eval(0, 2) - 3) <= 0.00001);
         assert(fabs(x_out_eval(0, 3) - 4) <= 0.00001);
 
-        auto y = Matrix<float, DeviceTags::CPU>::CreateWithShape(1, 4);
+        Matrix<float, DeviceTags::CPU> y(1, 4);
         y.SetValue(1, 0, 0); y.SetValue(5, 0, 1); y.SetValue(7, 0, 2); y.SetValue(3, 0, 3);
         auto y_out = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(y)).Get<LayerIO>();
         auto y_out_eval = Evaluate(y_out);

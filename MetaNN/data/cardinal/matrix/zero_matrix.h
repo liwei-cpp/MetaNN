@@ -50,14 +50,12 @@ public:
     using DeviceType = TDevice;
 
 public:
-    static ZeroMatrix CreateWithShape(size_t rowNum, size_t colNum)
-    {
-        return ZeroMatrix(MetaNN::Shape<CategoryTag>(rowNum, colNum));
-    }
-    
-public:
     explicit ZeroMatrix(MetaNN::Shape<CategoryTag> p_shape = MetaNN::Shape<CategoryTag>())
         : m_shape(std::move(p_shape))
+    {}
+    
+    explicit ZeroMatrix(size_t rowNum, size_t colNum)
+        : m_shape(rowNum, colNum)
     {}
     
     const auto& Shape() const noexcept

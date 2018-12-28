@@ -11,12 +11,12 @@ namespace
     void test_softmax_grad_case1()
     {
         cout << "Test softmax grad case 1 ...\t";
-        auto input = Vector<CheckElement, CheckDevice>::CreateWithShape(3);
+        Vector<CheckElement, CheckDevice> input(3);
         input.SetValue(0.5484, 0);
         input.SetValue(0.3292, 1);
         input.SetValue(0.1224, 2);
         
-        auto grad = Vector<CheckElement, CheckDevice>::CreateWithShape(3);
+        Vector<CheckElement, CheckDevice> grad(3);
         grad.SetValue(0.5911, 0);
         grad.SetValue(0.6659, 1);
         grad.SetValue(0.7868, 2);
@@ -33,7 +33,7 @@ namespace
     void test_softmax_grad_case2()
     {
         cout << "Test softmax grad case 2 ...\t";
-        auto input = BatchMatrix<CheckElement, CheckDevice>::CreateWithShape(2, 1, 3);
+        BatchMatrix<CheckElement, CheckDevice> input(2, 1, 3);
         input.SetValue(0.5484, 0, 0, 0);
         input.SetValue(0.3292, 0, 0, 1);
         input.SetValue(0.1224, 0, 0, 2);
@@ -42,7 +42,7 @@ namespace
         input.SetValue(0.0655, 1, 0, 1);
         input.SetValue(0.5430, 1, 0, 2);
         
-        auto grad = BatchMatrix<CheckElement, CheckDevice>::CreateWithShape(2, 1, 3);
+        BatchMatrix<CheckElement, CheckDevice> grad(2, 1, 3);
         grad.SetValue(0.5911, 0, 0, 0);
         grad.SetValue(0.6659, 0, 0, 1);
         grad.SetValue(0.7868, 0, 0, 2);

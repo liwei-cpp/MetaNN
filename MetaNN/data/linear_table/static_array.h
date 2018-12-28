@@ -21,17 +21,22 @@ public:
     using DeviceType = DeviceTags::CPU;
     
     friend struct LowerAccessImpl<StaticArray>;
-
-public:
-    template<typename...TShapeParams>
-    static StaticArray CreateWithShape(TShapeParams&&... shapeParams)
-    {
-        return StaticArray(MetaNN::Shape<CategoryTag>(std::forward<TShapeParams>(shapeParams)...));
-    }
-
 public:
     explicit StaticArray(MetaNN::Shape<CategoryTag> p_shape = MetaNN::Shape<CategoryTag>())
         : m_shape(std::move(p_shape))
+        , m_mem(m_shape.Count())
+    {}
+    
+    template <typename... TShapeParams>
+    explicit StaticArray(size_t val, TShapeParams&&... shapeParams)
+        : m_shape(val, std::forward<TShapeParams>(shapeParams)...)
+        , m_mem(m_shape.Count())
+    {}
+    
+    template <template<typename T> class Cont, typename TVal, typename... TShapeParams>
+    explicit StaticArray(const Cont<TVal>& p_lens,
+                         TShapeParams&&... shapeParams)
+        : m_shape(p_lens, std::forward<TShapeParams>(shapeParams)...)
         , m_mem(m_shape.Count())
     {}
     

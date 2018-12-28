@@ -306,7 +306,7 @@ namespace
     {
         cout << "Test collapse: matrix -> matrix (plain collapse)\t";
         
-        auto ori = Matrix<CheckElement, CheckDevice>::CreateWithShape(3, 7);
+        Matrix<CheckElement, CheckDevice> ori(3, 7);
         auto col = Collapse(ori, ori.Shape());
         assert(col == ori);
         cout << "done" << endl;
@@ -540,7 +540,7 @@ namespace
     {
         cout << "Test collapse: 3d-array -> 3d-array (plain collapse)\t";
         
-        auto ori = ThreeDArray<CheckElement, CheckDevice>::CreateWithShape(5, 7, 3);
+        ThreeDArray<CheckElement, CheckDevice> ori(5, 7, 3);
         auto col = Collapse(ori, ori.Shape());
         assert(col == ori);
         cout << "done" << endl;

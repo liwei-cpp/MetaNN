@@ -20,7 +20,7 @@ namespace
         assert(rm.Shape().RowNum() == 0);
         assert(rm.Shape().ColNum() == 0);
 
-        rm = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
+        rm = Matrix<CheckElement, CheckDevice>(10, 20);
         assert(rm.Shape().RowNum() == 10);
         assert(rm.Shape().ColNum() == 20);
 
@@ -46,7 +46,7 @@ namespace
     void test_matrix_case2()
     {
         cout << "Test matrix case 2...\t";
-        auto rm1 = Matrix<CheckElement, CheckDevice>::CreateWithShape(10, 20);
+        Matrix<CheckElement, CheckDevice> rm1(10, 20);
         int c = 0;
         for (size_t i = 0; i < 10; ++i)
         {
@@ -56,7 +56,7 @@ namespace
             }
         }
 
-        auto rm2 = Matrix<CheckElement, CheckDevice>::CreateWithShape(3, 7);
+        Matrix<CheckElement, CheckDevice> rm2(3, 7);
         for (size_t i = 0; i < 3; ++i)
         {
             for (size_t j = 0; j < 7; ++j)
