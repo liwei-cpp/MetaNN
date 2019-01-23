@@ -31,12 +31,7 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto valOri = std::forward<TIn>(p_in).template Get<LayerIO>();
-            static_assert(!std::is_same_v<decltype(valOri), NullParameter>);
-
-            auto val = LayerTraits::DynamicTransWithFlag<IsDynamic<AimInputType>>(std::move(valOri));
-            static_assert(std::is_same_v<decltype(val), AimInputType>);
-
+            auto val = LayerTraits::PickItemFromCont<InputItemTypes, LayerIO>(std::forward<TIn>(p_in));
             if constexpr (IsFeedbackOutput)
             {
                 m_data.push(val);
@@ -53,14 +48,9 @@ namespace MetaNN
                 {
                     throw std::runtime_error("Cannot feed back in SigmoidLayer");
                 }
-                
-                auto gradOri = std::forward<TGrad>(p_grad).template Get<LayerIO>();
-                static_assert(!std::is_same_v<decltype(gradOri), NullParameter>);
-                using AimGradType = typename InputGradTypes::template Find<LayerIO>;
-                static_assert(!std::is_same_v<AimGradType, NullParameter>);
-                auto grad = LayerTraits::DynamicTransWithFlag<IsDynamic<AimGradType>>(std::move(gradOri));
-                
                 auto& input = m_data.top();
+                
+                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
                 auto res = LayerIO::Create().template Set<LayerIO>(std::move(grad) * Sign(input));
                 m_data.pop();
                 return res;

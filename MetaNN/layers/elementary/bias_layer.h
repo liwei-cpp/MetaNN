@@ -1,175 +1,181 @@
 #pragma once
-#include <MetaNN/data/dynamic.h>
-#include <MetaNN/layers/facilities/common_io.h>
-#include <MetaNN/layers/facilities/policies.h>
-#include <MetaNN/layers/facilities/traits.h>
-#include <MetaNN/policies/policy_operations.h>
-#include <MetaNN/operators/collapse.h>
-#include <MetaNN/model/param_initializer/facilities/traits.h>
-#include <string>
-#include <ostream>
 
 namespace MetaNN
 {
-template <typename TPolicies>
-class BiasLayer
-{
-    static_assert(IsPolicyContainer<TPolicies>, "Parameter is not policy container.");
-    using CurLayerPolicy = PlainPolicy<TPolicies>;
-public:
-    static constexpr bool IsFeedbackOutput = PolicySelect<FeedbackPolicy, CurLayerPolicy>::IsFeedbackOutput;
-    static constexpr bool IsUpdate = PolicySelect<FeedbackPolicy, CurLayerPolicy>::IsUpdate;
-    using InputType = LayerIO;
-    using OutputType = LayerIO;
-
-private:
-    using ElementType = typename PolicySelect<OperandPolicy, CurLayerPolicy>::Element;
-    using DeviceType = typename PolicySelect<OperandPolicy, CurLayerPolicy>::Device;
-
-public:
-    BiasLayer(std::string p_name, size_t p_vecLen)
-        : m_name(std::move(p_name))
+    template <typename TInputItems, typename TInputGrads, typename TPolicies>
+    class BiasLayer
     {
-        if (p_vecLen == 0)
-        {
-            throw std::runtime_error("Invalidate input len for bias layer");
-        }
+        static_assert(IsPolicyContainer<TPolicies>);
+        using CurLayerPolicy = PlainPolicy<TPolicies>;
+    public:
+        static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
+        static constexpr bool IsUpdate = PolicySelect<GradPolicy, CurLayerPolicy>::IsUpdate;
         
-        m_rowNum = 1;
-        m_colNum = p_vecLen;
-    }
-    
-    BiasLayer(std::string p_name, size_t p_rowNum, size_t p_colNum)
-        : m_name(std::move(p_name))
-        , m_rowNum(p_rowNum)
-        , m_colNum(p_colNum)
-    {
-        if ((m_rowNum == 0) || (m_colNum == 0))
-        {
-            throw std::runtime_error("Invalidate row/col num for bias layer.");
-        }
-    }
+        using InputContType = LayerIO;
+        using OutputContType = LayerIO;
+        
+        using InputItemTypes = TInputItems;
+        using InputGradTypes = TInputGrads;
 
-public:
-    template <typename TInitializer, typename TBuffer, 
-              typename TInitPolicies = typename TInitializer::PolicyCont>
-    void Init(TInitializer& initializer, TBuffer& loadBuffer, std::ostream* log = nullptr)
-    {
-        if (auto cit = loadBuffer.find(m_name); cit != loadBuffer.end())
+    private:
+        using ParamCategory = PolicySelect<ParamPolicy, CurLayerPolicy>::ParamType;
+        using AimInputType = typename TInputMap::template Find<LayerIO>;
+        using ParamType = PrincipalDataType<ParamCategory,
+                                            typename AimInputType::ElementType,
+                                            typename AimInputType::DeviceType>;
+        using AimInputShapeType = RemConstRef<decltype(std::declval<AimInputType>().Shape())>;
+        using AimGradType = typename InputGradTypes::template Find<LayerIO>;
+        
+    public:
+        BiasLayer(std::string p_name, Shape<ParamCategory> p_shape)
+            : m_name(std::move(p_name))
+            , m_biasShape(std::move(p_shape))
+        { }
+        
+        template <typename... TShapeParams>
+        BiasLayer(std::string p_name, size_t val, TShapeParams&&... shapeParams)
+            : m_name(std::move(p_name))
+            , m_biasShape(val, std::forward<TShapeParams>(shapeParams)...)
+        { }
+        
+        template <typename TInitializer, typename TBuffer, 
+                  typename TInitPolicies = typename TInitializer::PolicyCont>
+        void Init(TInitializer& initializer, TBuffer& loadBuffer, std::ostream* log = nullptr)
         {
-            const Matrix<ElementType, DeviceType>& m = cit->second;
-            if ((m.RowNum() != m_rowNum) || (m.ColNum() != m_colNum))
+            if (auto matPtr = loadBuffer.TryGet<ParamCategory>(m_name); matPtr)
             {
-                throw std::runtime_error("Load matrix error in BiasLayer");
-            }
-            m_bias = m;
-            if (log)
-            {
-                std::string logInfo = "Load from load buffer: " + m_name + '\n';
-                (*log) << logInfo;
-            }
-            return;
-        }
-        else if (initializer.IsMatrixExist(m_name))
-        {
-            m_bias = Matrix<ElementType, DeviceType>(m_rowNum, m_colNum);            
-            initializer.GetMatrix(m_name, m_bias);
-            loadBuffer[m_name] = m_bias;
-            if (log)
-            {
-                std::string logInfo = "Copy from initializer: " + m_name + '\n';
-                (*log) << logInfo;
-            }
-            return;
-        }
-        else
-        {
-            m_bias = Matrix<ElementType, DeviceType>(m_rowNum, m_colNum);
-            using CurInitializer = PickInitializer<TInitPolicies, InitPolicy::BiasTypeCate>;
-            if constexpr (!std::is_same<CurInitializer, void>::value)
-            {
-                size_t fan_io = m_rowNum * m_colNum;
-                auto& cur_init = initializer.template GetFiller<CurInitializer>();
-                cur_init.Fill(m_bias, fan_io, fan_io);
-                loadBuffer[m_name] = m_bias;
+                if (matPtr->Shape() != m_biasShape)
+                {
+                    throw std::runtime_error("Load parameter error in BiasLayer");
+                }
+                m_bias = *matPtr;
                 if (log)
                 {
-                    std::string logInfo = "Random init from initializer: " + m_name + '\n';
+                    std::string logInfo = "Load from load buffer: " + m_name + '\n';
                     (*log) << logInfo;
                 }
+                return;
+            }
+            else if (initializer.IsParamExist<ParamCategory>(m_name))
+            {
+                m_bias = ParamType(m_biasShape);
+                initializer.CopyParam<ParamCategory>(m_name, m_bias);
+                loadBuffer.Set<ParamCategory>(m_name, m_bias);
+                if (log)
+                {
+                    std::string logInfo = "Copy from initializer: " + m_name + '\n';
+                    (*log) << logInfo;
+                }
+                return;
+            }
+            else
+            {
+                m_bias = ParamType(m_biasShape);
+                using CurInitializer = PickInitializer<TInitPolicies, InitPolicy::BiasTypeCate>;
+                if constexpr (!std::is_same<CurInitializer, void>::value)
+                {
+                    auto& cur_init = initializer.template GetFiller<CurInitializer>();
+                    cur_init.Fill(m_bias, m_biasShape.Count(), m_biasShape.Count());
+                    loadBuffer.Set<ParamCategory>(m_name, m_bias);
+                    if (log)
+                    {
+                        std::string logInfo = "Random init from initializer: " + m_name + '\n';
+                        (*log) << logInfo;
+                    }
             }
             else
             {
                 throw std::runtime_error("Cannot get initializer for InitPolicy::BiasTypeCate");
             }
         }
-    }
-
-    template <typename TSave>
-    void SaveWeights(TSave& saver) const
-    {
-        auto cit = saver.find(m_name);
-        if ((cit != saver.end()) && (cit->second != m_bias))
+        
+        template <typename TSave>
+        void SaveWeights(TSave& saver) const
         {
-            throw std::runtime_error("Duplicate save for matrix: " + m_name);
-        }
-        saver[m_name] = m_bias;
-    }
-
-    template <typename TIn>
-    auto FeedForward(const TIn& p_in)
-    {
-        const auto& val = p_in.template Get<LayerIO>();
-        return LayerIO::Create().template Set<LayerIO>(val + m_bias);
-    }
-
-    template <typename TGrad>
-    auto FeedBackward(const TGrad& p_grad)
-    {
-        if constexpr (IsUpdate)
-        {
-            const auto& tmp = p_grad.template Get<LayerIO>();
-            assert((tmp.RowNum() == m_bias.RowNum()) && (tmp.ColNum() == m_bias.ColNum()));
-            
-            m_grad.push(MakeDynamic(tmp));
-        }
-        if constexpr (IsFeedbackOutput)
-            return p_grad;
-        else
-            return LayerIO::Create();
-    }
-
-    template <typename TGradCollector>
-    void GradCollect(TGradCollector& col)
-    {
-        if constexpr (IsUpdate)
-        {
-            LayerTraits::MatrixGradCollect(m_bias, m_grad, col);
-        }
-    }
-
-    void NeutralInvariant() const
-    {
-        if constexpr(IsUpdate)
-        {
-            if (!m_grad.empty())
+            auto matPtr = saver.TryGet<ParamCategory>(m_name);
+            if (matPtr && (matPtr != m_bias))
             {
-                throw std::runtime_error("NeutralInvariant Fail!");
+                throw std::runtime_error("Duplicate save for matrix: " + m_name);
+            }
+            loadBuffer.Set<ParamCategory>(m_name, m_bias);
+        }
+        
+        template <typename TIn>
+        auto FeedForward(TIn&& p_in)
+        {
+            auto input = LayerTraits::PickItemFromCont<InputItemTypes, LayerIO>(std::forward<TIn>(p_in));
+            
+            if constexpr (IsFeedbackOutput)
+            {
+                m_inputShapeStack.push(input.Shape());
+            }
+            
+            auto proShape = LayerTraits::ShapePromote(input.Shape(), m_biasShape);
+            return OutputContType::Create().template Set<LayerIO>(Duplicate(input, proShape) + Duplicate(m_bias, proShape));
+        }
+        
+        template <typename TGrad>
+        auto FeedBackward(TGrad&& p_grad)
+        {
+            if constexpr (IsUpdate)
+            {
+                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(p_grad);
+                m_paramGradStack.push(Collapse(std::move(grad), m_biasShape));
+            }
+            
+            if constexpr (IsFeedbackOutput)
+            {
+                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
+                
+                if (m_inputShapeStack.empty())
+                {
+                    throw std::runtime_error("Cannot feed back in BiasLayer");
+                }
+                auto curShape = m_inputShapeStack.top();
+                m_inputShapeStack.pop();
+
+                return LayerIO::Create().template Set<LayerIO>(Collapse(std::move(grad), curShape));
+            }
+            else
+                return LayerIO::Create();
+        }
+        
+        template <typename TGradCollector>
+        void GradCollect(TGradCollector& col)
+        {
+            if constexpr (IsUpdate)
+            {
+                LayerTraits::MatrixGradCollect(m_bias, m_grad, col);
+            }
+        }
+
+        void NeutralInvariant() const
+        {
+            if constexpr (IsUpdate)
+            {
+                if (!m_paramGradStack.empty())
+                {
+                    throw std::runtime_error("NeutralInvariant Fail!");
+                }
+            }
+            if constexpr (IsFeedbackOutput)
+            {
+                if (!m_inputShapeStack.empty())
+                {
+                    throw std::runtime_error("NeutralInvariant Fail!");
+                }
             }
         }
     }
-
-private:
-    const std::string m_name;
-    size_t m_rowNum;
-    size_t m_colNum;
-
-    Matrix<ElementType, DeviceType> m_bias;
-    
-    using DataType = LayerTraits::LayerInternalBuf<IsUpdate,
-                                                   PolicySelect<InputPolicy, CurLayerPolicy>::BatchMode,
-                                                   ElementType, DeviceType,
-                                                   CategoryTags::Matrix, CategoryTags::BatchMatrix>;
-    DataType m_grad;
-};
+        
+    private:
+        std::string m_name;
+        Shape<ParamCategory> m_biasShape;
+        ParamType m_bias;
+        
+        using TParamGradStackItem = decltype(Collapse(std::declval<AimGradType>(), m_biasShape));
+        
+        LayerTraits::LayerInternalBuf<TParamGradStackItem, IsUpdate> m_paramGradStack;
+        LayerTraits::LayerInternalBuf<AimInputShapeType, IsFeedbackOutput> m_inputShapeStack;
+    };
 }

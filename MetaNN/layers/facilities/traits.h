@@ -7,20 +7,57 @@
 
 namespace MetaNN::LayerTraits
 {
-/*
-template <typename TWeight, typename TGrad, typename TGradCollector>
+template <typename TWeight, typename TGradStack, typename TGradCollector>
 void MatrixGradCollect(const TWeight& weight,
-                       TGrad& grad,
+                       TGradStack& gradStack,
                        TGradCollector& col)
 {
-    while (!grad.empty())
+    size_t stackSize = gradStack.size();
+    if (stackSize == 0) return;
+    
+    if (stackSize == 1)
     {
-        auto g = grad.top();
-        grad.pop();
-        col.Collect(weight, g);
+        auto g = gradStack.top();
+        gradStack.pop();
+        col.Collect(weight, MakeDynamic(std::move(g)));
+        return;
+    }
+    else
+    {
+        DynamicBatch<RemConstRef<typename TGradStack::value_type>> dBatch(weight.Shape());
+        while (!gradStack.empty())
+        {
+            auto g = gradStack.top();
+            gradStack.pop();
+            dBatch.PushBack(std::move(g));
+        }
+        auto tmp = Collapse(dBatch, weight.Shape());
+        col.Collect(weight, MakeDynamic(std::move(tmp)));
+        return;
     }
 }
-*/
+
+template <typename TTypeMap, typename TKey, typename TCont>
+auto PickItemFromCont(TCont&& cont)
+{
+    using TAim = typename TTypeMap::template Find<TKey>;
+    auto itemOri = std::forward<TCont>(cont).template Get<TKey>();
+    static_assert(!std::is_same_v<decltype(itemOri), NullParameter>);
+    static_assert(!std::is_same_v<TAim, NullParameter>);
+    
+    if constexpr (IsDynamic<TAim>)
+    {
+        auto res = MakeDynamic(std::move(itemOri));
+        static_assert(std::is_same_v<decltype(res), TAim>);
+        return res;
+    }
+    else
+    {
+        static_assert(std::is_same_v<RemConstRef<decltype(itemOri)>, TAim>);
+        return itemOri;
+    }
+}
+
 namespace NSLayerIOMapTrasfer
 {
 template <typename TVarTypeDict, typename... TKVs>
@@ -114,19 +151,6 @@ using LayerOutputGradTypes = typename NSLayerIOMapTrasfer::LayerIOMapBackwardTra
 
 template <typename TStoreType, bool store>
 using LayerInternalBuf = std::conditional_t<store, std::stack<TStoreType>, NullParameter>;
-
-template <bool IsAimDynamic, typename T>
-auto DynamicTransWithFlag(T&& val)
-{
-    if constexpr (IsAimDynamic)
-    {
-        return MakeDynamic(std::forward<T>(val));
-    }
-    else
-    {
-        return std::forward<T>(val);
-    }
-}
 
 namespace NSShapePromote
 {

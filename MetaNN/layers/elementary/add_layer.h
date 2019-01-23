@@ -10,21 +10,25 @@ namespace MetaNN
 {
     using AddLayerInput = VarTypeDict<struct AddLayerIn1, struct AddLayerIn2>;
     
-    template <typename TInputMap, typename TPolicies>
+    template <typename TInputItems, typename TInputGrads, typename TPolicies>
     class AddLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
         using CurLayerPolicy = PlainPolicy<TPolicies>;
 
     public:
-        static constexpr bool IsFeedbackOutput = PolicySelect<GeneralPolicy, CurLayerPolicy>::IsFeedbackOutput;
+        static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
-        using InputType = AddLayerInput;
-        using OutputType = LayerIO;
+        
+        using InputContType = AddLayerInput;
+        using OutputContType = LayerIO;
+        
+        using InputItemTypes = TInputItems;
+        using InputGradTypes = TInputGrads;
         
     private:
-        using AimInput1Type = typename TInputMap::template Find<AddLayerIn1>;
-        using AimInput2Type = typename TInputMap::template Find<AddLayerIn2>;
+        using AimInput1Type = typename InputItemTypes::template Find<AddLayerIn1>;
+        using AimInput2Type = typename InputItemTypes::template Find<AddLayerIn2>;
         
         using AimInput1ShapeType = RemConstRef<decltype(std::declval<AimInput1Type>().Shape())>;
         using AimInput2ShapeType = RemConstRef<decltype(std::declval<AimInput2Type>().Shape())>;
@@ -32,13 +36,8 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto input1Ori = std::forward<TIn>(p_in).template Get<AddLayerIn1>();
-            auto input2Ori = std::forward<TIn>(p_in).template Get<AddLayerIn2>();
-            static_assert(!std::is_same_v<decltype(input1Ori), NullParameter>);
-            static_assert(!std::is_same_v<decltype(input2Ori), NullParameter>);
-            
-            auto input1 = LayerTraits::DynamicTransWithFlag<IsDynamic<AimInput1Type>>(std::move(input1Ori));
-            auto input2 = LayerTraits::DynamicTransWithFlag<IsDynamic<AimInput2Type>>(std::move(input2Ori));
+            auto input1 = LayerTraits::PickItemFromCont<InputItemTypes, AddLayerIn1>(std::forward<TIn>(p_in));
+            auto input2 = LayerTraits::PickItemFromCont<InputItemTypes, AddLayerIn2>(std::forward<TIn>(p_in));
             
             if constexpr (IsFeedbackOutput)
             {
@@ -47,7 +46,7 @@ namespace MetaNN
             }
             
             auto proShape = LayerTraits::ShapePromote(input1.Shape(), input2.Shape());
-            return OutputType::Create().template Set<LayerIO>(Duplicate(input1, proShape) + Duplicate(input2, proShape));
+            return OutputContType::Create().template Set<LayerIO>(Duplicate(input1, proShape) + Duplicate(input2, proShape));
         }
         
         template <typename TGrad>
@@ -65,7 +64,8 @@ namespace MetaNN
                 m_shape1.pop();
                 m_shape2.pop();
                 
-                auto grad = std::forward<TGrad>(p_grad).template Get<LayerIO>();
+                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
+                
                 return AddLayerInput::Create().template Set<AddLayerIn1>(Collapse(grad, curShape1))
                                               .template Set<AddLayerIn2>(Collapse(grad, curShape2));
             }

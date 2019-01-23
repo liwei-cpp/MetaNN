@@ -11,6 +11,7 @@ namespace
     using CommonInputMap = LayerIOMap<LayerKV<AddLayerIn1, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<AddLayerIn2, Matrix<CheckElement, CheckDevice>>
                                      >;
+    using CommonGradMap = LayerIOMap<LayerKV<LayerIO, Matrix<CheckElement, CheckDevice>>>;
     
     void test_add_layer1()
     {
@@ -50,7 +51,7 @@ namespace
     {
         cout << "Test add layer case 2 ...\t";
 
-        using RootLayer = MakeLayer<AddLayer, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<AddLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -73,7 +74,7 @@ namespace
 
         auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
 
-        auto out_grad = layer.FeedBackward(RootLayer::OutputType::Create().Set<LayerIO>(grad));
+        auto out_grad = layer.FeedBackward(RootLayer::OutputContType::Create().Set<LayerIO>(grad));
 
         auto handle1 = out_grad.Get<AddLayerIn1>().EvalRegister();
         auto handle2 = out_grad.Get<AddLayerIn2>().EvalRegister();
@@ -100,7 +101,7 @@ namespace
     void test_add_layer3()
     {
         cout << "Test add layer case 3 ...\t";
-        using RootLayer = MakeLayer<AddLayer, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<AddLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -139,7 +140,7 @@ namespace
 
         auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
 
-        auto out_grad = layer.FeedBackward(RootLayer::OutputType::Create().Set<LayerIO>(grad));
+        auto out_grad = layer.FeedBackward(RootLayer::OutputContType::Create().Set<LayerIO>(grad));
 
         auto handle1 = out_grad.Get<AddLayerIn1>().EvalRegister();
         auto handle2 = out_grad.Get<AddLayerIn2>().EvalRegister();
@@ -163,7 +164,7 @@ namespace
 
         grad = GenMatrix<CheckElement>(2, 3, -0.7f, 0.2f);
 
-        out_grad = layer.FeedBackward(RootLayer::OutputType::Create().Set<LayerIO>(grad));
+        out_grad = layer.FeedBackward(RootLayer::OutputContType::Create().Set<LayerIO>(grad));
 
         handle1 = out_grad.Get<AddLayerIn1>().EvalRegister();
         handle2 = out_grad.Get<AddLayerIn2>().EvalRegister();

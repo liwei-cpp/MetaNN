@@ -44,7 +44,7 @@ namespace
     void test_tanh_layer2()
     {
         cout << "Test tanh layer case 2 ...\t";
-        using RootLayer = MakeLayer<TanhLayer, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<TanhLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -78,7 +78,7 @@ namespace
     void test_tanh_layer3()
     {
         cout << "Test tanh layer case 3 ...\t";
-        using RootLayer = MakeLayer<TanhLayer, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<TanhLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

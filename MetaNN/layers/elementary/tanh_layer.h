@@ -8,33 +8,32 @@
 
 namespace MetaNN
 {
-    template <typename TInputMap, typename TPolicies>
+    template <typename TInputItems, typename TInputGrads, typename TPolicies>
     class TanhLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
         using CurLayerPolicy = PlainPolicy<TPolicies>;
 
     public:
-        static constexpr bool IsFeedbackOutput = PolicySelect<GeneralPolicy, CurLayerPolicy>::IsFeedbackOutput;
+        static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
-        using InputType = LayerIO;
-        using OutputType = LayerIO;
-        using InputTypeMap = TInputMap;
+
+        using InputContType = LayerIO;
+        using OutputContType = LayerIO;
+        
+        using InputItemTypes = TInputItems;
+        using InputGradTypes = TInputGrads;
         
     private:
-        using AimInputType = typename TInputMap::template Find<LayerIO>;
+        using AimInputType = typename InputItemTypes::template Find<LayerIO>;
         
     public:
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto valOri = std::forward<TIn>(p_in).template Get<LayerIO>();
-            static_assert(!std::is_same_v<decltype(valOri), NullParameter>);
-            auto val = LayerTraits::DynamicTransWithFlag<IsDynamic<AimInputType>>(std::move(valOri));
-            static_assert(std::is_same_v<decltype(val), AimInputType>);
+            auto val = LayerTraits::PickItemFromCont<InputItemTypes, LayerIO>(std::forward<TIn>(p_in));
             
             auto res = Tanh(val);
-
             if constexpr (IsFeedbackOutput)
             {
                 m_data.push(res);
@@ -51,10 +50,11 @@ namespace MetaNN
                 {
                     throw std::runtime_error("Cannot feed back in TanhLayer");
                 }
-                auto grad = p_grad.template Get<LayerIO>();
-                auto& tanhRes = m_data.top();
-                auto res = LayerIO::Create().template Set<LayerIO>(TanhGrad(grad, tanhRes));
+                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
+                
+                auto tanhRes = m_data.top();
                 m_data.pop();
+                auto res = LayerIO::Create().template Set<LayerIO>(TanhGrad(std::move(grad), std::move(tanhRes)));
                 return res;
             }
             else

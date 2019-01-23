@@ -43,7 +43,7 @@ namespace
     void test_sigmoid_layer2()
     {
         cout << "Test sigmoid layer case 2 ...\t";
-        using RootLayer = MakeLayer<SigmoidLayer, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<SigmoidLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -77,7 +77,7 @@ namespace
     void test_sigmoid_layer3()
     {
         cout << "Test sigmoid layer case 3 ...\t";
-        using RootLayer = MakeLayer<SigmoidLayer, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<SigmoidLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
