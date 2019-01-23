@@ -4,9 +4,9 @@
 #include <MetaNN/data/facilities/tags.h>
 namespace MetaNN
 {
-struct GeneralPolicy
+struct GradPolicy
 {
-    using MajorClass = GeneralPolicy;
+    using MajorClass = GradPolicy;
     
     struct IsUpdateValueCate;
     struct IsFeedbackOutputValueCate;
@@ -14,10 +14,26 @@ struct GeneralPolicy
     static constexpr bool IsUpdate = false;
     static constexpr bool IsFeedbackOutput = false;
 };
-ValuePolicyObj(PUpdate,           GeneralPolicy, IsUpdate, true);
-ValuePolicyObj(PNoUpdate,         GeneralPolicy, IsUpdate, false);
-ValuePolicyObj(PFeedbackOutput,   GeneralPolicy, IsFeedbackOutput, true);
-ValuePolicyObj(PFeedbackNoOutput, GeneralPolicy, IsFeedbackOutput, false);
+ValuePolicyObj(PUpdate,           GradPolicy, IsUpdate, true);
+ValuePolicyObj(PNoUpdate,         GradPolicy, IsUpdate, false);
+ValuePolicyObj(PFeedbackOutput,   GradPolicy, IsFeedbackOutput, true);
+ValuePolicyObj(PFeedbackNoOutput, GradPolicy, IsFeedbackOutput, false);
+
+struct ParamPolicy
+{
+    using MajorClass = ParamPolicy;
+    
+    struct ParamTypeCate
+    {
+        using Scalar = CategoryTags::Scalar;
+        using Matrix = CategoryTags::Matrix;
+        using ThreeDArray = CategoryTags::ThreeDArray;
+    };
+    using ParamType = ParamTypeCate::Matrix;
+};
+TypePolicyObj(PScalarParam,      ParamPolicy, Param, Scalar);
+TypePolicyObj(PMatrixParam,      ParamPolicy, Param, Matrix);
+TypePolicyObj(PThreeDArrayParam, ParamPolicy, Param, ThreeDArray);
 
 struct SingleLayerPolicy
 {

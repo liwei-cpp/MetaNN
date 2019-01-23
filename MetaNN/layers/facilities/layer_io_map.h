@@ -11,7 +11,7 @@ namespace MetaNN
     struct LayerIOMap : TLayerKVs...
     {
         using TLayerKVs::apply...;
-        static void apply(...);
+        static NullParameter apply(...);
         
         template <typename TKey>
         struct Find_

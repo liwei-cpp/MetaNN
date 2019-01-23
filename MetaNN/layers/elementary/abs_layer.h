@@ -8,21 +8,24 @@
 
 namespace MetaNN
 {
-    template <typename TInputMap, typename TPolicies>
+    template <typename TInputItems, typename TInputGrads, typename TPolicies>
     class AbsLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
         using CurLayerPolicy = PlainPolicy<TPolicies>;
 
     public:
-        static constexpr bool IsFeedbackOutput = PolicySelect<GeneralPolicy, CurLayerPolicy>::IsFeedbackOutput;
+        static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
-        using InputType = LayerIO;
-        using OutputType = LayerIO;
-        using InputTypeMap = TInputMap;
+        
+        using InputContType = LayerIO;
+        using OutputContType = LayerIO;
+        
+        using InputItemTypes = TInputItems;
+        using InputGradTypes = TInputGrads;
         
     private:
-        using AimInputType = typename TInputMap::template Find<LayerIO>;
+        using AimInputType = typename InputItemTypes::template Find<LayerIO>;
         
     public:
         template <typename TIn>
@@ -50,7 +53,13 @@ namespace MetaNN
                 {
                     throw std::runtime_error("Cannot feed back in SigmoidLayer");
                 }
-                auto grad = std::forward<TGrad>(p_grad).template Get<LayerIO>();
+                
+                auto gradOri = std::forward<TGrad>(p_grad).template Get<LayerIO>();
+                static_assert(!std::is_same_v<decltype(gradOri), NullParameter>);
+                using AimGradType = typename InputGradTypes::template Find<LayerIO>;
+                static_assert(!std::is_same_v<AimGradType, NullParameter>);
+                auto grad = LayerTraits::DynamicTransWithFlag<IsDynamic<AimGradType>>(std::move(gradOri));
+                
                 auto& input = m_data.top();
                 auto res = LayerIO::Create().template Set<LayerIO>(std::move(grad) * Sign(input));
                 m_data.pop();

@@ -49,7 +49,7 @@ namespace
     void test_abs_layer2()
     {
         cout << "Test abs layer case 2 ...\t";
-        using RootLayer = MakeLayer<AbsLayer, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -93,7 +93,7 @@ namespace
     void test_abs_layer3()
     {
         cout << "Test abs layer case 3 ...\t";
-        using RootLayer = MakeLayer<AbsLayer, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -150,7 +150,7 @@ namespace
     void test_abs_layer4()
     {
         cout << "Test abs layer case 4 ...\t";
-        using RootLayer = MakeLayer<AbsLayer, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
