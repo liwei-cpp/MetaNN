@@ -1,5 +1,12 @@
 #pragma once
 
+#include <MetaNN/layers/facilities/common_io.h>
+#include <MetaNN/layers/facilities/policies.h>
+#include <MetaNN/layers/facilities/traits.h>
+#include <MetaNN/policies/policy_operations.h>
+#include <MetaNN/policies/policy_selector.h>
+#include <MetaNN/model/param_initializer/facilities/traits.h>
+
 namespace MetaNN
 {
     template <typename TInputItems, typename TInputGrads, typename TPolicies>
@@ -18,8 +25,8 @@ namespace MetaNN
         using InputGradTypes = TInputGrads;
 
     private:
-        using ParamCategory = PolicySelect<ParamPolicy, CurLayerPolicy>::ParamType;
-        using AimInputType = typename TInputMap::template Find<LayerIO>;
+        using ParamCategory = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamType;
+        using AimInputType = typename InputItemTypes::template Find<LayerIO>;
         using ParamType = PrincipalDataType<ParamCategory,
                                             typename AimInputType::ElementType,
                                             typename AimInputType::DeviceType>;
@@ -40,32 +47,22 @@ namespace MetaNN
         
         template <typename TInitializer, typename TBuffer, 
                   typename TInitPolicies = typename TInitializer::PolicyCont>
-        void Init(TInitializer& initializer, TBuffer& loadBuffer, std::ostream* log = nullptr)
+        void Init(TInitializer& initializer, TBuffer& loadBuffer)
         {
-            if (auto matPtr = loadBuffer.TryGet<ParamCategory>(m_name); matPtr)
+            if (auto matPtr = loadBuffer.template TryGet<ParamCategory>(m_name); matPtr)
             {
                 if (matPtr->Shape() != m_biasShape)
                 {
                     throw std::runtime_error("Load parameter error in BiasLayer");
                 }
                 m_bias = *matPtr;
-                if (log)
-                {
-                    std::string logInfo = "Load from load buffer: " + m_name + '\n';
-                    (*log) << logInfo;
-                }
                 return;
             }
-            else if (initializer.IsParamExist<ParamCategory>(m_name))
+            else if (initializer.template IsParamExist<ParamCategory>(m_name))
             {
                 m_bias = ParamType(m_biasShape);
-                initializer.CopyParam<ParamCategory>(m_name, m_bias);
-                loadBuffer.Set<ParamCategory>(m_name, m_bias);
-                if (log)
-                {
-                    std::string logInfo = "Copy from initializer: " + m_name + '\n';
-                    (*log) << logInfo;
-                }
+                initializer.template CopyParam<ParamCategory>(m_name, m_bias);
+                loadBuffer.Set(m_name, m_bias);
                 return;
             }
             else
@@ -76,28 +73,24 @@ namespace MetaNN
                 {
                     auto& cur_init = initializer.template GetFiller<CurInitializer>();
                     cur_init.Fill(m_bias, m_biasShape.Count(), m_biasShape.Count());
-                    loadBuffer.Set<ParamCategory>(m_name, m_bias);
-                    if (log)
-                    {
-                        std::string logInfo = "Random init from initializer: " + m_name + '\n';
-                        (*log) << logInfo;
-                    }
-            }
-            else
-            {
-                throw std::runtime_error("Cannot get initializer for InitPolicy::BiasTypeCate");
+                    loadBuffer.Set(m_name, m_bias);
+                }
+                else
+                {
+                    throw std::runtime_error("Cannot get initializer for InitPolicy::BiasTypeCate");
+                }
             }
         }
         
         template <typename TSave>
         void SaveWeights(TSave& saver) const
         {
-            auto matPtr = saver.TryGet<ParamCategory>(m_name);
+            auto matPtr = saver.template TryGet<ParamCategory>(m_name);
             if (matPtr && (matPtr != m_bias))
             {
                 throw std::runtime_error("Duplicate save for matrix: " + m_name);
             }
-            loadBuffer.Set<ParamCategory>(m_name, m_bias);
+            saver.Set(m_name, m_bias);
         }
         
         template <typename TIn>
@@ -145,7 +138,7 @@ namespace MetaNN
         {
             if constexpr (IsUpdate)
             {
-                LayerTraits::MatrixGradCollect(m_bias, m_grad, col);
+                LayerTraits::MatrixGradCollect(m_bias, m_paramGradStack, col);
             }
         }
 
@@ -166,7 +159,6 @@ namespace MetaNN
                 }
             }
         }
-    }
         
     private:
         std::string m_name;

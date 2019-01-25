@@ -45,10 +45,10 @@ std::false_type NeutralInvariantTest(...);
 
 template <typename TLayer, typename TInitializer, typename TBuffer, 
           typename TInitPolicies = typename TInitializer::PolicyCont>
-void LayerInit(TLayer& layer, TInitializer& initializer, TBuffer& loadBuffer, std::ostream* log = nullptr)
+void LayerInit(TLayer& layer, TInitializer& initializer, TBuffer& loadBuffer)
 {
     if constexpr (decltype(NSLayerInterface::InitTest<TLayer, TInitializer, TBuffer, TInitPolicies>(nullptr))::value)
-        layer.template Init<TInitializer, TBuffer, TInitPolicies>(initializer, loadBuffer, log);
+        layer.template Init<TInitializer, TBuffer, TInitPolicies>(initializer, loadBuffer);
 }
     
 template <typename TLayer, typename TGradCollector>

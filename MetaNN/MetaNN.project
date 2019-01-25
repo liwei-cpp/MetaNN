@@ -249,9 +249,6 @@
     <File Name="policies/policy_selector.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="model">
-    <VirtualDirectory Name="grad_col">
-      <File Name="model/grad_col/grad_collector.h"/>
-    </VirtualDirectory>
     <VirtualDirectory Name="param_initializer">
       <File Name="model/param_initializer/constant_filler.h"/>
       <File Name="model/param_initializer/gaussian_filler.h"/>
@@ -263,6 +260,10 @@
         <File Name="model/param_initializer/facilities/policies.h"/>
         <File Name="model/param_initializer/facilities/traits.h"/>
       </VirtualDirectory>
+    </VirtualDirectory>
+    <VirtualDirectory Name="weight_cont">
+      <File Name="model/weight_cont/load_buffer.h"/>
+      <File Name="model/weight_cont/grad_collector.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
 </CodeLite_Project>
