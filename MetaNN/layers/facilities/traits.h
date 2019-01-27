@@ -19,7 +19,7 @@ void MatrixGradCollect(const TWeight& weight,
     {
         auto g = gradStack.top();
         gradStack.pop();
-        col.Collect(weight, MakeDynamic(std::move(g)));
+        col.Collect(weight, std::move(g));
         return;
     }
     else
@@ -32,7 +32,7 @@ void MatrixGradCollect(const TWeight& weight,
             dBatch.PushBack(std::move(g));
         }
         auto tmp = Collapse(dBatch, weight.Shape());
-        col.Collect(weight, MakeDynamic(std::move(tmp)));
+        col.Collect(weight, std::move(tmp));
         return;
     }
 }

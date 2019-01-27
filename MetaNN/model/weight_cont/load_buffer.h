@@ -19,19 +19,22 @@ namespace MetaNN
             if constexpr(std::is_same_v<TCategory, CategoryTags::Scalar>)
             {
                 auto it = m_scalarParam.find(name);
-                if (it == m_scalarParam.end()) return nullptr;
+                if (it == m_scalarParam.end())
+                    return static_cast<Scalar<TElem, TDevice>*>(nullptr);
                 return &(it->second);
             }
             else if constexpr(std::is_same_v<TCategory, CategoryTags::Matrix>)
             {
                 auto it = m_matrixParam.find(name);
-                if (it == m_matrixParam.end()) return nullptr;
+                if (it == m_matrixParam.end())
+                    return static_cast<Matrix<TElem, TDevice>*>(nullptr);
                 return &(it->second);
             }
             else if constexpr(std::is_same_v<TCategory, CategoryTags::ThreeDArray>)
             {
                 auto it = m_3dArrayParam.find(name);
-                if (it == m_3dArrayParam.end()) return nullptr;
+                if (it == m_3dArrayParam.end())
+                    return static_cast<ThreeDArray<TElem, TDevice>*>(nullptr);
                 return &(it->second);
             }
             else
@@ -74,6 +77,33 @@ namespace MetaNN
             else
             {
                 static_assert(DependencyFalse<TData>);
+            }
+        }
+        
+        void Clear()
+        {
+            m_scalarParam.clear();
+            m_matrixParam.clear();
+            m_3dArrayParam.clear();
+        }
+        
+        template <typename TParamCate>
+        bool IsParamExist(const std::string& name) const
+        {
+            if constexpr (std::is_same_v<TParamCate, CategoryTags::Scalar>)
+            {
+                auto it = m_scalarParam.find(name);
+                return it != m_scalarParam.end();
+            }
+            else if constexpr (std::is_same_v<TParamCate, CategoryTags::Matrix>)
+            {
+                auto it = m_matrixParam.find(name);
+                return it != m_matrixParam.end();
+            }
+            else if constexpr (std::is_same_v<TParamCate, CategoryTags::ThreeDArray>)
+            {
+                auto it = m_3dArrayParam.find(name);
+                return it != m_3dArrayParam.end();
             }
         }
         

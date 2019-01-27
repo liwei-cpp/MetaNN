@@ -12,7 +12,7 @@
       <Project Name="GeneralTest2" ConfigName="Debug"/>
       <Project Name="LayerTest" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="yes">
+    <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
       <Project Name="MetaNN" ConfigName="Release"/>
       <Project Name="GeneralTest" ConfigName="Release"/>

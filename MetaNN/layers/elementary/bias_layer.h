@@ -7,8 +7,25 @@
 #include <MetaNN/policies/policy_selector.h>
 #include <MetaNN/model/param_initializer/facilities/traits.h>
 
+#include <iostream>
 namespace MetaNN
 {
+    namespace NSBiasLayer
+    {
+        template <typename TAimGrad, typename TBiasShape, bool IsUpdate>
+        struct GradStackType_
+        {
+            using type = NullParameter;
+        };
+        
+        template <typename TAimGrad, typename TBiasShape>
+        struct GradStackType_<TAimGrad, TBiasShape, true>
+        {
+            using TParamGradStackItem = decltype(Collapse(std::declval<TAimGrad>(), std::declval<TBiasShape>()));
+            using type = LayerTraits::LayerInternalBuf<TParamGradStackItem, true>;
+        };
+    }
+    
     template <typename TInputItems, typename TInputGrads, typename TPolicies>
     class BiasLayer
     {
@@ -61,7 +78,7 @@ namespace MetaNN
             else if (initializer.template IsParamExist<ParamCategory>(m_name))
             {
                 m_bias = ParamType(m_biasShape);
-                initializer.template CopyParam<ParamCategory>(m_name, m_bias);
+                initializer.GetParam(m_name, m_bias);
                 loadBuffer.Set(m_name, m_bias);
                 return;
             }
@@ -86,7 +103,7 @@ namespace MetaNN
         void SaveWeights(TSave& saver) const
         {
             auto matPtr = saver.template TryGet<ParamCategory>(m_name);
-            if (matPtr && (matPtr != m_bias))
+            if (matPtr && (*matPtr != m_bias))
             {
                 throw std::runtime_error("Duplicate save for matrix: " + m_name);
             }
@@ -97,14 +114,12 @@ namespace MetaNN
         auto FeedForward(TIn&& p_in)
         {
             auto input = LayerTraits::PickItemFromCont<InputItemTypes, LayerIO>(std::forward<TIn>(p_in));
-            
             if constexpr (IsFeedbackOutput)
             {
                 m_inputShapeStack.push(input.Shape());
             }
             
-            auto proShape = LayerTraits::ShapePromote(input.Shape(), m_biasShape);
-            return OutputContType::Create().template Set<LayerIO>(Duplicate(input, proShape) + Duplicate(m_bias, proShape));
+            return OutputContType::Create().template Set<LayerIO>(input + Duplicate(m_bias, input.Shape()));
         }
         
         template <typename TGrad>
@@ -165,9 +180,7 @@ namespace MetaNN
         Shape<ParamCategory> m_biasShape;
         ParamType m_bias;
         
-        using TParamGradStackItem = decltype(Collapse(std::declval<AimGradType>(), m_biasShape));
-        
-        LayerTraits::LayerInternalBuf<TParamGradStackItem, IsUpdate> m_paramGradStack;
+        typename NSBiasLayer::GradStackType_<AimGradType, Shape<ParamCategory>, IsUpdate>::type m_paramGradStack;;
         LayerTraits::LayerInternalBuf<AimInputShapeType, IsFeedbackOutput> m_inputShapeStack;
     };
 }

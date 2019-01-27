@@ -9,9 +9,7 @@ template <typename TElem>
 void DataCopy(const Matrix<TElem, DeviceTags::CPU>& src,
               Matrix<TElem, DeviceTags::CPU>& dst)
 {
-    const size_t rowNum = src.RowNum();
-    const size_t colNum = src.ColNum();
-    if ((rowNum != dst.RowNum()) || (colNum != dst.ColNum()))
+    if (src.Shape() != dst.Shape())
     {
         throw std::runtime_error("Error in data-copy: Matrix dimension mismatch.");
     }
@@ -22,6 +20,6 @@ void DataCopy(const Matrix<TElem, DeviceTags::CPU>& src,
     const TElem* r1 = mem_src.RawMemory();
     TElem* r = mem_dst.MutableRawMemory();
         
-    memcpy(r, r1, sizeof(TElem) * rowNum * colNum);
+    memcpy(r, r1, sizeof(TElem) * src.Shape().Count());
 }
 }

@@ -8,26 +8,22 @@ namespace MetaNN
 {
 namespace NSConstantFiller
 {
-template <typename TElem>
-void Fill(Matrix<TElem, DeviceTags::CPU>& mat, const double& val)
+template <typename TData>
+void Fill(TData& data, const double& val)
 {
-    if (!mat.AvailableForWrite())
+    if (!data.AvailableForWrite())
     {
-        throw std::runtime_error("Matrix is sharing weight, cannot fill-in.");
+        throw std::runtime_error("Data is sharing weight, cannot fill-in.");
     }
     
-    auto mem = LowerAccess(mat);
-    const size_t rowNum = mat.RowNum();
-    const size_t colNum = mat.ColNum();
+    static_assert(std::is_same_v<typename TData::DeviceType, DeviceTags::CPU>);
+    auto mem = LowerAccess(data);
     auto r = mem.MutableRawMemory();
     
-    for (size_t i = 0; i < rowNum; ++i)
+    using ElementType = typename TData::ElementType;
+    for (size_t i = 0; i < data.Shape().Count(); ++i)
     {
-        for (size_t j = 0; j < colNum; ++j)
-        {
-            r[j] = static_cast<TElem>(val);
-        }
-        r += colNum;
+        r[i] = static_cast<ElementType>(val);
     }
 }
 }

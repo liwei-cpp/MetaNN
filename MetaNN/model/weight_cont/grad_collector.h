@@ -1,153 +1,149 @@
 #pragma once
+#include <list>
+#include <stdexcept>
 #include <unordered_map>
 
 namespace MetaNN
 {
-template <typename TElement, typename TDevice>
-struct MatrixGradInfo
+template <typename TElement, typename TDevice, typename TCategory>
+struct GradInfo
 {
-    using GradItemType = DynamicData<TElement, TDevice, CategoryTags::Matrix>;
-
-    MatrixGradInfo(Matrix<TElement, TDevice> p_weight)
+    using GradItemType = DynamicData<TElement, TDevice, TCategory>;
+    using WeightType = PrincipalDataType<TCategory, TElement, TDevice>;
+    
+    GradInfo(WeightType p_weight)
         : weight(std::move(p_weight))
-        , grad(p_weight.RowNum(), p_weight.ColNum()) {}
-
-    Matrix<TElement, TDevice> weight;
-    Array<GradItemType> grad;
-};
-
-template <typename TElement, typename TDevice>
-class GradCollectorIterator
-{
-    using IteratorType = typename std::unordered_map<const TElement*, MatrixGradInfo<TElement, TDevice>>::iterator;
-
-public:
-    GradCollectorIterator(IteratorType it)
-        : m_it(std::move(it)) {}
-
-    const auto& operator* () const
+        , grad(weight.Shape())
+    {}
+    
+    template <typename TGrad>
+    void Push(TGrad&& p_grad)
     {
-        return m_it->second;
+        auto tmp = MakeDynamic(std::forward<TGrad>(p_grad));
+        static_assert(std::is_same_v<decltype(tmp), GradItemType>);
+        if (tmp.Shape() != weight.Shape())
+        {
+            throw std::runtime_error("Shape of Weight/Grad mismatch.");
+        }
+        grad.PushBack(std::move(tmp));
     }
-
-    const auto operator-> () const
+    
+    const auto& Weight() const
     {
-        return &(m_it->second);
+        return weight;
     }
-
-    auto operator++()
+    
+    auto Grad() const
     {
-        ++m_it;
-        return *this;
-    }
-
-    auto operator++(int)
-    {
-        auto tmp = *this;
-        ++m_it;
-        return tmp;
-    }
-
-    bool operator== (const GradCollectorIterator& git) const
-    {
-        return m_it == git.m_it;
-    }
-
-    bool operator!= (const GradCollectorIterator& git) const
-    {
-        return !(operator==(git));
-    }
-
+        if (grad.Shape().BatchNum() == 0)
+        {
+            throw std::runtime_error("Empty grad.");
+        }
+        
+        if (grad.Shape().BatchNum() == 1)
+        {
+            return MakeDynamic(grad[0]);
+        }
+        else
+        {
+            return MakeDynamic(Collapse(grad, weight.Shape()));
+        }
+    }    
+    
 private:
-    IteratorType m_it;
+    WeightType weight;
+    DynamicBatch<GradItemType> grad;
 };
 
 template <typename TElement, typename TDevice>
 class GradCollector
 {
-public:
-    GradCollector() = default;
-    GradCollector(const GradCollector&) = delete;
-    GradCollector(GradCollector&&) = default;
-    GradCollector& operator = (const GradCollector&) = delete;
-    GradCollector& operator = (GradCollector&&) = delete;
-
-    template<typename TGrad>
-    void Collect(const Matrix<TElement, TDevice>& weight,
-                 const TGrad& grad)
+private:
+    template <typename TCont, typename TMap, typename TWeight>
+    auto GetEntry(TCont& p_cont, TMap& p_map, const TWeight& p_weight)
     {
-        auto mem = LowerAccess(weight);
-        auto buf = mem.RawMemory();
-
-        auto it = m_matricesInfo.find(buf);
-
-        if (it != m_matricesInfo.end())
+        auto mem = LowerAccess(p_weight);
+        auto weightPtr = mem.RawMemory();
+        auto it = p_map.find(weightPtr);
+        if (it != p_map.end()) return it->second;
+        
+        using TGradInfo = typename TCont::value_type;
+        p_cont.push_front(TGradInfo(p_weight));
+        p_map.insert({weightPtr, p_cont.begin()});
+        return p_cont.begin();
+    }
+    
+public:
+    template<typename TWeight, typename TGrad>
+    void Collect(const TWeight& weight,
+                 TGrad&& grad)
+    {
+        if constexpr (IsScalar<TWeight>)
         {
-            if constexpr(IsMatrix<TGrad>)
-            {
-                it->second.grad.push_back(MakeDynamic(grad));
-            }
-            else if constexpr (IsBatchMatrix<TGrad>)
-            {
-                it->second.grad.push_back(MakeDynamic(Collapse(grad)));
-            }
-            else
-            {
-                static_assert(DependencyFalse<TGrad>);
-            }
+            auto it = GetEntry(m_scalarGrad, m_scalarGradMap, weight);
+            it->Push(std::forward<TGrad>(grad));
+        }
+        else if constexpr (IsMatrix<TWeight>)
+        {
+            auto it = GetEntry(m_matrixGrad, m_matrixGradMap, weight);
+            it->Push(std::forward<TGrad>(grad));
+        }
+        else if constexpr (IsThreeDArray<TWeight>)
+        {
+            auto it = GetEntry(m_3dArrayGrad, m_3dArrayGradMap, weight);
+            it->Push(std::forward<TGrad>(grad));
         }
         else
         {
-            MatrixGradInfo<TElement, TDevice> mgi(weight);
-            
-            if constexpr(IsMatrix<TGrad>)
-            {
-                mgi.grad.push_back(MakeDynamic(grad));
-            }
-            else if constexpr (IsBatchMatrix<TGrad>)
-            {
-                mgi.grad.push_back(MakeDynamic(Collapse(grad)));
-            }
-            else
-            {
-                static_assert(DependencyFalse<TGrad>);
-            }
-
-            m_matricesInfo.insert({buf, std::move(mgi)});
+            static_assert(DependencyFalse<TWeight>);
         }
     }
 
-    void clear()
+    void Clear()
     {
-        m_matricesInfo.clear();
+        m_scalarGrad.clear();
+        m_scalarGradMap.clear();
+        m_matrixGrad.clear();
+        m_matrixGradMap.clear();
+        m_3dArrayGrad.clear();
+        m_3dArrayGradMap.clear();
     }
 
-    size_t size() const
+    template <typename TCategory>
+    const auto& GetContainer() const
     {
-        return m_matricesInfo.size();
-    }
-
-    auto begin()
-    {
-        return GradCollectorIterator<TElement, TDevice>(m_matricesInfo.begin());
-    }
-
-    auto begin() const
-    {
-        return GradCollectorIterator<TElement, TDevice>(m_matricesInfo.begin());
-    }
-
-    auto end()
-    {
-        return GradCollectorIterator<TElement, TDevice>(m_matricesInfo.end());
-    }
-
-    auto end() const
-    {
-        return GradCollectorIterator<TElement, TDevice>(m_matricesInfo.end());
+        if constexpr (std::is_same_v<TCategory, CategoryTags::Scalar>)
+        {
+            return m_scalarGrad;
+        }
+        else if constexpr (std::is_same_v<TCategory, CategoryTags::Matrix>)
+        {
+            return m_matrixGrad;
+        }
+        else if constexpr (std::is_same_v<TCategory, CategoryTags::ThreeDArray>)
+        {
+            return m_3dArrayGrad;
+        }
+        else
+        {
+            static_assert(DependencyFalse<TCategory>);
+        }
     }
 
 private:
-    std::unordered_map<const TElement*, MatrixGradInfo<TElement, TDevice>> m_matricesInfo;
+    template <typename TCategory>
+    using GradContainer = std::list<GradInfo<TElement, TDevice, TCategory>>;
+    
+    template <typename TCategory>
+    using GradContIter = typename GradContainer<TCategory>::iterator;
+    
+    GradContainer<CategoryTags::Scalar> m_scalarGrad;
+    std::unordered_map<const TElement*, GradContIter<CategoryTags::Scalar>> m_scalarGradMap;
+    
+    GradContainer<CategoryTags::Matrix> m_matrixGrad;
+    std::unordered_map<const TElement*, GradContIter<CategoryTags::Matrix>> m_matrixGradMap;
+    
+    GradContainer<CategoryTags::ThreeDArray> m_3dArrayGrad;
+    std::unordered_map<const TElement*, GradContIter<CategoryTags::ThreeDArray>> m_3dArrayGradMap;
 };
 }
