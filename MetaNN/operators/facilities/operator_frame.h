@@ -32,13 +32,12 @@ public:
     {}
     
     template <size_t id>
-    const auto& GetOperand() const
+    const auto& Operand() const
     {
         return std::get<id>(m_operands);
     }
     
-    
-    const auto& GetOperandTuple() const noexcept
+    const auto& OperandTuple() const noexcept
     {
         return m_operands;
     }

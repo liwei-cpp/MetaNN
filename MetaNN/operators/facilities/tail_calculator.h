@@ -14,13 +14,13 @@ namespace MetaNN
             static_assert(std::is_same_v<TCaseTail, OperSeqContainer<>>,
                           "General case is not the last one");
 
-            const auto& operands = oper.GetOperandTuple();
+            const auto& operands = oper.OperandTuple();
             constexpr size_t tupleSize = ArraySize<RemConstRef<decltype(operands)>>;
             using IndexSeq = ContMetaFun::Helper::MakeIndexSequence<(int)tupleSize>;
             constexpr IndexSeq* dummyParam = nullptr;
         
             auto operandHandles = GetOperandHandles(operands, dummyParam);
-            DoEvalRegister(std::move(operandHandles), evalRes.Handle(), dummyParam);
+            DoEvalRegister(std::move(operandHandles), evalRes.Handle(), oper.AuxParams(), dummyParam);
         }
     private:
         template <typename TOpTuple, template<int...> class IndCont, int... Index>
@@ -30,8 +30,10 @@ namespace MetaNN
             return ResType{std::get<Index>(opers).EvalRegister()...};
         }
     
-        template <typename TOperHandleTuple, typename TResHandle, template<int...> class IndCont, int... Index>
-        static auto DoEvalRegister(TOperHandleTuple operHandles, TResHandle resHandle, const IndCont<Index...>*)
+        template <typename TOperHandleTuple, typename TResHandle, typename TAuxParams,
+                  template<int...> class IndCont, int... Index>
+        static auto DoEvalRegister(TOperHandleTuple operHandles, TResHandle resHandle, 
+                                   const TAuxParams& auxParams, const IndCont<Index...>*)
         {
             using DeviceType = DeviceTypeFromHandle<TResHandle>;
         
@@ -41,7 +43,7 @@ namespace MetaNN
         
             std::vector<const void*> depVec{(std::get<Index>(operHandles).DataPtr())...};
             const void* dataPtr = resHandle.DataPtr();
-            UnitType unit(std::move(std::get<Index>(operHandles))... , std::move(resHandle));
+            UnitType unit(std::move(std::get<Index>(operHandles))... , std::move(resHandle), auxParams);
             EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, {depVec});
         }
     };

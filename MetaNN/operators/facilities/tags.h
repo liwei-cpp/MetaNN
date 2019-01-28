@@ -12,6 +12,7 @@ namespace MetaNN::OpTags
     struct Add;
     struct Asin;        struct AsinGrad;
     struct Divide;
+    struct DivideByNumber;
     struct Interpolate;
     struct Multiply;
     struct Sigmoid;     struct SigmoidGrad;

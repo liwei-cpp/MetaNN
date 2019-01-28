@@ -130,6 +130,44 @@ namespace
         }
         cout << "done" << endl;
     }
+    
+    void test_divide_case6()
+    {
+        cout << "Test divide case 6 (scalar divide by number)\t";
+        Scalar<CheckElement, CheckDevice> ori1(3);
+        auto op = ori1 / 9;
+        static_assert(IsScalar<decltype(op)>);
+        
+        auto res = Evaluate(op);
+        static_assert(IsScalar<decltype(res)>);
+        assert(fabs(res.Value() - (CheckElement)3/(CheckElement)9) < 0.001f);
+        cout << "done" << endl;
+    }
+    
+    void test_divide_case7()
+    {
+        cout << "Test divide case 7 (matrix divide by number)\t";
+        auto ori1 = GenMatrix<CheckElement>(10, 7, -100, 3);
+        auto op = ori1 / 13;
+        static_assert(IsMatrix<decltype(op)>);
+        assert(op.Shape().RowNum() == 10);
+        assert(op.Shape().ColNum() == 7);
+        
+        auto res = Evaluate(op);
+        static_assert(IsMatrix<decltype(res)>);
+        assert(res.Shape().RowNum() == 10);
+        assert(res.Shape().ColNum() == 7);
+        
+        for (size_t i = 0; i < 10; ++i)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                auto check = ori1(i, k) / 13;
+                assert(fabs(check - res(i, k)) < 0.001f);
+            }
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Operators
@@ -141,5 +179,9 @@ namespace Test::Operators
         test_divide_case3();
         test_divide_case4();
         test_divide_case5();
+        
+        // divid by number
+        test_divide_case6();
+        test_divide_case7();
     }
 }

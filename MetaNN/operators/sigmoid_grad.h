@@ -15,7 +15,8 @@ template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
 public:
-    EvalUnit(TGradHandle gradHandle, TInputHandle inputHandle, TOutputHandle outputHandle)
+    template <typename TAuxParams>
+    EvalUnit(TGradHandle gradHandle, TInputHandle inputHandle, TOutputHandle outputHandle, const TAuxParams&)
         : m_gradHandle(std::move(gradHandle))
         , m_inputHandle(std::move(inputHandle))
         , m_outputHandle(std::move(outputHandle))

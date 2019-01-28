@@ -17,7 +17,8 @@ template <typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
 public:
-    EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle)
+    template <typename TAuxParams>
+    EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
         : m_inputHandle(std::move(oriHandle))
         , m_outputHandle(std::move(outputHandle))
     {}

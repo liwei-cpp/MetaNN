@@ -18,7 +18,8 @@ template <typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
 public:
-    EvalUnit(TWeightHandle weightHandle, TInputHandle inputHandle, TOutputHandle outputHandle)
+    template <typename TAuxParams>
+    EvalUnit(TWeightHandle weightHandle, TInputHandle inputHandle, TOutputHandle outputHandle, const TAuxParams&)
         : m_weightHandle(std::move(weightHandle))
         , m_inputHandle(std::move(inputHandle))
         , m_outputHandle(std::move(outputHandle))

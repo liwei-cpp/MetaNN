@@ -13,11 +13,12 @@ namespace MetaNN
 {
 namespace OperAsinGrad::NSCaseGen
 {
-template <typename TGradHandle, typename TInputHandle, typename TOutputHandle, typename TDevice>
-class EvalUnit : public BaseEvalUnit<TDevice>
+template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
 public:
-    EvalUnit(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle)
+    template <typename TAuxParams>
+    EvalUnit(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
         : m_gradHandle(std::move(gradHandle))
         , m_inputHandle(std::move(oriHandle))
         , m_outputHandle(std::move(outputHandle))
@@ -45,7 +46,7 @@ public:
         auto low_out = LowerAccess(out);
         ElementType* mem_out = low_out.MutableRawMemory();
                 
-        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, "Currently only CPU is supported");
+        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
         
         for (size_t i = 0; i < count; ++i)
         {
@@ -59,38 +60,12 @@ private:
     const TInputHandle m_inputHandle;
     TOutputHandle m_outputHandle;
 };
-
-struct Calculator
-{
-    template <typename TCaseTail, typename TEvalRes, typename TOp>
-    static void EvalRegister(TEvalRes& evalRes, const TOp& oper)
-    {
-        static_assert(std::is_same_v<TCaseTail, OperSeqContainer<>>,
-                      "General case is not the last one");
-                      
-        using DeviceType = typename TEvalRes::DataType::DeviceType;
-
-        const auto& data1 = oper.template GetOperand<0>();
-        const auto& data2 = oper.template GetOperand<1>();
-        auto handle1 = data1.EvalRegister();
-        auto handle2 = data2.EvalRegister();
-        
-        auto outHandle = evalRes.Handle();
-        using UnitType = EvalUnit<decltype(handle1), decltype(handle2), decltype(outHandle), DeviceType>;
-        using GroupType = TrivalEvalGroup<UnitType>;
-
-        const void* dataPtr = outHandle.DataPtr();
-        std::vector<const void*> depVec{handle1.DataPtr(), handle2.DataPtr()};
-        UnitType unit(std::move(handle1), std::move(handle2), std::move(outHandle));
-        EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, depVec);
-    }
-};
 }
 
 template <>
 struct OperSeq_<OpTags::AsinGrad>
 {
-    using type = OperSeqContainer<OperAsinGrad::NSCaseGen::Calculator>;
+    using type = OperSeqContainer<TailCalculator<OperAsinGrad::NSCaseGen::EvalUnit>>;
 };
 
 template <typename TGrad, typename TInput,
