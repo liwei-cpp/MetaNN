@@ -77,7 +77,7 @@ public:
     template <typename TAuxParams>
     EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
         : m_inputHandle(std::move(oriHandle))
-        , m_dividend(params.dividend)
+        , m_dividend(params.Dividend())
         , m_outputHandle(std::move(outputHandle))
     {}
     
@@ -122,7 +122,24 @@ constexpr bool IsValidOper<OpTags::DivideByNumber, TOper, TNumber>
 template <typename TCate>
 struct OperAuxParams<OpTags::DivideByNumber, TCate>
 {
-    double dividend;
+public:
+    template <typename TValue>
+    OperAuxParams(TValue val)
+        : m_dividend(new double(val))
+    {}
+    
+    double Dividend() const
+    {
+        return *m_dividend;
+    }
+    
+    bool operator == (const OperAuxParams& val) const
+    {
+        return m_dividend == val.m_dividend;
+    }
+
+private:
+    std::shared_ptr<double> m_dividend;
 };
 
 template <>
@@ -153,8 +170,7 @@ auto operator/ (TP1&& p_m1, TP2&& p_m2)
     {
         using rawOp = RemConstRef<TP1>;
         using ResType = Operator<OpTags::DivideByNumber, rawOp>;
-        OperAuxParams<OpTags::DivideByNumber, OperCateCal<OpTags::DivideByNumber, rawOp>> params;
-        params.dividend = p_m2;
+        OperAuxParams<OpTags::DivideByNumber, OperCateCal<OpTags::DivideByNumber, rawOp>> params(p_m2);
         return ResType(std::move(params), std::forward<TP1>(p_m1));
     }
 }
