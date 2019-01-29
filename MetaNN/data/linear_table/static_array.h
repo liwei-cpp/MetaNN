@@ -9,6 +9,44 @@
 
 namespace MetaNN
 {
+namespace NSStatciArray
+{
+    template <typename TShape, typename TP1, typename TP2, typename TP3, typename TP4, typename TP5, typename TVal>
+    auto PosValSegment(const TShape& shape, TP1 p1, TP2 p2, TP3 p3, TP4 p4, TP5 p5, TVal val)
+    {
+        const size_t pos = shape.Index2Count(p1, p2, p3, p4, p5);
+        return std::pair{pos, val};
+    }
+
+    template <typename TShape, typename TP1, typename TP2, typename TP3, typename TP4, typename TVal>
+    auto PosValSegment(const TShape& shape, TP1 p1, TP2 p2, TP3 p3, TP4 p4, TVal val)
+    {
+        const size_t pos = shape.Index2Count(p1, p2, p3, p4);
+        return std::pair{pos, val};
+    }
+    
+    template <typename TShape, typename TP1, typename TP2, typename TP3, typename TVal>
+    auto PosValSegment(const TShape& shape, TP1 p1, TP2 p2, TP3 p3, TVal val)
+    {
+        const size_t pos = shape.Index2Count(p1, p2, p3);
+        return std::pair{pos, val};
+    }
+    
+    template <typename TShape, typename TP1, typename TP2, typename TVal>
+    auto PosValSegment(const TShape& shape, TP1 p1, TP2 p2, TVal val)
+    {
+        const size_t pos = shape.Index2Count(p1, p2);
+        return std::pair{pos, val};
+    }
+    
+    template <typename TShape, typename TP1, typename TVal>
+    auto PosValSegment(const TShape& shape, TP1 p1, TVal val)
+    {
+        const size_t pos = shape.Index2Count(p1);
+        return std::pair{pos, val};
+    }
+}
+
 template <typename TElement, typename TDevice,
           template<typename>class TCateWrapper, typename TCardinalCate>
 class StaticArray
@@ -60,14 +98,14 @@ public:
     
     bool AvailableForWrite() const { return m_mem.IsShared(); }
 
-    template <typename... TPosParams>
-    void SetValue(ElementType val, TPosParams... posParams)
+    template <typename... TPosValParams>
+    void SetValue(size_t Index1, TPosValParams... posValParams)
     {
         static_assert(std::is_same_v<DeviceType, DeviceTags::CPU>,
                       "Only CPU supports this method.");
-                      
+
         assert(AvailableForWrite());
-        const size_t pos = m_shape.Index2Count(posParams...);
+        const auto [pos, val] = NSStatciArray::PosValSegment(m_shape, Index1, posValParams...);
         (m_mem.RawMemory())[pos] = val;
     }
     

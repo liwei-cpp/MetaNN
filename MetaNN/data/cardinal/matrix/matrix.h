@@ -55,7 +55,7 @@ public:
         return m_mem.IsShared();
     }
 
-    void SetValue(ElementType val, size_t p_rowId, size_t p_colId)
+    void SetValue(size_t p_rowId, size_t p_colId, ElementType val)
     {
         static_assert(std::is_same_v<DeviceType, DeviceTags::CPU>,
                       "Only CPU supports this method.");

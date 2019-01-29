@@ -12,14 +12,14 @@ namespace
     {
         cout << "Test softmax grad case 1 ...\t";
         Vector<CheckElement, CheckDevice> input(3);
-        input.SetValue(0.5484, 0);
-        input.SetValue(0.3292, 1);
-        input.SetValue(0.1224, 2);
+        input.SetValue(0, 0.5484);
+        input.SetValue(1, 0.3292);
+        input.SetValue(2, 0.1224);
         
         Vector<CheckElement, CheckDevice> grad(3);
-        grad.SetValue(0.5911, 0);
-        grad.SetValue(0.6659, 1);
-        grad.SetValue(0.7868, 2);
+        grad.SetValue(0, 0.5911);
+        grad.SetValue(1, 0.6659);
+        grad.SetValue(2, 0.7868);
         
         auto op = SoftmaxGrad(grad, input);
         auto res = Evaluate(op);
@@ -34,22 +34,22 @@ namespace
     {
         cout << "Test softmax grad case 2 ...\t";
         BatchMatrix<CheckElement, CheckDevice> input(2, 1, 3);
-        input.SetValue(0.5484, 0, 0, 0);
-        input.SetValue(0.3292, 0, 0, 1);
-        input.SetValue(0.1224, 0, 0, 2);
+        input.SetValue(0, 0, 0, 0.5484);
+        input.SetValue(0, 0, 1, 0.3292);
+        input.SetValue(0, 0, 2, 0.1224);
         
-        input.SetValue(0.3915, 1, 0, 0);
-        input.SetValue(0.0655, 1, 0, 1);
-        input.SetValue(0.5430, 1, 0, 2);
+        input.SetValue(1, 0, 0, 0.3915);
+        input.SetValue(1, 0, 1, 0.0655);
+        input.SetValue(1, 0, 2, 0.5430);
         
         BatchMatrix<CheckElement, CheckDevice> grad(2, 1, 3);
-        grad.SetValue(0.5911, 0, 0, 0);
-        grad.SetValue(0.6659, 0, 0, 1);
-        grad.SetValue(0.7868, 0, 0, 2);
+        grad.SetValue(0, 0, 0, 0.5911);
+        grad.SetValue(0, 0, 1, 0.6659);
+        grad.SetValue(0, 0, 2, 0.7868);
         
-        grad.SetValue(1.1634, 1, 0, 0);
-        grad.SetValue(1.7164, 1, 0, 1);
-        grad.SetValue(0.2763, 1, 0, 2);
+        grad.SetValue(1, 0, 0, 1.1634);
+        grad.SetValue(1, 0, 1, 1.7164);
+        grad.SetValue(1, 0, 2, 0.2763);
         
         auto op = SoftmaxGrad(grad, input);
         auto res = Evaluate(op);

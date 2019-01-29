@@ -61,9 +61,9 @@ namespace
         {
             for (size_t j = 0; j < 20; ++j)
             {
-                me1.SetValue((CheckElement)(c++), i, j);
-                me2.SetValue((CheckElement)(c++), i, j);
-                me3.SetValue((CheckElement)(c++), i, j);
+                me1.SetValue(i, j, (CheckElement)(c++));
+                me2.SetValue(i, j, (CheckElement)(c++));
+                me3.SetValue(i, j, (CheckElement)(c++));
             }
         }
         rm1.PushBack(me1);
@@ -114,9 +114,9 @@ namespace
             {
                 for (size_t j = 0; j < 20; ++j)
                 {
-                    me1.SetValue((CheckElement)(c++), p, i, j);
-                    me2.SetValue((CheckElement)(c++), p, i, j);
-                    me3.SetValue((CheckElement)(c++), p, i, j);
+                    me1.SetValue(p, i, j, (CheckElement)(c++));
+                    me2.SetValue(p, i, j, (CheckElement)(c++));
+                    me3.SetValue(p, i, j, (CheckElement)(c++));
                 }
             }
         }

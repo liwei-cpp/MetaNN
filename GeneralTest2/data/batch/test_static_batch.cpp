@@ -25,7 +25,7 @@ namespace
         int c = 0;
         for (size_t i=0; i<13; ++i)
         {
-            check.SetValue((float)(c++), i);
+            check.SetValue(i, (float)(c++));
         }
 
         const BatchScalar<CheckElement, CheckDevice> c2 = check;
@@ -65,7 +65,7 @@ namespace
             {
                 for (size_t k = 0; k < 35; ++k)
                 {
-                    data.SetValue((int)(i * 1000 + j * 100 + k), i, j, k);
+                    data.SetValue(i, j, k, (int)(i * 1000 + j * 100 + k));
                 }
             }
         }
@@ -98,12 +98,12 @@ namespace
         {
             for (size_t j = 0; j < 20; ++j)
             {
-                me1.SetValue((float)(c++), i, j);
-                me2.SetValue((float)(c++), i, j);
-                me3.SetValue((float)(c++), i, j);
-                rm1.SetValue(me1(i, j), 0, i, j);
-                rm1.SetValue(me2(i, j), 1, i, j);
-                rm1.SetValue(me3(i, j), 2, i, j);
+                me1.SetValue(i, j, (float)(c++));
+                me2.SetValue(i, j, (float)(c++));
+                me3.SetValue(i, j, (float)(c++));
+                rm1.SetValue(0, i, j, me1(i, j));
+                rm1.SetValue(1, i, j, me2(i, j));
+                rm1.SetValue(2, i, j, me3(i, j));
             }
         }
     
@@ -143,7 +143,7 @@ namespace
                 {
                     for (size_t k = 0; k < 35; ++k)
                     {
-                        data.SetValue((int)(p * 33 + i * 1000 + j * 100 + k), i, p, j, k);
+                        data.SetValue(i, p, j, k, (int)(p * 33 + i * 1000 + j * 100 + k));
                     }
                 }
             }

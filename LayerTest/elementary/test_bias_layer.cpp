@@ -95,8 +95,8 @@ namespace
         RootLayer layer("root", 2, 1);
 
         Matrix<CheckElement, CheckDevice> w(2, 1);
-        w.SetValue(-0.48f, 0, 0);
-        w.SetValue(-0.13f, 1, 0);
+        w.SetValue(0, 0, -0.48f);
+        w.SetValue(1, 0, -0.13f);
 
         auto initializer = MakeInitializer<CheckElement>();
         initializer.SetParam("root", w);
@@ -104,8 +104,8 @@ namespace
         layer.Init(initializer, loadBuffer);
 
         Matrix<CheckElement, CheckDevice> input(2, 1);
-        input.SetValue(-0.27f, 0, 0);
-        input.SetValue(-0.41f, 1, 0);
+        input.SetValue(0, 0, -0.27f);
+        input.SetValue(1, 0, -0.41f);
 
         auto bi = LayerIO::Create().Set<LayerIO>(input);
 
@@ -116,8 +116,8 @@ namespace
         assert(fabs(res(1, 0) + 0.41f + 0.13f) < 0.001);
 
         Matrix<CheckElement, CheckDevice> g(2, 1);
-        g.SetValue(-0.0495f, 0, 0);
-        g.SetValue(-0.0997f, 1, 0);
+        g.SetValue(0, 0, -0.0495f);
+        g.SetValue(1, 0, -0.0997f);
 
         auto fbIn = LayerIO::Create().Set<LayerIO>(g);
         auto out_grad = layer.FeedBackward(fbIn);
@@ -159,8 +159,8 @@ namespace
         RootLayer layer("root", 2, 1);
     
         Matrix<CheckElement, CheckDevice> w(2, 1);
-        w.SetValue(-0.48f, 0, 0);
-        w.SetValue(-0.13f, 1, 0);
+        w.SetValue(0, 0, -0.48f);
+        w.SetValue(1, 0, -0.13f);
 
         auto initializer = MakeInitializer<CheckElement>();
         initializer.SetParam("root", w);
@@ -168,8 +168,8 @@ namespace
         layer.Init(initializer, loadBuffer);
 
         Matrix<CheckElement, CheckDevice> input(2, 1);
-        input.SetValue(-0.27f, 0, 0);
-        input.SetValue(-0.41f, 1, 0);
+        input.SetValue(0, 0, -0.27f);
+        input.SetValue(1, 0, -0.41f);
 
         auto bi = LayerIO::Create().Set<LayerIO>(input);
 
@@ -180,8 +180,8 @@ namespace
         assert(fabs(res(1, 0) + 0.41f + 0.13f) < 0.001);
 
         Matrix<CheckElement, CheckDevice> g(2, 1);
-        g.SetValue(-0.0495f, 0, 0);
-        g.SetValue(-0.0997f, 1, 0);
+        g.SetValue(0, 0, -0.0495f);
+        g.SetValue(1, 0, -0.0997f);
 
         auto fbIn = LayerIO::Create().Set<LayerIO>(g);
         auto out_grad = layer.FeedBackward(fbIn);
@@ -225,8 +225,8 @@ namespace
         RootLayer layer("root", 2, 1);
     
         Matrix<CheckElement, CheckDevice> w(2, 1);
-        w.SetValue(-0.48f, 0, 0);
-        w.SetValue(-0.13f, 1, 0);
+        w.SetValue(0, 0, -0.48f);
+        w.SetValue(1, 0, -0.13f);
         
         auto initializer = MakeInitializer<float>();
         initializer.SetParam("root", w);
@@ -234,8 +234,8 @@ namespace
         layer.Init(initializer, loadBuffer);
 
         Matrix<CheckElement, CheckDevice> input(2, 1);
-        input.SetValue(-0.27f, 0, 0);
-        input.SetValue(-0.41f, 1, 0);
+        input.SetValue(0, 0, -0.27f);
+        input.SetValue(1, 0, -0.41f);
 
         auto bi = LayerIO::Create().Set<LayerIO>(input);
 
@@ -246,8 +246,8 @@ namespace
         assert(fabs(res(1, 0) + 0.41f + 0.13f) < 0.001);
 
         input = Matrix<CheckElement, CheckDevice>(2, 1);
-        input.SetValue(1.27f, 0, 0);
-        input.SetValue(2.41f, 1, 0);
+        input.SetValue(0, 0, 1.27f);
+        input.SetValue(1, 0, 2.41f);
 
         bi = LayerIO::Create().Set<LayerIO>(input);
 
@@ -257,8 +257,8 @@ namespace
         assert(fabs(res(1, 0) - 2.41f + 0.13f) < 0.001);
 
         Matrix<CheckElement, CheckDevice> g(2, 1);
-        g.SetValue(-0.0495f, 0, 0);
-        g.SetValue(-0.0997f, 1, 0);
+        g.SetValue(0, 0, -0.0495f);
+        g.SetValue(1, 0, -0.0997f);
 
         auto fbIn = LayerIO::Create().Set<LayerIO>(g);
         auto out_grad = layer.FeedBackward(fbIn);
@@ -267,9 +267,9 @@ namespace
         assert(fabs(fbOut(0, 0) + 0.0495f) < 0.001);
         assert(fabs(fbOut(1, 0) + 0.0997f) < 0.001);
 
-        g = Matrix<float, DeviceTags::CPU>(2, 1);
-        g.SetValue(1.0495f, 0, 0);
-        g.SetValue(2.3997f, 1, 0);
+        g = Matrix<CheckElement, CheckDevice>(2, 1);
+        g.SetValue(0, 0, 1.0495f);
+        g.SetValue(1, 0, 2.3997f);
 
         fbIn = LayerIO::Create().Set<LayerIO>(g);
         out_grad = layer.FeedBackward(fbIn);

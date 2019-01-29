@@ -24,16 +24,16 @@ namespace
         // check contains 4 sequences, with length = 13, 1, 100, 87
         int c = 0;
         TItem item1(13);
-        for (size_t i = 0; i < 13; ++i) item1.SetValue((float)(c++), i);
+        for (size_t i = 0; i < 13; ++i) item1.SetValue(i, (float)(c++));
         
         TItem item2(1);
-        for (size_t i = 0; i < 1; ++i) item2.SetValue((float)(c++), i);
+        for (size_t i = 0; i < 1; ++i) item2.SetValue(i, (float)(c++));
         
         TItem item3(100);
-        for (size_t i = 0; i < 100; ++i) item3.SetValue((float)(c++), i);
+        for (size_t i = 0; i < 100; ++i) item3.SetValue(i, (float)(c++));
         
         TItem item4(87);
-        for (size_t i = 0; i < 87; ++i) item4.SetValue((float)(c++), i);
+        for (size_t i = 0; i < 87; ++i) item4.SetValue(i, (float)(c++));
         
         check.PushBack(item1); check.PushBack(item2); check.PushBack(item3); check.PushBack(item4);
         assert(check.Shape().SeqLenContainer()[0] == 13);
@@ -81,10 +81,10 @@ namespace
             {
                 for (size_t k = 0; k < 100; ++k)
                 {
-                    if (k < 13)  item1.SetValue((CheckElement)(c++), k, i, j);
-                    if (k < 1)   item2.SetValue((CheckElement)(c++), k, i, j);
-                    if (k < 100) item3.SetValue((CheckElement)(c++), k, i, j);
-                    if (k < 87)  item4.SetValue((CheckElement)(c++), k, i, j);
+                    if (k < 13)  item1.SetValue(k, i, j, (CheckElement)(c++));
+                    if (k < 1)   item2.SetValue(k, i, j, (CheckElement)(c++));
+                    if (k < 100) item3.SetValue(k, i, j, (CheckElement)(c++));
+                    if (k < 87)  item4.SetValue(k, i, j, (CheckElement)(c++));
                 }
             }
         }
@@ -143,10 +143,10 @@ namespace
                 {
                     for (size_t k = 0; k < 100; ++k)
                     {
-                        if (k < 13)  item1.SetValue((CheckElement)(c++), k, p, i, j);
-                        if (k < 1)   item2.SetValue((CheckElement)(c++), k, p, i, j);
-                        if (k < 100) item3.SetValue((CheckElement)(c++), k, p, i, j);
-                        if (k < 87)  item4.SetValue((CheckElement)(c++), k, p, i, j);
+                        if (k < 13)  item1.SetValue(k, p, i, j, (CheckElement)(c++));
+                        if (k < 1)   item2.SetValue(k, p, i, j, (CheckElement)(c++));
+                        if (k < 100) item3.SetValue(k, p, i, j, (CheckElement)(c++));
+                        if (k < 87)  item4.SetValue(k, p, i, j, (CheckElement)(c++));
                     }
                 }
             }

@@ -32,7 +32,7 @@ namespace
         {
             for (size_t i = 0; i < seqs[s]; ++i)
             {
-                check.SetValue((float)(c++), s, i);
+                check.SetValue(s, i, (float)(c++));
             }
         }
 
@@ -88,7 +88,7 @@ namespace
                 {
                     for (size_t k = 0; k < 35; ++k)
                     {
-                        data.SetValue((int)(s * 10000 + i * 1000 + j * 100 + k), s, i, j, k);
+                        data.SetValue(s, i, j, k, (int)(s * 10000 + i * 1000 + j * 100 + k));
                     }
                 }
             }
@@ -131,8 +131,8 @@ namespace
             {
                 for (size_t j = 0; j < 20; ++j)
                 {
-                    me1.SetValue((float)(c++), len, i, j);
-                    rm1.SetValue(me1[len](i, j), 0, len, i, j);
+                    me1.SetValue(len, i, j, (float)(c++));
+                    rm1.SetValue(0, len, i, j, me1[len](i, j));
                 }
             }
         }
@@ -142,8 +142,8 @@ namespace
             {
                 for (size_t j = 0; j < 20; ++j)
                 {
-                    me2.SetValue((float)(c++), len, i, j);
-                    rm1.SetValue(me2[len](i, j), 1, len, i, j);
+                    me2.SetValue(len, i, j, (float)(c++));
+                    rm1.SetValue(1, len, i, j, me2[len](i, j));
                 }
             }
         }
@@ -153,8 +153,8 @@ namespace
             {
                 for (size_t j = 0; j < 20; ++j)
                 {
-                    me3.SetValue((float)(c++), len, i, j);
-                    rm1.SetValue(me3[len](i, j), 2, len, i, j);
+                    me3.SetValue(len, i, j, (float)(c++));
+                    rm1.SetValue(2, len, i, j, me3[len](i, j));
                 }
             }
         }
@@ -221,7 +221,7 @@ namespace
                     {
                         for (size_t k = 0; k < 35; ++k)
                         {
-                            data.SetValue((int)(s * 171 + p * 33 + i * 1000 + j * 100 + k), s, i, p, j, k);
+                            data.SetValue(s, i, p, j, k, (int)(s * 171 + p * 33 + i * 1000 + j * 100 + k));
                         }
                     }
                 }

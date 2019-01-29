@@ -12,7 +12,7 @@ inline auto GenMatrix(std::size_t r, std::size_t c, TElem start = 0, TElem step 
     {
         for (std::size_t j = 0; j < c; ++j)
         {
-            res.SetValue((TElem)(start + cur), i, j);
+            res.SetValue(i, j, (TElem)(start + cur));
             cur += step;
         }
     }
@@ -32,7 +32,7 @@ inline auto GenThreeDArray(size_t p, size_t r, size_t c, TElem start = 0, TElem 
         {
             for (size_t j = 0; j < c; ++j)
             {
-                res.SetValue((TElem)(start + cur), k, i, j);
+                res.SetValue(k, i, j, (TElem)(start + cur));
                 cur += step;
             }
         }
@@ -48,7 +48,7 @@ inline auto GenBatchScalar(size_t len, TElem start = 0, TElem step = 1)
     TElem cur{};
     for (size_t k = 0; k < len; ++k)
     {
-        res.SetValue((TElem)(start + cur), k);
+        res.SetValue(k, (TElem)(start + cur));
         cur += step;
     }
     return res;
@@ -67,7 +67,7 @@ inline auto GenBatchMatrix(size_t p, size_t r, size_t c, TElem start = 0, TElem 
         {
             for (size_t j = 0; j < c; ++j)
             {
-                res.SetValue((TElem)(start + cur), k, i, j);
+                res.SetValue(k, i, j, (TElem)(start + cur));
                 cur += step;
             }
         }
@@ -89,7 +89,7 @@ inline auto GenBatchThreeDArray(size_t b, size_t p, size_t r, size_t c, TElem st
             {
                 for (size_t j = 0; j < c; ++j)
                 {
-                    res.SetValue((TElem)(start + cur), l, k, i, j);
+                    res.SetValue(l, k, i, j, (TElem)(start + cur));
                     cur += step;
                 }
             }
@@ -105,7 +105,7 @@ inline auto GenScalarSequence(size_t len, TElem start = 0, TElem scale = 1)
     ScalarSequence<TElem, MetaNN::DeviceTags::CPU> res(len);
     for (size_t k = 0; k < len; ++k)
     {
-        res.SetValue((TElem)(start * scale), k);
+        res.SetValue(k, (TElem)(start * scale));
         start += 1.0f;
     }
     return res;
@@ -122,7 +122,7 @@ inline auto GenMatrixSequence(size_t p, size_t r, size_t c, TElem start = 0, TEl
         {
             for (size_t j = 0; j < c; ++j)
             {
-                res.SetValue((TElem)(start * scale), k, i, j);
+                res.SetValue(k, i, j, (TElem)(start * scale));
                 start += 1.0f;
             }
         }
@@ -143,7 +143,7 @@ inline auto GenThreeDArraySequence(size_t b, size_t p, size_t r, size_t c, TElem
             {
                 for (size_t j = 0; j < c; ++j)
                 {
-                    res.SetValue((TElem)(start * scale), l, k, i, j);
+                    res.SetValue(l, k, i, j, (TElem)(start * scale));
                     start += 1.0f;
                 }
             }
@@ -161,7 +161,7 @@ inline auto GenBatchScalarSequence(const std::vector<TLen>& seqs, TElem start = 
     {
         for (size_t k = 0; k < (size_t)seqs[i]; ++k)
         {
-            res.SetValue((TElem)(start * scale), i, k);
+            res.SetValue(i, k, (TElem)(start * scale));
             start += 1.0f;
         }
     }
@@ -181,7 +181,7 @@ inline auto GenBatchMatrixSequence(const std::vector<TLen>& seqs, size_t rowNum,
             {
                 for (size_t c = 0; c < colNum; ++c)
                 {
-                    res.SetValue((TElem)(start * scale), i, k, r, c);
+                    res.SetValue(i, k, r, c, (TElem)(start * scale));
                     start += 1.0f;                
                 }
             }
@@ -205,7 +205,7 @@ inline auto GenBatchThreeDArraySequence(const std::vector<TLen>& seqs, size_t pa
                 {
                     for (size_t c = 0; c < colNum; ++c)
                     {
-                        res.SetValue((TElem)(start * scale), i, k, p, r, c);
+                        res.SetValue(i, k, p, r, c, (TElem)(start * scale));
                         start += 1.0f;
                     }
                 }

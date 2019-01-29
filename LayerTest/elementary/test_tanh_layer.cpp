@@ -19,8 +19,8 @@ namespace
 
         RootLayer layer;
         Matrix<CheckElement, CheckDevice> in(2, 1);
-        in.SetValue(-0.27f, 0, 0);
-        in.SetValue(-0.41f, 1, 0);
+        in.SetValue(0, 0, -0.27f);
+        in.SetValue(1, 0, -0.41f);
 
         auto input = LayerIO::Create().Set<LayerIO>(in);
 
@@ -51,8 +51,8 @@ namespace
         RootLayer layer;
 
         Matrix<CheckElement, CheckDevice> in(2, 1);
-        in.SetValue(-0.27f, 0, 0);
-        in.SetValue(-0.41f, 1, 0);
+        in.SetValue(0, 0, -0.27f);
+        in.SetValue(1, 0, -0.41f);
 
         auto input = LayerIO::Create().Set<LayerIO>(in);
 
@@ -64,8 +64,8 @@ namespace
         assert(fabs(res(1, 0) - tanh(-0.41f)) < 0.001);
 
         Matrix<CheckElement, CheckDevice> grad(2, 1);
-        grad.SetValue(0.1f, 0, 0);
-        grad.SetValue(0.3f, 1, 0);
+        grad.SetValue(0, 0, 0.1f);
+        grad.SetValue(1, 0, 0.3f);
         auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
         auto fb = Evaluate(out_grad.Get<LayerIO>());
         assert(fabs(fb(0, 0) - 0.1f * (1-tanh(-0.27f)*tanh(-0.27f))) < 0.001);
