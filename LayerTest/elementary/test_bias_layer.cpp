@@ -128,7 +128,6 @@ namespace
         auto& gradCont = grad_collector.GetContainer<CategoryTags::Matrix>();
         assert(gradCont.size() == 1);
 
-
         auto handle1 = gradCont.front().Weight().EvalRegister();
         auto handle2 = gradCont.front().Grad(1).EvalRegister();
         EvalPlan<DeviceTags::CPU>::Eval();

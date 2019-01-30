@@ -1,1 +1,1 @@
-./Debug/main.cpp.o ./Debug/facilities_test_layer_io_map.cpp.o ./Debug/elementary_test_abs_layer.cpp.o ./Debug/elementary_test_sigmoid_layer.cpp.o ./Debug/elementary_test_tanh_layer.cpp.o ./Debug/elementary_test_add_layer.cpp.o ./Debug/elementary_test_bias_layer.cpp.o
+./Debug/main.cpp.o ./Debug/facilities_test_layer_io_map.cpp.o ./Debug/elementary_test_abs_layer.cpp.o ./Debug/elementary_test_sigmoid_layer.cpp.o ./Debug/elementary_test_tanh_layer.cpp.o ./Debug/elementary_test_add_layer.cpp.o ./Debug/elementary_test_bias_layer.cpp.o ./Debug/elementary_test_weight_layer.cpp.o

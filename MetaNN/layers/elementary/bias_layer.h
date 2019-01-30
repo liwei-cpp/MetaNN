@@ -105,7 +105,7 @@ namespace MetaNN
             auto matPtr = saver.template TryGet<ParamCategory>(m_name);
             if (matPtr && (*matPtr != m_bias))
             {
-                throw std::runtime_error("Duplicate save for matrix: " + m_name);
+                throw std::runtime_error("Duplicate save for data: " + m_name);
             }
             saver.Set(m_name, m_bias);
         }
@@ -180,7 +180,7 @@ namespace MetaNN
         Shape<ParamCategory> m_biasShape;
         ParamType m_bias;
         
-        typename NSBiasLayer::GradStackType_<AimGradType, Shape<ParamCategory>, IsUpdate>::type m_paramGradStack;;
+        typename NSBiasLayer::GradStackType_<AimGradType, Shape<ParamCategory>, IsUpdate>::type m_paramGradStack;
         LayerTraits::LayerInternalBuf<AimInputShapeType, IsFeedbackOutput> m_inputShapeStack;
     };
 }

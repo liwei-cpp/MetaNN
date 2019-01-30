@@ -86,12 +86,12 @@ private:
 };
 }
 
-template <typename TOperand>
-constexpr bool IsValidOper<OpTags::Dot, TOperand> =
-    IsMatrix<TOperand> ||
-    IsBatchMatrix<TOperand> ||
-    IsMatrixSequence<TOperand> ||
-    IsBatchMatrixSequence<TOperand>;
+template <typename TOperand1, typename TOperand2>
+constexpr bool IsValidOper<OpTags::Dot, TOperand1, TOperand2> =
+    (IsMatrix<TOperand1> && IsMatrix<TOperand2>) ||
+    (IsBatchMatrix<TOperand1> && IsBatchMatrix<TOperand2>) ||
+    (IsMatrixSequence<TOperand1> && IsMatrixSequence<TOperand2>) ||
+    (IsBatchMatrixSequence<TOperand1> && IsBatchMatrixSequence<TOperand2>);
 
 template <typename TCate>
 class OperShapeInfo<OpTags::Dot, TCate>

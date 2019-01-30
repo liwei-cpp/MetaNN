@@ -29,6 +29,8 @@
     <File Name="elementary/test_add_layer.cpp"/>
     <File Name="elementary/test_bias_layer.h"/>
     <File Name="elementary/test_bias_layer.cpp"/>
+    <File Name="elementary/test_weight_layer.h"/>
+    <File Name="elementary/test_weight_layer.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
