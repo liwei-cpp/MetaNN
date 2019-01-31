@@ -3,7 +3,7 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/facilities/tags.h>
+#include <MetaNN/operators/elementwise/tags.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
 #include <cassert>
 #include <cmath>

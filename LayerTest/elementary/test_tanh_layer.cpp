@@ -17,7 +17,7 @@ namespace
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
-        RootLayer layer;
+        RootLayer layer("root");
         Matrix<CheckElement, CheckDevice> in(2, 1);
         in.SetValue(0, 0, -0.27f);
         in.SetValue(1, 0, -0.41f);
@@ -48,7 +48,7 @@ namespace
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
-        RootLayer layer;
+        RootLayer layer("root");
 
         Matrix<CheckElement, CheckDevice> in(2, 1);
         in.SetValue(0, 0, -0.27f);
@@ -82,7 +82,7 @@ namespace
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
-        RootLayer layer;
+        RootLayer layer("root");
 
         vector<Matrix<CheckElement, CheckDevice>> op;
 

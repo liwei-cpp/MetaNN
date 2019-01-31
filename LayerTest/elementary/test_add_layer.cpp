@@ -20,7 +20,7 @@ namespace
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
-        RootLayer layer;
+        RootLayer layer("root");
 
         auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
         auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
@@ -55,7 +55,7 @@ namespace
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
-        RootLayer layer;
+        RootLayer layer("root");
         auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
         auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
 
@@ -105,7 +105,7 @@ namespace
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
-        RootLayer layer;
+        RootLayer layer("root");
 
         auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
         auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);

@@ -3,15 +3,14 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/facilities/tags.h>
+#include <MetaNN/operators/elementwise/tags.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <cassert>
-#include <cmath>
 #include <type_traits>
 
 namespace MetaNN
 {
-namespace OperAsin::NSCaseGen
+namespace OperSign::NSCaseGen
 {
 template <typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
@@ -42,9 +41,15 @@ public:
                 
         static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
         
+        const ElementType zero{};
+        const ElementType one{1};
+        const ElementType negOne{-1};
         for (size_t i = 0; i < count; ++i)
         {
-            mem_out[i] = std::asin(mem_in[i]);
+            if (mem_in[i] == zero)
+                mem_out[i] = zero;
+            else
+                mem_out[i] = (mem_in[i] > zero) ? one : negOne;
         }
         m_outputHandle.SetEval();
     }
@@ -56,17 +61,18 @@ private:
 }
 
 template <>
-struct OperSeq_<OpTags::Asin>
+struct OperSeq_<OpTags::Sign>
 {
-    using type = OperSeqContainer<TailCalculator<OperAsin::NSCaseGen::EvalUnit>>;
+    using type = OperSeqContainer<TailCalculator<OperSign::NSCaseGen::EvalUnit>>;
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::Asin, TP>>>
-auto Asin(TP&& p_m)
+          typename = std::enable_if_t<IsValidOper<OpTags::Sign, TP>>>
+auto Sign(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
-    using ResType = Operator<OpTags::Asin, rawM>;
+    using ResType = Operator<OpTags::Sign, rawM>;
     return ResType(std::forward<TP>(p_m));
+
 }
 }

@@ -3,14 +3,15 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/facilities/tags.h>
+#include <MetaNN/operators/elementwise/tags.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <cassert>
+#include <cmath>
 #include <type_traits>
 
 namespace MetaNN
 {
-namespace OperTanh::NSCaseGen
+namespace OperAsin::NSCaseGen
 {
 template <typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
@@ -43,7 +44,7 @@ public:
         
         for (size_t i = 0; i < count; ++i)
         {
-            mem_out[i] = (ElementType)(tanh(mem_in[i]));
+            mem_out[i] = std::asin(mem_in[i]);
         }
         m_outputHandle.SetEval();
     }
@@ -55,17 +56,17 @@ private:
 }
 
 template <>
-struct OperSeq_<OpTags::Tanh>
+struct OperSeq_<OpTags::Asin>
 {
-    using type = OperSeqContainer<TailCalculator<OperTanh::NSCaseGen::EvalUnit>>;
+    using type = OperSeqContainer<TailCalculator<OperAsin::NSCaseGen::EvalUnit>>;
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::Tanh, TP>>>
-auto Tanh(TP&& p_m)
+          typename = std::enable_if_t<IsValidOper<OpTags::Asin, TP>>>
+auto Asin(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
-    using ResType = Operator<OpTags::Tanh, rawM>;
+    using ResType = Operator<OpTags::Asin, rawM>;
     return ResType(std::forward<TP>(p_m));
 }
 }

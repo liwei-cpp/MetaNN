@@ -28,6 +28,10 @@ namespace MetaNN
         using AimInputType = typename InputItemTypes::template Find<LayerIO>;
         
     public:
+        AbsLayer(std::string name)
+            : m_name(std::move(name))
+        {}
+
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
@@ -72,6 +76,7 @@ namespace MetaNN
             }
         }
     private:
+        std::string m_name;
         LayerTraits::LayerInternalBuf<AimInputType, IsFeedbackOutput> m_data;
     };
 }

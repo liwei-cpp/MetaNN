@@ -3,19 +3,18 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/facilities/tags.h>
+#include <MetaNN/operators/elementwise/tags.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
 #include <cassert>
 #include <type_traits>
 
 namespace MetaNN
 {
-namespace OperSoftmax::NSCaseGen
+namespace OperAbs::NSCaseGen
 {
 template <typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
-    using ElementType = ElementTypeFromHandle<TOutputHandle>;
 public:
     template <typename TAuxParams>
     EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
@@ -29,11 +28,10 @@ public:
         m_outputHandle.Allocate(in.Shape());
         auto& out = m_outputHandle.MutableData();
         
+        using ElementType = ElementTypePicker<decltype(out)>;
+        
         const size_t count = in.Shape().Count();
         assert(count == out.Shape().Count());
-        const size_t matrixSize = in.Shape().RowNum() * in.Shape().ColNum();
-        assert(count % matrixSize == 0);
-        const size_t loopCount = count / matrixSize;
         
         auto low_in = LowerAccess(in);
         ElementType* mem_in = low_in.MutableRawMemory();
@@ -43,55 +41,33 @@ public:
                 
         static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
         
-        for (size_t i = 0; i < loopCount; ++i)
+        const ElementType zero{};
+        for (size_t i = 0; i < count; ++i)
         {
-            EvalMatrix(mem_out, mem_in, matrixSize);
-            mem_out += matrixSize;
-            mem_in += matrixSize;
+            const ElementType val = mem_in[i];
+            mem_out[i] = (val > zero) ? val : -val;
         }
         m_outputHandle.SetEval();
     }
     
-private:
-    void EvalMatrix(ElementType* out, ElementType* in, const size_t len)
-    {
-        ElementType maxElem = *std::max_element(in, in + len);
-        ElementType sum{};
-
-        for (size_t i = 0; i < len; ++i)
-        {
-            out[i] = exp(in[i] - maxElem);
-            sum += out[i];
-        }
-
-        for (size_t i = 0; i < len; ++i)
-        {
-            out[i] /= sum;
-        }
-    }
 private:
     const TInputHandle m_inputHandle;
     TOutputHandle m_outputHandle;
 };
 }
 
-template <typename TOperand>
-constexpr bool IsValidOper<OpTags::Softmax, TOperand> =
-    IsMatrix<TOperand> ||
-    IsBatchMatrix<TOperand>;
-
 template <>
-struct OperSeq_<OpTags::Softmax>
+struct OperSeq_<OpTags::Abs>
 {
-    using type = OperSeqContainer<TailCalculator<OperSoftmax::NSCaseGen::EvalUnit>>;
+    using type = OperSeqContainer<TailCalculator<OperAbs::NSCaseGen::EvalUnit>>;
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::Softmax, TP>>>
-auto Softmax(TP&& p_m)
+          typename = std::enable_if_t<IsValidOper<OpTags::Abs, TP>>>
+auto Abs(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
-    using ResType = Operator<OpTags::Softmax, rawM>;
+    using ResType = Operator<OpTags::Abs, rawM>;
     return ResType(std::forward<TP>(p_m));
 }
 }

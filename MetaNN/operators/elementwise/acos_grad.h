@@ -3,22 +3,24 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/facilities/tags.h>
-#include <MetaNN/operators/facilities/tail_calculator.h>
-#include <stdexcept>
+#include <MetaNN/operators/elementwise/tags.h>
+#include <MetaNN/operators/facilities/operator_frame.h>
+#include <cassert>
+#include <cmath>
+#include <type_traits>
 
 namespace MetaNN
 {
-namespace OperTanhGrad::NSCaseGen
+namespace OperAcosGrad::NSCaseGen
 {
 template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
 public:
     template <typename TAuxParams>
-    EvalUnit(TGradHandle gradHandle, TInputHandle inputHandle, TOutputHandle outputHandle, const TAuxParams&)
+    EvalUnit(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
         : m_gradHandle(std::move(gradHandle))
-        , m_inputHandle(std::move(inputHandle))
+        , m_inputHandle(std::move(oriHandle))
         , m_outputHandle(std::move(outputHandle))
     {}
     
@@ -28,14 +30,14 @@ public:
         const auto& in = m_inputHandle.Data();
         assert(grad.Shape() == in.Shape());
         
-        m_outputHandle.Allocate(grad.Shape());
+        m_outputHandle.Allocate(in.Shape());
         auto& out = m_outputHandle.MutableData();
         
         using ElementType = ElementTypePicker<decltype(out)>;
         
         const size_t count = in.Shape().Count();
         assert(count == out.Shape().Count());
-        
+
         auto low_grad = LowerAccess(grad);
         ElementType* mem_grad = low_grad.MutableRawMemory();
         auto low_in = LowerAccess(in);
@@ -48,7 +50,7 @@ public:
         
         for (size_t i = 0; i < count; ++i)
         {
-            mem_out[i] = mem_grad[i] * (1 - mem_in[i] * mem_in[i]);
+            mem_out[i] = -mem_grad[i] / std::sqrt(1 - mem_in[i] * mem_in[i]);
         }
         m_outputHandle.SetEval();
     }
@@ -61,23 +63,18 @@ private:
 }
 
 template <>
-struct OperSeq_<OpTags::TanhGrad>
+struct OperSeq_<OpTags::AcosGrad>
 {
-    using type = OperSeqContainer<TailCalculator<OperTanhGrad::NSCaseGen::EvalUnit>>;
+    using type = OperSeqContainer<TailCalculator<OperAcosGrad::NSCaseGen::EvalUnit>>;
 };
 
 template <typename TGrad, typename TInput,
-          typename = std::enable_if_t<IsValidOper<OpTags::TanhGrad, TGrad, TInput>>>
-auto TanhGrad (TGrad&& p_grad, TInput&& p_input)
+          typename = std::enable_if_t<IsValidOper<OpTags::AcosGrad, TGrad, TInput>>>
+auto AcosGrad(TGrad&& p_grad, TInput&& p_input)
 {
-    if (p_grad.Shape() != p_input.Shape())
-    {
-        throw std::runtime_error("TanhGrad error: operands' shape mismatch.");
-    }
-    
-    using rawOp1 = RemConstRef<TGrad>;
-    using rawOp2 = RemConstRef<TInput>;
-    using ResType = Operator<OpTags::TanhGrad, rawOp1, rawOp2>;
+    using rawGrad = RemConstRef<TGrad>;
+    using rawInput = RemConstRef<TInput>;
+    using ResType = Operator<OpTags::AcosGrad, rawGrad, rawInput>;
     return ResType(std::forward<TGrad>(p_grad), std::forward<TInput>(p_input));
 }
 }

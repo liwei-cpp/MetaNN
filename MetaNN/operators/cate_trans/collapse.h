@@ -3,7 +3,7 @@
 #include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/operators/facilities/tags.h>
+#include <MetaNN/operators/cate_trans/tags.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <cassert>
 #include <cstring>
@@ -13,39 +13,39 @@
 namespace MetaNN
 {
 template <typename TOriData, typename TShape>
-constexpr bool IsValidOper<OpTags::Duplicate, TOriData, TShape>
-    = (IsScalar<TOriData>) ||
+constexpr bool IsValidOper<OpTags::Collapse, TOriData, TShape>
+    = (std::is_same_v<TShape, Shape<CategoryTags::Scalar>>) ||
 
-      (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
-      (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Batch<CategoryTags::Matrix>>>) ||
-      (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Batch<CategoryTags::ThreeDArray>>>) ||
-      (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Sequence<CategoryTags::Matrix>>>) ||
-      (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Sequence<CategoryTags::ThreeDArray>>>) ||
-      (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::BatchSequence<CategoryTags::Matrix>>>) ||
-      (IsMatrix<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::BatchSequence<CategoryTags::ThreeDArray>>>) ||
+      (IsThreeDArray<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsBatchMatrix<TOriData>              && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsBatchThreeDArray<TOriData>         && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsMatrixSequence<TOriData>           && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsThreeDArraySequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsBatchMatrixSequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
+      (IsBatchThreeDArraySequence<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Matrix>>) ||
 
-      (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Batch<CategoryTags::ThreeDArray>>>) ||
-      (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::Sequence<CategoryTags::ThreeDArray>>>) ||
-      (IsThreeDArray<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::BatchSequence<CategoryTags::ThreeDArray>>>) ||
+      (IsBatchThreeDArray<TOriData>         && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
+      (IsThreeDArraySequence<TOriData>      && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
+      (IsBatchThreeDArraySequence<TOriData> && std::is_same_v<TShape, Shape<CategoryTags::ThreeDArray>>) ||
       
       std::is_same_v<RemConstRef<decltype(std::declval<TOriData>().Shape())>, TShape>;
-      
-namespace OperDuplicate
+
+namespace OperCollapse
 {
-template<typename TAimShape>
-bool ShapeMatch(const Shape<CategoryTags::Scalar>&, const TAimShape&)
+template<typename TOriShape>
+bool ShapeMatch(const TOriShape&, const Shape<CategoryTags::Scalar>&)
 {
     return true;
 };
 
-template<typename TAimShape>
-bool ShapeMatch(const Shape<CategoryTags::Matrix>& ori, const TAimShape& aim)
+template<typename TOriShape>
+bool ShapeMatch(const TOriShape& ori, const Shape<CategoryTags::Matrix>& aim)
 {
     return ((ori.RowNum() == aim.RowNum()) && (ori.ColNum() == aim.ColNum()));
 };
 
-template<typename TAimShape>
-bool ShapeMatch(const Shape<CategoryTags::ThreeDArray>& ori, const TAimShape& aim)
+template<typename TOriShape>
+bool ShapeMatch(const TOriShape& ori, const Shape<CategoryTags::ThreeDArray>& aim)
 {
     return ((ori.RowNum() == aim.RowNum()) &&
             (ori.ColNum() == aim.ColNum()) &&
@@ -68,24 +68,31 @@ public:
         
         const auto& in = m_inputHandle.Data();
         auto& out = m_outputHandle.MutableData();
-        using ElementType = ElementTypePicker<decltype(out)>;
+        using ElementType = ElementTypePicker<decltype(in)>;
         
         const size_t inCount = in.Shape().Count();
         auto low_in = LowerAccess(in);
         ElementType* mem_in = low_in.MutableRawMemory();
-
+        
         const size_t outCount = out.Shape().Count();
         auto low_out = LowerAccess(out);
         ElementType* mem_out = low_out.MutableRawMemory();
-                
+        
         static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, "Currently only CPU is supported");
+        
+        assert(inCount % outCount == 0);
 
-        assert(outCount % inCount == 0);
-        const size_t loopCount = outCount / inCount;
-        for (size_t i = 0; i < loopCount; ++i)
+        // copy the first bucket for initialization, accumulate the other parts.
+        const size_t loopCount = inCount / outCount;
+        memcpy(mem_out, mem_in, sizeof(ElementType) * outCount);
+        mem_in += outCount;
+        for (size_t i = 1; i < loopCount; ++i)
         {
-            memcpy(mem_out, mem_in, sizeof(ElementType) * inCount);
-            mem_out += inCount;
+            for (size_t j = 0; j < outCount; ++j)
+            {
+                mem_out[j] += mem_in[j];
+            }
+            mem_in += outCount;
         }
         m_outputHandle.SetEval();
     }
@@ -95,7 +102,7 @@ private:
     const TShape m_shape;
     TOutputHandle m_outputHandle;
 };
-    
+
 struct Calculator
 {
     template <typename TEvalRes, typename TOriData, typename TShape>
@@ -120,7 +127,7 @@ struct Calculator
 // Note: since operator<OpTags::Duplicate> cannot deduce its category from operands,
 // so here involve a partial specification.
 template <typename TOriData, typename TCategory>
-class Operator<OpTags::Duplicate, TOriData, Shape<TCategory>>
+class Operator<OpTags::Collapse, TOriData, Shape<TCategory>>
 {
     static_assert(std::is_same_v<RemConstRef<TOriData>, TOriData>, "TOriData is not an available type.");
     
@@ -150,7 +157,7 @@ public:
     {
         if (!m_evalBuf.IsEvaluated())
         {
-            OperDuplicate::Calculator::EvalRegister(m_evalBuf, m_oriData, m_shape);
+            OperCollapse::Calculator::EvalRegister(m_evalBuf, m_oriData, m_shape);
         }
         return m_evalBuf.ConstHandle();
     }
@@ -169,8 +176,8 @@ private:
 };
 
 template <typename TOriData, typename TShape,
-          typename = std::enable_if_t<IsValidOper<OpTags::Duplicate, TOriData, RemConstRef<TShape>>>>
-auto Duplicate(TOriData&& data, TShape&& shape)
+          typename = std::enable_if_t<IsValidOper<OpTags::Collapse, TOriData, RemConstRef<TShape>>>>
+auto Collapse(TOriData&& data, TShape&& shape)
 {
     using OriShape = RemConstRef<decltype(data.Shape())>;
     using NewShape = RemConstRef<TShape>;
@@ -184,14 +191,15 @@ auto Duplicate(TOriData&& data, TShape&& shape)
     }
     else
     {
-        if (!OperDuplicate::ShapeMatch(data.Shape(), shape))
+        if (!OperCollapse::ShapeMatch(data.Shape(), shape))
         {
             throw std::runtime_error("Cannot duplicate for un-match shape.");
         }
+        
         using RawDataType = RemConstRef<TOriData>;
         using RawShapeType = RemConstRef<TShape>;
         
-        using ResType = Operator<OpTags::Duplicate, RawDataType, RawShapeType>;
+        using ResType = Operator<OpTags::Collapse, RawDataType, RawShapeType>;
         return ResType(std::forward<TOriData>(data),
                        std::forward<TShape>(shape));
     }

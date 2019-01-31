@@ -28,6 +28,10 @@ namespace MetaNN
         using AimInputType = typename InputItemTypes::template Find<LayerIO>;
         
     public:
+        TanhLayer(std::string name)
+            : m_name(std::move(name))
+        {}
+        
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
@@ -74,6 +78,7 @@ namespace MetaNN
             }
         }
     private:
+        std::string m_name;
         using TempDataType = decltype(Tanh(std::declval<AimInputType>()));
         LayerTraits::LayerInternalBuf<TempDataType, IsFeedbackOutput> m_data;
     };

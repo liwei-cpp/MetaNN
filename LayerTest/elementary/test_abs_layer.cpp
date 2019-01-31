@@ -16,7 +16,7 @@ namespace
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
-        RootLayer layer;
+        RootLayer layer("root");
 
         auto in = GenMatrix<CheckElement>(4, 5, -3.3f, 0.1f);
         auto input = LayerIO::Create().Set<LayerIO>(in);
@@ -53,7 +53,7 @@ namespace
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
-        RootLayer layer;
+        RootLayer layer("root");
 
         auto in = GenMatrix<CheckElement>(4, 5, -3.3f, 0.1f);
         auto input = LayerIO::Create().Set<LayerIO>(in);
@@ -97,7 +97,7 @@ namespace
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
-        RootLayer layer;
+        RootLayer layer("root");
 
         vector<Matrix<CheckElement, CheckDevice>> op;
 
@@ -154,7 +154,7 @@ namespace
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
-        RootLayer layer;
+        RootLayer layer("root");
     
         Matrix<CheckElement, CheckDevice> x(1, 4);
         x.SetValue(0, 0, 0); x.SetValue(0, 1, -2); x.SetValue(0, 2, 3); x.SetValue(0, 3, -4);

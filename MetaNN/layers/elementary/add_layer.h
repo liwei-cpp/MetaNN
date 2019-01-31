@@ -32,7 +32,12 @@ namespace MetaNN
         
         using AimInput1ShapeType = RemConstRef<decltype(std::declval<AimInput1Type>().Shape())>;
         using AimInput2ShapeType = RemConstRef<decltype(std::declval<AimInput2Type>().Shape())>;
+
     public:
+        AddLayer(std::string name)
+            : m_name(std::move(name))
+        {}
+
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
@@ -86,6 +91,7 @@ namespace MetaNN
             }
         }
     private:
+        std::string m_name;
         LayerTraits::LayerInternalBuf<AimInput1ShapeType, IsFeedbackOutput> m_shape1;
         LayerTraits::LayerInternalBuf<AimInput2ShapeType, IsFeedbackOutput> m_shape2;
     };

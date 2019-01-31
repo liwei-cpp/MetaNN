@@ -290,7 +290,7 @@ struct Calculator
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/facilities/tags.h>
+#include <MetaNN/operators/activations/tags.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <stdexcept>
 
