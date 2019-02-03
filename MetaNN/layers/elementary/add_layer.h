@@ -8,8 +8,6 @@
 #include <stack>
 namespace MetaNN
 {
-    using AddLayerInput = VarTypeDict<struct AddLayerIn1, struct AddLayerIn2>;
-    
     template <typename TInputItems, typename TInputGrads, typename TPolicies>
     class AddLayer
     {
@@ -20,15 +18,15 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
-        using InputContType = AddLayerInput;
+        using InputContType = BinaryInput;
         using OutputContType = LayerIO;
         
         using InputItemTypes = TInputItems;
         using InputGradTypes = TInputGrads;
         
     private:
-        using AimInput1Type = typename InputItemTypes::template Find<AddLayerIn1>;
-        using AimInput2Type = typename InputItemTypes::template Find<AddLayerIn2>;
+        using AimInput1Type = typename InputItemTypes::template Find<LeftOperand>;
+        using AimInput2Type = typename InputItemTypes::template Find<RightOperand>;
         
         using AimInput1ShapeType = RemConstRef<decltype(std::declval<AimInput1Type>().Shape())>;
         using AimInput2ShapeType = RemConstRef<decltype(std::declval<AimInput2Type>().Shape())>;
@@ -41,8 +39,8 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto input1 = LayerTraits::PickItemFromCont<InputItemTypes, AddLayerIn1>(std::forward<TIn>(p_in));
-            auto input2 = LayerTraits::PickItemFromCont<InputItemTypes, AddLayerIn2>(std::forward<TIn>(p_in));
+            auto input1 = LayerTraits::PickItemFromCont<InputItemTypes, LeftOperand>(std::forward<TIn>(p_in));
+            auto input2 = LayerTraits::PickItemFromCont<InputItemTypes, RightOperand>(std::forward<TIn>(p_in));
             
             if constexpr (IsFeedbackOutput)
             {
@@ -71,12 +69,12 @@ namespace MetaNN
                 
                 auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
                 
-                return AddLayerInput::Create().template Set<AddLayerIn1>(Collapse(grad, curShape1))
-                                              .template Set<AddLayerIn2>(Collapse(grad, curShape2));
+                return BinaryInput::Create().template Set<LeftOperand>(Collapse(grad, curShape1))
+                                            .template Set<RightOperand>(Collapse(grad, curShape2));
             }
             else
             {
-                return AddLayerInput::Create();
+                return BinaryInput::Create();
             }
         }
         

@@ -8,8 +8,8 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<AddLayerIn1, Matrix<CheckElement, CheckDevice>>,
-                                      LayerKV<AddLayerIn2, Matrix<CheckElement, CheckDevice>>
+    using CommonInputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+                                      LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                      >;
     using CommonGradMap = LayerIOMap<LayerKV<LayerIO, Matrix<CheckElement, CheckDevice>>>;
     
@@ -25,8 +25,8 @@ namespace
         auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
         auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
 
-        auto input = AddLayerInput::Create().Set<AddLayerIn1>(i1)
-                                            .Set<AddLayerIn2>(i2);
+        auto input = BinaryInput::Create().Set<LeftOperand>(i1)
+                                          .Set<RightOperand>(i2);
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerIO>());
@@ -40,8 +40,8 @@ namespace
 
         NullParameter fbIn;
         auto out_grad = layer.FeedBackward(fbIn);
-        auto fb1 = out_grad.Get<AddLayerIn1>();
-        auto fb2 = out_grad.Get<AddLayerIn2>();
+        auto fb1 = out_grad.Get<LeftOperand>();
+        auto fb2 = out_grad.Get<RightOperand>();
         static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");
         static_assert(std::is_same<decltype(fb2), NullParameter>::value, "Test error");
         cout << "done" << endl;
@@ -59,8 +59,8 @@ namespace
         auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
         auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
 
-        auto input = AddLayerInput::Create().Set<AddLayerIn1>(i1)
-                                            .Set<AddLayerIn2>(i2);
+        auto input = BinaryInput::Create().Set<LeftOperand>(i1)
+                                          .Set<RightOperand>(i2);
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerIO>());
@@ -76,8 +76,8 @@ namespace
 
         auto out_grad = layer.FeedBackward(RootLayer::OutputContType::Create().Set<LayerIO>(grad));
 
-        auto handle1 = out_grad.Get<AddLayerIn1>().EvalRegister();
-        auto handle2 = out_grad.Get<AddLayerIn2>().EvalRegister();
+        auto handle1 = out_grad.Get<LeftOperand>().EvalRegister();
+        auto handle2 = out_grad.Get<RightOperand>().EvalRegister();
         EvalPlan<DeviceTags::CPU>::Eval();
 
         auto fb1 = handle1.Data();
@@ -110,8 +110,8 @@ namespace
         auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
         auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
 
-        auto input = AddLayerInput::Create().Set<AddLayerIn1>(i1)
-                                            .Set<AddLayerIn2>(i2);
+        auto input = BinaryInput::Create().Set<LeftOperand>(i1)
+                                          .Set<RightOperand>(i2);
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerIO>());
@@ -126,7 +126,7 @@ namespace
         auto i3 = GenMatrix<CheckElement>(2, 3, 1.3, -0.1f);
         auto i4 = GenMatrix<CheckElement>(2, 3, 2.5f, -0.7f);
 
-        input = AddLayerInput::Create().Set<AddLayerIn1>(i3).Set<AddLayerIn2>(i4);
+        input = BinaryInput::Create().Set<LeftOperand>(i3).Set<RightOperand>(i4);
 
         out = layer.FeedForward(input);
         res = Evaluate(out.Get<LayerIO>());
@@ -142,8 +142,8 @@ namespace
 
         auto out_grad = layer.FeedBackward(RootLayer::OutputContType::Create().Set<LayerIO>(grad));
 
-        auto handle1 = out_grad.Get<AddLayerIn1>().EvalRegister();
-        auto handle2 = out_grad.Get<AddLayerIn2>().EvalRegister();
+        auto handle1 = out_grad.Get<LeftOperand>().EvalRegister();
+        auto handle2 = out_grad.Get<RightOperand>().EvalRegister();
         EvalPlan<DeviceTags::CPU>::Eval();
 
         auto fb1 = handle1.Data();
@@ -166,8 +166,8 @@ namespace
 
         out_grad = layer.FeedBackward(RootLayer::OutputContType::Create().Set<LayerIO>(grad));
 
-        handle1 = out_grad.Get<AddLayerIn1>().EvalRegister();
-        handle2 = out_grad.Get<AddLayerIn2>().EvalRegister();
+        handle1 = out_grad.Get<LeftOperand>().EvalRegister();
+        handle2 = out_grad.Get<RightOperand>().EvalRegister();
         EvalPlan<DeviceTags::CPU>::Eval();
 
         fb1 = handle1.Data();

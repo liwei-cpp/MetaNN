@@ -7,8 +7,6 @@
 
 namespace MetaNN
 {
-    using ElementMulLayerInput = VarTypeDict<struct ElementMulLayerIn1, struct ElementMulLayerIn2>;
-    
     template <typename TInputItems, typename TInputGrads, typename TPolicies>
     class ElementMulLayer
     {
@@ -19,15 +17,15 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
-        using InputContType = ElementMulLayerInput;
+        using InputContType = BinaryInput;
         using OutputContType = LayerIO;
         
         using InputItemTypes = TInputItems;
         using InputGradTypes = TInputGrads;
         
     private:
-        using AimInput1Type = typename InputItemTypes::template Find<ElementMulLayerIn1>;
-        using AimInput2Type = typename InputItemTypes::template Find<ElementMulLayerIn2>;
+        using AimInput1Type = typename InputItemTypes::template Find<LeftOperand>;
+        using AimInput2Type = typename InputItemTypes::template Find<RightOperand>;
         
     public:
         ElementMulLayer(std::string name)
@@ -37,8 +35,8 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto input1 = LayerTraits::PickItemFromCont<InputItemTypes, ElementMulLayerIn1>(std::forward<TIn>(p_in));
-            auto input2 = LayerTraits::PickItemFromCont<InputItemTypes, ElementMulLayerIn2>(std::forward<TIn>(p_in));
+            auto input1 = LayerTraits::PickItemFromCont<InputItemTypes, LeftOperand>(std::forward<TIn>(p_in));
+            auto input2 = LayerTraits::PickItemFromCont<InputItemTypes, RightOperand>(std::forward<TIn>(p_in));
             
             if constexpr (IsFeedbackOutput)
             {
@@ -73,12 +71,12 @@ namespace MetaNN
                 
                 auto grad1 = grad * Duplicate(input1, grad.Shape());
                 auto grad2 = grad * Duplicate(input2, grad.Shape());
-                return ElementMulLayerInput::Create().template Set<ElementMulLayerIn1>(Collapse(std::move(grad2), shape1))
-                                                     .template Set<ElementMulLayerIn2>(Collapse(std::move(grad1), shape2));
+                return InputContType::Create().template Set<LeftOperand>(Collapse(std::move(grad2), shape1))
+                                              .template Set<RightOperand>(Collapse(std::move(grad1), shape2));
             }
             else
             {
-                return ElementMulLayerInput::Create();
+                return InputContType::Create();
             }
         }
         

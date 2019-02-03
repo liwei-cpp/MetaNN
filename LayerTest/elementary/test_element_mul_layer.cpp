@@ -8,8 +8,8 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<ElementMulLayerIn1, Matrix<CheckElement, CheckDevice>>,
-                                      LayerKV<ElementMulLayerIn2, Matrix<CheckElement, CheckDevice>>
+    using CommonInputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+                                      LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                      >;
     using CommonGradMap = LayerIOMap<LayerKV<LayerIO, Matrix<CheckElement, CheckDevice>>>;
     
@@ -30,8 +30,8 @@ namespace
         i2.SetValue(0, 0, 0.2f);  i2.SetValue(0, 1, 0.3f); i2.SetValue(0, 2, 0.4f);
         i2.SetValue(1, 0, 0.5f);  i2.SetValue(1, 1, 0.6f); i2.SetValue(1, 2, 0.7f);
 
-        auto input = ElementMulLayerInput::Create().Set<ElementMulLayerIn1>(i1)
-                                                   .Set<ElementMulLayerIn2>(i2);
+        auto input = BinaryInput::Create().Set<LeftOperand>(i1)
+                                          .Set<RightOperand>(i2);
 
         LayerNeutralInvariant(layer);
 
@@ -45,8 +45,8 @@ namespace
         assert(fabs(res(1, 2) - 0.42f) < 0.001);
 
         auto out_grad = layer.FeedBackward(LayerIO::Create());
-        auto fb1 = out_grad.Get<ElementMulLayerIn1>();
-        auto fb2 = out_grad.Get<ElementMulLayerIn2>();
+        auto fb1 = out_grad.Get<LeftOperand>();
+        auto fb2 = out_grad.Get<RightOperand>();
         static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");
         static_assert(std::is_same<decltype(fb2), NullParameter>::value, "Test error");
 
@@ -72,8 +72,8 @@ namespace
         i2.SetValue(0, 0, 0.2f);  i2.SetValue(0, 1, 0.3f); i2.SetValue(0, 2, 0.4f);
         i2.SetValue(1, 0, 0.5f);  i2.SetValue(1, 1, 0.6f); i2.SetValue(1, 2, 0.7f);
 
-        auto input = ElementMulLayerInput::Create().Set<ElementMulLayerIn1>(i1)
-                                                   .Set<ElementMulLayerIn2>(i2);
+        auto input = BinaryInput::Create().Set<LeftOperand>(i1)
+                                          .Set<RightOperand>(i2);
 
         LayerNeutralInvariant(layer);
 
@@ -85,8 +85,8 @@ namespace
         auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
 
         auto handle1 = out.Get<LayerIO>().EvalRegister();
-        auto handle2 = out_grad.Get<ElementMulLayerIn1>().EvalRegister();
-        auto handle3 = out_grad.Get<ElementMulLayerIn2>().EvalRegister();
+        auto handle2 = out_grad.Get<LeftOperand>().EvalRegister();
+        auto handle3 = out_grad.Get<RightOperand>().EvalRegister();
         EvalPlan<CheckDevice>::Eval();
 
         auto res = handle1.Data();
@@ -137,8 +137,8 @@ namespace
             op1.push_back(i1);
             op2.push_back(i2);
 
-            auto input = ElementMulLayerInput::Create().Set<ElementMulLayerIn1>(i1)
-                                                       .Set<ElementMulLayerIn2>(i2);
+            auto input = BinaryInput::Create().Set<LeftOperand>(i1)
+                                              .Set<RightOperand>(i2);
 
             auto out = layer.FeedForward(input);
             auto res = Evaluate(out.Get<LayerIO>());
@@ -158,8 +158,8 @@ namespace
             auto grad = GenMatrix<CheckElement>(loop_count, 3, 2, 1.1f);
             auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
 
-            auto handle1 = out_grad.Get<ElementMulLayerIn1>().EvalRegister();
-            auto handle2 = out_grad.Get<ElementMulLayerIn2>().EvalRegister();
+            auto handle1 = out_grad.Get<LeftOperand>().EvalRegister();
+            auto handle2 = out_grad.Get<RightOperand>().EvalRegister();
             EvalPlan<CheckDevice>::Eval();
 
             auto g1 = handle1.Data();
