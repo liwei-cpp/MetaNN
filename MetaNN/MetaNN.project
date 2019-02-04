@@ -208,6 +208,7 @@
       <File Name="operators/facilities/tags.h"/>
       <File Name="operators/facilities/operator_frame.h"/>
       <File Name="operators/facilities/tail_calculator.h"/>
+      <File Name="operators/facilities/instance_id.h"/>
     </VirtualDirectory>
     <File Name="operators/conv.h"/>
     <File Name="operators/operators.h"/>

@@ -4,6 +4,7 @@
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
 #include <MetaNN/operators/elementwise/tags.h>
+#include <MetaNN/operators/facilities/instance_id.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
 #include <stdexcept>
 
@@ -125,21 +126,23 @@ struct OperAuxParams<OpTags::DivideByNumber, TCate>
 public:
     template <typename TValue>
     OperAuxParams(TValue val)
-        : m_dividend(new double(val))
+        : m_dividend(val)
+        , m_instID(InstanceID::Get())
     {}
     
     double Dividend() const
     {
-        return *m_dividend;
+        return m_dividend;
     }
     
     bool operator == (const OperAuxParams& val) const
     {
-        return m_dividend == val.m_dividend;
+        return m_instID == val.m_instID;
     }
 
 private:
-    std::shared_ptr<double> m_dividend;
+    double m_dividend;
+    size_t m_instID;
 };
 
 template <>

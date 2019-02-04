@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=
-Date                   :=02/02/19
+Date                   :=02/04/19
 CodeLitePath           :=/home/a/.codelite
 LinkerName             :=g++
 SharedObjectLinkerName :=g++ -shared -fPIC
@@ -60,7 +60,8 @@ AS       := as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/facilities_test_layer_io_map.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_bias_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_weight_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_element_mul_layer.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/facilities_test_layer_io_map.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_bias_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_weight_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_element_mul_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(ObjectSuffix) \
+	
 
 
 
@@ -162,6 +163,14 @@ $(IntermediateDirectory)/elementary_test_element_mul_layer.cpp$(DependSuffix): e
 
 $(IntermediateDirectory)/elementary_test_element_mul_layer.cpp$(PreprocessSuffix): elementary/test_element_mul_layer.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_element_mul_layer.cpp$(PreprocessSuffix) elementary/test_element_mul_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(ObjectSuffix): elementary/test_softmax_layer.cpp $(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/a/MetaNN/LayerTest/elementary/test_softmax_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(DependSuffix): elementary/test_softmax_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(DependSuffix) -MM elementary/test_softmax_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(PreprocessSuffix): elementary/test_softmax_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(PreprocessSuffix) elementary/test_softmax_layer.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)

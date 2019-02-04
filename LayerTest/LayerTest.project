@@ -33,6 +33,8 @@
     <File Name="elementary/test_weight_layer.cpp"/>
     <File Name="elementary/test_element_mul_layer.h"/>
     <File Name="elementary/test_element_mul_layer.cpp"/>
+    <File Name="elementary/test_softmax_layer.h"/>
+    <File Name="elementary/test_softmax_layer.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
