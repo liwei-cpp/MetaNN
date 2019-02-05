@@ -176,5 +176,9 @@ auto operator/ (TP1&& p_m1, TP2&& p_m2)
         OperAuxParams<OpTags::DivideByNumber, OperCateCal<OpTags::DivideByNumber, rawOp>> params(p_m2);
         return ResType(std::move(params), std::forward<TP1>(p_m1));
     }
+    else
+    {
+        static_assert(DependencyFalse<TP1>);
+    }
 }
 }

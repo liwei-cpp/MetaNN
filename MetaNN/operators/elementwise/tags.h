@@ -13,5 +13,6 @@ namespace MetaNN::OpTags
     struct Sigmoid;     struct SigmoidGrad;
     struct Sign;
     struct Substract;
+    struct SubstractFromNum;
     struct Tanh;        struct TanhGrad;
 }
