@@ -3,6 +3,7 @@
 #include <elementary/test_add_layer.h>
 #include <elementary/test_bias_layer.h>
 #include <elementary/test_element_mul_layer.h>
+#include <elementary/test_interpolate_layer.h>
 #include <elementary/test_sigmoid_layer.h>
 #include <elementary/test_softmax_layer.h>
 #include <elementary/test_tanh_layer.h>
@@ -16,6 +17,7 @@ namespace Test::Layer
         test_add_layer();
         test_bias_layer();
         test_element_mul_layer();
+        test_interpolate_layer();
         test_sigmoid_layer();
         test_softmax_layer();
         test_tanh_layer();

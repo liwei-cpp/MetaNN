@@ -1,99 +1,107 @@
 #pragma once
-#include <MetaNN/facilities/var_type_dict.h>
 #include <MetaNN/layers/facilities/common_io.h>
 #include <MetaNN/layers/facilities/policies.h>
+#include <MetaNN/layers/facilities/traits.h>
 #include <MetaNN/policies/policy_operations.h>
+#include <MetaNN/policies/policy_selector.h>
 
 namespace MetaNN
 {
-using InterpolateLayerInput = VarTypeDict<struct InterpolateLayerWeight1,
-                                          struct InterpolateLayerWeight2,
-                                          struct InterpolateLayerLambda>;
-
-template <typename TPolicies>
-class InterpolateLayer
-{
-    static_assert(IsPolicyContainer<TPolicies>, "TPolicies is not a policy container.");
-    using CurLayerPolicy = PlainPolicy<TPolicies>;
-
-public:
-    static constexpr bool IsFeedbackOutput = PolicySelect<FeedbackPolicy, CurLayerPolicy>::IsFeedbackOutput;
-    static constexpr bool IsUpdate = false;
-    using InputType = InterpolateLayerInput;
-    using OutputType = LayerIO;
-
-public:
-    template <typename TIn>
-    auto FeedForward(const TIn& p_in)
+    using InterpolateLayerInput = VarTypeDict<struct InterpolateLayerWeight1,
+                                              struct InterpolateLayerWeight2,
+                                              struct InterpolateLayerLambda>;
+    template <typename TInputItems, typename TInputGrads, typename TPolicies>
+    class InterpolateLayer
     {
-        const auto& val1 = p_in.template Get<InterpolateLayerWeight1>();
-        const auto& val2 = p_in.template Get<InterpolateLayerWeight2>();
-        const auto& val_lambda = p_in.template Get<InterpolateLayerLambda>();
+        static_assert(IsPolicyContainer<TPolicies>);
+        using CurLayerPolicy = PlainPolicy<TPolicies>;
 
-        using rawType1 = std::decay_t<decltype(val1)>;
-        using rawType2 = std::decay_t<decltype(val2)>;
-        using rawType3 = std::decay_t<decltype(val_lambda)>;
-
-        static_assert(!std::is_same<rawType1, NullParameter>::value, "parameter1 is invalid");
-        static_assert(!std::is_same<rawType2, NullParameter>::value, "parameter2 is invalid");
-        static_assert(!std::is_same<rawType3, NullParameter>::value, "parameter lambda is invalid");
-
-        if constexpr(IsFeedbackOutput)
-        {
-            m_weight1.push(MakeDynamic(val1));
-            m_weight2.push(MakeDynamic(val2));
-            m_weight_lambda.push(MakeDynamic(val_lambda));
-        }
-        return LayerIO::Create().template Set<LayerIO>(Interpolate(val1, val2, val_lambda));
-    }
-
-    template <typename TGrad>
-    auto FeedBackward(const TGrad& p_grad)
-    {
-        if constexpr (IsFeedbackOutput)
-        {
-            if ((m_weight1.empty()) || (m_weight2.empty()) || (m_weight_lambda.empty()))
-            {
-                throw std::runtime_error("Cannot do FeedBackward for InterpolateLayer");
-            }
-            auto tmp = p_grad.template Get<LayerIO>();
-            auto res1 = m_weight_lambda.top() * tmp;
+    public:
+        static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
+        static constexpr bool IsUpdate = false;
         
-            auto res2 = (Scalar<int>(1) - m_weight_lambda.top()) * tmp;
-            auto res_lambda = (m_weight1.top() - m_weight2.top()) * tmp;
-            auto res = InterpolateLayerInput::Create().template Set<InterpolateLayerWeight1>(std::move(res1))
-                                                .template Set<InterpolateLayerWeight2>(std::move(res2))
-                                                .template Set<InterpolateLayerLambda>(std::move(res_lambda));
-            m_weight_lambda.pop();
-            m_weight1.pop();
-            m_weight2.pop();
-            return res;
-        }
-        else
-        {
-            return InterpolateLayerInput::Create();
-        }
-    }
+        using InputContType = InterpolateLayerInput;
+        using OutputContType = LayerIO;
+        
+        using InputItemTypes = TInputItems;
+        using InputGradTypes = TInputGrads;
+        
+    private:
+        using Input1Type = typename InputItemTypes::template Find<InterpolateLayerWeight1>;
+        using Input2Type = typename InputItemTypes::template Find<InterpolateLayerWeight2>;
+        using InputLambdaType = typename InputItemTypes::template Find<InterpolateLayerLambda>;
 
-    void NeutralInvariant()
-    {
-        if constexpr(IsFeedbackOutput)
+    public:
+        InterpolateLayer(std::string name)
+            : m_name(std::move(name))
+        {}
+        
+        template <typename TIn>
+        auto FeedForward(TIn&& p_in)
         {
-            if ((!m_weight1.empty()) || (!m_weight2.empty()) || (!m_weight_lambda.empty()))
+            auto input1 = LayerTraits::PickItemFromCont<InputItemTypes, InterpolateLayerWeight1>(std::forward<TIn>(p_in));
+            auto input2 = LayerTraits::PickItemFromCont<InputItemTypes, InterpolateLayerWeight2>(std::forward<TIn>(p_in));
+            auto lambda = LayerTraits::PickItemFromCont<InputItemTypes, InterpolateLayerLambda>(std::forward<TIn>(p_in));
+
+            if constexpr (IsFeedbackOutput)
             {
-                throw std::runtime_error("NeutralInvariant Fail!");
+                m_input1Stack.push(input1);
+                m_input2Stack.push(input2);
+                m_lambdaStack.push(lambda);
+            }
+            
+            auto proShape = LayerTraits::ShapePromote(input1.Shape(), input2.Shape(), lambda.Shape());
+            auto res = Interpolate(Duplicate(std::move(input1), proShape),
+                                   Duplicate(std::move(input2), proShape),
+                                   Duplicate(std::move(lambda), proShape));
+            return LayerIO::Create().template Set<LayerIO>(std::move(res));
+        }
+
+        template <typename TGrad>
+        auto FeedBackward(TGrad&& p_grad)
+        {
+            if constexpr (IsFeedbackOutput)
+            {
+                if ((m_input1Stack.empty()) || (m_input2Stack.empty()) || (m_lambdaStack.empty()))
+                {
+                    throw std::runtime_error("Cannot do FeedBackward for InterpolateLayer");
+                }
+                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
+                auto curLambda = m_lambdaStack.top();
+                auto curInput1 = m_input1Stack.top();
+                auto curInput2 = m_input2Stack.top();
+                m_lambdaStack.pop();
+                m_input1Stack.pop();
+                m_input2Stack.pop();
+
+                auto res2 = grad * Duplicate(1 - curLambda, grad.Shape());
+                auto res1 = grad * Duplicate(curLambda, grad.Shape());
+                auto resLambda = grad * (Duplicate(curInput1, grad.Shape()) - Duplicate(curInput2, grad.Shape()));
+                return InterpolateLayerInput::Create()
+                    .template Set<InterpolateLayerWeight1>(Collapse(std::move(res1), curInput1.Shape()))
+                    .template Set<InterpolateLayerWeight2>(Collapse(std::move(res2), curInput2.Shape()))
+                    .template Set<InterpolateLayerLambda>(Collapse(std::move(resLambda), curLambda.Shape()));
+            }
+            else
+            {
+                return InterpolateLayerInput::Create();
             }
         }
-    }
 
-private:
-    using DataType = LayerTraits::LayerInternalBuf<IsFeedbackOutput,
-                                                   PolicySelect<InputPolicy, CurLayerPolicy>::BatchMode,
-                                                   typename PolicySelect<OperandPolicy, CurLayerPolicy>::Element,
-                                                   typename PolicySelect<OperandPolicy, CurLayerPolicy>::Device,
-                                                   CategoryTags::Matrix, CategoryTags::BatchMatrix>;
-    DataType m_weight1;
-    DataType m_weight2;
-    DataType m_weight_lambda;
-};
+        void NeutralInvariant()
+        {
+            if constexpr(IsFeedbackOutput)
+            {
+                if ((!m_input1Stack.empty()) || (!m_input2Stack.empty()) || (!m_lambdaStack.empty()))
+                {
+                    throw std::runtime_error("NeutralInvariant Fail!");
+                }
+            }
+        }
+    private:
+        std::string m_name;
+        LayerTraits::LayerInternalBuf<Input1Type, IsFeedbackOutput> m_input1Stack;
+        LayerTraits::LayerInternalBuf<Input2Type, IsFeedbackOutput> m_input2Stack;
+        LayerTraits::LayerInternalBuf<InputLambdaType, IsFeedbackOutput> m_lambdaStack;
+    };
 }
