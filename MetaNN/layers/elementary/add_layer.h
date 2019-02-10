@@ -8,7 +8,10 @@
 #include <stack>
 namespace MetaNN
 {
-    template <typename TInputItems, typename TInputGrads, typename TPolicies>
+    struct LeftOperand; struct RightOperand;
+    struct LayerOutput;
+
+    template <typename TInputs, typename TGrads, typename TPolicies>
     class AddLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -18,15 +21,12 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
-        using InputContType = BinaryInput;
-        using OutputContType = LayerIO;
-        
-        using InputItemTypes = TInputItems;
-        using InputGradTypes = TInputGrads;
+        using InputMap = TInputs;
+        using GradMap = FillGradMap<TGrads, LayerOutput>;
         
     private:
-        using AimInput1Type = typename InputItemTypes::template Find<LeftOperand>;
-        using AimInput2Type = typename InputItemTypes::template Find<RightOperand>;
+        using AimInput1Type = typename InputMap::template Find<LeftOperand>;
+        using AimInput2Type = typename InputMap::template Find<RightOperand>;
         
         using AimInput1ShapeType = RemConstRef<decltype(std::declval<AimInput1Type>().Shape())>;
         using AimInput2ShapeType = RemConstRef<decltype(std::declval<AimInput2Type>().Shape())>;
@@ -39,8 +39,8 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto input1 = LayerTraits::PickItemFromCont<InputItemTypes, LeftOperand>(std::forward<TIn>(p_in));
-            auto input2 = LayerTraits::PickItemFromCont<InputItemTypes, RightOperand>(std::forward<TIn>(p_in));
+            auto input1 = LayerTraits::PickItemFromCont<InputMap, LeftOperand>(std::forward<TIn>(p_in));
+            auto input2 = LayerTraits::PickItemFromCont<InputMap, RightOperand>(std::forward<TIn>(p_in));
             
             if constexpr (IsFeedbackOutput)
             {
@@ -49,7 +49,7 @@ namespace MetaNN
             }
             
             auto proShape = LayerTraits::ShapePromote(input1.Shape(), input2.Shape());
-            return OutputContType::Create().template Set<LayerIO>(Duplicate(input1, proShape) + Duplicate(input2, proShape));
+            return LayerOutputCont<AddLayer>().template Set<LayerOutput>(Duplicate(input1, proShape) + Duplicate(input2, proShape));
         }
         
         template <typename TGrad>
@@ -67,14 +67,14 @@ namespace MetaNN
                 m_shape1.pop();
                 m_shape2.pop();
                 
-                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
+                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
                 
-                return BinaryInput::Create().template Set<LeftOperand>(Collapse(grad, curShape1))
-                                            .template Set<RightOperand>(Collapse(grad, curShape2));
+                return LayerInputCont<AddLayer>().template Set<LeftOperand>(Collapse(grad, curShape1))
+                                                 .template Set<RightOperand>(Collapse(grad, curShape2));
             }
             else
             {
-                return BinaryInput::Create();
+                return LayerInputCont<AddLayer>();
             }
         }
         

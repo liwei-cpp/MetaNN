@@ -17,8 +17,11 @@ namespace MetaNN
             using type = LayerTraits::LayerInternalBuf<TParamGradStackItem, true>;
         };
     }
-    
-    template <typename TInputItems, typename TInputGrads, typename TPolicies>
+
+    struct LayerInput;
+    struct LayerOutput;
+
+    template <typename TInputs, typename TGrads, typename TPolicies>
     class WeightLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -27,20 +30,17 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = PolicySelect<GradPolicy, CurLayerPolicy>::IsUpdate;
         
-        using InputContType = LayerIO;
-        using OutputContType = LayerIO;
-        
-        using InputItemTypes = TInputItems;
-        using InputGradTypes = TInputGrads;
+        using InputMap = TInputs;
+        using GradMap = FillGradMap<TGrads, LayerOutput>;
 
     private:
-        using AimInputType = typename InputItemTypes::template Find<LayerIO>;
+        using AimInputType = typename InputMap::template Find<LayerInput>;
         using ParamType = PrincipalDataType<CategoryTags::Matrix,
                                             typename AimInputType::ElementType,
                                             typename AimInputType::DeviceType>;
 
     private:
-        using AimGradType = typename InputGradTypes::template Find<LayerIO>;
+        using AimGradType = typename GradMap::template Find<LayerOutput>;
         auto CalParamGrad(AimGradType&& grad)
         {
             if constexpr (!IsUpdate)
@@ -122,7 +122,7 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto input = LayerTraits::PickItemFromCont<InputItemTypes, LayerIO>(std::forward<TIn>(p_in));
+            auto input = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
             if constexpr (IsUpdate)
             {
                 m_inputStack.push(input);
@@ -131,7 +131,7 @@ namespace MetaNN
             tmpShape.RowNum() = m_weight.Shape().RowNum();
             tmpShape.ColNum() = m_weight.Shape().ColNum();
             auto res = Dot(input, Duplicate(m_weight, tmpShape));
-            return OutputContType::Create().template Set<LayerIO>(std::move(res));
+            return LayerOutputCont<WeightLayer>().template Set<LayerOutput>(std::move(res));
         }
 
         template <typename TGrad>
@@ -139,22 +139,22 @@ namespace MetaNN
         {
             if constexpr (IsUpdate)
             {
-                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(p_grad);
+                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(p_grad);
                 m_paramGradStack.push(CalParamGrad(std::move(grad)));
             }
 
             if constexpr (IsFeedbackOutput)
             {
-                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
+                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
                 auto tmpShape = grad.Shape();
                 tmpShape.ColNum() = m_weight.Shape().RowNum();
                 tmpShape.RowNum() = m_weight.Shape().ColNum();
                 auto res = Dot(std::move(grad), Duplicate(Transpose(m_weight), tmpShape));
 
-                return LayerIO::Create().template Set<LayerIO>(std::move(res));
+                return LayerInputCont<WeightLayer>().template Set<LayerInput>(std::move(res));
             }
             else
-                return LayerIO::Create();
+                return LayerInputCont<WeightLayer>();
         }
 
         template <typename TGradCollector>

@@ -8,7 +8,8 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LayerIO, Matrix<CheckElement, CheckDevice>>>;
+    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
+    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_sigmoid_layer1()
     {
@@ -23,17 +24,17 @@ namespace
         in.SetValue(0, 0, -0.27f);
         in.SetValue(1, 0, -0.41f);
 
-        auto input = LayerIO::Create().Set<LayerIO>(in);
+        auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(input);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) - (1/(1+exp(0.27f)))) < 0.001);
         assert(fabs(res(1, 0) - (1/(1+exp(0.41f)))) < 0.001);
 
         NullParameter fbIn;
         auto out_grad = layer.FeedBackward(fbIn);
-        auto fb1 = out_grad.Get<LayerIO>();
+        auto fb1 = out_grad.Get<LayerInput>();
         static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");
 
         LayerNeutralInvariant(layer);
@@ -43,7 +44,7 @@ namespace
     void test_sigmoid_layer2()
     {
         cout << "Test sigmoid layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<SigmoidLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<SigmoidLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -53,11 +54,11 @@ namespace
         in.SetValue(0, 0, -0.27f);
         in.SetValue(1, 0, -0.41f);
 
-        auto input = LayerIO::Create().Set<LayerIO>(in);
+        auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(input);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) - (1/(1+exp(0.27f)))) < 0.001);
         assert(fabs(res(1, 0) - (1/(1+exp(0.41f)))) < 0.001);
 
@@ -65,8 +66,8 @@ namespace
         grad.SetValue(0, 0, 0.1f);
         grad.SetValue(1, 0, 0.3f);
 
-        auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
-        auto fb = Evaluate(out_grad.Get<LayerIO>());
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
+        auto fb = Evaluate(out_grad.Get<LayerInput>());
         assert(fabs(fb(0, 0) - 0.1f * exp(0.27f) / (1+exp(0.27f)) / (1+exp(0.27f))) < 0.001);
         assert(fabs(fb(1, 0) - 0.3f * exp(0.41f) / (1+exp(0.41f)) / (1+exp(0.41f))) < 0.001);
 
@@ -77,7 +78,7 @@ namespace
     void test_sigmoid_layer3()
     {
         cout << "Test sigmoid layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<SigmoidLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<SigmoidLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -92,10 +93,10 @@ namespace
 
             op.push_back(in);
 
-            auto input = LayerIO::Create().Set<LayerIO>(in);
+            auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
             auto out = layer.FeedForward(input);
-            auto res = Evaluate(out.Get<LayerIO>());
+            auto res = Evaluate(out.Get<LayerOutput>());
             assert(res.Shape().RowNum() == loop_count);
             assert(res.Shape().ColNum() == 3);
             for (size_t i = 0; i < loop_count; ++i)
@@ -111,9 +112,9 @@ namespace
         for (size_t loop_count = 9; loop_count >= 1; --loop_count)
         {
             auto grad = GenMatrix<CheckElement>(loop_count, 3, 2, 1.1f);
-            auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
+            auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
-            auto fb = Evaluate(out_grad.Get<LayerIO>());
+            auto fb = Evaluate(out_grad.Get<LayerInput>());
 
             auto in = op.back(); op.pop_back();
             for (size_t i = 0; i < loop_count; ++i)

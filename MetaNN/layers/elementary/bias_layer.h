@@ -26,7 +26,10 @@ namespace MetaNN
         };
     }
     
-    template <typename TInputItems, typename TInputGrads, typename TPolicies>
+    struct LayerInput;
+    struct LayerOutput;
+    
+    template <typename TInputs, typename TGrads, typename TPolicies>
     class BiasLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -35,20 +38,17 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = PolicySelect<GradPolicy, CurLayerPolicy>::IsUpdate;
         
-        using InputContType = LayerIO;
-        using OutputContType = LayerIO;
-        
-        using InputItemTypes = TInputItems;
-        using InputGradTypes = TInputGrads;
+        using InputMap = TInputs;
+        using GradMap = FillGradMap<TGrads, LayerOutput>;
 
     private:
         using ParamCategory = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamType;
-        using AimInputType = typename InputItemTypes::template Find<LayerIO>;
+        using AimInputType = typename InputMap::template Find<LayerInput>;
         using ParamType = PrincipalDataType<ParamCategory,
                                             typename AimInputType::ElementType,
                                             typename AimInputType::DeviceType>;
         using AimInputShapeType = RemConstRef<decltype(std::declval<AimInputType>().Shape())>;
-        using AimGradType = typename InputGradTypes::template Find<LayerIO>;
+        using AimGradType = typename GradMap::template Find<LayerOutput>;
         
     public:
         BiasLayer(std::string p_name, Shape<ParamCategory> p_shape)
@@ -113,13 +113,13 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto input = LayerTraits::PickItemFromCont<InputItemTypes, LayerIO>(std::forward<TIn>(p_in));
+            auto input = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
             if constexpr (IsFeedbackOutput)
             {
                 m_inputShapeStack.push(input.Shape());
             }
             
-            return OutputContType::Create().template Set<LayerIO>(input + Duplicate(m_bias, input.Shape()));
+            return LayerOutputCont<BiasLayer>().template Set<LayerOutput>(input + Duplicate(m_bias, input.Shape()));
         }
         
         template <typename TGrad>
@@ -127,13 +127,13 @@ namespace MetaNN
         {
             if constexpr (IsUpdate)
             {
-                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(p_grad);
+                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(p_grad);
                 m_paramGradStack.push(Collapse(std::move(grad), m_biasShape));
             }
             
             if constexpr (IsFeedbackOutput)
             {
-                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
+                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
                 
                 if (m_inputShapeStack.empty())
                 {
@@ -142,10 +142,10 @@ namespace MetaNN
                 auto curShape = m_inputShapeStack.top();
                 m_inputShapeStack.pop();
 
-                return LayerIO::Create().template Set<LayerIO>(Collapse(std::move(grad), curShape));
+                return LayerInputCont<BiasLayer>().template Set<LayerInput>(Collapse(std::move(grad), curShape));
             }
             else
-                return LayerIO::Create();
+                return LayerInputCont<BiasLayer>();
         }
         
         template <typename TGradCollector>

@@ -8,7 +8,10 @@
 
 namespace MetaNN
 {
-    template <typename TInputItems, typename TInputGrads, typename TPolicies>
+    struct LayerInput;
+    struct LayerOutput;
+    
+    template <typename TInputs, typename TGrads, typename TPolicies>
     class AbsLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -17,15 +20,12 @@ namespace MetaNN
     public:
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
-        
-        using InputContType = LayerIO;
-        using OutputContType = LayerIO;
-        
-        using InputItemTypes = TInputItems;
-        using InputGradTypes = TInputGrads;
+
+        using InputMap = TInputs;
+        using GradMap = FillGradMap<TGrads, LayerOutput>;
         
     private:
-        using AimInputType = typename InputItemTypes::template Find<LayerIO>;
+        using AimInputType = typename InputMap::template Find<LayerInput>;
         
     public:
         AbsLayer(std::string name)
@@ -35,12 +35,12 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto val = LayerTraits::PickItemFromCont<InputItemTypes, LayerIO>(std::forward<TIn>(p_in));
+            auto val = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
             if constexpr (IsFeedbackOutput)
             {
                 m_data.push(val);
             }
-            return LayerIO::Create().template Set<LayerIO>(Abs(std::move(val)));
+            return LayerOutputCont<AbsLayer>().template Set<LayerOutput>(Abs(std::move(val)));
         }
 
         template <typename TGrad>
@@ -54,14 +54,14 @@ namespace MetaNN
                 }
                 auto& input = m_data.top();
                 
-                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
-                auto res = LayerIO::Create().template Set<LayerIO>(std::move(grad) * Sign(input));
+                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
+                auto res = LayerInputCont<AbsLayer>().template Set<LayerInput>(std::move(grad) * Sign(input));
                 m_data.pop();
                 return res;
             }
             else
             {
-                return LayerIO::Create();
+                return LayerInputCont<AbsLayer>();
             }
         }
 

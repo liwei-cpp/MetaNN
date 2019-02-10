@@ -7,10 +7,10 @@
 
 namespace MetaNN
 {
-    using InterpolateLayerInput = VarTypeDict<struct InterpolateLayerWeight1,
-                                              struct InterpolateLayerWeight2,
-                                              struct InterpolateLayerLambda>;
-    template <typename TInputItems, typename TInputGrads, typename TPolicies>
+    struct InterpolateLayerWeight1; struct InterpolateLayerWeight2; struct InterpolateLayerLambda;
+    struct LayerOutput;
+
+    template <typename TInputs, typename TGrads, typename TPolicies>
     class InterpolateLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -20,16 +20,13 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
-        using InputContType = InterpolateLayerInput;
-        using OutputContType = LayerIO;
-        
-        using InputItemTypes = TInputItems;
-        using InputGradTypes = TInputGrads;
+        using InputMap = TInputs;
+        using GradMap = FillGradMap<TGrads, LayerOutput>;
         
     private:
-        using Input1Type = typename InputItemTypes::template Find<InterpolateLayerWeight1>;
-        using Input2Type = typename InputItemTypes::template Find<InterpolateLayerWeight2>;
-        using InputLambdaType = typename InputItemTypes::template Find<InterpolateLayerLambda>;
+        using Input1Type = typename InputMap::template Find<InterpolateLayerWeight1>;
+        using Input2Type = typename InputMap::template Find<InterpolateLayerWeight2>;
+        using InputLambdaType = typename InputMap::template Find<InterpolateLayerLambda>;
 
     public:
         InterpolateLayer(std::string name)
@@ -39,9 +36,9 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto input1 = LayerTraits::PickItemFromCont<InputItemTypes, InterpolateLayerWeight1>(std::forward<TIn>(p_in));
-            auto input2 = LayerTraits::PickItemFromCont<InputItemTypes, InterpolateLayerWeight2>(std::forward<TIn>(p_in));
-            auto lambda = LayerTraits::PickItemFromCont<InputItemTypes, InterpolateLayerLambda>(std::forward<TIn>(p_in));
+            auto input1 = LayerTraits::PickItemFromCont<InputMap, InterpolateLayerWeight1>(std::forward<TIn>(p_in));
+            auto input2 = LayerTraits::PickItemFromCont<InputMap, InterpolateLayerWeight2>(std::forward<TIn>(p_in));
+            auto lambda = LayerTraits::PickItemFromCont<InputMap, InterpolateLayerLambda>(std::forward<TIn>(p_in));
 
             if constexpr (IsFeedbackOutput)
             {
@@ -54,7 +51,7 @@ namespace MetaNN
             auto res = Interpolate(Duplicate(std::move(input1), proShape),
                                    Duplicate(std::move(input2), proShape),
                                    Duplicate(std::move(lambda), proShape));
-            return LayerIO::Create().template Set<LayerIO>(std::move(res));
+            return LayerOutputCont<InterpolateLayer>().template Set<LayerOutput>(std::move(res));
         }
 
         template <typename TGrad>
@@ -66,7 +63,7 @@ namespace MetaNN
                 {
                     throw std::runtime_error("Cannot do FeedBackward for InterpolateLayer");
                 }
-                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
+                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
                 auto curLambda = m_lambdaStack.top();
                 auto curInput1 = m_input1Stack.top();
                 auto curInput2 = m_input2Stack.top();
@@ -77,14 +74,14 @@ namespace MetaNN
                 auto res2 = grad * Duplicate(1 - curLambda, grad.Shape());
                 auto res1 = grad * Duplicate(curLambda, grad.Shape());
                 auto resLambda = grad * (Duplicate(curInput1, grad.Shape()) - Duplicate(curInput2, grad.Shape()));
-                return InterpolateLayerInput::Create()
+                return LayerInputCont<InterpolateLayer>()
                     .template Set<InterpolateLayerWeight1>(Collapse(std::move(res1), curInput1.Shape()))
                     .template Set<InterpolateLayerWeight2>(Collapse(std::move(res2), curInput2.Shape()))
                     .template Set<InterpolateLayerLambda>(Collapse(std::move(resLambda), curLambda.Shape()));
             }
             else
             {
-                return InterpolateLayerInput::Create();
+                return LayerInputCont<InterpolateLayer>();
             }
         }
 

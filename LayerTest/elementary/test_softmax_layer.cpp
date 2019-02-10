@@ -8,12 +8,13 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LayerIO, Matrix<CheckElement, CheckDevice>>>;
+    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
+    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_softmax_layer1()
     {
         cout << "Test softmax layer case 1 ...\t";
-        using RootLayer = MakeBPLayer<SoftmaxLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<SoftmaxLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -23,14 +24,14 @@ namespace
         in.SetValue(0, 0, -0.27f);
         in.SetValue(0, 1, -0.41f);
 
-        auto input = LayerIO::Create().Set<LayerIO>(in);
+        auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
         LayerNeutralInvariant(layer);
 
         auto out = layer.FeedForward(input);
         auto check = Softmax(in);
 
-        auto handle1 = out.Get<LayerIO>().EvalRegister();
+        auto handle1 = out.Get<LayerOutput>().EvalRegister();
         auto handle2 = check.EvalRegister();
         EvalPlan<CheckDevice>::Eval();
 
@@ -44,8 +45,8 @@ namespace
         grad.SetValue(0, 0, 0.1f);
         grad.SetValue(0, 1, 0.3f);
 
-        auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
-        auto fb = Evaluate(out_grad.Get<LayerIO>());
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
+        auto fb = Evaluate(out_grad.Get<LayerInput>());
 
         c = Evaluate(SoftmaxGrad(grad, c));
         assert(fabs(fb(0, 0) - c(0, 0)) < 0.001);
@@ -59,7 +60,7 @@ namespace
     void test_softmax_layer2()
     {
         cout << "Test softmax layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<SoftmaxLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<SoftmaxLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -72,12 +73,12 @@ namespace
         {
             auto in = GenMatrix<CheckElement>(1, loop_count, 0.1f, 0.13f);
 
-            auto input = LayerIO::Create().Set<LayerIO>(in);
+            auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
             auto out = layer.FeedForward(input);
             auto check = Softmax(in);
 
-            auto handle1 = out.Get<LayerIO>().EvalRegister();
+            auto handle1 = out.Get<LayerOutput>().EvalRegister();
             auto handle2 = check.EvalRegister();
             EvalPlan<CheckDevice>::Eval();
 
@@ -94,10 +95,10 @@ namespace
         for (size_t loop_count = 9; loop_count >= 1; --loop_count)
         {
             auto grad = GenMatrix<CheckElement>(1, loop_count, 1.3f, 1.1f);
-            auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
+            auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
             auto check = SoftmaxGrad(grad, op.back());
 
-            auto handle1 = out_grad.Get<LayerIO>().EvalRegister();
+            auto handle1 = out_grad.Get<LayerInput>().EvalRegister();
             auto handle2 = check.EvalRegister();
             EvalPlan<CheckDevice>::Eval();
 

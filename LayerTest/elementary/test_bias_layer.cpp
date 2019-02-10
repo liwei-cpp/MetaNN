@@ -8,7 +8,8 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LayerIO, Matrix<CheckElement, CheckDevice>>>;
+    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
+    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_bias_layer1()
     {
@@ -26,17 +27,17 @@ namespace
         layer.Init(initializer, loadBuffer);
 
         auto input = GenMatrix<CheckElement>(2, 1, 0.5f, -0.1f);
-        auto bi = LayerIO::Create().Set<LayerIO>(input);
+        auto bi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(bi);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) - input(0, 0) - weight(0, 0)) < 0.001);
         assert(fabs(res(1, 0) - input(1, 0) - weight(1, 0)) < 0.001);
 
-        auto fbIn = LayerIO::Create();
+        auto fbIn = LayerOutputCont<RootLayer>();
         auto out_grad = layer.FeedBackward(fbIn);
-        auto fbOut = out_grad.Get<LayerIO>();
+        auto fbOut = out_grad.Get<LayerInput>();
         static_assert(is_same<decltype(fbOut), NullParameter>::value, "Test error");
 
         loadBuffer.Clear();
@@ -63,17 +64,17 @@ namespace
         layer.Init(initializer, loadBuffer);
     
         auto input = GenMatrix<CheckElement>(1, 2, 0.5f, -0.1f);
-        auto bi = LayerIO::Create().Set<LayerIO>(input);
+        auto bi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(bi);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) - input(0, 0) - weight(0, 0)) < 0.001);
         assert(fabs(res(0, 1) - input(0, 1) - weight(0, 1)) < 0.001);
 
-        auto fbIn = LayerIO::Create();
+        auto fbIn = LayerOutputCont<RootLayer>();
         auto out_grad = layer.FeedBackward(fbIn);
-        auto fbOut = out_grad.Get<LayerIO>();
+        auto fbOut = out_grad.Get<LayerInput>();
         static_assert(is_same<decltype(fbOut), NullParameter>::value, "Test error");
 
         LayerNeutralInvariant(layer);
@@ -88,7 +89,7 @@ namespace
     void test_bias_layer3()
     {
         cout << "Test bias layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<BiasLayer, CommonInputMap, CommonInputMap, PUpdate>;
+        using RootLayer = MakeBPLayer<BiasLayer, CommonInputMap, CommonGradMap, PUpdate>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
 
@@ -107,11 +108,11 @@ namespace
         input.SetValue(0, 0, -0.27f);
         input.SetValue(1, 0, -0.41f);
 
-        auto bi = LayerIO::Create().Set<LayerIO>(input);
+        auto bi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(bi);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) + 0.27f + 0.48f) < 0.001);
         assert(fabs(res(1, 0) + 0.41f + 0.13f) < 0.001);
 
@@ -119,7 +120,7 @@ namespace
         g.SetValue(0, 0, -0.0495f);
         g.SetValue(1, 0, -0.0997f);
 
-        auto fbIn = LayerIO::Create().Set<LayerIO>(g);
+        auto fbIn = LayerOutputCont<RootLayer>().Set<LayerOutput>(g);
         auto out_grad = layer.FeedBackward(fbIn);
 
         GradCollector<CheckElement, CheckDevice> grad_collector;
@@ -151,7 +152,7 @@ namespace
     void test_bias_layer4()
     {
         cout << "Test bias layer case 4 ...\t";
-        using RootLayer = MakeBPLayer<BiasLayer, CommonInputMap, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<BiasLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
 
@@ -170,11 +171,11 @@ namespace
         input.SetValue(0, 0, -0.27f);
         input.SetValue(1, 0, -0.41f);
 
-        auto bi = LayerIO::Create().Set<LayerIO>(input);
+        auto bi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(bi);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) + 0.27f + 0.48f) < 0.001);
         assert(fabs(res(1, 0) + 0.41f + 0.13f) < 0.001);
 
@@ -182,9 +183,9 @@ namespace
         g.SetValue(0, 0, -0.0495f);
         g.SetValue(1, 0, -0.0997f);
 
-        auto fbIn = LayerIO::Create().Set<LayerIO>(g);
+        auto fbIn = LayerOutputCont<RootLayer>().Set<LayerOutput>(g);
         auto out_grad = layer.FeedBackward(fbIn);
-        auto fbOut = Evaluate(out_grad.Get<LayerIO>());
+        auto fbOut = Evaluate(out_grad.Get<LayerInput>());
 
         assert(fabs(fbOut(0, 0) + 0.0495f) < 0.001);
         assert(fabs(fbOut(1, 0) + 0.0997f) < 0.001);
@@ -217,7 +218,7 @@ namespace
     void test_bias_layer5()
     {
         cout << "Test bias layer case 5 ...\t";
-        using RootLayer = MakeBPLayer<BiasLayer, CommonInputMap, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<BiasLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
 
@@ -236,11 +237,11 @@ namespace
         input.SetValue(0, 0, -0.27f);
         input.SetValue(1, 0, -0.41f);
 
-        auto bi = LayerIO::Create().Set<LayerIO>(input);
+        auto bi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(bi);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) + 0.27f + 0.48f) < 0.001);
         assert(fabs(res(1, 0) + 0.41f + 0.13f) < 0.001);
 
@@ -248,10 +249,10 @@ namespace
         input.SetValue(0, 0, 1.27f);
         input.SetValue(1, 0, 2.41f);
 
-        bi = LayerIO::Create().Set<LayerIO>(input);
+        bi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         out = layer.FeedForward(bi);
-        res = Evaluate(out.Get<LayerIO>());
+        res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) - 1.27f + 0.48f) < 0.001);
         assert(fabs(res(1, 0) - 2.41f + 0.13f) < 0.001);
 
@@ -259,9 +260,9 @@ namespace
         g.SetValue(0, 0, -0.0495f);
         g.SetValue(1, 0, -0.0997f);
 
-        auto fbIn = LayerIO::Create().Set<LayerIO>(g);
+        auto fbIn = LayerOutputCont<RootLayer>().Set<LayerOutput>(g);
         auto out_grad = layer.FeedBackward(fbIn);
-        auto fbOut = Evaluate(out_grad.Get<LayerIO>());
+        auto fbOut = Evaluate(out_grad.Get<LayerInput>());
 
         assert(fabs(fbOut(0, 0) + 0.0495f) < 0.001);
         assert(fabs(fbOut(1, 0) + 0.0997f) < 0.001);
@@ -270,9 +271,9 @@ namespace
         g.SetValue(0, 0, 1.0495f);
         g.SetValue(1, 0, 2.3997f);
 
-        fbIn = LayerIO::Create().Set<LayerIO>(g);
+        fbIn = LayerOutputCont<RootLayer>().Set<LayerOutput>(g);
         out_grad = layer.FeedBackward(fbIn);
-        fbOut = Evaluate(out_grad.Get<LayerIO>());
+        fbOut = Evaluate(out_grad.Get<LayerInput>());
 
         assert(fabs(fbOut(0, 0) - 1.0495f) < 0.001);
         assert(fabs(fbOut(1, 0) - 2.3997f) < 0.001);
@@ -304,7 +305,7 @@ namespace
     void test_bias_layer6()
     {
         cout << "Test bias layer case 6 ...\t";
-        using RootLayer = MakeBPLayer<BiasLayer, CommonInputMap, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<BiasLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
     
@@ -332,7 +333,7 @@ namespace
     void test_bias_layer7()
     {
         cout << "Test bias layer case 7 ...\t";
-        using RootLayer = MakeBPLayer<BiasLayer, CommonInputMap, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<BiasLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
 

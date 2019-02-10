@@ -8,7 +8,8 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LayerIO, Matrix<CheckElement, CheckDevice>>>;
+    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
+    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_weight_layer1()
     {
@@ -32,15 +33,15 @@ namespace
         input.SetValue(0, 0, 1);
 
         LayerNeutralInvariant(layer);
-        auto wi = LayerIO::Create().Set<LayerIO>(input);
+        auto wi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         auto out = layer.FeedForward(wi);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) + 0.27f) < 0.001);
         assert(fabs(res(0, 1) + 0.41f) < 0.001);
 
-        auto out_grad = layer.FeedBackward(LayerIO::Create());
-        auto fbOut = out_grad.Get<LayerIO>();
+        auto out_grad = layer.FeedBackward(NullParameter{});
+        auto fbOut = out_grad.Get<LayerInput>();
         static_assert(is_same<decltype(fbOut), NullParameter>::value, "Test error");
 
         loadBuffer.Clear();
@@ -54,7 +55,7 @@ namespace
     void test_weight_layer2()
     {
         cout << "Test weight layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonInputMap, PUpdate>;
+        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonGradMap, PUpdate>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(RootLayer::IsUpdate, "Test Error");
 
@@ -72,19 +73,19 @@ namespace
         Matrix<CheckElement, CheckDevice> input(1, 1);
         input.SetValue(0, 0, 0.1f);
 
-        auto wi = LayerIO::Create().Set<LayerIO>(input);
+        auto wi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(wi);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) + 0.027f) < 0.001);
         assert(fabs(res(0, 1) + 0.041f) < 0.001);
 
         Matrix<CheckElement, CheckDevice> g(1, 2);
         g.SetValue(0, 0, -0.0495f);
         g.SetValue(0, 1, -0.0997f);
-        auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(g));
-        auto fbOut = out_grad.Get<LayerIO>();
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(g));
+        auto fbOut = out_grad.Get<LayerInput>();
         static_assert(is_same<decltype(fbOut), NullParameter>::value, "Test error");
 
         GradCollector<CheckElement, CheckDevice> grad_collector;
@@ -116,7 +117,7 @@ namespace
     void test_weight_layer3()
     {
         cout << "Test weight layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(RootLayer::IsUpdate, "Test Error");
 
@@ -135,19 +136,19 @@ namespace
         input.SetValue(0, 0, 0.999f);
         input.SetValue(0, 1, 0.0067f);
 
-        auto wi = LayerIO::Create().Set<LayerIO>(input);
+        auto wi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(wi);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) - 1.0996f) < 0.001);
         assert(fabs(res(0, 1) - 3.1047f) < 0.001);
 
         Matrix<CheckElement, CheckDevice> g(1, 2);
         g.SetValue(0, 0, 0.0469f);
         g.SetValue(0, 1, -0.0394f);
-        auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(g));
-        auto fbOut = Evaluate(out_grad.Get<LayerIO>());
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(g));
+        auto fbOut = Evaluate(out_grad.Get<LayerInput>());
         assert(fabs(fbOut(0, 0) + 0.07055) < 0.001);
         assert(fabs(fbOut(0, 1) + 0.041408f) < 0.001);
 
@@ -183,7 +184,7 @@ namespace
     void test_weight_layer4()
     {
         cout << "Test weight layer case 4 ...\t";
-        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(RootLayer::IsUpdate, "Test Error");
 
@@ -204,10 +205,10 @@ namespace
             auto input = GenMatrix<CheckElement>(1, 8, loop_count * 0.1f, -0.3f);
             op_in.push_back(input);
 
-            auto out = layer.FeedForward(LayerIO::Create().Set<LayerIO>(input));
+            auto out = layer.FeedForward(LayerInputCont<RootLayer>().Set<LayerInput>(input));
             auto check = Dot(input, w);
 
-            auto handle1 = out.Get<LayerIO>().EvalRegister();
+            auto handle1 = out.Get<LayerOutput>().EvalRegister();
             auto handle2 = check.EvalRegister();
             EvalPlan<DeviceTags::CPU>::Eval();
 
@@ -226,10 +227,10 @@ namespace
         {
             auto grad = GenMatrix<CheckElement>(1, 4, loop_count * 0.2f, -0.1f);
             op_grad.push_back(grad);
-            auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
+            auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
             auto check = Dot(grad, Transpose(w));
 
-            auto handle1 = out_grad.Get<LayerIO>().EvalRegister();
+            auto handle1 = out_grad.Get<LayerInput>().EvalRegister();
             auto handle2 = check.EvalRegister();
             EvalPlan<DeviceTags::CPU>::Eval();
 
@@ -278,7 +279,7 @@ namespace
     void test_weight_layer5()
     {
         cout << "Test weight layer case 5 ...\t";
-        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
         RootLayer layer("root", 800, 400);
     
         auto initializer = MakeInitializer<CheckElement, PInitializerIs<struct UniformTag>>()
@@ -317,7 +318,7 @@ namespace
     void test_weight_layer6()
     {
         cout << "Test weight layer case 6 ...\t";
-        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
         RootLayer layer("root", 400, 200);
     
         auto initializer = MakeInitializer<CheckElement, PWeightInitializerIs<struct UniformTag>>()

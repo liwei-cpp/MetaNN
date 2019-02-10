@@ -11,7 +11,7 @@ namespace
     using CommonInputMap = LayerIOMap<LayerKV<InterpolateLayerWeight1, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<InterpolateLayerWeight2, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<InterpolateLayerLambda, Matrix<CheckElement, CheckDevice>>>;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerIO, Matrix<CheckElement, CheckDevice>>>;
+    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     void test_interpolate_layer1()
     {
         cout << "Test interpolate layer case 1 ...\t";
@@ -33,14 +33,14 @@ namespace
         delta.SetValue(0, 0, 0.3f);  delta.SetValue(0, 1, 0.6f); delta.SetValue(0, 2, 0.9f);
         delta.SetValue(1, 0, 0.4f);  delta.SetValue(1, 1, 0.1f); delta.SetValue(1, 2, 0.7f);
 
-        auto input = InterpolateLayerInput::Create().Set<InterpolateLayerWeight1>(i1)
-                                                    .Set<InterpolateLayerWeight2>(i2)
-                                                    .Set<InterpolateLayerLambda>(delta);
+        auto input = LayerInputCont<RootLayer>().Set<InterpolateLayerWeight1>(i1)
+                                                .Set<InterpolateLayerWeight2>(i2)
+                                                .Set<InterpolateLayerLambda>(delta);
 
         LayerNeutralInvariant(layer);
 
         auto out = layer.FeedForward(input);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) - 0.17f) < 0.001);
         assert(fabs(res(0, 1) - 0.24f) < 0.001);
         assert(fabs(res(0, 2) - 0.31f) < 0.001);
@@ -82,13 +82,13 @@ namespace
         delta.SetValue(0, 0, 0.3f);  delta.SetValue(0, 1, 0.6f); delta.SetValue(0, 2, 0.9f);
         delta.SetValue(1, 0, 0.4f);  delta.SetValue(1, 1, 0.1f); delta.SetValue(1, 2, 0.7f);
 
-        auto input = InterpolateLayerInput::Create().Set<InterpolateLayerWeight1>(i1)
-                                                    .Set<InterpolateLayerWeight2>(i2)
-                                                    .Set<InterpolateLayerLambda>(delta);
+        auto input = LayerInputCont<RootLayer>().Set<InterpolateLayerWeight1>(i1)
+                                                .Set<InterpolateLayerWeight2>(i2)
+                                                .Set<InterpolateLayerLambda>(delta);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(input);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(fabs(res(0, 0) - 0.17f) < 0.001);
         assert(fabs(res(0, 1) - 0.24f) < 0.001);
         assert(fabs(res(0, 2) - 0.31f) < 0.001);
@@ -100,7 +100,7 @@ namespace
         grad.SetValue(0, 0, 0.2f);  grad.SetValue(0, 1, 0.5f); grad.SetValue(0, 2, 0.8f);
         grad.SetValue(1, 0, 0.7f);  grad.SetValue(1, 1, 0.6f); grad.SetValue(1, 2, 0.3f);
 
-        auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
         auto r = Evaluate(out_grad.Get<InterpolateLayerWeight1>());
         assert(fabs(r(0, 0) - 0.06f) < 0.001);
@@ -155,12 +155,12 @@ namespace
             op2.push_back(i2);
             opdelta.push_back(delta);
 
-            auto input = InterpolateLayerInput::Create().Set<InterpolateLayerWeight1>(i1)
-                                                        .Set<InterpolateLayerWeight2>(i2)
-                                                        .Set<InterpolateLayerLambda>(delta);
+            auto input = LayerInputCont<RootLayer>().Set<InterpolateLayerWeight1>(i1)
+                                                    .Set<InterpolateLayerWeight2>(i2)
+                                                    .Set<InterpolateLayerLambda>(delta);
 
             auto out = layer.FeedForward(input);
-            auto res = Evaluate(out.Get<LayerIO>());
+            auto res = Evaluate(out.Get<LayerOutput>());
             assert(res.Shape().RowNum() == loop_count);
             assert(res.Shape().ColNum() == 3);
             for (size_t i = 0; i < loop_count; ++i)
@@ -177,7 +177,7 @@ namespace
         for (size_t loop_count = 9; loop_count >= 1; --loop_count)
         {
             auto grad = GenMatrix<CheckElement>(loop_count, 3, 2, 1.1f);
-            auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
+            auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
             auto handle1 = out_grad.Get<InterpolateLayerWeight1>().EvalRegister();
             auto handle2 = out_grad.Get<InterpolateLayerWeight2>().EvalRegister();

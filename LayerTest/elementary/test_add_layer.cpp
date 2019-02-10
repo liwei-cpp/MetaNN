@@ -11,7 +11,7 @@ namespace
     using CommonInputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                      >;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerIO, Matrix<CheckElement, CheckDevice>>>;
+    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_add_layer1()
     {
@@ -29,7 +29,7 @@ namespace
                                           .Set<RightOperand>(i2);
 
         auto out = layer.FeedForward(input);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         for (size_t i = 0; i < 2; ++i)
         {
             for (size_t j = 0; j < 3; ++j)
@@ -63,7 +63,7 @@ namespace
                                           .Set<RightOperand>(i2);
 
         auto out = layer.FeedForward(input);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         for (size_t i = 0; i < 2; ++i)
         {
             for (size_t j = 0; j < 3; ++j)
@@ -74,7 +74,7 @@ namespace
 
         auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
 
-        auto out_grad = layer.FeedBackward(RootLayer::OutputContType::Create().Set<LayerIO>(grad));
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
         auto handle1 = out_grad.Get<LeftOperand>().EvalRegister();
         auto handle2 = out_grad.Get<RightOperand>().EvalRegister();
@@ -114,7 +114,7 @@ namespace
                                           .Set<RightOperand>(i2);
 
         auto out = layer.FeedForward(input);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         for (size_t i = 0; i < 2; ++i)
         {
             for (size_t j = 0; j < 3; ++j)
@@ -129,7 +129,7 @@ namespace
         input = BinaryInput::Create().Set<LeftOperand>(i3).Set<RightOperand>(i4);
 
         out = layer.FeedForward(input);
-        res = Evaluate(out.Get<LayerIO>());
+        res = Evaluate(out.Get<LayerOutput>());
         for (size_t i = 0; i < 2; ++i)
         {
             for (size_t j = 0; j < 3; ++j)
@@ -140,7 +140,7 @@ namespace
 
         auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
 
-        auto out_grad = layer.FeedBackward(RootLayer::OutputContType::Create().Set<LayerIO>(grad));
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
         auto handle1 = out_grad.Get<LeftOperand>().EvalRegister();
         auto handle2 = out_grad.Get<RightOperand>().EvalRegister();
@@ -164,7 +164,7 @@ namespace
 
         grad = GenMatrix<CheckElement>(2, 3, -0.7f, 0.2f);
 
-        out_grad = layer.FeedBackward(RootLayer::OutputContType::Create().Set<LayerIO>(grad));
+        out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
         handle1 = out_grad.Get<LeftOperand>().EvalRegister();
         handle2 = out_grad.Get<RightOperand>().EvalRegister();

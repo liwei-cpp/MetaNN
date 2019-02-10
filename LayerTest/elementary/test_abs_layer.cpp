@@ -8,7 +8,8 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LayerIO, Matrix<CheckElement, CheckDevice>>>;
+    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
+    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     void test_abs_layer1()
     {
         cout << "Test abs layer case 1 ...\t";
@@ -19,11 +20,11 @@ namespace
         RootLayer layer("root");
 
         auto in = GenMatrix<CheckElement>(4, 5, -3.3f, 0.1f);
-        auto input = LayerIO::Create().Set<LayerIO>(in);
+        auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(input);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
     
         assert(res.Shape().RowNum() == 4);
         assert(res.Shape().ColNum() == 5);
@@ -39,7 +40,7 @@ namespace
 
         NullParameter fbIn;
         auto out_grad = layer.FeedBackward(fbIn);
-        auto fb1 = out_grad.Get<LayerIO>();
+        auto fb1 = out_grad.Get<LayerInput>();
         static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");
 
         LayerNeutralInvariant(layer);
@@ -49,18 +50,18 @@ namespace
     void test_abs_layer2()
     {
         cout << "Test abs layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
         RootLayer layer("root");
 
         auto in = GenMatrix<CheckElement>(4, 5, -3.3f, 0.1f);
-        auto input = LayerIO::Create().Set<LayerIO>(in);
+        auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(input);
-        auto res = Evaluate(out.Get<LayerIO>());
+        auto res = Evaluate(out.Get<LayerOutput>());
         assert(res.Shape().RowNum() == 4);
         assert(res.Shape().ColNum() == 5);
     
@@ -74,8 +75,8 @@ namespace
         }
 
         auto grad = GenMatrix<float>(4, 5, 1.8f, -0.2f);
-        auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
-        auto fb = Evaluate(out_grad.Get<LayerIO>());
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
+        auto fb = Evaluate(out_grad.Get<LayerInput>());
     
         for (size_t i = 0; i < 4; ++i)
         {
@@ -93,7 +94,7 @@ namespace
     void test_abs_layer3()
     {
         cout << "Test abs layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -108,10 +109,10 @@ namespace
 
             op.push_back(in);
 
-            auto input = LayerIO::Create().Set<LayerIO>(in);
+            auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
             auto out = layer.FeedForward(input);
-            auto res = Evaluate(out.Get<LayerIO>());
+            auto res = Evaluate(out.Get<LayerOutput>());
             assert(res.Shape().RowNum() == loop_count);
             assert(res.Shape().ColNum() == 3);
             for (size_t i = 0; i < loop_count; ++i)
@@ -127,9 +128,9 @@ namespace
         for (size_t loop_count = 9; loop_count >= 1; --loop_count)
         {
             auto grad = GenMatrix<CheckElement>(loop_count, 3, 2, 1.1f);
-            auto out_grad = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(grad));
+            auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
-            auto fb = Evaluate(out_grad.Get<LayerIO>());
+            auto fb = Evaluate(out_grad.Get<LayerInput>());
 
             auto in = op.back(); op.pop_back();
             for (size_t i = 0; i < loop_count; ++i)
@@ -150,7 +151,7 @@ namespace
     void test_abs_layer4()
     {
         cout << "Test abs layer case 4 ...\t";
-        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonInputMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -158,8 +159,8 @@ namespace
     
         Matrix<CheckElement, CheckDevice> x(1, 4);
         x.SetValue(0, 0, 0); x.SetValue(0, 1, -2); x.SetValue(0, 2, 3); x.SetValue(0, 3, -4);
-        auto x_out = layer.FeedForward(LayerIO::Create().Set<LayerIO>(x));
-        auto x_out_eval = Evaluate(x_out.Get<LayerIO>());
+        auto x_out = layer.FeedForward(LayerInputCont<RootLayer>().Set<LayerInput>(x));
+        auto x_out_eval = Evaluate(x_out.Get<LayerOutput>());
         assert(fabs(x_out_eval(0, 0) - 0) <= 0.00001);
         assert(fabs(x_out_eval(0, 1) - 2) <= 0.00001);
         assert(fabs(x_out_eval(0, 2) - 3) <= 0.00001);
@@ -167,7 +168,7 @@ namespace
 
         Matrix<float, DeviceTags::CPU> y(1, 4);
         y.SetValue(0, 0, 1); y.SetValue(0, 1, 5); y.SetValue(0, 2, 7); y.SetValue(0, 3, 3);
-        auto y_out = layer.FeedBackward(LayerIO::Create().Set<LayerIO>(y)).Get<LayerIO>();
+        auto y_out = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(y)).Get<LayerInput>();
         auto y_out_eval = Evaluate(y_out);
         assert(fabs(y_out_eval(0, 0) - 0) <= 0.00001);
         assert(fabs(y_out_eval(0, 1) + 5) <= 0.00001);

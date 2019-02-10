@@ -8,7 +8,10 @@
 
 namespace MetaNN
 {
-    template <typename TInputItems, typename TInputGrads, typename TPolicies>
+    struct LayerInput;
+    struct LayerOutput;
+    
+    template <typename TInputs, typename TGrads, typename TPolicies>
     class SoftmaxLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -18,14 +21,11 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
-        using InputContType = LayerIO;
-        using OutputContType = LayerIO;
-        
-        using InputItemTypes = TInputItems;
-        using InputGradTypes = TInputGrads;
+        using InputMap = TInputs;
+        using GradMap = FillGradMap<TGrads, LayerOutput>;
 
     private:
-        using AimInputType = typename InputItemTypes::template Find<LayerIO>;
+        using AimInputType = typename InputMap::template Find<LayerInput>;
 
     public:
         SoftmaxLayer(std::string name)
@@ -35,13 +35,13 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto val = LayerTraits::PickItemFromCont<InputItemTypes, LayerIO>(std::forward<TIn>(p_in));
+            auto val = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
             auto res = Softmax(val);
             if constexpr (IsFeedbackOutput)
             {
                 m_data.push(res);
             }
-            return LayerIO::Create().template Set<LayerIO>(std::move(res));
+            return LayerOutputCont<SoftmaxLayer>().template Set<LayerOutput>(std::move(res));
         }
         
         template <typename TGrad>
@@ -53,15 +53,15 @@ namespace MetaNN
                 {
                     throw std::runtime_error("Cannot feed back in SoftmaxLayer");
                 }
-                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
+                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
                 
                 auto softmaxRes = m_data.top();
                 m_data.pop();
-                return LayerIO::Create().template Set<LayerIO>(SoftmaxGrad(std::move(grad), std::move(softmaxRes)));
+                return LayerInputCont<SoftmaxLayer>().template Set<LayerInput>(SoftmaxGrad(std::move(grad), std::move(softmaxRes)));
             }
             else
             {
-                return LayerIO::Create();
+                return LayerInputCont<SoftmaxLayer>();
             }
         }
         

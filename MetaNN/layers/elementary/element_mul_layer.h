@@ -7,7 +7,10 @@
 
 namespace MetaNN
 {
-    template <typename TInputItems, typename TInputGrads, typename TPolicies>
+    struct LeftOperand; struct RightOperand;
+    struct LayerOutput;
+    
+    template <typename TInputs, typename TGrads, typename TPolicies>
     class ElementMulLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -17,15 +20,12 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
-        using InputContType = BinaryInput;
-        using OutputContType = LayerIO;
-        
-        using InputItemTypes = TInputItems;
-        using InputGradTypes = TInputGrads;
+        using InputMap = TInputs;
+        using GradMap = FillGradMap<TGrads, LayerOutput>;
         
     private:
-        using AimInput1Type = typename InputItemTypes::template Find<LeftOperand>;
-        using AimInput2Type = typename InputItemTypes::template Find<RightOperand>;
+        using AimInput1Type = typename InputMap::template Find<LeftOperand>;
+        using AimInput2Type = typename InputMap::template Find<RightOperand>;
         
     public:
         ElementMulLayer(std::string name)
@@ -35,8 +35,8 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto input1 = LayerTraits::PickItemFromCont<InputItemTypes, LeftOperand>(std::forward<TIn>(p_in));
-            auto input2 = LayerTraits::PickItemFromCont<InputItemTypes, RightOperand>(std::forward<TIn>(p_in));
+            auto input1 = LayerTraits::PickItemFromCont<InputMap, LeftOperand>(std::forward<TIn>(p_in));
+            auto input2 = LayerTraits::PickItemFromCont<InputMap, RightOperand>(std::forward<TIn>(p_in));
             
             if constexpr (IsFeedbackOutput)
             {
@@ -45,8 +45,8 @@ namespace MetaNN
             }
             
             auto proShape = LayerTraits::ShapePromote(input1.Shape(), input2.Shape());
-            return OutputContType::Create().template Set<LayerIO>(Duplicate(std::move(input1), proShape) *
-                                                                  Duplicate(std::move(input2), proShape));
+            return LayerOutputCont<ElementMulLayer>().template Set<LayerOutput>(Duplicate(std::move(input1), proShape) *
+                                                                                Duplicate(std::move(input2), proShape));
         }
         
         template <typename TGrad>
@@ -64,19 +64,19 @@ namespace MetaNN
                 m_input1.pop();
                 m_input2.pop();
                 
-                auto grad = LayerTraits::PickItemFromCont<InputGradTypes, LayerIO>(std::forward<TGrad>(p_grad));
+                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
                 
                 auto shape1 = input1.Shape();
                 auto shape2 = input2.Shape();
                 
                 auto grad1 = grad * Duplicate(input1, grad.Shape());
                 auto grad2 = grad * Duplicate(input2, grad.Shape());
-                return InputContType::Create().template Set<LeftOperand>(Collapse(std::move(grad2), shape1))
-                                              .template Set<RightOperand>(Collapse(std::move(grad1), shape2));
+                return LayerInputCont<ElementMulLayer>().template Set<LeftOperand>(Collapse(std::move(grad2), shape1))
+                                                        .template Set<RightOperand>(Collapse(std::move(grad1), shape2));
             }
             else
             {
-                return InputContType::Create();
+                return LayerInputCont<ElementMulLayer>();
             }
         }
         
