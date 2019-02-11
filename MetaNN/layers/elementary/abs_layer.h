@@ -25,8 +25,15 @@ namespace MetaNN
         using GradMap = FillGradMap<TGrads, LayerOutput>;
         
     private:
-        using AimInputType = typename InputMap::template Find<LayerInput>;
+        using TLayerInputFP = typename InputMap::template Find<LayerInput>;
+        using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
         
+        template <typename TVal>
+        auto FeedForwardCal(const TVal& val)
+        {
+            return Abs(val);
+        }
+
     public:
         AbsLayer(std::string name)
             : m_name(std::move(name))
@@ -36,11 +43,15 @@ namespace MetaNN
         auto FeedForward(TIn&& p_in)
         {
             auto val = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
+            auto res = FeedForwardCal(val);
+            
             if constexpr (IsFeedbackOutput)
             {
-                m_data.push(val);
+                m_inputShape.push(val.Shape());
+                m_outputShape.push(res.Shape());
+                m_data.push(std::move(val));
             }
-            return LayerOutputCont<AbsLayer>().template Set<LayerOutput>(Abs(std::move(val)));
+            return LayerOutputCont<AbsLayer>().template Set<LayerOutput>(std::move(res));
         }
 
         template <typename TGrad>
@@ -48,16 +59,20 @@ namespace MetaNN
         {
             if constexpr (IsFeedbackOutput)
             {
-                if (m_data.empty())
+                if ((m_data.empty()) || (m_outputShape.empty()))
                 {
-                    throw std::runtime_error("Cannot feed back in SigmoidLayer");
+                    throw std::runtime_error("Cannot feed back in AbsLayer");
                 }
-                auto& input = m_data.top();
-                
-                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                auto res = LayerInputCont<AbsLayer>().template Set<LayerInput>(std::move(grad) * Sign(input));
+                auto input = m_data.top();
                 m_data.pop();
-                return res;
+
+                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
+                LayerTraits::ShapeCheck(grad, m_outputShape);
+                auto res = std::move(grad) * Sign(std::move(input));
+                LayerTraits::ShapeCheck(res, m_inputShape);
+                m_outputShape.pop(); m_inputShape.pop();
+
+                return LayerInputCont<AbsLayer>().template Set<LayerInput>(std::move(res));
             }
             else
             {
@@ -69,7 +84,7 @@ namespace MetaNN
         {
             if constexpr(IsFeedbackOutput)
             {
-                if (!m_data.empty())
+                if ((!m_data.empty()) || (!m_outputShape.empty()) || (!m_inputShape.empty()))
                 {
                     throw std::runtime_error("NeutralInvariant Fail!");
                 }
@@ -77,6 +92,8 @@ namespace MetaNN
         }
     private:
         std::string m_name;
-        LayerTraits::LayerInternalBuf<AimInputType, IsFeedbackOutput> m_data;
+        LayerTraits::LayerInternalBuf<TLayerInputFP, IsFeedbackOutput> m_data;
+        LayerTraits::LayerInternalBuf<ShapeType<TLayerInputFP>, IsFeedbackOutput> m_inputShape;
+        LayerTraits::LayerInternalBuf<ShapeType<TLayerOutputBP>, IsFeedbackOutput> m_outputShape;
     };
 }

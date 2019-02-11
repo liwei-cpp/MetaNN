@@ -234,4 +234,17 @@ auto ShapePromote(const TShape1& s1, const TShape2& s2, const TShapes&... rem)
     auto res = NSShapePromote::ShapePromoteHelper(s1, s2);
     return ShapePromote(res, rem...);
 }
+
+template <typename TData, typename TShapeStack>
+inline void ShapeCheck(const TData& data, TShapeStack& ss)
+{
+    if (ss.empty())
+    {
+        throw std::runtime_error("ShapeStack is empty, cannot check shape.");
+    }
+    if (!(data.Shape() == ss.top()))
+    {
+        throw std::runtime_error("Shape check fail.");
+    }
+}
 }
