@@ -26,8 +26,14 @@ namespace MetaNN
         using GradMap = FillGradMap<TGrads, LayerOutput>;
         
     private:
-        using AimInputType = typename InputMap::template Find<LayerInput>;
-        
+        using TLayerInputFP = typename InputMap::template Find<LayerInput>;
+        using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
+
+        auto FeedForwardCal(const TLayerInputFP& val)
+        {
+            return Sigmoid(val);
+        }
+
     public:
         SigmoidLayer(std::string name)
             : m_name(std::move(name))
@@ -37,10 +43,12 @@ namespace MetaNN
         auto FeedForward(TIn&& p_in)
         {
             auto val = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
-            
-            auto res = Sigmoid(val);
+            auto res = FeedForwardCal(val);
+
             if constexpr (IsFeedbackOutput)
             {
+                m_inputShape.Push(val.Shape());
+                m_outputShape.Push(res.Shape());
                 m_data.push(res);
             }
             return LayerOutputCont<SigmoidLayer>().template Set<LayerOutput>(std::move(res));
@@ -56,10 +64,14 @@ namespace MetaNN
                     throw std::runtime_error("Cannot feed back in SigmoidLayer");
                 }
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
+                m_outputShape.CheckAndPop(grad.Shape());
                 
                 auto input = m_data.top();
                 m_data.pop();
-                return LayerInputCont<SigmoidLayer>().template Set<LayerInput>(SigmoidGrad(std::move(grad), std::move(input)));
+                
+                auto res = SigmoidGrad(std::move(grad), std::move(input));
+                m_inputShape.CheckAndPop(res.Shape());
+                return LayerInputCont<SigmoidLayer>().template Set<LayerInput>(std::move(res));
             }
             else
             {
@@ -75,12 +87,17 @@ namespace MetaNN
                 {
                     throw std::runtime_error("NeutralInvariant Fail!");
                 }
+                m_inputShape.AssertEmpty();
+                m_outputShape.AssertEmpty();
             }
         }
 
     private:
         std::string m_name;
-        using TempDataType = decltype(Sigmoid(std::declval<AimInputType>()));
+        using TempDataType = RemConstRef<std::invoke_result_t<decltype(&SigmoidLayer::FeedForwardCal), SigmoidLayer, TLayerInputFP>>;
         LayerTraits::LayerInternalBuf<TempDataType, IsFeedbackOutput> m_data;
+
+        LayerTraits::ShapeChecker<ShapeType<TLayerInputFP>,  IsFeedbackOutput> m_inputShape;
+        LayerTraits::ShapeChecker<ShapeType<TLayerOutputBP>, IsFeedbackOutput> m_outputShape;
     };
 }

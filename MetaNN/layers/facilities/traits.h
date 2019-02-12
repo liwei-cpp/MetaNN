@@ -235,6 +235,7 @@ auto ShapePromote(const TShape1& s1, const TShape2& s2, const TShapes&... rem)
     return ShapePromote(res, rem...);
 }
 
+#ifdef METANN_DEBUG
 template <typename TShape>
 class ShapeChecker_
 {
@@ -268,6 +269,16 @@ public:
 private:
     std::stack<TShape> m_buffer;
 };
+#else
+template <typename TShape>
+class ShapeChecker_
+{
+public:
+    void Push(const TShape&) {}
+    void CheckAndPop(const TShape&) {}
+    void AssertEmpty() const {}
+};
+#endif
 
 template <typename TShape, bool store>
 using ShapeChecker = std::conditional_t<store, ShapeChecker_<TShape>, NullParameter>;
