@@ -235,16 +235,40 @@ auto ShapePromote(const TShape1& s1, const TShape2& s2, const TShapes&... rem)
     return ShapePromote(res, rem...);
 }
 
-template <typename TData, typename TShapeStack>
-inline void ShapeCheck(const TData& data, TShapeStack& ss)
+template <typename TShape>
+class ShapeChecker_
 {
-    if (ss.empty())
+public:
+    void Push(const TShape& shape)
     {
-        throw std::runtime_error("ShapeStack is empty, cannot check shape.");
+        m_buffer.push(shape);
     }
-    if (!(data.Shape() == ss.top()))
+    
+    void CheckAndPop(const TShape& shape)
     {
-        throw std::runtime_error("Shape check fail.");
+        if (m_buffer.empty())
+        {
+            throw std::runtime_error("ShapeStack is empty, cannot check shape.");
+        }
+        if (!(shape == m_buffer.top()))
+        {
+            throw std::runtime_error("Shape check fail.");
+        }
+        m_buffer.pop();
     }
-}
+    
+    void AssertEmpty() const
+    {
+        if (!m_buffer.empty())
+        {
+            throw std::runtime_error("Shape checker is not empty.");
+        }
+    }
+
+private:
+    std::stack<TShape> m_buffer;
+};
+
+template <typename TShape, bool store>
+using ShapeChecker = std::conditional_t<store, ShapeChecker_<TShape>, NullParameter>;
 }

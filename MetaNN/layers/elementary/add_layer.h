@@ -25,12 +25,15 @@ namespace MetaNN
         using GradMap = FillGradMap<TGrads, LayerOutput>;
         
     private:
-        using AimInput1Type = typename InputMap::template Find<LeftOperand>;
-        using AimInput2Type = typename InputMap::template Find<RightOperand>;
+        using TLeftOperandFP = typename InputMap::template Find<LeftOperand>;
+        using TRightOperandFP = typename InputMap::template Find<RightOperand>;
+        using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
         
-        using AimInput1ShapeType = RemConstRef<decltype(std::declval<AimInput1Type>().Shape())>;
-        using AimInput2ShapeType = RemConstRef<decltype(std::declval<AimInput2Type>().Shape())>;
-
+        auto FeedForwardCal(const TLeftOperandFP& val1, const TRightOperandFP& val2)
+        {
+            auto proShape = LayerTraits::ShapePromote(val1.Shape(), val2.Shape());
+            return Duplicate(val1, proShape) + Duplicate(val2, proShape);
+        }
     public:
         AddLayer(std::string name)
             : m_name(std::move(name))
@@ -39,17 +42,21 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            auto input1 = LayerTraits::PickItemFromCont<InputMap, LeftOperand>(std::forward<TIn>(p_in));
-            auto input2 = LayerTraits::PickItemFromCont<InputMap, RightOperand>(std::forward<TIn>(p_in));
+            const auto& input1 = LayerTraits::PickItemFromCont<InputMap, LeftOperand>(std::forward<TIn>(p_in));
+            const auto& input2 = LayerTraits::PickItemFromCont<InputMap, RightOperand>(std::forward<TIn>(p_in));
+            auto res = FeedForwardCal(input1, input2);
             
             if constexpr (IsFeedbackOutput)
             {
                 m_shape1.push(input1.Shape());
                 m_shape2.push(input2.Shape());
+                
+                m_inputShapeChecker1.Push(input1.Shape());
+                m_inputShapeChecker2.Push(input2.Shape());
+                m_outputShape.Push(res.Shape());
             }
-            
-            auto proShape = LayerTraits::ShapePromote(input1.Shape(), input2.Shape());
-            return LayerOutputCont<AddLayer>().template Set<LayerOutput>(Duplicate(input1, proShape) + Duplicate(input2, proShape));
+
+            return LayerOutputCont<AddLayer>().template Set<LayerOutput>(std::move(res));
         }
         
         template <typename TGrad>
@@ -62,15 +69,19 @@ namespace MetaNN
                     throw std::runtime_error("Cannot feed back in AddLayer");
                 }
                 
-                auto curShape1 = m_shape1.top();
-                auto curShape2 = m_shape2.top();
-                m_shape1.pop();
-                m_shape2.pop();
+                auto curShape1 = m_shape1.top(); m_shape1.pop();
+                auto curShape2 = m_shape2.top(); m_shape2.pop();
                 
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                
-                return LayerInputCont<AddLayer>().template Set<LeftOperand>(Collapse(grad, curShape1))
-                                                 .template Set<RightOperand>(Collapse(grad, curShape2));
+                m_outputShape.CheckAndPop(grad.Shape());
+
+                auto res1 = Collapse(grad, curShape1);
+                auto res2 = Collapse(grad, curShape2);
+                m_inputShapeChecker1.CheckAndPop(res1.Shape());
+                m_inputShapeChecker2.CheckAndPop(res2.Shape());
+
+                return LayerInputCont<AddLayer>().template Set<LeftOperand>(std::move(res1))
+                                                 .template Set<RightOperand>(std::move(res2));
             }
             else
             {
@@ -86,11 +97,18 @@ namespace MetaNN
                 {
                     throw std::runtime_error("NeutralInvariant Fail!");
                 }
+                m_inputShapeChecker1.AssertEmpty();
+                m_inputShapeChecker2.AssertEmpty();
+                m_outputShape.AssertEmpty();
             }
         }
     private:
         std::string m_name;
-        LayerTraits::LayerInternalBuf<AimInput1ShapeType, IsFeedbackOutput> m_shape1;
-        LayerTraits::LayerInternalBuf<AimInput2ShapeType, IsFeedbackOutput> m_shape2;
+        LayerTraits::LayerInternalBuf<ShapeType<TLeftOperandFP>, IsFeedbackOutput> m_shape1;
+        LayerTraits::LayerInternalBuf<ShapeType<TRightOperandFP>, IsFeedbackOutput> m_shape2;
+        
+        LayerTraits::ShapeChecker<ShapeType<TLeftOperandFP>,  IsFeedbackOutput> m_inputShapeChecker1;
+        LayerTraits::ShapeChecker<ShapeType<TRightOperandFP>, IsFeedbackOutput> m_inputShapeChecker2;
+        LayerTraits::ShapeChecker<ShapeType<TLayerOutputBP>,  IsFeedbackOutput> m_outputShape;
     };
 }

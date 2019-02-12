@@ -27,9 +27,8 @@ namespace MetaNN
     private:
         using TLayerInputFP = typename InputMap::template Find<LayerInput>;
         using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
-        
-        template <typename TVal>
-        auto FeedForwardCal(const TVal& val)
+
+        auto FeedForwardCal(const TLayerInputFP& val)
         {
             return Abs(val);
         }
@@ -47,8 +46,8 @@ namespace MetaNN
             
             if constexpr (IsFeedbackOutput)
             {
-                m_inputShape.push(val.Shape());
-                m_outputShape.push(res.Shape());
+                m_inputShape.Push(val.Shape());
+                m_outputShape.Push(res.Shape());
                 m_data.push(std::move(val));
             }
             return LayerOutputCont<AbsLayer>().template Set<LayerOutput>(std::move(res));
@@ -59,7 +58,7 @@ namespace MetaNN
         {
             if constexpr (IsFeedbackOutput)
             {
-                if ((m_data.empty()) || (m_outputShape.empty()))
+                if (m_data.empty())
                 {
                     throw std::runtime_error("Cannot feed back in AbsLayer");
                 }
@@ -67,10 +66,9 @@ namespace MetaNN
                 m_data.pop();
 
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                LayerTraits::ShapeCheck(grad, m_outputShape);
+                m_outputShape.CheckAndPop(grad.Shape());
                 auto res = std::move(grad) * Sign(std::move(input));
-                LayerTraits::ShapeCheck(res, m_inputShape);
-                m_outputShape.pop(); m_inputShape.pop();
+                m_inputShape.CheckAndPop(res.Shape());
 
                 return LayerInputCont<AbsLayer>().template Set<LayerInput>(std::move(res));
             }
@@ -84,16 +82,19 @@ namespace MetaNN
         {
             if constexpr(IsFeedbackOutput)
             {
-                if ((!m_data.empty()) || (!m_outputShape.empty()) || (!m_inputShape.empty()))
+                if (!m_data.empty())
                 {
                     throw std::runtime_error("NeutralInvariant Fail!");
                 }
+                m_inputShape.AssertEmpty();
+                m_outputShape.AssertEmpty();
             }
         }
     private:
         std::string m_name;
         LayerTraits::LayerInternalBuf<TLayerInputFP, IsFeedbackOutput> m_data;
-        LayerTraits::LayerInternalBuf<ShapeType<TLayerInputFP>, IsFeedbackOutput> m_inputShape;
-        LayerTraits::LayerInternalBuf<ShapeType<TLayerOutputBP>, IsFeedbackOutput> m_outputShape;
+        
+        LayerTraits::ShapeChecker<ShapeType<TLayerInputFP>,  IsFeedbackOutput> m_inputShape;
+        LayerTraits::ShapeChecker<ShapeType<TLayerOutputBP>, IsFeedbackOutput> m_outputShape;
     };
 }

@@ -186,6 +186,7 @@ namespace
                 assert(fb2(i, j) == grad(i, j));
             }
         }
+        layer.NeutralInvariant();
         cout << "done" << endl;
     }
 }
