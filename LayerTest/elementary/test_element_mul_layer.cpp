@@ -44,7 +44,7 @@ namespace
         assert(fabs(res(1, 1) - 0.30f) < 0.001);
         assert(fabs(res(1, 2) - 0.42f) < 0.001);
 
-        auto out_grad = layer.FeedBackward(LayerIO::Create());
+        auto out_grad = layer.FeedBackward(NullParameter{});
         auto fb1 = out_grad.Get<LeftOperand>();
         auto fb2 = out_grad.Get<RightOperand>();
         static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");

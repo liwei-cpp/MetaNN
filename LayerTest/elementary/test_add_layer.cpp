@@ -25,8 +25,8 @@ namespace
         auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
         auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
 
-        auto input = BinaryInput::Create().Set<LeftOperand>(i1)
-                                          .Set<RightOperand>(i2);
+        auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
+                                                .Set<RightOperand>(i2);
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
@@ -59,8 +59,8 @@ namespace
         auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
         auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
 
-        auto input = BinaryInput::Create().Set<LeftOperand>(i1)
-                                          .Set<RightOperand>(i2);
+        auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
+                                                .Set<RightOperand>(i2);
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
@@ -110,8 +110,8 @@ namespace
         auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
         auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
 
-        auto input = BinaryInput::Create().Set<LeftOperand>(i1)
-                                          .Set<RightOperand>(i2);
+        auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
+                                                .Set<RightOperand>(i2);
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
@@ -126,7 +126,7 @@ namespace
         auto i3 = GenMatrix<CheckElement>(2, 3, 1.3, -0.1f);
         auto i4 = GenMatrix<CheckElement>(2, 3, 2.5f, -0.7f);
 
-        input = BinaryInput::Create().Set<LeftOperand>(i3).Set<RightOperand>(i4);
+        input = LayerInputCont<RootLayer>().Set<LeftOperand>(i3).Set<RightOperand>(i4);
 
         out = layer.FeedForward(input);
         res = Evaluate(out.Get<LayerOutput>());
