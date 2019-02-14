@@ -200,6 +200,7 @@
     <File Name="layers/layers.h"/>
     <VirtualDirectory Name="loss">
       <File Name="layers/loss/nll_loss_layer.h"/>
+      <File Name="layers/loss/loss.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="operators">

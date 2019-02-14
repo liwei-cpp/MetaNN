@@ -129,4 +129,9 @@
       </Completion>
     </Configuration>
   </Settings>
+  <VirtualDirectory Name="loss">
+    <File Name="loss/test_loss.h"/>
+    <File Name="loss/test_nll_loss_layer.h"/>
+    <File Name="loss/test_nll_loss_layer.cpp"/>
+  </VirtualDirectory>
 </CodeLite_Project>

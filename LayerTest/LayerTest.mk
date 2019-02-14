@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=liwei
-Date                   :=12/02/19
+Date                   :=14/02/19
 CodeLitePath           :=/home/liwei/.codelite
 LinkerName             :=g++
 SharedObjectLinkerName :=g++ -shared -fPIC
@@ -61,7 +61,7 @@ AS       := as
 ##
 CodeLiteDir:=/usr/share/codelite
 Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/facilities_test_layer_io_map.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_bias_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_weight_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_element_mul_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(ObjectSuffix) \
-	$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) 
+	$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix) 
 
 
 
@@ -179,6 +179,14 @@ $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(DependSuffix): e
 
 $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(PreprocessSuffix): elementary/test_interpolate_layer.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(PreprocessSuffix) elementary/test_interpolate_layer.cpp
+
+$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix): loss/test_nll_loss_layer.cpp $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/LayerTest/loss/test_nll_loss_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(DependSuffix): loss/test_nll_loss_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(DependSuffix) -MM loss/test_nll_loss_layer.cpp
+
+$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(PreprocessSuffix): loss/test_nll_loss_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(PreprocessSuffix) loss/test_nll_loss_layer.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
