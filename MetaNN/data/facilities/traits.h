@@ -199,6 +199,15 @@ template <typename T>
 constexpr bool IsCardinal = IsScalar<T> || IsMatrix<T> || IsThreeDArray<T>;
 
 template <typename T>
+constexpr bool IsBatchCardinal = IsBatchScalar<T> || IsBatchMatrix<T> || IsBatchThreeDArray<T>;
+
+template <typename T>
+constexpr bool IsCardinalSequence = IsScalarSequence<T> || IsMatrixSequence<T> || IsThreeDArraySequence<T>;
+
+template <typename T>
+constexpr bool IsBatchCardinalSequence = IsBatchScalarSequence<T> || IsBatchMatrixSequence<T> || IsBatchThreeDArraySequence<T>;
+
+template <typename T>
 struct IsIterator_
 {   
     template <typename R>

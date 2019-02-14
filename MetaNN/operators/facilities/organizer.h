@@ -11,18 +11,16 @@ template <typename TOpTag, typename TOperHead, typename... TOperands>
 constexpr bool IsValidOper = (!IsInvalid<TOperHead>) &&
                              (std::is_same_v<DataCategory<TOperHead>, DataCategory<TOperands>> && ...);
 // data category calculation
-template <typename TOpTag, typename... TOperands>
-struct OperCategory_
-{
-    static_assert(DependencyFalse<TOpTag>, "Operand container is empty");
-};
-
-template <typename TOpTag, typename THeadCate, typename...TRemainCate>
-struct OperCategory_<TOpTag, THeadCate, TRemainCate...>
+template <typename THeadCate, typename...TRemainCate>
+struct PickCommonCategory_
 {
     static_assert((std::is_same_v<THeadCate, TRemainCate> && ...), "Data category mismatch.");
     using type = THeadCate;
 };
+
+template <typename TOpTag, typename... TOperands>
+struct OperCategory_ : PickCommonCategory_<TOperands...>
+{};
 
 template <typename TOpTag, typename... TOperands>
 using OperCateCal = typename OperCategory_<TOpTag, DataCategory<TOperands>...>::type;

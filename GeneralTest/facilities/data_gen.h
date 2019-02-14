@@ -18,18 +18,20 @@ inline auto GenMatrix(std::size_t r, std::size_t c, TElem start = 0, TElem scale
 }
 
 template <typename TElem>
-inline auto GenBatchMatrix(size_t r, size_t c, size_t d, float start = 0, float scale = 1)
+inline auto GenBatchMatrix(size_t p, size_t r, size_t c, TElem start = 0, TElem step = 1)
 {
     using namespace MetaNN;
-    Batch<TElem, MetaNN::DeviceTags::CPU, CategoryTags::Matrix> res(d, r, c);
-    for (size_t i = 0; i < r; ++i)
+    BatchMatrix<TElem, MetaNN::DeviceTags::CPU> res(p, r, c);
+    
+    TElem cur{};
+    for (size_t k = 0; k < p; ++k)
     {
-        for (size_t j = 0; j < c; ++j)
+        for (size_t i = 0; i < r; ++i)
         {
-            for (size_t k = 0; k < d; ++k)
+            for (size_t j = 0; j < c; ++j)
             {
-                res.SetValue(k, i, j, (TElem)(start * scale));
-                start += 1.0f;
+                res.SetValue(k, i, j, (TElem)(start + cur));
+                cur += step;
             }
         }
     }

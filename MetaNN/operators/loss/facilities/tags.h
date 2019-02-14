@@ -2,5 +2,5 @@
 
 namespace MetaNN::OpTags
 {
-    struct NLLLoss;
+    struct NLLLoss; struct NLLLossGrad;
 }

@@ -203,6 +203,8 @@
       <File Name="operators/loss/test_nll_loss.h"/>
       <File Name="operators/loss/test_nll_loss.cpp"/>
       <File Name="operators/loss/test_loss_operators.h"/>
+      <File Name="operators/loss/test_nll_loss_grad.h"/>
+      <File Name="operators/loss/test_nll_loss_grad.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
 </CodeLite_Project>

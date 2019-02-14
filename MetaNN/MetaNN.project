@@ -173,9 +173,6 @@
       <File Name="layers/compose/linear_layer.h"/>
       <File Name="layers/compose/single_layer.h"/>
     </VirtualDirectory>
-    <VirtualDirectory Name="cost">
-      <File Name="layers/cost/negative_log_likelihood_layer.h"/>
-    </VirtualDirectory>
     <VirtualDirectory Name="elementary">
       <File Name="layers/elementary/abs_layer.h"/>
       <File Name="layers/elementary/add_layer.h"/>
@@ -201,6 +198,9 @@
       <File Name="layers/recurrent/recurrent_layer.h"/>
     </VirtualDirectory>
     <File Name="layers/layers.h"/>
+    <VirtualDirectory Name="loss">
+      <File Name="layers/loss/nll_loss_layer.h"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="operators">
     <VirtualDirectory Name="facilities">
@@ -219,6 +219,7 @@
       </VirtualDirectory>
       <File Name="operators/loss/nll_loss.h"/>
       <File Name="operators/loss/loss.h"/>
+      <File Name="operators/loss/nll_loss_grad.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="cate_trans">
       <File Name="operators/cate_trans/tags.h"/>

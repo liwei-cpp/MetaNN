@@ -52,7 +52,7 @@
 
 #include <MetaNN/layers/recurrent/recurrent_layer.h>
 
-#include <MetaNN/layers/cost/negative_log_likelihood_layer.h>
+#include <MetaNN/layers/cost/nll_loss_layer.h>
 
 #include <MetaNN/model/param_initializer/constant_filler.h>
 #include <MetaNN/model/param_initializer/gaussian_filler.h>

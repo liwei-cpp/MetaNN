@@ -31,6 +31,11 @@ public:
         return 1;
     }
     
+    constexpr size_t CardinalCount() const noexcept
+    {
+        return 1;
+    }
+    
     constexpr size_t Index2Count() const noexcept
     {
         return 0;
@@ -62,6 +67,11 @@ public:
     size_t& ColNum() noexcept { return m_colNum; }
     
     size_t Count() const noexcept
+    {
+        return m_rowNum * m_colNum;
+    }
+    
+    size_t CardinalCount() const noexcept
     {
         return m_rowNum * m_colNum;
     }
@@ -101,6 +111,11 @@ public:
     size_t PageNum() const noexcept { return m_pageNum; }
     
     size_t Count() const noexcept
+    {
+        return m_pageNum * Shape<CategoryTags::Matrix>::Count();
+    }
+    
+    size_t CardinalCount() const noexcept
     {
         return m_pageNum * Shape<CategoryTags::Matrix>::Count();
     }
@@ -146,6 +161,11 @@ public:
     size_t Count() const noexcept
     {
         return BatchNum() * Shape<TSubCate>::Count();
+    }
+    
+    size_t CardinalCount() const noexcept
+    {
+        return Shape<TSubCate>::Count();
     }
     
     template <typename... TIndexParams>
@@ -195,6 +215,11 @@ public:
     size_t Count() const noexcept
     {
         return Length() * Shape<TSubCate>::Count();
+    }
+    
+    size_t CardinalCount() const noexcept
+    {
+        return Shape<TSubCate>::Count();
     }
     
     template <typename... TIndexParams>
@@ -254,6 +279,11 @@ public:
     {
         return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.end(), 0) *
                Shape<TSubCate>::Count();
+    }
+    
+    size_t CardinalCount() const noexcept
+    {
+        return Shape<TSubCate>::Count();
     }
     
     template <typename... TIndexParams>
@@ -320,6 +350,11 @@ public:
     size_t Count() const noexcept
     {
         return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.end(), 0);
+    }
+    
+    constexpr size_t CardinalCount() const noexcept
+    {
+        return 1;
     }
     
     template <typename... TIndexParams>
