@@ -259,10 +259,8 @@
       <File Name="operators/activations/activations.h"/>
       <File Name="operators/activations/relu.h"/>
       <File Name="operators/activations/sigmoid.h"/>
-      <File Name="operators/activations/sigmoid_grad.h"/>
       <File Name="operators/activations/tags.h"/>
       <File Name="operators/activations/tanh.h"/>
-      <File Name="operators/activations/tanh_grad.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">

@@ -161,26 +161,10 @@
     <File Name="operators/test_operators.h"/>
     <File Name="operators/test_collapse.h"/>
     <File Name="operators/test_collapse.cpp"/>
-    <File Name="operators/test_sign.h"/>
-    <File Name="operators/test_sign.cpp"/>
-    <File Name="operators/test_add.h"/>
-    <File Name="operators/test_add.cpp"/>
-    <File Name="operators/test_substract.h"/>
-    <File Name="operators/test_substract.cpp"/>
-    <File Name="operators/test_multiply.h"/>
-    <File Name="operators/test_multiply.cpp"/>
-    <File Name="operators/test_divide.h"/>
-    <File Name="operators/test_divide.cpp"/>
-    <File Name="operators/test_asin.h"/>
-    <File Name="operators/test_asin.cpp"/>
-    <File Name="operators/test_asin_grad.h"/>
-    <File Name="operators/test_asin_grad.cpp"/>
     <File Name="operators/test_transpose.h"/>
     <File Name="operators/test_transpose.cpp"/>
     <File Name="operators/test_dot.h"/>
     <File Name="operators/test_dot.cpp"/>
-    <File Name="operators/test_interpolate.h"/>
-    <File Name="operators/test_interpolate.cpp"/>
     <VirtualDirectory Name="loss">
       <File Name="operators/loss/test_nll_loss.cpp"/>
       <File Name="operators/loss/test_loss_operators.h"/>
@@ -191,15 +175,20 @@
       <File Name="operators/elementwise/test_abs.cpp"/>
       <File Name="operators/elementwise/test_acos.cpp"/>
       <File Name="operators/elementwise/test_acos_grad.cpp"/>
+      <File Name="operators/elementwise/test_add.cpp"/>
+      <File Name="operators/elementwise/test_asin.cpp"/>
+      <File Name="operators/elementwise/test_asin_grad.cpp"/>
+      <File Name="operators/elementwise/test_divide.cpp"/>
+      <File Name="operators/elementwise/test_interpolate.cpp"/>
+      <File Name="operators/elementwise/test_multiply.cpp"/>
+      <File Name="operators/elementwise/test_sign.cpp"/>
+      <File Name="operators/elementwise/test_substract.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="activation">
       <File Name="operators/activation/test_activation_operators.h"/>
       <File Name="operators/activation/test_sigmoid.cpp"/>
-      <File Name="operators/activation/test_sigmoid_grad.cpp"/>
       <File Name="operators/activation/test_tanh.cpp"/>
-      <File Name="operators/activation/test_tanh_grad.cpp"/>
       <File Name="operators/activation/test_softmax.cpp"/>
-      <File Name="operators/activation/test_softmax_grad.cpp"/>
       <File Name="operators/activation/test_relu.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>

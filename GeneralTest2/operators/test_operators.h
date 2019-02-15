@@ -2,16 +2,6 @@
 #include <operators/test_duplicate.h>
 #include <operators/test_collapse.h>
 
-// elementwise operators
-#include <operators/test_add.h>
-#include <operators/test_asin.h>
-#include <operators/test_asin_grad.h>
-#include <operators/test_divide.h>
-#include <operators/test_interpolate.h>
-#include <operators/test_multiply.h>
-#include <operators/test_sign.h>
-#include <operators/test_substract.h>
-
 // mutation operators
 #include <operators/test_transpose.h>
 
@@ -28,17 +18,6 @@ namespace Test::Operators
     {
         test_duplicate();
         test_collapse();
-        
-        // elementwise operators
-        test_abs();
-        test_acos();        test_acos_grad();
-        test_add();
-        test_asin();        test_asin_grad();
-        test_divide();
-        test_interpolate();
-        test_multiply();
-        test_sign();
-        test_substract();
         
         // mutation operators
         test_transpose();
