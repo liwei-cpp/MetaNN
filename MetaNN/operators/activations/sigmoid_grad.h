@@ -3,13 +3,13 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/elementwise/tags.h>
-#include <MetaNN/operators/facilities/tail_calculator.h>
+#include <MetaNN/operators/activations/tags.h>
+#include <MetaNN/operators/facilities/operator_frame.h>
 #include <stdexcept>
 
 namespace MetaNN
 {
-namespace OperTanhGrad::NSCaseGen
+namespace OperSigmoidGrad::NSCaseGen
 {
 template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
@@ -48,7 +48,7 @@ public:
         
         for (size_t i = 0; i < count; ++i)
         {
-            mem_out[i] = mem_grad[i] * (1 - mem_in[i] * mem_in[i]);
+            mem_out[i] = mem_grad[i] * mem_in[i] * (1 - mem_in[i]);
         }
         m_outputHandle.SetEval();
     }
@@ -61,23 +61,23 @@ private:
 }
 
 template <>
-struct OperSeq_<OpTags::TanhGrad>
+struct OperSeq_<OpTags::SigmoidGrad>
 {
-    using type = OperSeqContainer<TailCalculator<OperTanhGrad::NSCaseGen::EvalUnit>>;
+    using type = OperSeqContainer<TailCalculator<OperSigmoidGrad::NSCaseGen::EvalUnit>>;
 };
 
 template <typename TGrad, typename TInput,
-          typename = std::enable_if_t<IsValidOper<OpTags::TanhGrad, TGrad, TInput>>>
-auto TanhGrad (TGrad&& p_grad, TInput&& p_input)
+          typename = std::enable_if_t<IsValidOper<OpTags::SigmoidGrad, TGrad, TInput>>>
+auto SigmoidGrad (TGrad&& p_grad, TInput&& p_input)
 {
     if (p_grad.Shape() != p_input.Shape())
     {
-        throw std::runtime_error("TanhGrad error: operands' shape mismatch.");
+        throw std::runtime_error("SigmoidGrad error: operands' shape mismatch.");
     }
     
     using rawOp1 = RemConstRef<TGrad>;
     using rawOp2 = RemConstRef<TInput>;
-    using ResType = Operator<OpTags::TanhGrad, rawOp1, rawOp2>;
+    using ResType = Operator<OpTags::SigmoidGrad, rawOp1, rawOp2>;
     return ResType(std::forward<TGrad>(p_grad), std::forward<TInput>(p_input));
 }
 }

@@ -3,21 +3,14 @@
 #include <operators/test_collapse.h>
 
 // elementwise operators
-#include <operators/test_abs.h>
-#include <operators/test_acos.h>
-#include <operators/test_acos_grad.h>
 #include <operators/test_add.h>
 #include <operators/test_asin.h>
 #include <operators/test_asin_grad.h>
 #include <operators/test_divide.h>
 #include <operators/test_interpolate.h>
 #include <operators/test_multiply.h>
-#include <operators/test_sigmoid.h>
-#include <operators/test_sigmoid_grad.h>
 #include <operators/test_sign.h>
 #include <operators/test_substract.h>
-#include <operators/test_tanh.h>
-#include <operators/test_tanh_grad.h>
 
 // mutation operators
 #include <operators/test_transpose.h>
@@ -25,10 +18,8 @@
 // blas operators
 #include <operators/test_dot.h>
 
-// non-linear activation operators
-#include <operators/test_softmax.h>
-#include <operators/test_softmax_grad.h>
-
+#include <operators/activation/test_activation_operators.h>
+#include <operators/elementwise/test_elementwise_operators.h>
 #include <operators/loss/test_loss_operators.h>
 
 namespace Test::Operators
@@ -46,10 +37,8 @@ namespace Test::Operators
         test_divide();
         test_interpolate();
         test_multiply();
-        test_sigmoid();     test_sigmoid_grad();
         test_sign();
         test_substract();
-        test_tanh();        test_tanh_grad();
         
         // mutation operators
         test_transpose();
@@ -57,10 +46,8 @@ namespace Test::Operators
         // blas operators
         test_dot();
         
-        // non-linear activation operators
-        test_softmax();
-        test_softmax_grad();
-        
+        test_activation_operators();
+        test_elementwise_operators();
         test_loss_operators();
     }
 }

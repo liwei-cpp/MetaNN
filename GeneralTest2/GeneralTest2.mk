@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=liwei
-Date                   :=14/02/19
+Date                   :=15/02/19
 CodeLitePath           :=/home/liwei/.codelite
 LinkerName             :=g++
 SharedObjectLinkerName :=g++ -shared -fPIC
@@ -60,10 +60,10 @@ AS       := as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_test_dynamic.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_duplicate.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_collapse.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_abs.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_sign.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_add.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_substract.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_multiply.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_divide.cpp$(ObjectSuffix) \
-	$(IntermediateDirectory)/operators_test_acos.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_acos_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_sigmoid.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_sigmoid_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_asin.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_asin_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_tanh.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_tanh_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_transpose.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_dot.cpp$(ObjectSuffix) \
-	$(IntermediateDirectory)/operators_test_interpolate.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_softmax.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_softmax_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_test_static_batch.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_test_dynamic_batch.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_sequence_test_static_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_sequence_test_dynamic_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_sequence_test_static_batch_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_sequence_test_dynamic_batch_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(ObjectSuffix) \
-	$(IntermediateDirectory)/operators_loss_test_nll_loss_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_zero_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_trival_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_one_hot_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_test_dynamic.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_duplicate.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_collapse.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_sign.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_add.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_substract.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_multiply.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_divide.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_asin.cpp$(ObjectSuffix) \
+	$(IntermediateDirectory)/operators_test_asin_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_transpose.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_dot.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_test_interpolate.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_test_static_batch.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_test_dynamic_batch.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_sequence_test_static_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_sequence_test_dynamic_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_sequence_test_static_batch_sequence.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_batch_sequence_test_dynamic_batch_sequence.cpp$(ObjectSuffix) \
+	$(IntermediateDirectory)/operators_loss_test_nll_loss.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_loss_test_nll_loss_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_elementwise_test_abs.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_elementwise_test_acos.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_elementwise_test_acos_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_activation_test_sigmoid.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_activation_test_sigmoid_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_activation_test_tanh.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_activation_test_tanh_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_activation_test_softmax.cpp$(ObjectSuffix) \
+	$(IntermediateDirectory)/operators_activation_test_softmax_grad.cpp$(ObjectSuffix) $(IntermediateDirectory)/operators_activation_test_relu.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_zero_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_trival_matrix.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_matrix_test_one_hot_vector.cpp$(ObjectSuffix) $(IntermediateDirectory)/data_cardinal_3d_array_test_3d_array.cpp$(ObjectSuffix) 
 
 
 
@@ -126,14 +126,6 @@ $(IntermediateDirectory)/operators_test_collapse.cpp$(DependSuffix): operators/t
 $(IntermediateDirectory)/operators_test_collapse.cpp$(PreprocessSuffix): operators/test_collapse.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_collapse.cpp$(PreprocessSuffix) operators/test_collapse.cpp
 
-$(IntermediateDirectory)/operators_test_abs.cpp$(ObjectSuffix): operators/test_abs.cpp $(IntermediateDirectory)/operators_test_abs.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_abs.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_abs.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/operators_test_abs.cpp$(DependSuffix): operators/test_abs.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_test_abs.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_test_abs.cpp$(DependSuffix) -MM operators/test_abs.cpp
-
-$(IntermediateDirectory)/operators_test_abs.cpp$(PreprocessSuffix): operators/test_abs.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_abs.cpp$(PreprocessSuffix) operators/test_abs.cpp
-
 $(IntermediateDirectory)/operators_test_sign.cpp$(ObjectSuffix): operators/test_sign.cpp $(IntermediateDirectory)/operators_test_sign.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_sign.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_sign.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/operators_test_sign.cpp$(DependSuffix): operators/test_sign.cpp
@@ -174,38 +166,6 @@ $(IntermediateDirectory)/operators_test_divide.cpp$(DependSuffix): operators/tes
 $(IntermediateDirectory)/operators_test_divide.cpp$(PreprocessSuffix): operators/test_divide.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_divide.cpp$(PreprocessSuffix) operators/test_divide.cpp
 
-$(IntermediateDirectory)/operators_test_acos.cpp$(ObjectSuffix): operators/test_acos.cpp $(IntermediateDirectory)/operators_test_acos.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_acos.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_acos.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/operators_test_acos.cpp$(DependSuffix): operators/test_acos.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_test_acos.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_test_acos.cpp$(DependSuffix) -MM operators/test_acos.cpp
-
-$(IntermediateDirectory)/operators_test_acos.cpp$(PreprocessSuffix): operators/test_acos.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_acos.cpp$(PreprocessSuffix) operators/test_acos.cpp
-
-$(IntermediateDirectory)/operators_test_acos_grad.cpp$(ObjectSuffix): operators/test_acos_grad.cpp $(IntermediateDirectory)/operators_test_acos_grad.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_acos_grad.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_acos_grad.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/operators_test_acos_grad.cpp$(DependSuffix): operators/test_acos_grad.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_test_acos_grad.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_test_acos_grad.cpp$(DependSuffix) -MM operators/test_acos_grad.cpp
-
-$(IntermediateDirectory)/operators_test_acos_grad.cpp$(PreprocessSuffix): operators/test_acos_grad.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_acos_grad.cpp$(PreprocessSuffix) operators/test_acos_grad.cpp
-
-$(IntermediateDirectory)/operators_test_sigmoid.cpp$(ObjectSuffix): operators/test_sigmoid.cpp $(IntermediateDirectory)/operators_test_sigmoid.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_sigmoid.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_sigmoid.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/operators_test_sigmoid.cpp$(DependSuffix): operators/test_sigmoid.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_test_sigmoid.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_test_sigmoid.cpp$(DependSuffix) -MM operators/test_sigmoid.cpp
-
-$(IntermediateDirectory)/operators_test_sigmoid.cpp$(PreprocessSuffix): operators/test_sigmoid.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_sigmoid.cpp$(PreprocessSuffix) operators/test_sigmoid.cpp
-
-$(IntermediateDirectory)/operators_test_sigmoid_grad.cpp$(ObjectSuffix): operators/test_sigmoid_grad.cpp $(IntermediateDirectory)/operators_test_sigmoid_grad.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_sigmoid_grad.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_sigmoid_grad.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/operators_test_sigmoid_grad.cpp$(DependSuffix): operators/test_sigmoid_grad.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_test_sigmoid_grad.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_test_sigmoid_grad.cpp$(DependSuffix) -MM operators/test_sigmoid_grad.cpp
-
-$(IntermediateDirectory)/operators_test_sigmoid_grad.cpp$(PreprocessSuffix): operators/test_sigmoid_grad.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_sigmoid_grad.cpp$(PreprocessSuffix) operators/test_sigmoid_grad.cpp
-
 $(IntermediateDirectory)/operators_test_asin.cpp$(ObjectSuffix): operators/test_asin.cpp $(IntermediateDirectory)/operators_test_asin.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_asin.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_asin.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/operators_test_asin.cpp$(DependSuffix): operators/test_asin.cpp
@@ -221,22 +181,6 @@ $(IntermediateDirectory)/operators_test_asin_grad.cpp$(DependSuffix): operators/
 
 $(IntermediateDirectory)/operators_test_asin_grad.cpp$(PreprocessSuffix): operators/test_asin_grad.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_asin_grad.cpp$(PreprocessSuffix) operators/test_asin_grad.cpp
-
-$(IntermediateDirectory)/operators_test_tanh.cpp$(ObjectSuffix): operators/test_tanh.cpp $(IntermediateDirectory)/operators_test_tanh.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_tanh.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_tanh.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/operators_test_tanh.cpp$(DependSuffix): operators/test_tanh.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_test_tanh.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_test_tanh.cpp$(DependSuffix) -MM operators/test_tanh.cpp
-
-$(IntermediateDirectory)/operators_test_tanh.cpp$(PreprocessSuffix): operators/test_tanh.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_tanh.cpp$(PreprocessSuffix) operators/test_tanh.cpp
-
-$(IntermediateDirectory)/operators_test_tanh_grad.cpp$(ObjectSuffix): operators/test_tanh_grad.cpp $(IntermediateDirectory)/operators_test_tanh_grad.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_tanh_grad.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_tanh_grad.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/operators_test_tanh_grad.cpp$(DependSuffix): operators/test_tanh_grad.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_test_tanh_grad.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_test_tanh_grad.cpp$(DependSuffix) -MM operators/test_tanh_grad.cpp
-
-$(IntermediateDirectory)/operators_test_tanh_grad.cpp$(PreprocessSuffix): operators/test_tanh_grad.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_tanh_grad.cpp$(PreprocessSuffix) operators/test_tanh_grad.cpp
 
 $(IntermediateDirectory)/operators_test_transpose.cpp$(ObjectSuffix): operators/test_transpose.cpp $(IntermediateDirectory)/operators_test_transpose.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_transpose.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_transpose.cpp$(ObjectSuffix) $(IncludePath)
@@ -261,22 +205,6 @@ $(IntermediateDirectory)/operators_test_interpolate.cpp$(DependSuffix): operator
 
 $(IntermediateDirectory)/operators_test_interpolate.cpp$(PreprocessSuffix): operators/test_interpolate.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_interpolate.cpp$(PreprocessSuffix) operators/test_interpolate.cpp
-
-$(IntermediateDirectory)/operators_test_softmax.cpp$(ObjectSuffix): operators/test_softmax.cpp $(IntermediateDirectory)/operators_test_softmax.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_softmax.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_softmax.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/operators_test_softmax.cpp$(DependSuffix): operators/test_softmax.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_test_softmax.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_test_softmax.cpp$(DependSuffix) -MM operators/test_softmax.cpp
-
-$(IntermediateDirectory)/operators_test_softmax.cpp$(PreprocessSuffix): operators/test_softmax.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_softmax.cpp$(PreprocessSuffix) operators/test_softmax.cpp
-
-$(IntermediateDirectory)/operators_test_softmax_grad.cpp$(ObjectSuffix): operators/test_softmax_grad.cpp $(IntermediateDirectory)/operators_test_softmax_grad.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/test_softmax_grad.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_test_softmax_grad.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/operators_test_softmax_grad.cpp$(DependSuffix): operators/test_softmax_grad.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_test_softmax_grad.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_test_softmax_grad.cpp$(DependSuffix) -MM operators/test_softmax_grad.cpp
-
-$(IntermediateDirectory)/operators_test_softmax_grad.cpp$(PreprocessSuffix): operators/test_softmax_grad.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_test_softmax_grad.cpp$(PreprocessSuffix) operators/test_softmax_grad.cpp
 
 $(IntermediateDirectory)/data_batch_test_static_batch.cpp$(ObjectSuffix): data/batch/test_static_batch.cpp $(IntermediateDirectory)/data_batch_test_static_batch.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/data/batch/test_static_batch.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/data_batch_test_static_batch.cpp$(ObjectSuffix) $(IncludePath)
@@ -341,6 +269,86 @@ $(IntermediateDirectory)/operators_loss_test_nll_loss_grad.cpp$(DependSuffix): o
 
 $(IntermediateDirectory)/operators_loss_test_nll_loss_grad.cpp$(PreprocessSuffix): operators/loss/test_nll_loss_grad.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_loss_test_nll_loss_grad.cpp$(PreprocessSuffix) operators/loss/test_nll_loss_grad.cpp
+
+$(IntermediateDirectory)/operators_elementwise_test_abs.cpp$(ObjectSuffix): operators/elementwise/test_abs.cpp $(IntermediateDirectory)/operators_elementwise_test_abs.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/elementwise/test_abs.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_elementwise_test_abs.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_elementwise_test_abs.cpp$(DependSuffix): operators/elementwise/test_abs.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_elementwise_test_abs.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_elementwise_test_abs.cpp$(DependSuffix) -MM operators/elementwise/test_abs.cpp
+
+$(IntermediateDirectory)/operators_elementwise_test_abs.cpp$(PreprocessSuffix): operators/elementwise/test_abs.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_elementwise_test_abs.cpp$(PreprocessSuffix) operators/elementwise/test_abs.cpp
+
+$(IntermediateDirectory)/operators_elementwise_test_acos.cpp$(ObjectSuffix): operators/elementwise/test_acos.cpp $(IntermediateDirectory)/operators_elementwise_test_acos.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/elementwise/test_acos.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_elementwise_test_acos.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_elementwise_test_acos.cpp$(DependSuffix): operators/elementwise/test_acos.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_elementwise_test_acos.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_elementwise_test_acos.cpp$(DependSuffix) -MM operators/elementwise/test_acos.cpp
+
+$(IntermediateDirectory)/operators_elementwise_test_acos.cpp$(PreprocessSuffix): operators/elementwise/test_acos.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_elementwise_test_acos.cpp$(PreprocessSuffix) operators/elementwise/test_acos.cpp
+
+$(IntermediateDirectory)/operators_elementwise_test_acos_grad.cpp$(ObjectSuffix): operators/elementwise/test_acos_grad.cpp $(IntermediateDirectory)/operators_elementwise_test_acos_grad.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/elementwise/test_acos_grad.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_elementwise_test_acos_grad.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_elementwise_test_acos_grad.cpp$(DependSuffix): operators/elementwise/test_acos_grad.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_elementwise_test_acos_grad.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_elementwise_test_acos_grad.cpp$(DependSuffix) -MM operators/elementwise/test_acos_grad.cpp
+
+$(IntermediateDirectory)/operators_elementwise_test_acos_grad.cpp$(PreprocessSuffix): operators/elementwise/test_acos_grad.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_elementwise_test_acos_grad.cpp$(PreprocessSuffix) operators/elementwise/test_acos_grad.cpp
+
+$(IntermediateDirectory)/operators_activation_test_sigmoid.cpp$(ObjectSuffix): operators/activation/test_sigmoid.cpp $(IntermediateDirectory)/operators_activation_test_sigmoid.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/activation/test_sigmoid.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_activation_test_sigmoid.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_activation_test_sigmoid.cpp$(DependSuffix): operators/activation/test_sigmoid.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_activation_test_sigmoid.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_activation_test_sigmoid.cpp$(DependSuffix) -MM operators/activation/test_sigmoid.cpp
+
+$(IntermediateDirectory)/operators_activation_test_sigmoid.cpp$(PreprocessSuffix): operators/activation/test_sigmoid.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_activation_test_sigmoid.cpp$(PreprocessSuffix) operators/activation/test_sigmoid.cpp
+
+$(IntermediateDirectory)/operators_activation_test_sigmoid_grad.cpp$(ObjectSuffix): operators/activation/test_sigmoid_grad.cpp $(IntermediateDirectory)/operators_activation_test_sigmoid_grad.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/activation/test_sigmoid_grad.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_activation_test_sigmoid_grad.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_activation_test_sigmoid_grad.cpp$(DependSuffix): operators/activation/test_sigmoid_grad.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_activation_test_sigmoid_grad.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_activation_test_sigmoid_grad.cpp$(DependSuffix) -MM operators/activation/test_sigmoid_grad.cpp
+
+$(IntermediateDirectory)/operators_activation_test_sigmoid_grad.cpp$(PreprocessSuffix): operators/activation/test_sigmoid_grad.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_activation_test_sigmoid_grad.cpp$(PreprocessSuffix) operators/activation/test_sigmoid_grad.cpp
+
+$(IntermediateDirectory)/operators_activation_test_tanh.cpp$(ObjectSuffix): operators/activation/test_tanh.cpp $(IntermediateDirectory)/operators_activation_test_tanh.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/activation/test_tanh.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_activation_test_tanh.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_activation_test_tanh.cpp$(DependSuffix): operators/activation/test_tanh.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_activation_test_tanh.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_activation_test_tanh.cpp$(DependSuffix) -MM operators/activation/test_tanh.cpp
+
+$(IntermediateDirectory)/operators_activation_test_tanh.cpp$(PreprocessSuffix): operators/activation/test_tanh.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_activation_test_tanh.cpp$(PreprocessSuffix) operators/activation/test_tanh.cpp
+
+$(IntermediateDirectory)/operators_activation_test_tanh_grad.cpp$(ObjectSuffix): operators/activation/test_tanh_grad.cpp $(IntermediateDirectory)/operators_activation_test_tanh_grad.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/activation/test_tanh_grad.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_activation_test_tanh_grad.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_activation_test_tanh_grad.cpp$(DependSuffix): operators/activation/test_tanh_grad.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_activation_test_tanh_grad.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_activation_test_tanh_grad.cpp$(DependSuffix) -MM operators/activation/test_tanh_grad.cpp
+
+$(IntermediateDirectory)/operators_activation_test_tanh_grad.cpp$(PreprocessSuffix): operators/activation/test_tanh_grad.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_activation_test_tanh_grad.cpp$(PreprocessSuffix) operators/activation/test_tanh_grad.cpp
+
+$(IntermediateDirectory)/operators_activation_test_softmax.cpp$(ObjectSuffix): operators/activation/test_softmax.cpp $(IntermediateDirectory)/operators_activation_test_softmax.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/activation/test_softmax.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_activation_test_softmax.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_activation_test_softmax.cpp$(DependSuffix): operators/activation/test_softmax.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_activation_test_softmax.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_activation_test_softmax.cpp$(DependSuffix) -MM operators/activation/test_softmax.cpp
+
+$(IntermediateDirectory)/operators_activation_test_softmax.cpp$(PreprocessSuffix): operators/activation/test_softmax.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_activation_test_softmax.cpp$(PreprocessSuffix) operators/activation/test_softmax.cpp
+
+$(IntermediateDirectory)/operators_activation_test_softmax_grad.cpp$(ObjectSuffix): operators/activation/test_softmax_grad.cpp $(IntermediateDirectory)/operators_activation_test_softmax_grad.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/activation/test_softmax_grad.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_activation_test_softmax_grad.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_activation_test_softmax_grad.cpp$(DependSuffix): operators/activation/test_softmax_grad.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_activation_test_softmax_grad.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_activation_test_softmax_grad.cpp$(DependSuffix) -MM operators/activation/test_softmax_grad.cpp
+
+$(IntermediateDirectory)/operators_activation_test_softmax_grad.cpp$(PreprocessSuffix): operators/activation/test_softmax_grad.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_activation_test_softmax_grad.cpp$(PreprocessSuffix) operators/activation/test_softmax_grad.cpp
+
+$(IntermediateDirectory)/operators_activation_test_relu.cpp$(ObjectSuffix): operators/activation/test_relu.cpp $(IntermediateDirectory)/operators_activation_test_relu.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/operators/activation/test_relu.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/operators_activation_test_relu.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/operators_activation_test_relu.cpp$(DependSuffix): operators/activation/test_relu.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/operators_activation_test_relu.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/operators_activation_test_relu.cpp$(DependSuffix) -MM operators/activation/test_relu.cpp
+
+$(IntermediateDirectory)/operators_activation_test_relu.cpp$(PreprocessSuffix): operators/activation/test_relu.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/operators_activation_test_relu.cpp$(PreprocessSuffix) operators/activation/test_relu.cpp
 
 $(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(ObjectSuffix): data/cardinal/scalar/test_scalar.cpp $(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/GeneralTest2/data/cardinal/scalar/test_scalar.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/data_cardinal_scalar_test_scalar.cpp$(ObjectSuffix) $(IncludePath)

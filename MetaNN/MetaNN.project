@@ -240,12 +240,8 @@
       <File Name="operators/elementwise/divide.h"/>
       <File Name="operators/elementwise/interpolate.h"/>
       <File Name="operators/elementwise/multiply.h"/>
-      <File Name="operators/elementwise/sigmoid.h"/>
-      <File Name="operators/elementwise/sigmoid_grad.h"/>
       <File Name="operators/elementwise/sign.h"/>
       <File Name="operators/elementwise/substract.h"/>
-      <File Name="operators/elementwise/tanh.h"/>
-      <File Name="operators/elementwise/tanh_grad.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="mutating">
       <File Name="operators/mutating/transpose.h"/>
@@ -260,8 +256,13 @@
     <VirtualDirectory Name="activations">
       <File Name="operators/activations/softmax.h"/>
       <File Name="operators/activations/softmax_grad.h"/>
-      <File Name="operators/activations/tags.h"/>
       <File Name="operators/activations/activations.h"/>
+      <File Name="operators/activations/relu.h"/>
+      <File Name="operators/activations/sigmoid.h"/>
+      <File Name="operators/activations/sigmoid_grad.h"/>
+      <File Name="operators/activations/tags.h"/>
+      <File Name="operators/activations/tanh.h"/>
+      <File Name="operators/activations/tanh_grad.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">

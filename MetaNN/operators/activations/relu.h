@@ -3,14 +3,14 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/elementwise/tags.h>
+#include <MetaNN/operators/activations/tags.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
 #include <cassert>
 #include <type_traits>
 
 namespace MetaNN
 {
-namespace OperSigmoid::NSCaseGen
+namespace OperReLU::NSCaseGen
 {
 template <typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
@@ -41,9 +41,10 @@ public:
                 
         static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
         
+        const ElementType zero{};
         for (size_t i = 0; i < count; ++i)
         {
-            mem_out[i] = (ElementType)(1 / (1 + exp(-mem_in[i])));
+            mem_out[i] = (mem_in[i] > zero) ? mem_in[i] : zero;
         }
         m_outputHandle.SetEval();
     }
@@ -55,17 +56,17 @@ private:
 }
 
 template <>
-struct OperSeq_<OpTags::Sigmoid>
+struct OperSeq_<OpTags::ReLU>
 {
-    using type = OperSeqContainer<TailCalculator<OperSigmoid::NSCaseGen::EvalUnit>>;
+    using type = OperSeqContainer<TailCalculator<OperReLU::NSCaseGen::EvalUnit>>;
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::Sigmoid, TP>>>
-auto Sigmoid(TP&& p_m)
+          typename = std::enable_if_t<IsValidOper<OpTags::ReLU, TP>>>
+auto ReLU(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
-    using ResType = Operator<OpTags::Sigmoid, rawM>;
+    using ResType = Operator<OpTags::ReLU, rawM>;
     return ResType(std::forward<TP>(p_m));
 }
 }
