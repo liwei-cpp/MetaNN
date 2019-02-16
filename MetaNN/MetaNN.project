@@ -250,7 +250,6 @@
     </VirtualDirectory>
     <VirtualDirectory Name="blas">
       <File Name="operators/blas/dot.h"/>
-      <File Name="operators/blas/tags.h"/>
       <File Name="operators/blas/blas.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="activations">

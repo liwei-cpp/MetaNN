@@ -156,28 +156,17 @@
     </Configuration>
   </Settings>
   <VirtualDirectory Name="operators">
-    <File Name="operators/test_duplicate.h"/>
-    <File Name="operators/test_duplicate.cpp"/>
     <File Name="operators/test_operators.h"/>
-    <File Name="operators/test_collapse.h"/>
-    <File Name="operators/test_collapse.cpp"/>
-    <File Name="operators/test_transpose.h"/>
-    <File Name="operators/test_transpose.cpp"/>
-    <File Name="operators/test_dot.h"/>
-    <File Name="operators/test_dot.cpp"/>
     <VirtualDirectory Name="loss">
       <File Name="operators/loss/test_nll_loss.cpp"/>
       <File Name="operators/loss/test_loss_operators.h"/>
-      <File Name="operators/loss/test_nll_loss_grad.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="elementwise">
       <File Name="operators/elementwise/test_elementwise_operators.h"/>
       <File Name="operators/elementwise/test_abs.cpp"/>
       <File Name="operators/elementwise/test_acos.cpp"/>
-      <File Name="operators/elementwise/test_acos_grad.cpp"/>
       <File Name="operators/elementwise/test_add.cpp"/>
       <File Name="operators/elementwise/test_asin.cpp"/>
-      <File Name="operators/elementwise/test_asin_grad.cpp"/>
       <File Name="operators/elementwise/test_divide.cpp"/>
       <File Name="operators/elementwise/test_interpolate.cpp"/>
       <File Name="operators/elementwise/test_multiply.cpp"/>
@@ -190,6 +179,19 @@
       <File Name="operators/activation/test_tanh.cpp"/>
       <File Name="operators/activation/test_softmax.cpp"/>
       <File Name="operators/activation/test_relu.cpp"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="cate_trans">
+      <File Name="operators/cate_trans/test_collapse.cpp"/>
+      <File Name="operators/cate_trans/test_duplicate.cpp"/>
+      <File Name="operators/cate_trans/test_cate_trans_operators.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="blas">
+      <File Name="operators/blas/test_dot.cpp"/>
+      <File Name="operators/blas/test_blas_operators.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="mutating">
+      <File Name="operators/mutating/test_mutating_operators.h"/>
+      <File Name="operators/mutating/test_transpose.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
 </CodeLite_Project>

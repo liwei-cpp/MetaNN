@@ -3,11 +3,15 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/blas/tags.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
 #include <cassert>
 #include <type_traits>
+
+namespace MetaNN::OpTags
+{
+    struct Dot;
+}
 
 namespace MetaNN
 {
