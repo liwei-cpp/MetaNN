@@ -152,6 +152,28 @@ namespace
         assert(fabs(res[1](0, 2) + 0.2398) < 0.001f);
         cout << "done" << endl;
     }
+    
+    void test_softmax_grad_case3()
+    {
+        cout << "Test softmax grad case 3 (NLL with one hot weight vector) ...\t";
+
+        auto softmaxRes = GenMatrix<CheckElement>(1, 20, 0, 0.001f);
+        auto grad = Scalar<CheckElement, CheckDevice>(0.7f);
+        auto weight = OneHotVector<CheckElement, CheckDevice>(20, 3);
+        auto nllLossBP = NLLLossGrad(grad, weight, softmaxRes);
+        auto softmaxBP = SoftmaxGrad(nllLossBP, softmaxRes);
+        auto check = Evaluate(softmaxBP);
+        for (size_t i = 0; i < 20; ++i)
+        {
+            CheckElement compare = softmaxRes(0, i);
+            if (i == 3)
+            {
+                compare -= 1;
+            }
+            assert(fabs(check(0, i) - compare * 0.7f) <= 0.0001);
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Operators
@@ -160,5 +182,6 @@ namespace Test::Operators
     {
         test_softmax_grad_case1();
         test_softmax_grad_case2();
+        test_softmax_grad_case3();
     }
 }
