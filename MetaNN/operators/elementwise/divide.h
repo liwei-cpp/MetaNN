@@ -3,10 +3,15 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/elementwise/tags.h>
 #include <MetaNN/operators/facilities/instance_id.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
 #include <stdexcept>
+
+namespace MetaNN::OpTags
+{
+    struct Divide;
+    struct DivideByNumber;
+}
 
 namespace MetaNN
 {

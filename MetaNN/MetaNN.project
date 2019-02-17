@@ -216,24 +216,18 @@
     <VirtualDirectory Name="loss">
       <VirtualDirectory Name="facilities">
         <File Name="operators/loss/facilities/organizer.h"/>
-        <File Name="operators/loss/facilities/tags.h"/>
       </VirtualDirectory>
       <File Name="operators/loss/nll_loss.h"/>
       <File Name="operators/loss/loss.h"/>
-      <File Name="operators/loss/nll_loss_grad.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="cate_trans">
-      <File Name="operators/cate_trans/tags.h"/>
       <File Name="operators/cate_trans/duplicate.h"/>
       <File Name="operators/cate_trans/collapse.h"/>
       <File Name="operators/cate_trans/cate_trans.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="elementwise">
-      <File Name="operators/elementwise/tags.h"/>
       <File Name="operators/elementwise/elementwise.h"/>
-      <File Name="operators/elementwise/asin_grad.h"/>
       <File Name="operators/elementwise/asin.h"/>
-      <File Name="operators/elementwise/acos_grad.h"/>
       <File Name="operators/elementwise/acos.h"/>
       <File Name="operators/elementwise/abs.h"/>
       <File Name="operators/elementwise/add.h"/>
@@ -245,7 +239,6 @@
     </VirtualDirectory>
     <VirtualDirectory Name="mutating">
       <File Name="operators/mutating/transpose.h"/>
-      <File Name="operators/mutating/tags.h"/>
       <File Name="operators/mutating/mutating.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="blas">

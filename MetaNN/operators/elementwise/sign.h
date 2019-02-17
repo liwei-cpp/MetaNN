@@ -3,10 +3,14 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/operators/elementwise/tags.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <cassert>
 #include <type_traits>
+
+namespace MetaNN::OpTags
+{
+    struct Sign;
+}
 
 namespace MetaNN
 {

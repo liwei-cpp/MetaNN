@@ -3,12 +3,16 @@
 #include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/operators/cate_trans/tags.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <cassert>
 #include <cstring>
 #include <type_traits>
 #include <utility>
+
+namespace MetaNN::OpTags
+{
+    struct Duplicate;
+}
 
 namespace MetaNN
 {

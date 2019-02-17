@@ -4,7 +4,6 @@
 #include <MetaNN/evaluate/facilities/eval_plan.h>
 #include <MetaNN/evaluate/facilities/eval_unit.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
-#include <MetaNN/operators/loss/nll_loss_grad.h>
 #include <cassert>
 #include <cmath>
 #include <type_traits>
@@ -13,6 +12,9 @@ namespace MetaNN::OpTags
 {
     struct Softmax;
     struct SoftmaxGrad;
+
+    // optimization assistant tags
+    struct NLLLossGrad;
 }
 
 namespace MetaNN
