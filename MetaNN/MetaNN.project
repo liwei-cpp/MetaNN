@@ -254,7 +254,6 @@
     </VirtualDirectory>
     <VirtualDirectory Name="activations">
       <File Name="operators/activations/softmax.h"/>
-      <File Name="operators/activations/softmax_grad.h"/>
       <File Name="operators/activations/activations.h"/>
       <File Name="operators/activations/relu.h"/>
       <File Name="operators/activations/sigmoid.h"/>

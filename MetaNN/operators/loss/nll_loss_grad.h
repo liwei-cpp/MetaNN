@@ -39,7 +39,7 @@ public:
         using ElementType = ElementTypePicker<decltype(out)>;
         
         const size_t count = in.Shape().Count();
-        const size_t cardinalCount = in.Shape().CardinalCount();
+        const size_t cardinalCount = in.Shape().CardinalShape().Count();
         assert(count % cardinalCount == 0);
         const size_t loopCount = count / cardinalCount;
         

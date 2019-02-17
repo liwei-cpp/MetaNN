@@ -174,6 +174,61 @@ namespace
         }
         cout << "done" << endl;
     }
+    
+    void test_softmax_grad_case4()
+    {
+        cout << "Test softmax grad case 4 (NLL with general weight vector) ...\t";
+        
+        auto softmaxRes = GenMatrix<CheckElement>(1, 20, 0, 0.001f);
+        auto grad = Scalar<CheckElement, CheckDevice>(0.7f);
+        auto weight = GenMatrix<CheckElement>(1, 20, 1, 0.1f);
+        auto nllLossBP = NLLLossGrad(grad, weight, softmaxRes);
+        auto softmaxBP = SoftmaxGrad(nllLossBP, softmaxRes);
+        
+        auto check = Evaluate(softmaxBP);
+
+        float sum = 0;
+        for (size_t i = 0; i < 20; ++i)
+        {
+            sum += weight(0, i);
+        }
+
+        for (size_t i = 0; i < 20; ++i)
+        {
+            CheckElement compare = softmaxRes(0, i) * sum - weight(0, i);
+            assert(fabs(check(0, i) - compare * 0.7f) <= 0.0001);
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_softmax_grad_case5()
+    {
+        cout << "Test softmax grad case 5 (NLL with general weight vector, bacth mode) ...\t";
+        
+        auto softmaxRes = GenBatchMatrix<CheckElement>(5, 1, 20, 0, 0.001f);
+        auto grad = GenBatchScalar<CheckElement>(5, 0.7f, -0.31f);
+        auto weight = GenBatchMatrix<CheckElement>(5, 1, 20, 1, 0.1f);
+        auto nllLossBP = NLLLossGrad(grad, weight, softmaxRes);
+        auto softmaxBP = SoftmaxGrad(nllLossBP, softmaxRes);
+        
+        auto check = Evaluate(softmaxBP);
+
+        for (size_t b = 0; b < 5; ++b)
+        {
+            float sum = 0;
+            for (size_t i = 0; i < 20; ++i)
+            {
+                sum += weight[b](0, i);
+            }
+
+            for (size_t i = 0; i < 20; ++i)
+            {
+                CheckElement compare = softmaxRes[b](0, i) * sum - weight[b](0, i);
+                assert(fabs(check[b](0, i) - compare * grad[b].Value()) <= 0.0001);
+            }
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Operators
@@ -183,5 +238,7 @@ namespace Test::Operators
         test_softmax_grad_case1();
         test_softmax_grad_case2();
         test_softmax_grad_case3();
+        test_softmax_grad_case4();
+        test_softmax_grad_case5();
     }
 }

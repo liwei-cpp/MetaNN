@@ -31,9 +31,9 @@ public:
         return 1;
     }
     
-    constexpr size_t CardinalCount() const noexcept
+    const auto& CardinalShape() const noexcept
     {
-        return 1;
+        return *this;
     }
     
     constexpr size_t Index2Count() const noexcept
@@ -71,9 +71,9 @@ public:
         return m_rowNum * m_colNum;
     }
     
-    size_t CardinalCount() const noexcept
+    const auto& CardinalShape() const noexcept
     {
-        return m_rowNum * m_colNum;
+        return *this;
     }
     
     size_t Index2Count(size_t rowID, size_t colID) const
@@ -115,9 +115,9 @@ public:
         return m_pageNum * Shape<CategoryTags::Matrix>::Count();
     }
     
-    size_t CardinalCount() const noexcept
+    const auto& CardinalShape() const noexcept
     {
-        return m_pageNum * Shape<CategoryTags::Matrix>::Count();
+        return *this;
     }
     
     size_t Index2Count(size_t pageID, size_t rowID, size_t colID) const
@@ -163,9 +163,9 @@ public:
         return BatchNum() * Shape<TSubCate>::Count();
     }
     
-    size_t CardinalCount() const noexcept
+    const auto& CardinalShape() const noexcept
     {
-        return Shape<TSubCate>::Count();
+        return Shape<TSubCate>::CardinalShape();
     }
     
     template <typename... TIndexParams>
@@ -217,9 +217,9 @@ public:
         return Length() * Shape<TSubCate>::Count();
     }
     
-    size_t CardinalCount() const noexcept
+    const auto& CardinalShape() const noexcept
     {
-        return Shape<TSubCate>::Count();
+        return Shape<TSubCate>::CardinalShape();
     }
     
     template <typename... TIndexParams>
@@ -281,9 +281,9 @@ public:
                Shape<TSubCate>::Count();
     }
     
-    size_t CardinalCount() const noexcept
+    const auto& CardinalShape() const noexcept
     {
-        return Shape<TSubCate>::Count();
+        return Shape<TSubCate>::CardinalShape();
     }
     
     template <typename... TIndexParams>
@@ -352,9 +352,10 @@ public:
         return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.end(), 0);
     }
     
-    constexpr size_t CardinalCount() const noexcept
+    const auto& CardinalShape() const noexcept
     {
-        return 1;
+        const static Shape<CategoryTags::Scalar> inst{};
+        return inst;
     }
     
     template <typename... TIndexParams>
