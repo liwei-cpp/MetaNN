@@ -1,16 +1,18 @@
 #pragma once
-#include <elementary/test_abs_layer.h>
-#include <elementary/test_add_layer.h>
-#include <elementary/test_bias_layer.h>
-#include <elementary/test_element_mul_layer.h>
-#include <elementary/test_interpolate_layer.h>
-#include <elementary/test_sigmoid_layer.h>
-#include <elementary/test_softmax_layer.h>
-#include <elementary/test_tanh_layer.h>
-#include <elementary/test_weight_layer.h>
 
 namespace Test::Layer
 {
+    void test_abs_layer();
+    void test_add_layer();
+    void test_bias_layer();
+    void test_element_mul_layer();
+    void test_interpolate_layer();
+    void test_relu_layer();
+    void test_sigmoid_layer();
+    void test_softmax_layer();
+    void test_tanh_layer();
+    void test_weight_layer();
+    
     inline void test_elementary()
     {
         test_abs_layer();
@@ -18,6 +20,7 @@ namespace Test::Layer
         test_bias_layer();
         test_element_mul_layer();
         test_interpolate_layer();
+        test_relu_layer();
         test_sigmoid_layer();
         test_softmax_layer();
         test_tanh_layer();

@@ -184,6 +184,7 @@
       <File Name="layers/elementary/tanh_layer.h"/>
       <File Name="layers/elementary/weight_layer.h"/>
       <File Name="layers/elementary/elementary.h"/>
+      <File Name="layers/elementary/relu_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
       <File Name="layers/facilities/common_io.h"/>
