@@ -31,7 +31,7 @@ namespace MetaNN
         
         auto FeedForwardCal(const TLeftOperandFP& val1, const TRightOperandFP& val2)
         {
-            auto proShape = LayerTraits::ShapePromote(val1.Shape(), val2.Shape());
+            auto proShape = LayerTraits::ShapePromote(val1, val2);
             return Duplicate(val1, proShape) + Duplicate(val2, proShape);
         }
     public:
@@ -51,9 +51,9 @@ namespace MetaNN
                 m_shape1.push(input1.Shape());
                 m_shape2.push(input2.Shape());
                 
-                m_inputShapeChecker1.Push(input1.Shape());
-                m_inputShapeChecker2.Push(input2.Shape());
-                m_outputShape.Push(res.Shape());
+                m_inputShapeChecker1.PushDataShape(input1);
+                m_inputShapeChecker2.PushDataShape(input2);
+                m_outputShape.PushDataShape(res);
             }
 
             return LayerOutputCont<AddLayer>().template Set<LayerOutput>(std::move(res));
@@ -73,12 +73,12 @@ namespace MetaNN
                 auto curShape2 = m_shape2.top(); m_shape2.pop();
                 
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckAndPop(grad.Shape());
+                m_outputShape.CheckDataShapeAndPop(grad);
 
                 auto res1 = Collapse(grad, curShape1);
                 auto res2 = Collapse(grad, curShape2);
-                m_inputShapeChecker1.CheckAndPop(res1.Shape());
-                m_inputShapeChecker2.CheckAndPop(res2.Shape());
+                m_inputShapeChecker1.CheckDataShapeAndPop(res1);
+                m_inputShapeChecker2.CheckDataShapeAndPop(res2);
 
                 return LayerInputCont<AddLayer>().template Set<LeftOperand>(std::move(res1))
                                                  .template Set<RightOperand>(std::move(res2));
@@ -104,11 +104,12 @@ namespace MetaNN
         }
     private:
         std::string m_name;
+
         LayerTraits::LayerInternalBuf<ShapeType<TLeftOperandFP>, IsFeedbackOutput> m_shape1;
         LayerTraits::LayerInternalBuf<ShapeType<TRightOperandFP>, IsFeedbackOutput> m_shape2;
         
-        LayerTraits::ShapeChecker<ShapeType<TLeftOperandFP>,  IsFeedbackOutput> m_inputShapeChecker1;
-        LayerTraits::ShapeChecker<ShapeType<TRightOperandFP>, IsFeedbackOutput> m_inputShapeChecker2;
-        LayerTraits::ShapeChecker<ShapeType<TLayerOutputBP>,  IsFeedbackOutput> m_outputShape;
+        LayerTraits::ShapeChecker<TLeftOperandFP,  IsFeedbackOutput> m_inputShapeChecker1;
+        LayerTraits::ShapeChecker<TRightOperandFP, IsFeedbackOutput> m_inputShapeChecker2;
+        LayerTraits::ShapeChecker<TLayerOutputBP,  IsFeedbackOutput> m_outputShape;
     };
 }

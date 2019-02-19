@@ -220,66 +220,114 @@ namespace NSShapePromote
             static_assert(DependencyFalse<TShape1>);
         }
     }
-}
-
-template <typename TShape>
-auto ShapePromote(const TShape& s)
-{
-    return s;
-}
-
-template <typename TShape1, typename TShape2, typename... TShapes>
-auto ShapePromote(const TShape1& s1, const TShape2& s2, const TShapes&... rem)
-{
-    auto res = NSShapePromote::ShapePromoteHelper(s1, s2);
-    return ShapePromote(res, rem...);
-}
-
-#ifdef METANN_DEBUG
-template <typename TShape>
-class ShapeChecker_
-{
-public:
-    void Push(const TShape& shape)
-    {
-        m_buffer.push(shape);
-    }
     
-    void CheckAndPop(const TShape& shape)
+    template <typename TShape>
+    auto ShapePromote_(const TShape& s)
     {
-        if (m_buffer.empty())
-        {
-            throw std::runtime_error("ShapeStack is empty, cannot check shape.");
-        }
-        if (!(shape == m_buffer.top()))
-        {
-            throw std::runtime_error("Shape check fail.");
-        }
-        m_buffer.pop();
-    }
-    
-    void AssertEmpty() const
-    {
-        if (!m_buffer.empty())
-        {
-            throw std::runtime_error("Shape checker is not empty.");
-        }
+        return s;
     }
 
-private:
-    std::stack<TShape> m_buffer;
-};
-#else
-template <typename TShape>
-class ShapeChecker_
+    template <typename TShape, typename TData1, typename... TDatas>
+    auto ShapePromote_(const TShape& shape, const TData1& data, const TDatas&... rem)
+    {
+        if constexpr (IsInvalid<TData1>)
+        {
+            return ShapePromote_(shape, rem...);
+        }
+        else
+        {
+            auto res = NSShapePromote::ShapePromoteHelper(shape, data.Shape());
+            return ShapePromote_(res, rem...);
+        }
+    }
+}
+
+template <typename TData>
+auto ShapePromote(const TData& data)
 {
-public:
-    void Push(const TShape&) {}
-    void CheckAndPop(const TShape&) {}
-    void AssertEmpty() const {}
-};
+    static_assert(!IsInvalid<TData>, "All data types are invalid.");
+    return data.Shape();
+}
+
+template <typename TDataHead, typename... TData>
+auto ShapePromote(const TDataHead& head, const TData&... data)
+{
+    if constexpr (IsInvalid<TDataHead>)
+    {
+        return ShapePromote(data...);
+    }
+    else
+    {
+        return NSShapePromote::ShapePromote_(head.Shape(), data...);
+    }
+}
+
+namespace NSShapeChecker
+{
+    template <typename TShape, bool bTrigger>
+    class ShapeChecker_
+    {
+    public:
+        template <typename TData>
+        void PushDataShape(const TData&) {}
+        
+        template <typename TData>
+        void CheckDataShapeAndPop(const TData&) {}
+    
+        void AssertEmpty() const {}
+    };
+    
+    template <typename TShape>
+    class ShapeChecker_<TShape, true>
+    {
+    public:
+        template <typename TData>
+        void PushDataShape(const TData& data)
+        {
+            m_buffer.push(data.Shape());
+        }
+        
+        template <typename TData>
+        void CheckDataShapeAndPop(const TData& data)
+        {
+            if (m_buffer.empty())
+            {
+                throw std::runtime_error("ShapeStack is empty, cannot check shape.");
+            }
+            if (!(data.Shape() == m_buffer.top()))
+            {
+                throw std::runtime_error("Shape check fail.");
+            }
+            m_buffer.pop();
+        }
+    
+        void AssertEmpty() const
+        {
+            if (!m_buffer.empty())
+            {
+                throw std::runtime_error("Shape checker is not empty.");
+            }
+        }
+
+    private:
+        std::stack<TShape> m_buffer;
+    };
+
+    template <typename TData, bool bTrigger>
+    struct DataToShape_
+    {
+        using type = ShapeChecker_<void, false>;
+    };
+
+#ifdef METANN_CHECKSHAPE
+    template <typename TData>
+    struct DataToShape_<TData, true>
+    {
+        using type = ShapeChecker_<ShapeType<TData>, true>;
+    };
 #endif
+}
 
-template <typename TShape, bool store>
-using ShapeChecker = std::conditional_t<store, ShapeChecker_<TShape>, NullParameter>;
+template <typename TData, bool bTrigger>
+using ShapeChecker = typename NSShapeChecker::DataToShape_<TData, bTrigger && (!IsInvalid<TData>)>::type;
 }

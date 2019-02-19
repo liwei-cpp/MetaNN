@@ -242,17 +242,5 @@ bool operator!= (const T1& val1, const T2& val2)
 }
 
 template <typename TData>
-struct ShapeType_
-{
-    using type = RemConstRef<decltype(std::declval<TData>().Shape())>;
-};
-
-template <>
-struct ShapeType_<NullParameter>
-{
-    using type = NullParameter;
-};
-
-template <typename TData>
-using ShapeType = typename ShapeType_<TData>::type;
+using ShapeType = RemConstRef<decltype(std::declval<TData>().Shape())>;
 }

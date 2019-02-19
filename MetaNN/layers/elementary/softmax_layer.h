@@ -45,8 +45,8 @@ namespace MetaNN
             auto res = FeedForwardCal(val);
             if constexpr (IsFeedbackOutput)
             {
-                m_inputShape.Push(val.Shape());
-                m_outputShape.Push(res.Shape());
+                m_inputShape.PushDataShape(val);
+                m_outputShape.PushDataShape(res);
                 m_data.push(res);
             }
             return LayerOutputCont<SoftmaxLayer>().template Set<LayerOutput>(std::move(res));
@@ -65,10 +65,10 @@ namespace MetaNN
                 m_data.pop();
                 
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckAndPop(grad.Shape());
+                m_outputShape.CheckDataShapeAndPop(grad);
 
                 auto res = SoftmaxGrad(std::move(grad), std::move(softmaxRes));
-                m_inputShape.CheckAndPop(res.Shape());
+                m_inputShape.CheckDataShapeAndPop(res);
                 return LayerInputCont<SoftmaxLayer>().template Set<LayerInput>(std::move(res));
             }
             else
@@ -94,7 +94,7 @@ namespace MetaNN
         using TempDataType = RemConstRef<std::invoke_result_t<decltype(&SoftmaxLayer::FeedForwardCal), SoftmaxLayer, TLayerInputFP>>;
         LayerTraits::LayerInternalBuf<TempDataType, IsFeedbackOutput> m_data;
 
-        LayerTraits::ShapeChecker<ShapeType<TLayerInputFP>,  IsFeedbackOutput> m_inputShape;
-        LayerTraits::ShapeChecker<ShapeType<TLayerOutputBP>, IsFeedbackOutput> m_outputShape;
+        LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
+        LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;
     };
 }

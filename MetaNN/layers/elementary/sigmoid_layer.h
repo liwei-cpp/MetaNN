@@ -47,8 +47,8 @@ namespace MetaNN
 
             if constexpr (IsFeedbackOutput)
             {
-                m_inputShape.Push(val.Shape());
-                m_outputShape.Push(res.Shape());
+                m_inputShape.PushDataShape(val);
+                m_outputShape.PushDataShape(res);
                 m_data.push(res);
             }
             return LayerOutputCont<SigmoidLayer>().template Set<LayerOutput>(std::move(res));
@@ -64,13 +64,13 @@ namespace MetaNN
                     throw std::runtime_error("Cannot feed back in SigmoidLayer");
                 }
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckAndPop(grad.Shape());
+                m_outputShape.CheckDataShapeAndPop(grad);
                 
                 auto input = m_data.top();
                 m_data.pop();
                 
                 auto res = SigmoidGrad(std::move(grad), std::move(input));
-                m_inputShape.CheckAndPop(res.Shape());
+                m_inputShape.CheckDataShapeAndPop(res);
                 return LayerInputCont<SigmoidLayer>().template Set<LayerInput>(std::move(res));
             }
             else
@@ -97,7 +97,7 @@ namespace MetaNN
         using TempDataType = RemConstRef<std::invoke_result_t<decltype(&SigmoidLayer::FeedForwardCal), SigmoidLayer, TLayerInputFP>>;
         LayerTraits::LayerInternalBuf<TempDataType, IsFeedbackOutput> m_data;
 
-        LayerTraits::ShapeChecker<ShapeType<TLayerInputFP>,  IsFeedbackOutput> m_inputShape;
-        LayerTraits::ShapeChecker<ShapeType<TLayerOutputBP>, IsFeedbackOutput> m_outputShape;
+        LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
+        LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;
     };
 }

@@ -33,7 +33,7 @@ namespace MetaNN
                             const TInterpolateLayerWeight2FP& val2,
                             const TInterpolateLayerLambdaFP& lambda)
         {
-            auto proShape = LayerTraits::ShapePromote(val1.Shape(), val2.Shape(), lambda.Shape());
+            auto proShape = LayerTraits::ShapePromote(val1, val2, lambda);
             return Interpolate(Duplicate(std::move(val1), proShape),
                                Duplicate(std::move(val2), proShape),
                                Duplicate(std::move(lambda), proShape));
@@ -53,10 +53,10 @@ namespace MetaNN
 
             if constexpr (IsFeedbackOutput)
             {
-                m_weight1Shape.Push(input1.Shape());
-                m_weight2Shape.Push(input2.Shape());
-                m_lambdaShape.Push(lambda.Shape());
-                m_outputShape.Push(res.Shape());
+                m_weight1Shape.PushDataShape(input1);
+                m_weight2Shape.PushDataShape(input2);
+                m_lambdaShape.PushDataShape(lambda);
+                m_outputShape.PushDataShape(res);
 
                 m_input1Stack.push(std::move(input1));
                 m_input2Stack.push(std::move(input2));
@@ -76,7 +76,7 @@ namespace MetaNN
                     throw std::runtime_error("Cannot do FeedBackward for InterpolateLayer");
                 }
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckAndPop(grad.Shape());
+                m_outputShape.CheckDataShapeAndPop(grad);
                 
                 auto curLambda = m_lambdaStack.top();
                 auto curInput1 = m_input1Stack.top();
@@ -93,9 +93,9 @@ namespace MetaNN
                 auto out2 = Collapse(std::move(res2), curInput2.Shape());
                 auto outLambda = Collapse(std::move(resLambda), curLambda.Shape());
                 
-                m_weight1Shape.CheckAndPop(out1.Shape());
-                m_weight2Shape.CheckAndPop(out2.Shape());
-                m_lambdaShape.CheckAndPop(outLambda.Shape());
+                m_weight1Shape.CheckDataShapeAndPop(out1);
+                m_weight2Shape.CheckDataShapeAndPop(out2);
+                m_lambdaShape.CheckDataShapeAndPop(outLambda);
 
                 return LayerInputCont<InterpolateLayer>()
                     .template Set<InterpolateLayerWeight1>(std::move(out1))
@@ -128,9 +128,9 @@ namespace MetaNN
         LayerTraits::LayerInternalBuf<TInterpolateLayerWeight2FP, IsFeedbackOutput> m_input2Stack;
         LayerTraits::LayerInternalBuf<TInterpolateLayerLambdaFP,  IsFeedbackOutput> m_lambdaStack;
 
-        LayerTraits::ShapeChecker<ShapeType<TInterpolateLayerWeight1FP>,  IsFeedbackOutput> m_weight1Shape;
-        LayerTraits::ShapeChecker<ShapeType<TInterpolateLayerWeight2FP>,  IsFeedbackOutput> m_weight2Shape;
-        LayerTraits::ShapeChecker<ShapeType<TInterpolateLayerLambdaFP>,   IsFeedbackOutput> m_lambdaShape;
-        LayerTraits::ShapeChecker<ShapeType<TLayerOutputBP>, IsFeedbackOutput> m_outputShape;
+        LayerTraits::ShapeChecker<TInterpolateLayerWeight1FP,  IsFeedbackOutput> m_weight1Shape;
+        LayerTraits::ShapeChecker<TInterpolateLayerWeight2FP,  IsFeedbackOutput> m_weight2Shape;
+        LayerTraits::ShapeChecker<TInterpolateLayerLambdaFP,   IsFeedbackOutput> m_lambdaShape;
+        LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;
     };
 }

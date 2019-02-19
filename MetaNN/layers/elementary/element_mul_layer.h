@@ -30,7 +30,7 @@ namespace MetaNN
 
         auto FeedForwardCal(const TLeftOperandFP& val1, const TRightOperandFP& val2)
         {
-            auto proShape = LayerTraits::ShapePromote(val1.Shape(), val2.Shape());
+            auto proShape = LayerTraits::ShapePromote(val1, val2);
             return Duplicate(val1, proShape) * Duplicate(val2, proShape);
         }
     public:
@@ -49,9 +49,9 @@ namespace MetaNN
             {
                 m_input1.push(input1);
                 m_input2.push(input2);
-                m_inputShape1.Push(input1.Shape());
-                m_inputShape2.Push(input2.Shape());
-                m_outputShape.Push(res.Shape());
+                m_inputShape1.PushDataShape(input1);
+                m_inputShape2.PushDataShape(input2);
+                m_outputShape.PushDataShape(res);
             }
 
             return LayerOutputCont<ElementMulLayer>().template Set<LayerOutput>(std::move(res));
@@ -73,7 +73,7 @@ namespace MetaNN
                 m_input2.pop();
                 
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckAndPop(grad.Shape());
+                m_outputShape.CheckDataShapeAndPop(grad);
                 
                 auto shape1 = input1.Shape();
                 auto shape2 = input2.Shape();
@@ -82,8 +82,8 @@ namespace MetaNN
                 auto grad2 = grad * Duplicate(input2, grad.Shape());
                 auto res1 = Collapse(std::move(grad2), shape1);
                 auto res2 = Collapse(std::move(grad1), shape2);
-                m_inputShape1.CheckAndPop(res1.Shape());
-                m_inputShape2.CheckAndPop(res2.Shape());
+                m_inputShape1.CheckDataShapeAndPop(res1);
+                m_inputShape2.CheckDataShapeAndPop(res2);
                 return LayerInputCont<ElementMulLayer>().template Set<LeftOperand>(std::move(res1))
                                                         .template Set<RightOperand>(std::move(res2));
             }
@@ -111,8 +111,8 @@ namespace MetaNN
         LayerTraits::LayerInternalBuf<TLeftOperandFP, IsFeedbackOutput> m_input1;
         LayerTraits::LayerInternalBuf<TRightOperandFP, IsFeedbackOutput> m_input2;
 
-        LayerTraits::ShapeChecker<ShapeType<TLeftOperandFP>, IsFeedbackOutput> m_inputShape1;
-        LayerTraits::ShapeChecker<ShapeType<TRightOperandFP>, IsFeedbackOutput> m_inputShape2;
-        LayerTraits::ShapeChecker<ShapeType<TLayerOutputBP>, IsFeedbackOutput> m_outputShape;
+        LayerTraits::ShapeChecker<TLeftOperandFP,  IsFeedbackOutput> m_inputShape1;
+        LayerTraits::ShapeChecker<TRightOperandFP, IsFeedbackOutput> m_inputShape2;
+        LayerTraits::ShapeChecker<TLayerOutputBP,  IsFeedbackOutput> m_outputShape;
     };
 }

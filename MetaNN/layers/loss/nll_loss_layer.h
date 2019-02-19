@@ -41,8 +41,8 @@ namespace MetaNN
             
             if constexpr (IsFeedbackOutput)
             {
-                m_inputShape.Push(val.Shape());
-                m_outputShape.Push(res.Shape());
+                m_inputShape.PushDataShape(val);
+                m_outputShape.PushDataShape(res);
                 m_input.push(std::move(val));
                 m_weight.push(std::move(weight));
             }
@@ -62,9 +62,9 @@ namespace MetaNN
                 auto weight = m_weight.top(); m_weight.pop();
 
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckAndPop(grad.Shape());
+                m_outputShape.CheckDataShapeAndPop(grad);
                 auto res = NLLLossGrad(std::move(grad), std::move(weight), std::move(input));
-                m_inputShape.CheckAndPop(res.Shape());
+                m_inputShape.CheckDataShapeAndPop(res);
 
                 return LayerInputCont<NLLLossLayer>().template Set<LayerInput>(std::move(res));
             }
@@ -91,7 +91,7 @@ namespace MetaNN
         LayerTraits::LayerInternalBuf<TLayerInputFP,      IsFeedbackOutput> m_input;
         LayerTraits::LayerInternalBuf<TLossLayerWeightFP, IsFeedbackOutput> m_weight;
 
-        LayerTraits::ShapeChecker<ShapeType<TLayerInputFP>,  IsFeedbackOutput> m_inputShape;
-        LayerTraits::ShapeChecker<ShapeType<TLayerOutputBP>, IsFeedbackOutput> m_outputShape;
+        LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
+        LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;
     };
 }
