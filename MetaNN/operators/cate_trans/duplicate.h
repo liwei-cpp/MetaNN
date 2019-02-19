@@ -200,4 +200,17 @@ auto Duplicate(TOriData&& data, TShape&& shape)
                        std::forward<TShape>(shape));
     }
 }
+
+template <typename TOriData, typename TShape>
+auto DuplicateOrKeep(TOriData&& data, TShape&& shape)
+{
+    if constexpr (IsInvalid<TOriData>)
+    {
+        return std::forward<TOriData>(data);
+    }
+    else
+    {
+        return Duplicate(std::forward<TOriData>(data), std::forward<TShape>(shape));
+    }
+}
 }

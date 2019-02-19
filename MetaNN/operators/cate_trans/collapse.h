@@ -208,4 +208,17 @@ auto Collapse(TOriData&& data, TShape&& shape)
                        std::forward<TShape>(shape));
     }
 }
+
+template <typename TOriData, typename TDataWithAimShape>
+auto CollapseOrOmit(TOriData&& data, TDataWithAimShape&& dataWithAimShape)
+{
+    if constexpr (IsInvalid<dataWithAimShape>)
+    {
+        return NullParameter{};
+    }
+    else
+    {
+        Collapse(std::forward<TOriData>(data), dataWithAimShape.Shape());
+    }
+}
 }
