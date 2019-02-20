@@ -212,7 +212,7 @@ auto Collapse(TOriData&& data, TShape&& shape)
 template <typename TOriData, typename TDataWithAimShape>
 auto CollapseOrOmit(TOriData&& data, TDataWithAimShape&& dataWithAimShape)
 {
-    if constexpr (IsInvalid<dataWithAimShape>)
+    if constexpr (IsOutOfDataCategory<dataWithAimShape>)
     {
         return NullParameter{};
     }

@@ -230,7 +230,7 @@ namespace NSShapePromote
     template <typename TShape, typename TData1, typename... TDatas>
     auto ShapePromote_(const TShape& shape, const TData1& data, const TDatas&... rem)
     {
-        if constexpr (IsInvalid<TData1>)
+        if constexpr (IsOutOfDataCategory<TData1>)
         {
             return ShapePromote_(shape, rem...);
         }
@@ -245,14 +245,14 @@ namespace NSShapePromote
 template <typename TData>
 auto ShapePromote(const TData& data)
 {
-    static_assert(!IsInvalid<TData>, "All data types are invalid.");
+    static_assert(IsInDataCategory<TData>, "All data types are invalid.");
     return data.Shape();
 }
 
 template <typename TDataHead, typename... TData>
 auto ShapePromote(const TDataHead& head, const TData&... data)
 {
-    if constexpr (IsInvalid<TDataHead>)
+    if constexpr (IsOutOfDataCategory<TDataHead>)
     {
         return ShapePromote(data...);
     }
@@ -329,5 +329,5 @@ namespace NSShapeChecker
 }
 
 template <typename TData, bool bTrigger>
-using ShapeChecker = typename NSShapeChecker::DataToShape_<TData, bTrigger && (!IsInvalid<TData>)>::type;
+using ShapeChecker = typename NSShapeChecker::DataToShape_<TData, bTrigger && (IsInDataCategory<TData>)>::type;
 }

@@ -77,7 +77,7 @@ namespace OperSubstractFromNum
 template <typename TNumber, typename TOper>
 constexpr bool Valid()
 {
-    if constexpr (IsInvalid<TOper>)
+    if constexpr (IsOutOfDataCategory<TOper>)
     {
         return false;
     }

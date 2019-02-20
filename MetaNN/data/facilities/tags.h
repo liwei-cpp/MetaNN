@@ -7,7 +7,7 @@ namespace MetaNN
 /// data types
 namespace CategoryTags
 {
-    struct Invalid;
+    struct OutOfCategory;
     
     struct Scalar;
     struct Matrix;

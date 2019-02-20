@@ -9,7 +9,7 @@ namespace MetaNN
 {
 // operator validation check
 template <typename TOpTag, typename TOperHead, typename... TOperands>
-constexpr bool IsValidOper = (!IsInvalid<TOperHead>) &&
+constexpr bool IsValidOper = (IsInDataCategory<TOperHead>) &&
                              (std::is_same_v<DataCategory<TOperHead>, DataCategory<TOperands>> && ...);
 // data category calculation
 template <typename THeadCate, typename...TRemainCate>

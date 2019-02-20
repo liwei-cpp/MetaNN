@@ -77,13 +77,13 @@ namespace OperAddWithNum
 template <typename TOp1, typename TOp2>
 constexpr bool Valid()
 {
-    if constexpr (IsInvalid<TOp1> && !IsInvalid<TOp2>)
-    {
-        return std::is_constructible_v<typename RemConstRef<TOp2>::ElementType, TOp1>;
-    }
-    else if constexpr (!IsInvalid<TOp1> && IsInvalid<TOp2>)
+    if constexpr (IsInDataCategory<TOp1> && IsOutOfDataCategory<TOp2>)
     {
         return std::is_constructible_v<typename RemConstRef<TOp1>::ElementType, TOp2>;
+    }
+    else if constexpr (IsOutOfDataCategory<TOp1> && IsInDataCategory<TOp2>)
+    {
+        return std::is_constructible_v<typename RemConstRef<TOp2>::ElementType, TOp1>;
     }
     else
     {
@@ -176,14 +176,14 @@ auto operator+ (TP1&& p_m1, TP2&& p_m2)
     }
     else if constexpr (IsValidOper<OpTags::AddWithNum, TP1, TP2>)
     {
-        if constexpr (IsInvalid<TP1> && !IsInvalid<TP2>)
+        if constexpr (IsOutOfDataCategory<TP1> && IsInDataCategory<TP2>)
         {
             using rawOp = RemConstRef<TP2>;
             using ResType = Operator<OpTags::AddWithNum, rawOp>;
             OperAuxParams<OpTags::AddWithNum, OperCateCal<OpTags::AddWithNum, rawOp>> params(p_m1);
             return ResType(std::move(params), std::forward<TP2>(p_m2));
         }
-        else if constexpr (!IsInvalid<TP1> && IsInvalid<TP2>)
+        else if constexpr (IsInDataCategory<TP1> && IsOutOfDataCategory<TP2>)
         {
             using rawOp = RemConstRef<TP1>;
             using ResType = Operator<OpTags::AddWithNum, rawOp>;

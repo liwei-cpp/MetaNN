@@ -123,7 +123,7 @@ private:
 
 template <typename TOper, typename TNumber>
 constexpr bool IsValidOper<OpTags::DivideByNum, TOper, TNumber>
-    = (!IsInvalid<TOper>) && (std::is_constructible_v<typename RemConstRef<TOper>::ElementType, TNumber>);
+    = (IsInDataCategory<TOper>) && (std::is_constructible_v<typename RemConstRef<TOper>::ElementType, TNumber>);
 
 template <typename TCate>
 struct OperAuxParams<OpTags::DivideByNum, TCate> : public OperAuxValue<double>

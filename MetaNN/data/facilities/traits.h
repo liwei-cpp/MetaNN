@@ -109,12 +109,12 @@ struct DataCategory_
     static typename R::CategoryTag Test(typename R::CategoryTag*);
     
     template <typename R>
-    static CategoryTags::Invalid Test(...);
+    static CategoryTags::OutOfCategory Test(...);
 
     using typeCand = decltype(Test<T>(nullptr));
     using type = std::conditional_t<IsValidCategoryTag<typeCand>,
                                     typeCand,
-                                    CategoryTags::Invalid>;
+                                    CategoryTags::OutOfCategory>;
 };
 
 template <typename T>
@@ -157,7 +157,10 @@ template <typename T>
 using DeciveTypePicker = typename RemConstRef<T>::DeciveType;
 
 template <typename T>
-constexpr bool IsInvalid = std::is_same_v<DataCategory<T>, CategoryTags::Invalid>;
+constexpr bool IsOutOfDataCategory = std::is_same_v<DataCategory<T>, CategoryTags::OutOfCategory>;
+
+template <typename T>
+constexpr bool IsInDataCategory = !IsOutOfDataCategory<T>;
 
 template <typename T>
 constexpr bool IsScalar = std::is_same_v<DataCategory<T>, CategoryTags::Scalar>;
@@ -223,8 +226,8 @@ template <typename T>
 constexpr bool IsIterator = IsIterator_<T>::value;
 
 template <typename T1, typename T2,
-          typename = std::enable_if_t<!IsInvalid<T1>>,
-          typename = std::enable_if_t<!IsInvalid<T2>>,
+          typename = std::enable_if_t<IsInDataCategory<T1>>,
+          typename = std::enable_if_t<IsInDataCategory<T2>>,
           typename = std::enable_if_t<!std::is_same_v<T1, T2>>
          >
 bool operator== (const T1&, const T2&)
@@ -233,8 +236,8 @@ bool operator== (const T1&, const T2&)
 }
 
 template <typename T1, typename T2,
-          typename = std::enable_if_t<!IsInvalid<T1>>,
-          typename = std::enable_if_t<!IsInvalid<T2>>
+          typename = std::enable_if_t<IsInDataCategory<T1>>,
+          typename = std::enable_if_t<IsInDataCategory<T2>>
          >
 bool operator!= (const T1& val1, const T2& val2)
 {

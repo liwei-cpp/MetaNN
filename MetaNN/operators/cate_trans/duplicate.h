@@ -204,7 +204,7 @@ auto Duplicate(TOriData&& data, TShape&& shape)
 template <typename TOriData, typename TShape>
 auto DuplicateOrKeep(TOriData&& data, TShape&& shape)
 {
-    if constexpr (IsInvalid<TOriData>)
+    if constexpr (IsOutOfDataCategory<TOriData>)
     {
         return std::forward<TOriData>(data);
     }
