@@ -32,7 +32,7 @@ namespace MetaNN
         auto FeedForwardCal(const TLeftOperandFP& val1, const TRightOperandFP& val2)
         {
             auto proShape = LayerTraits::ShapePromote(val1, val2);
-            return Duplicate(val1, proShape) + Duplicate(val2, proShape);
+            return DuplicateOrKeep(val1, proShape) + DuplicateOrKeep(val2, proShape);
         }
     public:
         AddLayer(std::string name)
@@ -48,11 +48,10 @@ namespace MetaNN
             
             if constexpr (IsFeedbackOutput)
             {
-                m_shape1.push(input1.Shape());
-                m_shape2.push(input2.Shape());
-                
                 m_inputShapeChecker1.PushDataShape(input1);
                 m_inputShapeChecker2.PushDataShape(input2);
+                m_input1.push(std::move(input1));
+                m_input2.push(std::move(input2));
                 m_outputShape.PushDataShape(res);
             }
 
@@ -64,19 +63,19 @@ namespace MetaNN
         {
             if constexpr (IsFeedbackOutput)
             {
-                if ((m_shape1.empty()) || (m_shape2.empty()))
+                if ((m_input1.empty()) || (m_input2.empty()))
                 {
                     throw std::runtime_error("Cannot feed back in AddLayer");
                 }
                 
-                auto curShape1 = m_shape1.top(); m_shape1.pop();
-                auto curShape2 = m_shape2.top(); m_shape2.pop();
+                auto input1 = m_input1.top(); m_input1.pop();
+                auto input2 = m_input2.top(); m_input2.pop();
                 
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
                 m_outputShape.CheckDataShapeAndPop(grad);
 
-                auto res1 = Collapse(grad, curShape1);
-                auto res2 = Collapse(grad, curShape2);
+                auto res1 = CollapseOrOmit(grad, std::move(input1));
+                auto res2 = CollapseOrOmit(grad, std::move(input2));
                 m_inputShapeChecker1.CheckDataShapeAndPop(res1);
                 m_inputShapeChecker2.CheckDataShapeAndPop(res2);
 
@@ -93,7 +92,7 @@ namespace MetaNN
         {
             if constexpr(IsFeedbackOutput)
             {
-                if ((!m_shape1.empty()) || (!m_shape2.empty()))
+                if ((!m_input1.empty()) || (!m_input2.empty()))
                 {
                     throw std::runtime_error("NeutralInvariant Fail!");
                 }
@@ -105,8 +104,8 @@ namespace MetaNN
     private:
         std::string m_name;
 
-        LayerTraits::LayerInternalBuf<ShapeType<TLeftOperandFP>, IsFeedbackOutput> m_shape1;
-        LayerTraits::LayerInternalBuf<ShapeType<TRightOperandFP>, IsFeedbackOutput> m_shape2;
+        LayerTraits::LayerInternalBuf<TLeftOperandFP,  IsFeedbackOutput> m_input1;
+        LayerTraits::LayerInternalBuf<TRightOperandFP, IsFeedbackOutput> m_input2;
         
         LayerTraits::ShapeChecker<TLeftOperandFP,  IsFeedbackOutput> m_inputShapeChecker1;
         LayerTraits::ShapeChecker<TRightOperandFP, IsFeedbackOutput> m_inputShapeChecker2;

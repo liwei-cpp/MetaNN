@@ -45,7 +45,11 @@ auto PickItemFromCont(TCont&& cont)
     static_assert(!std::is_same_v<decltype(itemOri), NullParameter>);
     static_assert(!std::is_same_v<TAim, NullParameter>);
     
-    if constexpr (IsDynamic<TAim>)
+    if constexpr (IsOutOfDataCategory<TAim>)
+    {
+        return TAim(itemOri);
+    }
+    else if constexpr (IsDynamic<TAim>)
     {
         auto res = MakeDynamic(std::move(itemOri));
         static_assert(std::is_same_v<decltype(res), TAim>);

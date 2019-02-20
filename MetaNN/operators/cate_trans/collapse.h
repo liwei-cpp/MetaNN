@@ -212,13 +212,13 @@ auto Collapse(TOriData&& data, TShape&& shape)
 template <typename TOriData, typename TDataWithAimShape>
 auto CollapseOrOmit(TOriData&& data, TDataWithAimShape&& dataWithAimShape)
 {
-    if constexpr (IsOutOfDataCategory<dataWithAimShape>)
+    if constexpr (IsOutOfDataCategory<TDataWithAimShape>)
     {
         return NullParameter{};
     }
     else
     {
-        Collapse(std::forward<TOriData>(data), dataWithAimShape.Shape());
+        return Collapse(std::forward<TOriData>(data), dataWithAimShape.Shape());
     }
 }
 }

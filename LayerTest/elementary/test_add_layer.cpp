@@ -189,6 +189,108 @@ namespace
         layer.NeutralInvariant();
         cout << "done" << endl;
     }
+    
+    void test_add_layer4()
+    {
+        cout << "Test add layer case 4 (add with number)...\t";
+        
+        using InputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+                                    LayerKV<RightOperand, int>
+                                   >;
+
+        using RootLayer = MakeBPLayer<AddLayer, InputMap, CommonGradMap, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput, "Test Error");
+        static_assert(!RootLayer::IsUpdate, "Test Error");
+
+        RootLayer layer("root");
+        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
+
+        auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
+                                                .Set<RightOperand>(3.3f);
+
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        for (size_t i = 0; i < 2; ++i)
+        {
+            for (size_t j = 0; j < 3; ++j)
+            {
+                // Note: since RightOperand should be int, the 3.3f should be translated into 3.
+                assert(fabs(res(i, j) - i1(i, j) - 3) < 0.001);
+            }
+        }
+
+        auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
+
+        auto handle1 = out_grad.Get<LeftOperand>().EvalRegister();
+        static_assert(std::is_same_v<RemConstRef<decltype(out_grad.Get<RightOperand>())>, NullParameter>);
+        EvalPlan<DeviceTags::CPU>::Eval();
+
+        auto fb1 = handle1.Data();
+        assert(fb1.Shape().RowNum() == 2);
+        assert(fb1.Shape().ColNum() == 3);
+
+        for (size_t i = 0; i < 2; ++i)
+        {
+            for (size_t j = 0; j < 3; ++j)
+            {
+                assert(fb1(i, j) == grad(i, j));
+            }
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_add_layer5()
+    {
+        cout << "Test add layer case 5 (add with number 2)...\t";
+        
+        using InputMap = LayerIOMap<LayerKV<LeftOperand, int>,
+                                    LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
+                                   >;
+
+        using RootLayer = MakeBPLayer<AddLayer, InputMap, CommonGradMap, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput, "Test Error");
+        static_assert(!RootLayer::IsUpdate, "Test Error");
+
+        RootLayer layer("root");
+        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
+
+        auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(3.3f)
+                                                .Set<RightOperand>(i1);
+
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        for (size_t i = 0; i < 2; ++i)
+        {
+            for (size_t j = 0; j < 3; ++j)
+            {
+                // Note: since RightOperand should be int, the 3.3f should be translated into 3.
+                assert(fabs(res(i, j) - i1(i, j) - 3) < 0.001);
+            }
+        }
+
+        auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
+
+        auto handle1 = out_grad.Get<RightOperand>().EvalRegister();
+        static_assert(std::is_same_v<RemConstRef<decltype(out_grad.Get<LeftOperand>())>, NullParameter>);
+        EvalPlan<DeviceTags::CPU>::Eval();
+
+        auto fb1 = handle1.Data();
+        assert(fb1.Shape().RowNum() == 2);
+        assert(fb1.Shape().ColNum() == 3);
+
+        for (size_t i = 0; i < 2; ++i)
+        {
+            for (size_t j = 0; j < 3; ++j)
+            {
+                assert(fb1(i, j) == grad(i, j));
+            }
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer
@@ -198,5 +300,7 @@ namespace Test::Layer
         test_add_layer1();
         test_add_layer2();
         test_add_layer3();
+        test_add_layer4();
+        test_add_layer5();
     }
 }
