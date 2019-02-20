@@ -2,6 +2,7 @@
 
 #include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/data/facilities/traits.h>
+#include <MetaNN/operators/facilities/instance_id.h>
 #include <cassert>
 
 namespace MetaNN
@@ -60,6 +61,30 @@ public:
     {
         return true;
     }
+};
+
+template <typename TValue>
+struct OperAuxValue
+{
+public:
+    OperAuxValue(TValue val)
+        : m_value(val)
+        , m_instID(InstanceID::Get())
+    {}
+    
+    const auto& Value() const
+    {
+        return m_value;
+    }
+    
+    bool operator== (const OperAuxValue& val) const
+    {
+        return m_instID == val.m_instID;
+    }
+
+private:
+    TValue m_value;
+    size_t m_instID;
 };
 
 // Shape

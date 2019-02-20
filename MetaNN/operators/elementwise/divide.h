@@ -10,7 +10,7 @@
 namespace MetaNN::OpTags
 {
     struct Divide;
-    struct DivideByNumber;
+    struct DivideByNum;
 }
 
 namespace MetaNN
@@ -74,7 +74,7 @@ struct OperSeq_<OpTags::Divide>
 };
 
 /// Divide by number
-namespace OperDivideByNumber::NSCaseGen
+namespace OperDivideByNum::NSCaseGen
 {
 template <typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
@@ -83,7 +83,7 @@ public:
     template <typename TAuxParams>
     EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
         : m_inputHandle(std::move(oriHandle))
-        , m_dividend(params.Dividend())
+        , m_dividend(params.Value())
         , m_outputHandle(std::move(outputHandle))
     {}
     
@@ -122,44 +122,27 @@ private:
 }
 
 template <typename TOper, typename TNumber>
-constexpr bool IsValidOper<OpTags::DivideByNumber, TOper, TNumber>
+constexpr bool IsValidOper<OpTags::DivideByNum, TOper, TNumber>
     = (!IsInvalid<TOper>) && (std::is_constructible_v<typename RemConstRef<TOper>::ElementType, TNumber>);
 
 template <typename TCate>
-struct OperAuxParams<OpTags::DivideByNumber, TCate>
+struct OperAuxParams<OpTags::DivideByNum, TCate> : public OperAuxValue<double>
 {
-public:
-    template <typename TValue>
-    OperAuxParams(TValue val)
-        : m_dividend(val)
-        , m_instID(InstanceID::Get())
-    {}
-    
-    double Dividend() const
-    {
-        return m_dividend;
-    }
-    
-    bool operator == (const OperAuxParams& val) const
-    {
-        return m_instID == val.m_instID;
-    }
-
-private:
-    double m_dividend;
-    size_t m_instID;
+    using TBase = OperAuxValue<double>;
+    using TBase::TBase;
+    using TBase::operator =;
 };
 
 template <>
-struct OperSeq_<OpTags::DivideByNumber>
+struct OperSeq_<OpTags::DivideByNum>
 {
-    using type = OperSeqContainer<TailCalculator<OperDivideByNumber::NSCaseGen::EvalUnit>>;
+    using type = OperSeqContainer<TailCalculator<OperDivideByNum::NSCaseGen::EvalUnit>>;
 };
 
 /// Interface
 template <typename TP1, typename TP2,
           typename = std::enable_if_t<IsValidOper<OpTags::Divide, TP1, TP2> ||
-                                      IsValidOper<OpTags::DivideByNumber, TP1, TP2>>>
+                                      IsValidOper<OpTags::DivideByNum, TP1, TP2>>>
 auto operator/ (TP1&& p_m1, TP2&& p_m2)
 {
     if constexpr (IsValidOper<OpTags::Divide, TP1, TP2>)
@@ -174,11 +157,11 @@ auto operator/ (TP1&& p_m1, TP2&& p_m2)
         using ResType = Operator<OpTags::Divide, rawOp1, rawOp2>;
         return ResType(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2));
     }
-    else if constexpr (IsValidOper<OpTags::DivideByNumber, TP1, TP2>)
+    else if constexpr (IsValidOper<OpTags::DivideByNum, TP1, TP2>)
     {
         using rawOp = RemConstRef<TP1>;
-        using ResType = Operator<OpTags::DivideByNumber, rawOp>;
-        OperAuxParams<OpTags::DivideByNumber, OperCateCal<OpTags::DivideByNumber, rawOp>> params(p_m2);
+        using ResType = Operator<OpTags::DivideByNum, rawOp>;
+        OperAuxParams<OpTags::DivideByNum, OperCateCal<OpTags::DivideByNum, rawOp>> params(p_m2);
         return ResType(std::move(params), std::forward<TP1>(p_m1));
     }
     else

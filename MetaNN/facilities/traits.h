@@ -82,7 +82,7 @@ struct SeqTail_<Container<TH, TCases...>>
 template <typename TSeqCont>
 using SeqTail = typename SeqTail_<TSeqCont>::type;
 
-template <typename T>
+template <typename... T>
 constexpr static bool DependencyFalse = false;
 
 template <typename T>

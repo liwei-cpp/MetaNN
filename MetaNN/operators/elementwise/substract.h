@@ -96,7 +96,7 @@ public:
     template <typename TAuxParams>
     EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
         : m_inputHandle(std::move(oriHandle))
-        , m_minuend(params.Minuend())
+        , m_minuend(params.Value())
         , m_outputHandle(std::move(outputHandle))
     {}
     
@@ -139,28 +139,11 @@ constexpr bool IsValidOper<OpTags::SubstractFromNum, TNumber, TOper>
     = OperSubstractFromNum::Valid<TNumber, TOper>();
 
 template <typename TCate>
-struct OperAuxParams<OpTags::SubstractFromNum, TCate>
+struct OperAuxParams<OpTags::SubstractFromNum, TCate> : public OperAuxValue<double>
 {
-public:
-    template <typename TValue>
-    OperAuxParams(TValue val)
-        : m_minuend(val)
-        , m_instID(InstanceID::Get())
-    {}
-    
-    double Minuend() const
-    {
-        return m_minuend;
-    }
-    
-    bool operator == (const OperAuxParams& val) const
-    {
-        return m_instID == val.m_instID;
-    }
-
-private:
-    double m_minuend;
-    size_t m_instID;
+    using TBase = OperAuxValue<double>;
+    using TBase::TBase;
+    using TBase::operator =;
 };
 
 template <>

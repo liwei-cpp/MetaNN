@@ -47,6 +47,54 @@ namespace
         }
         cout << "done" << endl;
     }
+    
+    void test_add_case3()
+    {
+        cout << "Test add case 3 (add with number)\t";
+        {
+            auto ori1 = GenMatrix<CheckElement>(10, 7, -100, 3);
+            auto op = ori1 + 3;
+            static_assert(IsMatrix<decltype(op)>);
+            assert(op.Shape().RowNum() == 10);
+            assert(op.Shape().ColNum() == 7);
+        
+            auto res = Evaluate(op);
+            static_assert(IsMatrix<decltype(res)>);
+            assert(res.Shape().RowNum() == 10);
+            assert(res.Shape().ColNum() == 7);
+        
+            for (size_t i = 0; i < 10; ++i)
+            {
+                for (size_t k = 0; k < 7; ++k)
+                {
+                    auto check = ori1(i, k) + 3;
+                    assert(fabs(check - res(i, k)) < 0.001f);
+                }
+            }
+        }
+        {
+            auto ori1 = GenMatrix<CheckElement>(10, 7, -100, 3);
+            auto op = 3 + ori1;
+            static_assert(IsMatrix<decltype(op)>);
+            assert(op.Shape().RowNum() == 10);
+            assert(op.Shape().ColNum() == 7);
+        
+            auto res = Evaluate(op);
+            static_assert(IsMatrix<decltype(res)>);
+            assert(res.Shape().RowNum() == 10);
+            assert(res.Shape().ColNum() == 7);
+        
+            for (size_t i = 0; i < 10; ++i)
+            {
+                for (size_t k = 0; k < 7; ++k)
+                {
+                    auto check = ori1(i, k) + 3;
+                    assert(fabs(check - res(i, k)) < 0.001f);
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Operators
@@ -55,5 +103,6 @@ namespace Test::Operators
     {
         test_add_case1();
         test_add_case2();
+        test_add_case3();
     }
 }
