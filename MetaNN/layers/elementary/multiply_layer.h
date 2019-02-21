@@ -11,7 +11,7 @@ namespace MetaNN
     struct LayerOutput;
     
     template <typename TInputs, typename TGrads, typename TPolicies>
-    class ElementMulLayer
+    class MultiplyLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
         using CurLayerPolicy = PlainPolicy<TPolicies>;
@@ -34,7 +34,7 @@ namespace MetaNN
             return Duplicate(val1, proShape) * Duplicate(val2, proShape);
         }
     public:
-        ElementMulLayer(std::string name)
+        MultiplyLayer(std::string name)
             : m_name(std::move(name))
         {}
         
@@ -54,7 +54,7 @@ namespace MetaNN
                 m_outputShape.PushDataShape(res);
             }
 
-            return LayerOutputCont<ElementMulLayer>().template Set<LayerOutput>(std::move(res));
+            return LayerOutputCont<MultiplyLayer>().template Set<LayerOutput>(std::move(res));
         }
         
         template <typename TGrad>
@@ -64,7 +64,7 @@ namespace MetaNN
             {
                 if ((m_input1.empty()) || (m_input2.empty()))
                 {
-                    throw std::runtime_error("Cannot feed back in ElementMulLayer");
+                    throw std::runtime_error("Cannot feed back in MultiplyLayer");
                 }
                 
                 auto input1 = m_input1.top();
@@ -84,12 +84,12 @@ namespace MetaNN
                 auto res2 = Collapse(std::move(grad1), shape2);
                 m_inputShape1.CheckDataShapeAndPop(res1);
                 m_inputShape2.CheckDataShapeAndPop(res2);
-                return LayerInputCont<ElementMulLayer>().template Set<LeftOperand>(std::move(res1))
-                                                        .template Set<RightOperand>(std::move(res2));
+                return LayerInputCont<MultiplyLayer>().template Set<LeftOperand>(std::move(res1))
+                                                      .template Set<RightOperand>(std::move(res2));
             }
             else
             {
-                return LayerInputCont<ElementMulLayer>();
+                return LayerInputCont<MultiplyLayer>();
             }
         }
         

@@ -16,7 +16,7 @@ namespace
     void test_element_mul_layer1()
     {
         cout << "Test element mul layer case 1 ...\t";
-        using RootLayer = MakeLayer<ElementMulLayer, CommonInputMap>;
+        using RootLayer = MakeLayer<MultiplyLayer, CommonInputMap>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -57,7 +57,7 @@ namespace
     void test_element_mul_layer2()
     {
         cout << "Test element mul layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<ElementMulLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<MultiplyLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
 
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
@@ -121,7 +121,7 @@ namespace
     void test_element_mul_layer3()
     {
         cout << "Test element mul layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<ElementMulLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeBPLayer<MultiplyLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

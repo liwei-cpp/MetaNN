@@ -5,7 +5,7 @@
 #include <MetaNN/layers/elementary/add_layer.h>
 #include <MetaNN/layers/elementary/sigmoid_layer.h>
 #include <MetaNN/layers/elementary/tanh_layer.h>
-#include <MetaNN/layers/elementary/element_mul_layer.h>
+#include <MetaNN/layers/elementary/multiply_layer.h>
 #include <MetaNN/layers/elementary/interpolate_layer.h>
 #include <MetaNN/layers/facilities/common_io.h>
 
