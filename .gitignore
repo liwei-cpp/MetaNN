@@ -3,5 +3,9 @@
 /GeneralTest/Release
 /GeneralTest/GeneralTest.mk
 /GeneralTest/GeneralTest.txt
+/GeneralTest2/GeneralTest2.mk
+/GeneralTest2/GeneralTest2.txt
+/LayerTest/LayerTest.mk
+/LayerTest/LayerTest.txt
 /MetaNN/MetaNN.mk
 /Makefile
