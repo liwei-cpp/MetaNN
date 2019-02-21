@@ -13,9 +13,9 @@ namespace
                                      >;
     using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
-    void test_element_mul_layer1()
+    void test_multiply_layer1()
     {
-        cout << "Test element mul layer case 1 ...\t";
+        cout << "Test multiply layer case 1 ...\t";
         using RootLayer = MakeLayer<MultiplyLayer, CommonInputMap>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
@@ -54,9 +54,9 @@ namespace
         cout << "done" << endl;
     }
     
-    void test_element_mul_layer2()
+    void test_multiply_layer2()
     {
-        cout << "Test element mul layer case 2 ...\t";
+        cout << "Test multiply layer case 2 ...\t";
         using RootLayer = MakeBPLayer<MultiplyLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
 
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
@@ -118,9 +118,9 @@ namespace
         cout << "done" << endl;
     }
     
-    void test_element_mul_layer3()
+    void test_multiply_layer3()
     {
-        cout << "Test element mul layer case 3 ...\t";
+        cout << "Test multiply layer case 3 ...\t";
         using RootLayer = MakeBPLayer<MultiplyLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
@@ -180,14 +180,118 @@ namespace
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
     }
+    
+    void test_multiply_layer4()
+    {
+        cout << "Test multiply layer case 4 (multiply with number)...\t";
+        
+        using InputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+                                    LayerKV<RightOperand, int>
+                                   >;
+
+        using RootLayer = MakeBPLayer<MultiplyLayer, InputMap, CommonGradMap, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput, "Test Error");
+        static_assert(!RootLayer::IsUpdate, "Test Error");
+
+        RootLayer layer("root");
+        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
+
+        auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
+                                                .Set<RightOperand>(3.3f);
+
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        for (size_t i = 0; i < 2; ++i)
+        {
+            for (size_t j = 0; j < 3; ++j)
+            {
+                // Note: since RightOperand should be int, the 3.3f should be translated into 3.
+                assert(fabs(res(i, j) - i1(i, j) * 3) < 0.001);
+            }
+        }
+
+        auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
+
+        auto handle1 = out_grad.Get<LeftOperand>().EvalRegister();
+        static_assert(std::is_same_v<RemConstRef<decltype(out_grad.Get<RightOperand>())>, NullParameter>);
+        EvalPlan<DeviceTags::CPU>::Eval();
+
+        auto fb1 = handle1.Data();
+        assert(fb1.Shape().RowNum() == 2);
+        assert(fb1.Shape().ColNum() == 3);
+
+        for (size_t i = 0; i < 2; ++i)
+        {
+            for (size_t j = 0; j < 3; ++j)
+            {
+                assert(fb1(i, j) == grad(i, j) * 3);
+            }
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_multiply_layer5()
+    {
+        cout << "Test multiply layer case 5 (multiply with number 2)...\t";
+        
+        using InputMap = LayerIOMap<LayerKV<LeftOperand, int>,
+                                    LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
+                                   >;
+
+        using RootLayer = MakeBPLayer<MultiplyLayer, InputMap, CommonGradMap, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput, "Test Error");
+        static_assert(!RootLayer::IsUpdate, "Test Error");
+
+        RootLayer layer("root");
+        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
+
+        auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(3.3f)
+                                                .Set<RightOperand>(i1);
+
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        for (size_t i = 0; i < 2; ++i)
+        {
+            for (size_t j = 0; j < 3; ++j)
+            {
+                // Note: since RightOperand should be int, the 3.3f should be translated into 3.
+                assert(fabs(res(i, j) - i1(i, j) * 3) < 0.001);
+            }
+        }
+
+        auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
+
+        auto handle1 = out_grad.Get<RightOperand>().EvalRegister();
+        static_assert(std::is_same_v<RemConstRef<decltype(out_grad.Get<LeftOperand>())>, NullParameter>);
+        EvalPlan<DeviceTags::CPU>::Eval();
+
+        auto fb1 = handle1.Data();
+        assert(fb1.Shape().RowNum() == 2);
+        assert(fb1.Shape().ColNum() == 3);
+
+        for (size_t i = 0; i < 2; ++i)
+        {
+            for (size_t j = 0; j < 3; ++j)
+            {
+                assert(fb1(i, j) == grad(i, j) * 3);
+            }
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer
 {
-    void test_element_mul_layer()
+    void test_multiply_layer()
     {
-        test_element_mul_layer1();
-        test_element_mul_layer2();
-        test_element_mul_layer3();
+        test_multiply_layer1();
+        test_multiply_layer2();
+        test_multiply_layer3();
+        test_multiply_layer4();
+        test_multiply_layer5();
     }
 }

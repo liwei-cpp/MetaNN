@@ -31,7 +31,7 @@ namespace MetaNN
         auto FeedForwardCal(const TLeftOperandFP& val1, const TRightOperandFP& val2)
         {
             auto proShape = LayerTraits::ShapePromote(val1, val2);
-            return Duplicate(val1, proShape) * Duplicate(val2, proShape);
+            return DuplicateOrKeep(val1, proShape) * DuplicateOrKeep(val2, proShape);
         }
     public:
         MultiplyLayer(std::string name)
@@ -71,17 +71,14 @@ namespace MetaNN
                 auto input2 = m_input2.top();
                 m_input1.pop();
                 m_input2.pop();
-                
+
                 auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
                 m_outputShape.CheckDataShapeAndPop(grad);
-                
-                auto shape1 = input1.Shape();
-                auto shape2 = input2.Shape();
-                
-                auto grad1 = grad * Duplicate(input1, grad.Shape());
-                auto grad2 = grad * Duplicate(input2, grad.Shape());
-                auto res1 = Collapse(std::move(grad2), shape1);
-                auto res2 = Collapse(std::move(grad1), shape2);
+
+                auto grad1 = grad * DuplicateOrKeep(input1, grad.Shape());
+                auto grad2 = grad * DuplicateOrKeep(input2, grad.Shape());
+                auto res1 = CollapseOrOmit(std::move(grad2), input1);
+                auto res2 = CollapseOrOmit(std::move(grad1), input2);
                 m_inputShape1.CheckDataShapeAndPop(res1);
                 m_inputShape2.CheckDataShapeAndPop(res2);
                 return LayerInputCont<MultiplyLayer>().template Set<LeftOperand>(std::move(res1))

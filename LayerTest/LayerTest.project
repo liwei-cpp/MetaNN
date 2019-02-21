@@ -25,10 +25,10 @@
     <File Name="elementary/test_add_layer.cpp"/>
     <File Name="elementary/test_bias_layer.cpp"/>
     <File Name="elementary/test_weight_layer.cpp"/>
-    <File Name="elementary/test_element_mul_layer.cpp"/>
     <File Name="elementary/test_softmax_layer.cpp"/>
     <File Name="elementary/test_interpolate_layer.cpp"/>
     <File Name="elementary/test_relu_layer.cpp"/>
+    <File Name="elementary/test_multiply_layer.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="loss">
     <File Name="loss/test_loss.h"/>

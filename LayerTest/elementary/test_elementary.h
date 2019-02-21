@@ -5,7 +5,7 @@ namespace Test::Layer
     void test_abs_layer();
     void test_add_layer();
     void test_bias_layer();
-    void test_element_mul_layer();
+    void test_multiply_layer();
     void test_interpolate_layer();
     void test_relu_layer();
     void test_sigmoid_layer();
@@ -18,7 +18,7 @@ namespace Test::Layer
         test_abs_layer();
         test_add_layer();
         test_bias_layer();
-        test_element_mul_layer();
+        test_multiply_layer();
         test_interpolate_layer();
         test_relu_layer();
         test_sigmoid_layer();
