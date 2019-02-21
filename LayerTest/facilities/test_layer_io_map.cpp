@@ -1,4 +1,3 @@
-#include "test_layer_io_map.h"
 #include <MetaNN/meta_nn2.h>
 #include <iostream>
 using namespace std;

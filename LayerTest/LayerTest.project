@@ -14,7 +14,6 @@
   </VirtualDirectory>
   <VirtualDirectory Name="facilities">
     <File Name="facilities/test_facilities.h"/>
-    <File Name="facilities/test_layer_io_map.h"/>
     <File Name="facilities/test_layer_io_map.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="elementary">
@@ -126,4 +125,8 @@
       </Completion>
     </Configuration>
   </Settings>
+  <VirtualDirectory Name="src_rec">
+    <File Name="src_rec/test_src_rec.h"/>
+    <File Name="src_rec/test_value_source_layer.cpp"/>
+  </VirtualDirectory>
 </CodeLite_Project>

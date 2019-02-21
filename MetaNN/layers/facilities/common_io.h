@@ -4,7 +4,5 @@
 
 namespace MetaNN
 {
-struct CostLayerIn : public VarTypeDict<CostLayerIn, struct CostLayerLabel> {};
-
 struct RnnLayerHiddenBefore;
 }

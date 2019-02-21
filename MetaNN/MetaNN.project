@@ -203,6 +203,10 @@
       <File Name="layers/loss/nll_loss_layer.h"/>
       <File Name="layers/loss/loss.h"/>
     </VirtualDirectory>
+    <VirtualDirectory Name="src_rec">
+      <File Name="layers/src_rec/value_source_layer.h"/>
+      <File Name="layers/src_rec/src_rec.h"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="operators">
     <VirtualDirectory Name="facilities">

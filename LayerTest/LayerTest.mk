@@ -61,7 +61,7 @@ AS       := as
 ##
 CodeLiteDir:=/usr/share/codelite
 Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/facilities_test_layer_io_map.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_bias_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_weight_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) \
-	$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix) 
+	$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/src_rec_test_value_source_layer.cpp$(ObjectSuffix) 
 
 
 
@@ -195,6 +195,14 @@ $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(DependSuffix): loss/test_
 
 $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(PreprocessSuffix): loss/test_nll_loss_layer.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(PreprocessSuffix) loss/test_nll_loss_layer.cpp
+
+$(IntermediateDirectory)/src_rec_test_value_source_layer.cpp$(ObjectSuffix): src_rec/test_value_source_layer.cpp $(IntermediateDirectory)/src_rec_test_value_source_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/liwei/MetaNN/new/MetaNN/LayerTest/src_rec/test_value_source_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_rec_test_value_source_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/src_rec_test_value_source_layer.cpp$(DependSuffix): src_rec/test_value_source_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/src_rec_test_value_source_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/src_rec_test_value_source_layer.cpp$(DependSuffix) -MM src_rec/test_value_source_layer.cpp
+
+$(IntermediateDirectory)/src_rec_test_value_source_layer.cpp$(PreprocessSuffix): src_rec/test_value_source_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/src_rec_test_value_source_layer.cpp$(PreprocessSuffix) src_rec/test_value_source_layer.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
