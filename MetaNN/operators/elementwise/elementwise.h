@@ -7,5 +7,6 @@
 #include <MetaNN/operators/elementwise/divide.h>
 #include <MetaNN/operators/elementwise/interpolate.h>
 #include <MetaNN/operators/elementwise/multiply.h>
+#include <MetaNN/operators/elementwise/negative.h>
 #include <MetaNN/operators/elementwise/sign.h>
 #include <MetaNN/operators/elementwise/substract.h>

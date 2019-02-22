@@ -241,6 +241,7 @@
       <File Name="operators/elementwise/multiply.h"/>
       <File Name="operators/elementwise/sign.h"/>
       <File Name="operators/elementwise/substract.h"/>
+      <File Name="operators/elementwise/negative.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="mutating">
       <File Name="operators/mutating/transpose.h"/>

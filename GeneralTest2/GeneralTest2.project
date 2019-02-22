@@ -172,6 +172,7 @@
       <File Name="operators/elementwise/test_multiply.cpp"/>
       <File Name="operators/elementwise/test_sign.cpp"/>
       <File Name="operators/elementwise/test_substract.cpp"/>
+      <File Name="operators/elementwise/test_negative.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="activation">
       <File Name="operators/activation/test_activation_operators.h"/>

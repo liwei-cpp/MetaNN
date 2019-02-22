@@ -9,6 +9,7 @@ namespace Test::Operators
     void test_divide();
     void test_interpolate();
     void test_multiply();
+    void test_negative();
     void test_sign();
     void test_substract();
 
@@ -21,6 +22,7 @@ namespace Test::Operators
         test_divide();
         test_interpolate();
         test_multiply();
+        test_negative();
         test_sign();
         test_substract();
     }
