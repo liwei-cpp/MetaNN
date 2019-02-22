@@ -9,4 +9,5 @@
 #include <MetaNN/layers/elementary/sigmoid_layer.h>
 #include <MetaNN/layers/elementary/softmax_layer.h>
 #include <MetaNN/layers/elementary/tanh_layer.h>
+#include <MetaNN/layers/elementary/transpose_layer.h>
 #include <MetaNN/layers/elementary/weight_layer.h>

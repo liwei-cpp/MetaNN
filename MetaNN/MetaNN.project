@@ -185,6 +185,7 @@
       <File Name="layers/elementary/elementary.h"/>
       <File Name="layers/elementary/relu_layer.h"/>
       <File Name="layers/elementary/multiply_layer.h"/>
+      <File Name="layers/elementary/transpose_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
       <File Name="layers/facilities/common_io.h"/>

@@ -28,6 +28,7 @@
     <File Name="elementary/test_interpolate_layer.cpp"/>
     <File Name="elementary/test_relu_layer.cpp"/>
     <File Name="elementary/test_multiply_layer.cpp"/>
+    <File Name="elementary/test_transpose_layer.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="loss">
     <File Name="loss/test_loss.h"/>
