@@ -18,10 +18,10 @@ auto LayerFeedBackward(TLayer& layer, TGrad&& p_grad)
 /// init interface ========================================
 namespace NSLayerInterface
 {
-template <typename L, typename TInitializer, typename TBuffer, typename TInitPolicies>
-std::true_type InitTest(decltype(&L::template Init<TInitializer, TBuffer, TInitPolicies>));
+template <typename L, typename TInitializer, typename TBuffer>
+std::true_type InitTest(decltype(&L::template Init<TInitializer, TBuffer>));
 
-template <typename L, typename TInitPolicies, typename TInitContainer, typename TLoad>
+template <typename L, typename TInitializer, typename TBuffer>
 std::false_type InitTest(...);
 
 template <typename L, typename TGradCollector>
@@ -43,12 +43,11 @@ template <typename L>
 std::false_type NeutralInvariantTest(...);
 }
 
-template <typename TLayer, typename TInitializer, typename TBuffer, 
-          typename TInitPolicies = typename TInitializer::PolicyCont>
+template <typename TLayer, typename TInitializer, typename TBuffer>
 void LayerInit(TLayer& layer, TInitializer& initializer, TBuffer& loadBuffer)
 {
-    if constexpr (decltype(NSLayerInterface::InitTest<TLayer, TInitializer, TBuffer, TInitPolicies>(nullptr))::value)
-        layer.template Init<TInitializer, TBuffer, TInitPolicies>(initializer, loadBuffer);
+    if constexpr (decltype(NSLayerInterface::InitTest<TLayer, TInitializer, TBuffer>(nullptr))::value)
+        layer.template Init<TInitializer, TBuffer>(initializer, loadBuffer);
 }
     
 template <typename TLayer, typename TGradCollector>

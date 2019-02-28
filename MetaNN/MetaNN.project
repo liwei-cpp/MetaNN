@@ -207,6 +207,7 @@
     <VirtualDirectory Name="src_rec">
       <File Name="layers/src_rec/value_source_layer.h"/>
       <File Name="layers/src_rec/src_rec.h"/>
+      <File Name="layers/src_rec/param_source_layer.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="operators">
@@ -280,12 +281,14 @@
       <VirtualDirectory Name="facilities">
         <File Name="model/param_initializer/facilities/fill_with_spec_dist.h"/>
         <File Name="model/param_initializer/facilities/policies.h"/>
-        <File Name="model/param_initializer/facilities/traits.h"/>
       </VirtualDirectory>
+      <File Name="model/param_initializer/param_initializer_pack.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="weight_cont">
       <File Name="model/weight_cont/load_buffer.h"/>
       <File Name="model/weight_cont/grad_collector.h"/>
+      <File Name="model/weight_cont/weight_cont_pack.h"/>
     </VirtualDirectory>
+    <File Name="model/model.h"/>
   </VirtualDirectory>
 </CodeLite_Project>

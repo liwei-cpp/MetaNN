@@ -19,9 +19,9 @@ ValuePolicyObj(PNoUpdate,         GradPolicy, IsUpdate, false);
 ValuePolicyObj(PFeedbackOutput,   GradPolicy, IsFeedbackOutput, true);
 ValuePolicyObj(PFeedbackNoOutput, GradPolicy, IsFeedbackOutput, false);
 
-struct ParamPolicy
+struct ParamPolicyDeprecate
 {
-    using MajorClass = ParamPolicy;
+    using MajorClass = ParamPolicyDeprecate;
     
     struct ParamTypeCate
     {
@@ -31,9 +31,9 @@ struct ParamPolicy
     };
     using ParamType = ParamTypeCate::Matrix;
 };
-TypePolicyObj(PScalarParam,      ParamPolicy, Param, Scalar);
-TypePolicyObj(PMatrixParam,      ParamPolicy, Param, Matrix);
-TypePolicyObj(PThreeDArrayParam, ParamPolicy, Param, ThreeDArray);
+TypePolicyObj(PScalarParamDeprecate,      ParamPolicyDeprecate, Param, Scalar);
+TypePolicyObj(PMatrixParamDeprecate,      ParamPolicyDeprecate, Param, Matrix);
+TypePolicyObj(PThreeDArrayParamDeprecate, ParamPolicyDeprecate, Param, ThreeDArray);
 
 struct SingleLayerPolicy
 {

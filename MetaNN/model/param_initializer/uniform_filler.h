@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <MetaNN/model/param_initializer/facilities/fill_with_spec_dist.h>
+#include <MetaNN/model/param_initializer/facilities/policies.h>
 
 namespace MetaNN
 {
@@ -25,7 +26,7 @@ public:
     }
     
     template <typename TData>
-    void Fill(TData& data, size_t /*fanin*/, size_t /*fanout*/)
+    void Fill(TData& data)
     {
         using ElementType = typename TData::ElementType;
         using DistType = std::conditional_t<std::is_integral<ElementType>::value,

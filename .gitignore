@@ -7,5 +7,7 @@
 /GeneralTest2/GeneralTest2.txt
 /LayerTest/LayerTest.mk
 /LayerTest/LayerTest.txt
+/OtherTests/OtherTests.mk
+/OtherTests/OtherTests.txt
 /MetaNN/MetaNN.mk
 /Makefile

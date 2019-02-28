@@ -8,9 +8,9 @@
 namespace MetaNN::LayerTraits
 {
 template <typename TWeight, typename TGradStack, typename TGradCollector>
-void MatrixGradCollect(const TWeight& weight,
-                       TGradStack& gradStack,
-                       TGradCollector& col)
+void ParamGradCollect(const TWeight& weight,
+                      TGradStack& gradStack,
+                      TGradCollector& col)
 {
     size_t stackSize = gradStack.size();
     if (stackSize == 0) return;

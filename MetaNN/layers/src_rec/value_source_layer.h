@@ -12,7 +12,7 @@ namespace MetaNN
         using MajorClass = ValueSourcePolicy;
 
         struct ValueTypeTypeCate;
-        using ValueType = double;
+        using ValueType = float;
         
         struct NumeratorValueCate;
         static constexpr int Numerator = 0;
@@ -38,7 +38,7 @@ namespace MetaNN
     public:
         static constexpr bool IsFeedbackOutput = false;
         static constexpr bool IsUpdate = false;
-        
+
     private:
         using ValueType = typename PolicySelect<ValueSourcePolicy, CurLayerPolicy>::ValueType;
         constexpr static int Numerator = PolicySelect<ValueSourcePolicy, CurLayerPolicy>::Numerator;
@@ -46,7 +46,7 @@ namespace MetaNN
 
     public:
         using InputMap = LayerIOMap<>;
-        using GradMap = LayerIOMap<LayerKV<LayerOutput, ValueType>>;
+        using GradMap = FillGradMap<TGrads, LayerOutput>;
         
     public:
         ValueSourceLayer(std::string name)
@@ -61,7 +61,7 @@ namespace MetaNN
         }
 
         template <typename TGrad>
-        auto FeedBackward(TGrad&& p_grad)
+        auto FeedBackward(TGrad&&)
         {
             return LayerInputCont<ValueSourceLayer>();
         }
