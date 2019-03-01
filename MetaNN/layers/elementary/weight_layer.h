@@ -2,7 +2,7 @@
 
 namespace MetaNN
 {
-    namespace NSWeightLayer
+/*    namespace NSWeightLayer
     {
         template <typename TAimGrad, bool IsUpdate>
         struct GradStackType_
@@ -162,7 +162,7 @@ namespace MetaNN
         {
             if constexpr (IsUpdate)
             {
-                LayerTraits::MatrixGradCollect(m_weight, m_paramGradStack, col);
+                LayerTraits::ParamGradCollect(m_weight, m_paramGradStack, col);
             }
         }
 
@@ -183,5 +183,5 @@ namespace MetaNN
         
         LayerTraits::LayerInternalBuf<AimInputType, IsUpdate> m_inputStack;
         std::stack<decltype(std::declval<WeightLayer>().CalParamGrad(std::declval<AimGradType>()))> m_paramGradStack;
-    };
+    };*/
 }

@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
+/*    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
     using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_bias_layer1()
@@ -356,19 +356,19 @@ namespace
             }
         }
         cout << "done" << endl;
-    }
+    }*/
 }
 
 namespace Test::Layer
 {
     void test_bias_layer()
     {
-        test_bias_layer1();
+/*        test_bias_layer1();
         test_bias_layer2();
         test_bias_layer3();
         test_bias_layer4();
         test_bias_layer5();
         test_bias_layer6();
-        test_bias_layer7();
+        test_bias_layer7();*/
     }
 }

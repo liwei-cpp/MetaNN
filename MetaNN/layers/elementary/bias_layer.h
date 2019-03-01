@@ -5,12 +5,11 @@
 #include <MetaNN/layers/facilities/traits.h>
 #include <MetaNN/policies/policy_operations.h>
 #include <MetaNN/policies/policy_selector.h>
-#include <MetaNN/model/param_initializer/facilities/traits.h>
 
 #include <iostream>
 namespace MetaNN
 {
-    namespace NSBiasLayer
+/*    namespace NSBiasLayer
     {
         template <typename TAimGrad, typename TBiasShape, bool IsUpdate>
         struct GradStackType_
@@ -42,7 +41,7 @@ namespace MetaNN
         using GradMap = FillGradMap<TGrads, LayerOutput>;
 
     private:
-        using ParamCategory = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamType;
+        using ParamCategory = typename PolicySelect<ParamPolicyDeprecate, CurLayerPolicy>::ParamType;
         using AimInputType = typename InputMap::template Find<LayerInput>;
         using ParamType = PrincipalDataType<ParamCategory,
                                             typename AimInputType::ElementType,
@@ -153,7 +152,7 @@ namespace MetaNN
         {
             if constexpr (IsUpdate)
             {
-                LayerTraits::MatrixGradCollect(m_bias, m_paramGradStack, col);
+                LayerTraits::ParamGradCollect(m_bias, m_paramGradStack, col);
             }
         }
 
@@ -182,5 +181,5 @@ namespace MetaNN
         
         typename NSBiasLayer::GradStackType_<AimGradType, Shape<ParamCategory>, IsUpdate>::type m_paramGradStack;
         LayerTraits::LayerInternalBuf<AimInputShapeType, IsFeedbackOutput> m_inputShapeStack;
-    };
+    };*/
 }

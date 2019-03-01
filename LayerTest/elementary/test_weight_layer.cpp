@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
+/*    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
     using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_weight_layer1()
@@ -352,18 +352,18 @@ namespace
         cout << "mean-delta = " << fabs(mean) << " Variance-delta = " << fabs(var-0.75) << ' ';
 
         cout << "done" << endl;
-    }
+    }*/
 }
 
 namespace Test::Layer
 {
     void test_weight_layer()
     {
-        test_weight_layer1();
+/*        test_weight_layer1();
         test_weight_layer2();
         test_weight_layer3();
         test_weight_layer4();
         test_weight_layer5();
-        test_weight_layer6();
+        test_weight_layer6();*/
     }
 }
