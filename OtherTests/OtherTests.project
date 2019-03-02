@@ -17,6 +17,7 @@
       <File Name="model/param_initializer/test_constant_filler.cpp"/>
       <File Name="model/param_initializer/test_gaussian_filler.cpp"/>
       <File Name="model/param_initializer/test_uniform_filler.cpp"/>
+      <File Name="model/param_initializer/test_param_initializer.cpp"/>
     </VirtualDirectory>
     <File Name="model/model.h"/>
   </VirtualDirectory>

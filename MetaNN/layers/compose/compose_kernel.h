@@ -3,6 +3,7 @@
 #include <MetaNN/facilities/cont_metafuns/sequential.h>
 #include <MetaNN/facilities/cont_metafuns/multi_map.h>
 #include <MetaNN/facilities/cont_metafuns/set.h>
+#include <type_traits>
 
 namespace MetaNN
 {
@@ -137,17 +138,7 @@ using SublayerNameSet_ = ContMetaFun::Set::Insert_<TState, typename TInput::Laye
 template <typename TSublayerClauses>
 using SublayerNameSet = ContMetaFun::Sequential::Fold<ClauseSeq<>, TSublayerClauses,
                                                       SublayerNameSet_>;
-                                                      
-/// InternalInNamePortSet
-template <typename TState, typename TInput>
-using InternalInNamePortSet_ = ContMetaFun::Set::Insert_<TState,
-                                                         ContMetaFun::Helper::Pair<typename TInput::InLayer,
-                                                                                   typename TInput::InPort>,
-                                                         true>;
-template <typename TInternalClauses>
-using InternalInNamePortSet = ContMetaFun::Sequential::Fold<ClauseSeq<>, TInternalClauses,
-                                                            InternalInNamePortSet_>;
-                                                            
+
 /// InternalLayerSet
 template <typename TState, typename TInput>
 using InternalInLayerSet_ = ContMetaFun::Set::Insert_<TState, typename TInput::InLayer, true>;
@@ -169,28 +160,39 @@ using InternalLayerSet = ContMetaFun::Sequential::Fold<InternalInLayerSet<TInter
                                                        
 /// InputNamePortSet
 template <typename TState, typename TInput>
+using InternalInNamePortSet_ = ContMetaFun::Set::Insert_<TState,
+                                                         ContMetaFun::Helper::Pair<typename TInput::InLayer,
+                                                                                   typename TInput::InPort>,
+                                                         true>;
+
+template <typename TState, typename TInput>
 using InputNamePortSet_ = ContMetaFun::Set::Insert_<TState, 
                                                     ContMetaFun::Helper::Pair<typename TInput::InLayerName,
                                                                               typename TInput::InLayerPort>,
                                                     true>;
+
 template <typename TInternalClauses>
-using InputNamePortSet = ContMetaFun::Sequential::Fold<ClauseSeq<>, TInternalClauses,
+using InternalInNamePortSet = ContMetaFun::Sequential::Fold<ClauseSeq<>, TInternalClauses,
+                                                            InternalInNamePortSet_>;
+
+template <typename TInternalClauses, typename TInputClauses>
+using InputNamePortSet = ContMetaFun::Sequential::Fold<InternalInNamePortSet<TInternalClauses>, TInputClauses,
                                                        InputNamePortSet_>;
-                                                       
+
 /// InputLayerSet
 template <typename TState, typename TInput>
 using InputLayerSet_ = ContMetaFun::Set::Insert_<TState, typename TInput::InLayerName, true>;
 
-template <typename TInternalClauses>
-using InputLayerSet = ContMetaFun::Sequential::Fold<ClauseSeq<>, TInternalClauses,
+template <typename TInputClauses>
+using InputLayerSet = ContMetaFun::Sequential::Fold<ClauseSeq<>, TInputClauses,
                                                     InputLayerSet_>;
                                                        
 /// OutputPortSet
 template <typename TState, typename TInput>
 using OutputPortSet_ = ContMetaFun::Set::Insert_<TState, typename TInput::OutPort, true>;
 
-template <typename TInternalClauses>
-using OutputPortSet = ContMetaFun::Sequential::Fold<ClauseSeq<>, TInternalClauses,
+template <typename TOutputClauses>
+using OutputPortSet = ContMetaFun::Sequential::Fold<ClauseSeq<>, TOutputClauses,
                                                     OutputPortSet_>;
                                                     
 /// OutputLayerSet
@@ -227,7 +229,7 @@ template <typename...TOutputTags, typename TSublayerNameSet>
 constexpr bool OutputTagInSubLayer<ClauseSeq<TOutputTags...>, TSublayerNameSet> = 
     (MetaNN::ContMetaFun::Set::HasKey<TSublayerNameSet, typename TOutputTags::OutLayerName> && ...);
     
-/// ========= Sublayers Tags Sould Exist in Other Arrays ==============================
+/// ========= Sublayers Tags Sould Exist in Other Sets =================================
 template <typename TSublayerNameSet,
           typename TInterLayerSet, typename TInLayerSet, typename TOutLayerSet>
 constexpr bool SublayerTagInOtherArrays = false;
@@ -239,26 +241,7 @@ constexpr bool SublayerTagInOtherArrays<ClauseSeq<TSublayerElems...>,
     ((MetaNN::ContMetaFun::Set::HasKey<TInterLayerSet, TSublayerElems> ||
       MetaNN::ContMetaFun::Set::HasKey<TInLayerSet, TSublayerElems> ||
       MetaNN::ContMetaFun::Set::HasKey<TOutLayerSet, TSublayerElems>) && ...);
-      
-/// ========= Internal Post Layers Should Be Useful ==================================
-template <typename TInternalClauses, typename TSublayerSet>
-constexpr bool UsefulInternalPostLayer = false;
 
-template <typename... TInputTags, typename TSublayerSet>
-constexpr bool UsefulInternalPostLayer<ClauseSeq<TInputTags...>, TSublayerSet> =
-    ((MetaNN::ContMetaFun::Set::HasKey<ClauseRefine::InternalOutLayerSet<ClauseSeq<TInputTags...>>,
-                                       typename TInputTags::InLayer> ||
-      MetaNN::ContMetaFun::Set::HasKey<TSublayerSet, typename TInputTags::InLayer>) && ...);
-      
-/// ========= Input Layers Should Be Useful ============================================
-template <typename TInClauses, typename TInterOutLayerSet, typename TOutLayerSet>
-constexpr bool UsefulInputLayer = false;
-
-template <typename...TInElems, typename TInterOutLayerSet, typename TOutLayerSet>
-constexpr bool UsefulInputLayer<ClauseSeq<TInElems...>, TInterOutLayerSet, TOutLayerSet> =
-    ((MetaNN::ContMetaFun::Set::HasKey<TInterOutLayerSet, typename TInElems::InLayerName> ||
-      MetaNN::ContMetaFun::Set::HasKey<TOutLayerSet, typename TInElems::InLayerName>) && ...);
-      
 /// ========= Topological Ordering Implementation ======================================
 namespace NSTPO
 {
@@ -404,16 +387,21 @@ namespace NSSI
         };
     };
     
-    template <bool plainFBO, typename TInsts>
-    struct FeedbackOutCheck
+    template <typename TInst, typename InConnectSet>
+    struct FbSetByInConnectionHelper_
     {
-        constexpr static bool value = true;
+        using type = typename std::conditional_t<ContMetaFun::Set::HasKey<InConnectSet, typename TInst::Sublayer>,
+                                                 ChangePolicy_<PFeedbackOutput, typename TInst::Policy>,
+                                                 Identity_<typename TInst::Policy>>::type;
     };
-
-    template <typename...TItems>
-    struct FeedbackOutCheck<true, SublayerPolicyCont<TItems...>>
+    
+    template <typename TInstCont, typename InConnectSet>
+    struct FbSetByInConnection_;
+    
+    template <typename... TInst, typename InConnectSet>
+    struct FbSetByInConnection_<SublayerPolicyCont<TInst...>, InConnectSet>
     {
-        constexpr static bool value = (PolicySelect<FeedbackPolicy, PlainPolicy<typename TItems::Policy>>::IsFeedbackOutput && ...);
+        using type = SublayerPolicyCont<typename FbSetByInConnectionHelper_<TInst, InConnectSet>::type ...>;
     };
     
     template <typename TItem, typename TQuery>
@@ -446,8 +434,8 @@ namespace NSSI
     template <typename TProcessed, typename TCur, typename...TInstElements, typename InterFMap>
     struct FeedbackOutModif<TProcessed, SublayerPolicyCont<TCur, TInstElements...>, InterFMap>
     {
-        constexpr static bool isUpdate = PolicySelect<FeedbackPolicy, typename TCur::Policy>::IsFeedbackOutput || \
-                                         PolicySelect<FeedbackPolicy, typename TCur::Policy>::IsUpdate;
+        constexpr static bool isUpdate = PolicySelect<GradPolicy, typename TCur::Policy>::IsFeedbackOutput || \
+                                         PolicySelect<GradPolicy, typename TCur::Policy>::IsUpdate;
                                          
         using NewProcessed = ContMetaFun::Sequential::PushBack<TProcessed, TCur>;
 
@@ -469,7 +457,7 @@ namespace NSSI
     };
 }
 
-template <typename TPolicyCont, typename OrderedSublayers, typename InterConnects>
+template <typename TPolicyCont, typename OrderedSublayers, typename InConnects, typename InterConnects>
 struct SublayerInstantiation
 {
     static_assert(IsPolicyContainer<TPolicyCont>, "Not a Policy Container");
@@ -477,21 +465,22 @@ struct SublayerInstantiation
     using SublayerWithPolicyRes = ContMetaFun::Sequential::Fold<NSSI::SublayerPolicyCont<>, OrderedSublayers,
                                                                 NSSI::GetSublayerPolicy<TPolicyCont>::template apply>;
                                                                 
-    /// check -- if feedbackout is set in parent layer, then each sublayer should also set it to true
-    constexpr static bool IsPlainPolicyFeedbackOut = PolicySelect<FeedbackPolicy, PlainPolicy<TPolicyCont>>::IsFeedbackOutput;
-    static_assert(NSSI::FeedbackOutCheck<IsPlainPolicyFeedbackOut, SublayerWithPolicyRes>::value,
-                                         "Sublayer not set feedback output, logic error!");
+    /// if feedbackout is set in parent layer, then each sublayer that includes in InConnects should also set it to true
+    constexpr static bool IsPlainPolicyFeedbackOut = PolicySelect<GradPolicy, PlainPolicy<TPolicyCont>>::IsFeedbackOutput;
+    using SublayerPolicyModif1
+        =typename std::conditional_t<!IsPlainPolicyFeedbackOut,
+                                      Identity_<SublayerWithPolicyRes>,
+                                      NSSI::FbSetByInConnection_<SublayerWithPolicyRes,
+                                                                 ClauseRefine::InputLayerSet<InConnects>>>::type;
                                          
     /// for any instance A, if there is a connection A->B and A is feedbackin, then B should set to feedbackout
-    using FeedbackOutUpdate = typename std::conditional_t<IsPlainPolicyFeedbackOut,
-                                                          Identity_<SublayerWithPolicyRes>,
-                                                          NSSI::FeedbackOutModif<NSSI::SublayerPolicyCont<>,
-                                                                                 SublayerWithPolicyRes,
-                                                                                 ClauseRefine::InternalFMap<InterConnects>>>::type;
+    using SublayerPolicyModif2 = typename NSSI::FeedbackOutModif<NSSI::SublayerPolicyCont<>,
+                                                                 SublayerPolicyModif1,
+                                                                 ClauseRefine::InternalFMap<InterConnects>>::type;
 
 
     /// Instantiation
-    using type = ContMetaFun::Sequential::Fold<std::tuple<>, FeedbackOutUpdate,
+    using type = ContMetaFun::Sequential::Fold<std::tuple<>, SublayerPolicyModif2,
                                                NSSI::InstHelper_>;
 };
 }
@@ -513,9 +502,8 @@ struct ComposeTopology
     static_assert((ArraySize<Sublayers> != 0), "Sublayer is empty.");
     static_assert((ArraySize<Sublayers> == ArraySize<SublayerNameSet>),
                   "Two or more sublayers have same tag.");
-    static_assert(ArraySize<InterConnects> == ArraySize<NSComposeKernel::ClauseRefine::InternalInNamePortSet<InterConnects>>,
-                  "One internal input corresponds to two or more internal outputs.");
-    static_assert(ArraySize<InputConnects> == ArraySize<NSComposeKernel::ClauseRefine::InputNamePortSet<InputConnects>>,
+    static_assert(ArraySize<InputConnects> + ArraySize<InterConnects> ==
+                  ArraySize<NSComposeKernel::ClauseRefine::InputNamePortSet<InterConnects, InputConnects>>,
                   "One input corresponds to two or more sources.");
     static_assert(ArraySize<OutputConnects> == ArraySize<NSComposeKernel::ClauseRefine::OutputPortSet<OutputConnects>>,
                   "One output corresponds to two or more sources.");
@@ -530,17 +518,12 @@ struct ComposeTopology
                                                             NSComposeKernel::ClauseRefine::InputLayerSet<InputConnects>,
                                                             NSComposeKernel::ClauseRefine::OutputLayerSet<OutputConnects>>,
                   "One ore more sublayer tags not belong to any connection containers.");
-    static_assert(NSComposeKernel::UsefulInternalPostLayer<InterConnects, SublayerNameSet>,
-                  "One or more output tags are not sublayer tags.");
-    static_assert(NSComposeKernel::UsefulInputLayer<InputConnects, NSComposeKernel::ClauseRefine::InternalOutLayerSet<InterConnects>,
-                                                    NSComposeKernel::ClauseRefine::OutputLayerSet<OutputConnects>>,
-                  "Input info is useless");
-                  
+
 /// ========== Topological Ordering ===================================
     using TopologicalOrdering = typename NSComposeKernel::TopologicalOrdering_<Sublayers, InterConnects>::type;
 
     template <typename TPolicyCont>
-    using Instances = typename NSComposeKernel::SublayerInstantiation<TPolicyCont, TopologicalOrdering, InterConnects>::type;
+    using Instances = typename NSComposeKernel::SublayerInstantiation<TPolicyCont, TopologicalOrdering, InputConnects, InterConnects>::type;
 };
 
 
@@ -942,7 +925,7 @@ private:
     using InternalResult = NSComposeKernel::InternalResult<typename TKernelTopo::SublayerNameSet>;
     
 public:
-    static constexpr bool IsFeedbackOutput = PolicySelect<FeedbackPolicy, PlainPolicies>::IsFeedbackOutput;
+    static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, PlainPolicies>::IsFeedbackOutput;
     static constexpr bool IsUpdate = NSComposeKernel::IsComposeLayerUpdate<TInstContainer>;
 
     using InputType = TInputType;

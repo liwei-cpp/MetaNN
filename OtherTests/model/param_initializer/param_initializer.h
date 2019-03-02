@@ -4,6 +4,8 @@ namespace Test::Model
 {
     namespace ParamInitializer
     {
+        void test_param_initializer();
+
         void test_constant_filler();
         void test_gaussian_filler();
         void test_uniform_filler();
@@ -14,5 +16,6 @@ namespace Test::Model
         ParamInitializer::test_constant_filler();
         ParamInitializer::test_gaussian_filler();
         ParamInitializer::test_uniform_filler();
+        ParamInitializer::test_param_initializer();
     }
 }

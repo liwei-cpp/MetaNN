@@ -17,6 +17,14 @@ struct VarTypeDict
     {
     public:
         Values() = default;
+        
+        Values(Values&& val)
+        {
+            for (size_t i = 0; i < sizeof...(TTypes); ++i)
+            {
+                m_tuple[i] = std::move(val.m_tuple[i]);
+            }
+        }
 
         Values(std::shared_ptr<void> (&&input)[sizeof...(TTypes)])
         {

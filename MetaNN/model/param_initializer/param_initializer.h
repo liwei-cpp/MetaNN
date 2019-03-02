@@ -13,6 +13,12 @@ namespace MetaNN
             : m_filler(std::move(filler))
         {}
         
+        template <typename TKey>
+        const auto& GetFiller() const
+        {
+            return m_filler.template Get<TKey>();
+        }
+        
         template <typename TElem2, typename TDevice2>
         void SetParam(const std::string& name, const Scalar<TElem2, TDevice2>& param)
         {
@@ -171,7 +177,7 @@ namespace MetaNN
         {
             using TKey = typename RemConstRef<TCur>::KeyType;
             auto newCont = std::forward<TCont>(cont).template Set<TKey>(cur.m_filler);
-            return CreateFillerCont(newCont, std::forward<TRemain>(remain)...);
+            return CreateFillerCont(std::move(newCont), std::forward<TRemain>(remain)...);
         }
     }
 
