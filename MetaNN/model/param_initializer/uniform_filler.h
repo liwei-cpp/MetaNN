@@ -26,7 +26,7 @@ public:
     }
     
     template <typename TData>
-    void Fill(TData& data)
+    void Fill(TData& data) const
     {
         using ElementType = typename TData::ElementType;
         using DistType = std::conditional_t<std::is_integral<ElementType>::value,

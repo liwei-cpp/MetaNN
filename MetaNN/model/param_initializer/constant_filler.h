@@ -36,7 +36,7 @@ public:
     {}
     
     template <typename TData>
-    void Fill(TData& data)
+    void Fill(TData& data) const
     {
         NSConstantFiller::Fill(data, m_value);
     }

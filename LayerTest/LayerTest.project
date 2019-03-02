@@ -13,12 +13,11 @@
     <File Name="calculate_tags.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="facilities">
-    <File Name="facilities/test_facilities.h"/>
     <File Name="facilities/test_layer_io_map.cpp"/>
+    <File Name="facilities/test_facilities.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="elementary">
     <File Name="elementary/test_abs_layer.cpp"/>
-    <File Name="elementary/test_elementary.h"/>
     <File Name="elementary/test_sigmoid_layer.cpp"/>
     <File Name="elementary/test_tanh_layer.cpp"/>
     <File Name="elementary/test_add_layer.cpp"/>
@@ -29,11 +28,11 @@
     <File Name="elementary/test_relu_layer.cpp"/>
     <File Name="elementary/test_multiply_layer.cpp"/>
     <File Name="elementary/test_transpose_layer.cpp"/>
+    <File Name="elementary/test_elementary.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="loss">
-    <File Name="loss/test_loss.h"/>
-    <File Name="loss/test_nll_loss_layer.h"/>
     <File Name="loss/test_nll_loss_layer.cpp"/>
+    <File Name="loss/test_loss.cpp"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -127,7 +126,8 @@
     </Configuration>
   </Settings>
   <VirtualDirectory Name="src_rec">
-    <File Name="src_rec/test_src_rec.h"/>
     <File Name="src_rec/test_value_source_layer.cpp"/>
+    <File Name="src_rec/test_param_source_layer.cpp"/>
+    <File Name="src_rec/test_src_rec.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

@@ -66,8 +66,10 @@ namespace MetaNN
         using GradMap = FillGradMap<TGrads, LayerOutput>;
 
     public:
-        ParamSourceLayer(std::string name)
+        template <typename... TShapeParams>
+        ParamSourceLayer(std::string name, TShapeParams&&... shapeParams)
             : m_name(std::move(name))
+            , m_dataShape(std::forward<TShapeParams>(shapeParams)...)
         {}
 
         template <typename TInitializer, typename TBuffer>
@@ -92,8 +94,15 @@ namespace MetaNN
             {
                 m_data = ParamType(m_dataShape);
                 using InitializerName = typename PolicySelect<ParamPolicy, CurLayerPolicy>::Initializer;
-                auto& cur_init = initializer.template GetFiller<InitializerName>();
-                cur_init.Fill(m_data);
+                if constexpr (!std::is_same_v<InitializerName, NullParameter>)
+                {
+                    auto& cur_init = initializer.template GetFiller<InitializerName>();
+                    cur_init.Fill(m_data);
+                }
+                else
+                {
+                    throw std::runtime_error("Cannot get the initializer.");
+                }
             }
             loadBuffer.Set(m_name, m_data);
         }

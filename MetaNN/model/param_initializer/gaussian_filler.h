@@ -26,7 +26,7 @@ public:
     }
     
     template <typename TData>
-    void Fill(TData& data)
+    void Fill(TData& data) const
     {
         using ElementType = typename TData::ElementType;
         std::normal_distribution<ElementType> dist(m_mean, m_std);

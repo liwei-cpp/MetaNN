@@ -74,7 +74,7 @@ namespace MetaNN
         {}
     
         template <typename TData>
-        void Fill(TData& data)
+        void Fill(TData& data) const
         {
             auto [fanIn, fanOut] = NSVarScaleFiller::GetFanInFanOut(data);
             using ScaleMode = typename PolicySelect<VarScaleFillerPolicy, TPolicyCont>::ScaleMode;        

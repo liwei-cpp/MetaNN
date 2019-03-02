@@ -25,6 +25,10 @@ struct VarTypeDict
                 m_tuple[i] = std::move(val.m_tuple[i]);
             }
         }
+        
+        Values(const Values&) = default;
+        Values& operator= (const Values&) = default;
+        Values& operator= (Values&&) = default;
 
         Values(std::shared_ptr<void> (&&input)[sizeof...(TTypes)])
         {

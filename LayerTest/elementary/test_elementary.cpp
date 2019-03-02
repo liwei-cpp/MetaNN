@@ -1,5 +1,3 @@
-#pragma once
-
 namespace Test::Layer
 {
     void test_abs_layer();
@@ -14,7 +12,7 @@ namespace Test::Layer
     void test_transpose_layer();
     void test_weight_layer();
     
-    inline void test_elementary()
+    void test_elementary()
     {
         test_abs_layer();
         test_add_layer();
