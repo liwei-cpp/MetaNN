@@ -37,7 +37,7 @@ namespace
         // mean = 0, std = 2^2/12 = 1/3
         cout << "mean-delta = " << fabs(mean) << " std-delta = " << fabs(sqrt(var) - sqrt(1.0f / 3)) << ' ';
         cout << "done" << endl;
-}
+    }
 }
 
 namespace Test::Model::ParamInitializer

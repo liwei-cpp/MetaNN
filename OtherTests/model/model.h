@@ -1,8 +1,12 @@
 #pragma once
 
-#include <model/param_initializer/param_initializer.h>
 namespace Test
 {
+    namespace Model
+    {
+        void test_param_initializer();
+    }
+
     void test_model()
     {
         Model::test_param_initializer();

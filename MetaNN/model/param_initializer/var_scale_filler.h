@@ -40,25 +40,25 @@ namespace MetaNN
         template <typename TElem, typename TDevice>
         auto GetFanInFanOut(const Scalar<TElem, TDevice>&)
         {
-            return {1, 1};
+            return std::tuple{1, 1};
         }
         
         template <typename TElem, typename TDevice>
         auto GetFanInFanOut(const Matrix<TElem, TDevice>& mat)
         {
-            return {mat.Shape().RowNum(), mat.Shape.ColNum()};
+            return std::tuple{mat.Shape().RowNum(), mat.Shape().ColNum()};
         }
         
         template <typename TElem, typename TDevice>
         auto GetFanInFanOut(const ThreeDArray<TElem, TDevice>& arr)
         {
-            return {1, arr.Shape().PageNum()};
+            return std::tuple{1, arr.Shape().PageNum()};
         }
         
         template <typename TElem, typename TDevice>
         auto GetFanInFanOut(const ThreeDArraySequence<TElem, TDevice>& data)
         {
-            return {data.Shape().Length(), data.Shape().PageNum()};
+            return std::tuple{data.Shape().Length(), data.Shape().PageNum()};
         }
     }
     
@@ -74,7 +74,7 @@ namespace MetaNN
         {}
     
         template <typename TData>
-        void Fill(TData& data) const
+        void Fill(TData& data)
         {
             auto [fanIn, fanOut] = NSVarScaleFiller::GetFanInFanOut(data);
             using ScaleMode = typename PolicySelect<VarScaleFillerPolicy, TPolicyCont>::ScaleMode;        

@@ -13,11 +13,12 @@
   </VirtualDirectory>
   <VirtualDirectory Name="model">
     <VirtualDirectory Name="param_initializer">
-      <File Name="model/param_initializer/param_initializer.h"/>
       <File Name="model/param_initializer/test_constant_filler.cpp"/>
       <File Name="model/param_initializer/test_gaussian_filler.cpp"/>
       <File Name="model/param_initializer/test_uniform_filler.cpp"/>
       <File Name="model/param_initializer/test_param_initializer.cpp"/>
+      <File Name="model/param_initializer/param_initializer.cpp"/>
+      <File Name="model/param_initializer/test_var_scalr_filler.cpp"/>
     </VirtualDirectory>
     <File Name="model/model.h"/>
   </VirtualDirectory>
