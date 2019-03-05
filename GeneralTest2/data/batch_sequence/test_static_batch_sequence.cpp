@@ -1,4 +1,3 @@
-#include <data/batch_sequence/test_static_batch_sequence.h>
 #include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <iostream>

@@ -168,7 +168,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Blas
 {
     void test_dot()
     {

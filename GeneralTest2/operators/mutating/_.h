@@ -1,10 +1,10 @@
 #pragma once
 
-namespace Test::Operators
+namespace Test::Operators::Mutating
 {
     void test_transpose();
 
-    void test_mutating_operators()
+    void test()
     {
         test_transpose();
     }

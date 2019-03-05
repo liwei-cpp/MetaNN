@@ -161,7 +161,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Activation
 {
     void test_tanh()
     {
@@ -218,7 +218,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Activation
 {
     void test_tanh_grad()
     {

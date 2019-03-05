@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Test::Operators
+namespace Test::Operators::Elwentwise
 {
     void test_abs();
     void test_acos();   void test_acos_grad();
@@ -13,7 +13,7 @@ namespace Test::Operators
     void test_sign();
     void test_substract();
 
-    void test_elementwise_operators()
+    void test()
     {
         test_abs();
         test_acos();    test_acos_grad();

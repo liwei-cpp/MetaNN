@@ -1,11 +1,11 @@
 #pragma once
 
-namespace Test::Operators
+namespace Test::Operators::CateTrans
 {
     void test_collapse();
     void test_duplicate();
 
-    void test_cate_trans_operators()
+    void test()
     {
         test_collapse();
         test_duplicate();

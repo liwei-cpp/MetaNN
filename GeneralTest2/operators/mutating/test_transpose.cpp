@@ -134,7 +134,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Mutating
 {
     void test_transpose()
     {

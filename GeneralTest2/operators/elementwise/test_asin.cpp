@@ -96,7 +96,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Elwentwise
 {
     void test_asin()
     {
@@ -234,7 +234,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Elwentwise
 {
     void test_asin_grad()
     {

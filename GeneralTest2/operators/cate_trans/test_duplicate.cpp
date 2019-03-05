@@ -727,7 +727,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::CateTrans
 {
     void test_duplicate()
     {

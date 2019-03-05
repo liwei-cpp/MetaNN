@@ -111,7 +111,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Loss
 {
     void test_nll_loss()
     {
@@ -201,7 +201,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Loss
 {
     void test_nll_loss_grad()
     {

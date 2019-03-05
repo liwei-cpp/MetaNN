@@ -1,10 +1,10 @@
 #pragma once
 
-namespace Test::Operators
+namespace Test::Operators::Blas
 {
     void test_dot();
 
-    void test_blas_operators()
+    void test()
     {
         test_dot();
     }

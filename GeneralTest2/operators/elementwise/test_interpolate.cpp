@@ -52,7 +52,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Elwentwise
 {
     void test_interpolate()
     {

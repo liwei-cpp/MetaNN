@@ -85,7 +85,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Activation
 {
     void test_softmax()
     {
@@ -231,7 +231,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Activation
 {
     void test_softmax_grad()
     {

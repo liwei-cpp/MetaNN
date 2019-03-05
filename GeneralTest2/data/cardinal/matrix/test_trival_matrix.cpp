@@ -1,4 +1,3 @@
-#include <data/cardinal/matrix/test_trival_matrix.h>
 #include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <cmath>

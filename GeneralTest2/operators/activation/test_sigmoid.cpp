@@ -161,7 +161,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Activation
 {
     void test_sigmoid()
     {
@@ -219,7 +219,7 @@ namespace
     }
 }
 
-namespace Test::Operators
+namespace Test::Operators::Activation
 {
     void test_sigmoid_grad()
     {
