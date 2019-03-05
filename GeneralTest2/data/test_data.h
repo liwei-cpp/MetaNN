@@ -2,9 +2,9 @@
 
 #include <data/cardinal/test_cardinal_pack.h>
 #include <data/batch/test_batch_pack.h>
+#include <data/general/_.h>
 #include <data/sequence/test_sequence_pack.h>
 #include <data/batch_sequence/test_batch_sequence_pack.h>
-#include <data/test_dynamic.h>
 
 namespace Test::Data
 {
@@ -12,8 +12,8 @@ namespace Test::Data
     {
         Cardinal::test_cardinal_pack();
         Batch::test_batch_pack();
+        General::test();
         Sequence::test_sequence_pack();
         BatchSequence::test_batch_sequence_pack();
-        test_dynamic();
     }
 }

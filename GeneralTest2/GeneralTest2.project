@@ -16,15 +16,12 @@
     <VirtualDirectory Name="cardinal">
       <VirtualDirectory Name="scalar">
         <File Name="data/cardinal/scalar/test_scalar.cpp"/>
-        <File Name="data/cardinal/scalar/test_scalar.h"/>
         <File Name="data/cardinal/scalar/test_scalar_pack.h"/>
       </VirtualDirectory>
       <VirtualDirectory Name="matrix">
         <File Name="data/cardinal/matrix/test_matrix.h"/>
         <File Name="data/cardinal/matrix/test_matrix.cpp"/>
         <File Name="data/cardinal/matrix/test_matrix_pack.h"/>
-        <File Name="data/cardinal/matrix/test_zero_matrix.h"/>
-        <File Name="data/cardinal/matrix/test_zero_matrix.cpp"/>
         <File Name="data/cardinal/matrix/test_trival_matrix.cpp"/>
         <File Name="data/cardinal/matrix/test_trival_matrix.h"/>
         <File Name="data/cardinal/matrix/test_vector.h"/>
@@ -34,7 +31,6 @@
       </VirtualDirectory>
       <File Name="data/cardinal/test_cardinal_pack.h"/>
       <VirtualDirectory Name="3d_array">
-        <File Name="data/cardinal/3d_array/test_3d_array.h"/>
         <File Name="data/cardinal/3d_array/test_3d_array.cpp"/>
         <File Name="data/cardinal/3d_array/test_3d_array_pack.h"/>
       </VirtualDirectory>
@@ -61,8 +57,11 @@
       <File Name="data/batch_sequence/test_dynamic_batch_sequence.cpp"/>
     </VirtualDirectory>
     <File Name="data/test_data.h"/>
-    <File Name="data/test_dynamic.h"/>
-    <File Name="data/test_dynamic.cpp"/>
+    <VirtualDirectory Name="general">
+      <File Name="data/general/test_zero_data.cpp"/>
+      <File Name="data/general/_.h"/>
+      <File Name="data/general/test_dynamic.cpp"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>

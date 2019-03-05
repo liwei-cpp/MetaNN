@@ -1,4 +1,3 @@
-#include <data/test_dynamic.h>
 #include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <iostream>
@@ -440,7 +439,7 @@ namespace
     }
 }
 
-namespace Test::Data
+namespace Test::Data::General
 {
     void test_dynamic()
     {

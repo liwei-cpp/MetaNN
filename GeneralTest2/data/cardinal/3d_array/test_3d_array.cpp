@@ -1,4 +1,3 @@
-#include <data/cardinal/3d_array/test_3d_array.h>
 #include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <iostream>

@@ -7,42 +7,6 @@
 
 namespace MetaNN
 {
-    struct ParamPolicy
-    {
-        using MajorClass = ParamPolicy;
-        
-        struct ParamDeviceTypeCate
-        {
-            using CPU = DeviceTags::CPU;
-        };
-        using ParamDevice = ParamDeviceTypeCate::CPU;
-        
-        struct ParamTypeTypeCate;
-        using ParamType = float;
-
-        struct ParamCategoryTypeCate
-        {
-            using Scalar = CategoryTags::Scalar;
-            using Matrix = CategoryTags::Matrix;
-            using ThreeDArray = CategoryTags::ThreeDArray;
-        };
-        using ParamCategory = ParamCategoryTypeCate::Matrix;
-        
-        struct InitializerTypeCate;
-        using Initializer = NullParameter;
-    };
-#include <MetaNN/policies/policy_macro_begin.h>
-    TypePolicyObj(PScalarParam,               ParamPolicy, ParamCategory, Scalar);
-    TypePolicyObj(PMatrixParam,               ParamPolicy, ParamCategory, Matrix);
-    TypePolicyObj(PThreeDArrayParam,          ParamPolicy, ParamCategory, ThreeDArray);
-    
-    TypePolicyTemplate(PParamElementTypeIs,   ParamPolicy, ParamType);
-
-    TypePolicyObj(PCPUDeviceParam,            ParamPolicy, ParamDevice,   CPU);
-    
-    TypePolicyTemplate(PInitializerIs,        ParamPolicy, Initializer);
-#include <MetaNN/policies/policy_macro_end.h>
-
     struct LayerOutput;
 
     template <typename TInputs, typename TGrads, typename TPolicies>

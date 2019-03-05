@@ -1,4 +1,3 @@
-#include <data/cardinal/scalar/test_scalar.h>
 #include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <iostream>

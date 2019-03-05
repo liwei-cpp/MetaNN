@@ -2,7 +2,6 @@
 
 // matrices
 #include <MetaNN/data/cardinal/matrix/matrix.h>
-#include <MetaNN/data/cardinal/matrix/zero_matrix.h>
 #include <MetaNN/data/cardinal/matrix/trival_matrix.h>
 
 

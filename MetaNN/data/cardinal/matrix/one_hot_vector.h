@@ -1,4 +1,5 @@
 #pragma once
+#include <cstring>
 #include <MetaNN/data/cardinal/matrix/matrix.h>
 #include <MetaNN/evaluate/facilities/eval_buffer.h>
 #include <MetaNN/evaluate/facilities/eval_group.h>
