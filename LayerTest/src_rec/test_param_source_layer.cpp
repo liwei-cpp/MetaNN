@@ -214,7 +214,7 @@ namespace
     }
 }
 
-namespace Test::Layer
+namespace Test::Layer::SrcRec
 {
     void test_param_source_layer()
     {

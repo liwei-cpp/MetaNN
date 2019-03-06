@@ -33,9 +33,7 @@ namespace MetaNN
         using GradMap = LayerIOMap<>;
 
     private:
-        using InputCategory = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamCategory;
-        using ElementType = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamType;
-        using DeviceType  = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamDevice;
+        using TLayerInputFP = typename InputMap::template Find<LayerInput>;
 
     public:
         DataEliminateLayer(std::string name)
@@ -63,7 +61,11 @@ namespace MetaNN
                 }
                 auto shape = m_inputShapeStack.top();
                 m_inputShapeStack.pop();
-                auto res = NSDataEliminateLayer::CreateGradRes<InputCategory, ElementType, DeviceType>(shape);
+                
+                auto res
+                    = NSDataEliminateLayer::CreateGradRes<typename TLayerInputFP::CategoryTag,
+                                                          typename TLayerInputFP::ElementType,
+                                                          typename TLayerInputFP::DeviceType>(shape);
                 return LayerInputCont<DataEliminateLayer>().template Set<LayerInput>(std::move(res));
             }
             else
@@ -71,9 +73,20 @@ namespace MetaNN
                 return LayerInputCont<DataEliminateLayer>();
             }
         }
+        
+        void NeutralInvariant() const
+        {
+            if constexpr(IsFeedbackOutput)
+            {
+                if (!m_inputShapeStack.empty())
+                {
+                    throw std::runtime_error("NeutralInvariant Fail!");
+                }
+            }
+        }
 
     private:
         std::string m_name;
-        LayerTraits::LayerInternalBuf<Shape<InputCategory>, IsFeedbackOutput> m_inputShapeStack;
+        LayerTraits::LayerInternalBuf<ShapeType<TLayerInputFP>, IsFeedbackOutput> m_inputShapeStack;
     };
 }

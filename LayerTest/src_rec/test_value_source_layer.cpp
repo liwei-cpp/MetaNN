@@ -55,7 +55,7 @@ namespace
     }
 }
 
-namespace Test::Layer
+namespace Test::Layer::SrcRec
 {
     void test_value_source_layer()
     {

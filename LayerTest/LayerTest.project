@@ -128,6 +128,7 @@
   <VirtualDirectory Name="src_rec">
     <File Name="src_rec/test_value_source_layer.cpp"/>
     <File Name="src_rec/test_param_source_layer.cpp"/>
-    <File Name="src_rec/test_src_rec.cpp"/>
+    <File Name="src_rec/_.h"/>
+    <File Name="src_rec/test_data_eliminate_layer.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>
