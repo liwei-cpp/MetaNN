@@ -115,5 +115,6 @@
   </Settings>
   <VirtualDirectory Name="facilities">
     <File Name="facilities/test_sequential.cpp"/>
+    <File Name="facilities/test_map.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

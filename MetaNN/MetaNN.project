@@ -165,10 +165,13 @@
       <File Name="facilities/cont_metafuns/multi_map.h"/>
       <File Name="facilities/cont_metafuns/sequential.h"/>
       <File Name="facilities/cont_metafuns/set.h"/>
+      <File Name="facilities/cont_metafuns/map.h"/>
+      <File Name="facilities/cont_metafuns/_.h"/>
     </VirtualDirectory>
     <File Name="facilities/null_param.h"/>
     <File Name="facilities/traits.h"/>
     <File Name="facilities/var_type_dict.h"/>
+    <File Name="facilities/_.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="layers">
     <VirtualDirectory Name="compose">
