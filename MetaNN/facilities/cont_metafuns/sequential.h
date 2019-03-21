@@ -296,4 +296,20 @@ struct Cascade_<TCont<TParams1...>, TCont<TParams2...>>
 template <typename TCont1, typename TCont2>
 using Cascade = typename Cascade_<TCont1, TCont2>::type;
 //=========================================================================================
+
+
+// Transform ==============================================================================
+template <typename TInCont, template <typename> typename F, template<typename...> typename TOutCont>
+struct Transform_;
+
+template <template <typename...> typename TInCont, typename... TInputs,
+          template <typename> typename F, template<typename...> typename TOutCont>
+struct Transform_<TInCont<TInputs...>, F, TOutCont>
+{
+    using type = TOutCont<typename F<TInputs>::type ...>;
+};
+
+template <typename TInCont, template <typename> typename F, template<typename...> typename TOutCont>
+using Transform = typename Transform_<TInCont, F, TOutCont>::type;
+//=========================================================================================
 }
