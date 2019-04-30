@@ -72,10 +72,10 @@ public:
         auto it = m_params.find(name);
         return it != m_params.end();
     }
-    
+
+	std::map<std::string, Matrix<TElem, DeviceTags::CPU>> m_params;
 private:
     TFillers m_filler;
-    std::map<std::string, Matrix<TElem, DeviceTags::CPU>> m_params;
 };
 
 template <typename TElem, typename...TPolicies>
