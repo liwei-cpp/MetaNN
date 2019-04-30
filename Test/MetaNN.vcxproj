@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{4E74EFD2-9312-453B-9AA0-46EA21D35277}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>obj\x86_dbg</IntDir>
+    <TargetName>$(ProjectName)_x86_dbg</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>obj\x86</IntDir>
+    <TargetName>$(ProjectName)_x86</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>obj\x64</IntDir>
+    <TargetName>$(ProjectName)_x64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>obj\x64_dbg</IntDir>
+    <TargetName>$(ProjectName)_x64_dbg</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="data\test_array.cpp" />
+    <ClCompile Include="data\test_batch_matrix.cpp" />
+    <ClCompile Include="data\test_batch_scalar.cpp" />
+    <ClCompile Include="data\test_duplicate.cpp" />
+    <ClCompile Include="data\test_general_matrix.cpp" />
+    <ClCompile Include="data\test_one_hot_vector.cpp" />
+    <ClCompile Include="data\test_scalar.cpp" />
+    <ClCompile Include="data\test_trival_matrix.cpp" />
+    <ClCompile Include="data\test_zero_matrix.cpp" />
+    <ClCompile Include="evaluate\test_eval_plan.cpp" />
+    <ClCompile Include="facilities\test_var_type_dict.cpp" />
+    <ClCompile Include="layers\compose\test_compose_kernel.cpp" />
+    <ClCompile Include="layers\compose\test_linear_layer.cpp" />
+    <ClCompile Include="layers\compose\test_single_layer.cpp" />
+    <ClCompile Include="layers\cost\test_negative_log_likelihood_layer.cpp" />
+    <ClCompile Include="layers\elementary\test_abs_layer.cpp" />
+    <ClCompile Include="layers\elementary\test_add_layer.cpp" />
+    <ClCompile Include="layers\elementary\test_bias_layer.cpp" />
+    <ClCompile Include="layers\elementary\test_element_mul_layer.cpp" />
+    <ClCompile Include="layers\elementary\test_interpolate_layer.cpp" />
+    <ClCompile Include="layers\elementary\test_sigmoid_layer.cpp" />
+    <ClCompile Include="layers\elementary\test_softmax_layer.cpp" />
+    <ClCompile Include="layers\elementary\test_tanh_layer.cpp" />
+    <ClCompile Include="layers\elementary\test_weight_layer.cpp" />
+    <ClCompile Include="layers\recurrent\test_gru.cpp" />
+    <ClCompile Include="layers\recurrent\test_gru_2.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="model_rel\param_initializer\test_constant_filler.cpp" />
+    <ClCompile Include="model_rel\param_initializer\test_gaussian_filler.cpp" />
+    <ClCompile Include="model_rel\param_initializer\test_var_scale_filter.cpp" />
+    <ClCompile Include="operators\test_abs.cpp" />
+    <ClCompile Include="operators\test_add.cpp" />
+    <ClCompile Include="operators\test_collapse.cpp" />
+    <ClCompile Include="operators\test_divide.cpp" />
+    <ClCompile Include="operators\test_dot.cpp" />
+    <ClCompile Include="operators\test_element_mul.cpp" />
+    <ClCompile Include="operators\test_interpolate.cpp" />
+    <ClCompile Include="operators\test_negative_log_likelihood.cpp" />
+    <ClCompile Include="operators\test_negative_log_likelihood_derivative.cpp" />
+    <ClCompile Include="operators\test_sigmoid.cpp" />
+    <ClCompile Include="operators\test_sigmoid_derivative.cpp" />
+    <ClCompile Include="operators\test_sign.cpp" />
+    <ClCompile Include="operators\test_softmax.cpp" />
+    <ClCompile Include="operators\test_softmax_derivative.cpp" />
+    <ClCompile Include="operators\test_substract.cpp" />
+    <ClCompile Include="operators\test_tanh.cpp" />
+    <ClCompile Include="operators\test_tanh_derivative.cpp" />
+    <ClCompile Include="operators\test_transpose.cpp" />
+    <ClCompile Include="policies\test_change_policy.cpp" />
+    <ClCompile Include="policies\test_policy_operations.cpp" />
+    <ClCompile Include="policies\test_policy_selector.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\metann\data\batch\array.h" />
+    <ClInclude Include="..\metann\data\batch\batch.h" />
+    <ClInclude Include="..\metann\data\batch\duplicate.h" />
+    <ClInclude Include="..\metann\data\batch\matrix.h" />
+    <ClInclude Include="..\metann\data\batch\scalar.h" />
+    <ClInclude Include="..\metann\data\dynamic.h" />
+    <ClInclude Include="..\metann\data\facilities\allocators.h" />
+    <ClInclude Include="..\metann\data\facilities\continuous_memory.h" />
+    <ClInclude Include="..\metann\data\facilities\lower_access.h" />
+    <ClInclude Include="..\metann\data\facilities\tags.h" />
+    <ClInclude Include="..\metann\data\facilities\traits.h" />
+    <ClInclude Include="..\metann\data\matrices\cpu_matrix.h" />
+    <ClInclude Include="..\metann\data\matrices\matrices.h" />
+    <ClInclude Include="..\metann\data\matrices\one_hot_vector.h" />
+    <ClInclude Include="..\metann\data\matrices\trival_matrix.h" />
+    <ClInclude Include="..\metann\data\matrices\zero_matrix.h" />
+    <ClInclude Include="..\metann\data\scalar.h" />
+    <ClInclude Include="..\metann\data_copy\data_copy.h" />
+    <ClInclude Include="..\metann\evaluate\cpu\trival_eval_pool.h" />
+    <ClInclude Include="..\metann\evaluate\facilities\eval_buffer.h" />
+    <ClInclude Include="..\metann\evaluate\facilities\eval_group.h" />
+    <ClInclude Include="..\metann\evaluate\facilities\eval_handle.h" />
+    <ClInclude Include="..\metann\evaluate\facilities\eval_plan.h" />
+    <ClInclude Include="..\metann\evaluate\facilities\eval_pool.h" />
+    <ClInclude Include="..\metann\evaluate\facilities\eval_unit.h" />
+    <ClInclude Include="..\metann\facilities\null_param.h" />
+    <ClInclude Include="..\metann\facilities\traits.h" />
+    <ClInclude Include="..\metann\facilities\var_type_dict.h" />
+    <ClInclude Include="..\metann\layers\compose\compose_kernel.h" />
+    <ClInclude Include="..\metann\layers\compose\linear_layer.h" />
+    <ClInclude Include="..\metann\layers\compose\single_layer.h" />
+    <ClInclude Include="..\metann\layers\cost\negative_log_likelihood_layer.h" />
+    <ClInclude Include="..\metann\layers\elementary\abs_layer.h" />
+    <ClInclude Include="..\metann\layers\elementary\add_layer.h" />
+    <ClInclude Include="..\metann\layers\elementary\bias_layer.h" />
+    <ClInclude Include="..\metann\layers\elementary\element_mul_layer.h" />
+    <ClInclude Include="..\metann\layers\elementary\interpolate_layer.h" />
+    <ClInclude Include="..\metann\layers\elementary\sigmoid_layer.h" />
+    <ClInclude Include="..\metann\layers\elementary\softmax_layer.h" />
+    <ClInclude Include="..\metann\layers\elementary\tanh_layer.h" />
+    <ClInclude Include="..\metann\layers\elementary\weight_layer.h" />
+    <ClInclude Include="..\metann\layers\facilities\common_io.h" />
+    <ClInclude Include="..\metann\layers\facilities\interface_fun.h" />
+    <ClInclude Include="..\metann\layers\facilities\policies.h" />
+    <ClInclude Include="..\metann\layers\facilities\traits.h" />
+    <ClInclude Include="..\metann\layers\recurrent\gru_step.h" />
+    <ClInclude Include="..\metann\layers\recurrent\recurrent_layer.h" />
+    <ClInclude Include="..\metann\meta_nn.h" />
+    <ClInclude Include="..\metann\model_rel\grad_col\grad_collector.h" />
+    <ClInclude Include="..\metann\model_rel\param_initializer\constant_filler.h" />
+    <ClInclude Include="..\metann\model_rel\param_initializer\facilities\fill_with_spec_dist.h" />
+    <ClInclude Include="..\metann\model_rel\param_initializer\facilities\policies.h" />
+    <ClInclude Include="..\metann\model_rel\param_initializer\facilities\traits.h" />
+    <ClInclude Include="..\metann\model_rel\param_initializer\gaussian_filler.h" />
+    <ClInclude Include="..\metann\model_rel\param_initializer\param_initializer.h" />
+    <ClInclude Include="..\metann\model_rel\param_initializer\uniform_filler.h" />
+    <ClInclude Include="..\metann\model_rel\param_initializer\var_scale_filler.h" />
+    <ClInclude Include="..\metann\operators\abs.h" />
+    <ClInclude Include="..\metann\operators\add.h" />
+    <ClInclude Include="..\metann\operators\collapse.h" />
+    <ClInclude Include="..\metann\operators\divide.h" />
+    <ClInclude Include="..\metann\operators\dot.h" />
+    <ClInclude Include="..\metann\operators\element_mul.h" />
+    <ClInclude Include="..\metann\operators\facilities\category_cal.h" />
+    <ClInclude Include="..\metann\operators\facilities\oper_seq.h" />
+    <ClInclude Include="..\metann\operators\facilities\organizer.h" />
+    <ClInclude Include="..\metann\operators\facilities\tags.h" />
+    <ClInclude Include="..\metann\operators\facilities\traits.h" />
+    <ClInclude Include="..\metann\operators\interpolate.h" />
+    <ClInclude Include="..\metann\operators\negative_log_likelihood.h" />
+    <ClInclude Include="..\metann\operators\negative_log_likelihood_derivative.h" />
+    <ClInclude Include="..\metann\operators\operators.h" />
+    <ClInclude Include="..\metann\operators\sigmoid.h" />
+    <ClInclude Include="..\metann\operators\sigmoid_derivative.h" />
+    <ClInclude Include="..\metann\operators\sign.h" />
+    <ClInclude Include="..\metann\operators\softmax.h" />
+    <ClInclude Include="..\metann\operators\softmax_derivative.h" />
+    <ClInclude Include="..\metann\operators\substract.h" />
+    <ClInclude Include="..\metann\operators\tanh.h" />
+    <ClInclude Include="..\metann\operators\tanh_derivative.h" />
+    <ClInclude Include="..\metann\operators\transpose.h" />
+    <ClInclude Include="..\metann\policies\change_policy.h" />
+    <ClInclude Include="..\metann\policies\inject_policy.h" />
+    <ClInclude Include="..\metann\policies\policy_container.h" />
+    <ClInclude Include="..\metann\policies\policy_macro_begin.h" />
+    <ClInclude Include="..\metann\policies\policy_macro_end.h" />
+    <ClInclude Include="..\metann\policies\policy_operations.h" />
+    <ClInclude Include="..\metann\policies\policy_selector.h" />
+    <ClInclude Include="data\test_array.h" />
+    <ClInclude Include="data\test_batch_matrix.h" />
+    <ClInclude Include="data\test_batch_scalar.h" />
+    <ClInclude Include="data\test_duplicate.h" />
+    <ClInclude Include="data\test_general_matrix.h" />
+    <ClInclude Include="data\test_one_hot_vector.h" />
+    <ClInclude Include="data\test_scalar.h" />
+    <ClInclude Include="data\test_trival_matrix.h" />
+    <ClInclude Include="data\test_zero_matrix.h" />
+    <ClInclude Include="evaluate\test_eval_plan.h" />
+    <ClInclude Include="facilities\calculate_tags.h" />
+    <ClInclude Include="facilities\data_gen.h" />
+    <ClInclude Include="facilities\test_var_type_dict.h" />
+    <ClInclude Include="layers\compose\test_compose_kernel.h" />
+    <ClInclude Include="layers\compose\test_linear_layer.h" />
+    <ClInclude Include="layers\compose\test_single_layer.h" />
+    <ClInclude Include="layers\cost\test_negative_log_likelihood_layer.h" />
+    <ClInclude Include="layers\elementary\test_abs_layer.h" />
+    <ClInclude Include="layers\elementary\test_add_layer.h" />
+    <ClInclude Include="layers\elementary\test_bias_layer.h" />
+    <ClInclude Include="layers\elementary\test_element_mul_layer.h" />
+    <ClInclude Include="layers\elementary\test_interpolate_layer.h" />
+    <ClInclude Include="layers\elementary\test_sigmoid_layer.h" />
+    <ClInclude Include="layers\elementary\test_softmax_layer.h" />
+    <ClInclude Include="layers\elementary\test_tanh_layer.h" />
+    <ClInclude Include="layers\elementary\test_weight_layer.h" />
+    <ClInclude Include="layers\recurrent\test_gru.h" />
+    <ClInclude Include="layers\recurrent\test_gru_2.h" />
+    <ClInclude Include="model_rel\param_initializer\test_constant_filler.h" />
+    <ClInclude Include="model_rel\param_initializer\test_gaussian_filler.h" />
+    <ClInclude Include="model_rel\param_initializer\test_var_scale_filter.h" />
+    <ClInclude Include="operators\test_abs.h" />
+    <ClInclude Include="operators\test_add.h" />
+    <ClInclude Include="operators\test_collapse.h" />
+    <ClInclude Include="operators\test_divide.h" />
+    <ClInclude Include="operators\test_dot.h" />
+    <ClInclude Include="operators\test_element_mul.h" />
+    <ClInclude Include="operators\test_interpolate.h" />
+    <ClInclude Include="operators\test_negative_log_likelihood.h" />
+    <ClInclude Include="operators\test_negative_log_likelihood_derivative.h" />
+    <ClInclude Include="operators\test_sigmoid.h" />
+    <ClInclude Include="operators\test_sigmoid_derivative.h" />
+    <ClInclude Include="operators\test_sign.h" />
+    <ClInclude Include="operators\test_softmax.h" />
+    <ClInclude Include="operators\test_softmax_derivative.h" />
+    <ClInclude Include="operators\test_substract.h" />
+    <ClInclude Include="operators\test_tanh.h" />
+    <ClInclude Include="operators\test_tanh_derivative.h" />
+    <ClInclude Include="operators\test_transpose.h" />
+    <ClInclude Include="policies\test_change_policy.h" />
+    <ClInclude Include="policies\test_policy_operations.h" />
+    <ClInclude Include="policies\test_policy_selector.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
