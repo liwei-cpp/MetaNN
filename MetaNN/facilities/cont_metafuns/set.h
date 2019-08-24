@@ -69,4 +69,30 @@ namespace NSErase
     template <typename TCon, typename TKey>
     using Erase = typename Erase_<TCon, TKey>::type;
 //=========================================================================================
+
+// Create From Items ======================================================================
+namespace NSCreateFromItems
+{
+    template <template<typename> typename Picker, bool bMute>
+    struct Creator
+    {
+        template <typename TState, typename TInput>
+        struct apply
+        {
+            using TItem = typename Picker<TInput>::type;
+            using type = ContMetaFun::Set::Insert<TState, TItem, bMute>;
+        };
+    };
+}
+
+    template <typename TItemCont, template <typename> typename Picker, bool bMute,
+              template<typename...> typename TOutCont = std::tuple>
+    struct CreateFromItems_
+    {
+        using type = ContMetaFun::Sequential::Fold<TOutCont<>, TItemCont, NSCreateFromItems::Creator<Picker, bMute>::template apply>;
+    };
+    
+    template <typename TItemCont, template <typename> typename Picker, bool bMute,
+              template<typename...> typename TOutCont = std::tuple>
+    using CreateFromItems = typename CreateFromItems_<TItemCont, Picker, bMute, TOutCont>::type;
 }

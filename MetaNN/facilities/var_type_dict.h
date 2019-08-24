@@ -83,8 +83,8 @@ struct VarTypeDict
         template <size_t ID>
         using KeyType = ContMetaFun::Sequential::At<VarTypeDict, ID>;
         
-        template <typename TTag>
-        using ValueType = ContMetaFun::Sequential::At<Values, ContMetaFun::Sequential::Order<VarTypeDict, TTag>>;
+        template <size_t ID>
+        using ValueType = ContMetaFun::Sequential::At<Values, ContMetaFun::Sequential::Order<VarTypeDict, KeyType<ID>>>;
 
     private:
         std::shared_ptr<void> m_tuple[sizeof...(TTypes)];

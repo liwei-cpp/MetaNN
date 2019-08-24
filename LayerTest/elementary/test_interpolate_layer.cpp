@@ -207,7 +207,7 @@ namespace
         cout << "done" << endl;
     }
 }
-namespace Test::Layer
+namespace Test::Layer::Elementary
 {
     void test_interpolate_layer()
     {

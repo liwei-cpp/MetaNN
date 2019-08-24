@@ -293,7 +293,7 @@ namespace
     }
 }
 
-namespace Test::Layer
+namespace Test::Layer::Elementary
 {
     void test_add_layer()
     {

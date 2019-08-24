@@ -20,7 +20,7 @@ namespace
     }
 }
 
-namespace Test::Layer
+namespace Test::Layer::Facilities
 {
     void test_layer_io_map()
     {

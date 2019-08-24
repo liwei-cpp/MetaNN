@@ -81,7 +81,7 @@ namespace
     }
 }
 
-namespace Test::Layer
+namespace Test::Layer::Elementary
 {
     void test_relu_layer()
     {

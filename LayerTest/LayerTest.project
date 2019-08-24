@@ -14,7 +14,7 @@
   </VirtualDirectory>
   <VirtualDirectory Name="facilities">
     <File Name="facilities/test_layer_io_map.cpp"/>
-    <File Name="facilities/test_facilities.cpp"/>
+    <File Name="facilities/_.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="elementary">
     <File Name="elementary/test_abs_layer.cpp"/>
@@ -28,11 +28,11 @@
     <File Name="elementary/test_relu_layer.cpp"/>
     <File Name="elementary/test_multiply_layer.cpp"/>
     <File Name="elementary/test_transpose_layer.cpp"/>
-    <File Name="elementary/test_elementary.cpp"/>
+    <File Name="elementary/_.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="loss">
     <File Name="loss/test_nll_loss_layer.cpp"/>
-    <File Name="loss/test_loss.cpp"/>
+    <File Name="loss/_.h"/>
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
@@ -130,5 +130,9 @@
     <File Name="src_rec/test_param_source_layer.cpp"/>
     <File Name="src_rec/_.h"/>
     <File Name="src_rec/test_data_eliminate_layer.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="compose">
+    <File Name="compose/_.h"/>
+    <File Name="compose/test_compose_kernel.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

@@ -32,7 +32,6 @@ namespace MetaNN
         {
             return Softmax(val);
         }
-
     public:
         SoftmaxLayer(std::string name)
             : m_name(std::move(name))

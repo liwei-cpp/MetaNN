@@ -35,4 +35,26 @@ namespace NSCreateFromItems
               template<typename> typename KeyPicker,
               template<typename...> typename TOutCont = std::tuple>
     using CreateFromItems = typename CreateFromItems_<TItemCont, KeyPicker, TOutCont>::type;
+
+// Find ===================================================================================
+namespace NSFind
+{
+    template <typename TCon>
+    struct map_;
+        
+    template <template <typename... > typename TCon, typename...TItem>
+    struct map_<TCon<TItem...>> : TItem...
+    {
+        using TItem::apply ...;
+        static void apply(...);
+    };
+}
+    template <typename TCon, typename TKey>
+    struct Find_
+    {
+        using type = decltype(NSFind::map_<TCon>::apply((TKey*)nullptr));
+    };
+    
+    template <typename TCon, typename TKey>
+    using Find = typename Find_<TCon, TKey>::type;
 }

@@ -29,15 +29,6 @@ namespace MetaNN
         using TInterpolateLayerLambdaFP  = typename InputMap::template Find<InterpolateLayerLambda>;
         using TLayerOutputBP             = typename GradMap::template Find<LayerOutput>;
 
-        auto FeedForwardCal(const TInterpolateLayerWeight1FP& val1,
-                            const TInterpolateLayerWeight2FP& val2,
-                            const TInterpolateLayerLambdaFP& lambda)
-        {
-            auto proShape = LayerTraits::ShapePromote(val1, val2, lambda);
-            return Interpolate(Duplicate(std::move(val1), proShape),
-                               Duplicate(std::move(val2), proShape),
-                               Duplicate(std::move(lambda), proShape));
-        }
     public:
         InterpolateLayer(std::string name)
             : m_name(std::move(name))
@@ -49,7 +40,10 @@ namespace MetaNN
             auto input1 = LayerTraits::PickItemFromCont<InputMap, InterpolateLayerWeight1>(std::forward<TIn>(p_in));
             auto input2 = LayerTraits::PickItemFromCont<InputMap, InterpolateLayerWeight2>(std::forward<TIn>(p_in));
             auto lambda = LayerTraits::PickItemFromCont<InputMap, InterpolateLayerLambda>(std::forward<TIn>(p_in));
-            auto res = FeedForwardCal(input1, input2, lambda);
+            auto proShape = LayerTraits::ShapePromote(input1, input2, lambda);
+            auto res = Interpolate(Duplicate(input1, proShape),
+                                   Duplicate(input2, proShape),
+                                   Duplicate(lambda, proShape));
 
             if constexpr (IsFeedbackOutput)
             {

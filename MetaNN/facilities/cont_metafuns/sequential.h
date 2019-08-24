@@ -309,7 +309,8 @@ struct Transform_<TInCont<TInputs...>, F, TOutCont>
     using type = TOutCont<typename F<TInputs>::type ...>;
 };
 
-template <typename TInCont, template <typename> typename F, template<typename...> typename TOutCont>
+template <typename TInCont, template <typename> typename F,
+          template<typename...> typename TOutCont>
 using Transform = typename Transform_<TInCont, F, TOutCont>::type;
 //=========================================================================================
 }

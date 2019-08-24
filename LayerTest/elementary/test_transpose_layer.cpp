@@ -89,7 +89,7 @@ namespace
     }
 }
 
-namespace Test::Layer
+namespace Test::Layer::Elementary
 {
     void test_transpose_layer()
     {

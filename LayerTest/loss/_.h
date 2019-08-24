@@ -1,8 +1,8 @@
-namespace Test::Layer
+namespace Test::Layer::Loss
 {
     void test_nll_loss_layer();
 
-    void test_loss()
+    void Test()
     {
         test_nll_loss_layer();
     }

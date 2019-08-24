@@ -284,7 +284,7 @@ namespace
     }
 }
 
-namespace Test::Layer
+namespace Test::Layer::Elementary
 {
     void test_multiply_layer()
     {

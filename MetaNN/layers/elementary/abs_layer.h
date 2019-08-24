@@ -27,11 +27,6 @@ namespace MetaNN
         using TLayerInputFP = typename InputMap::template Find<LayerInput>;
         using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
 
-        auto FeedForwardCal(const TLayerInputFP& val)
-        {
-            return Abs(val);
-        }
-
     public:
         AbsLayer(std::string name)
             : m_name(std::move(name))
@@ -41,7 +36,7 @@ namespace MetaNN
         auto FeedForward(TIn&& p_in)
         {
             auto val = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
-            auto res = FeedForwardCal(val);
+            auto res = Abs(val);
             
             if constexpr (IsFeedbackOutput)
             {

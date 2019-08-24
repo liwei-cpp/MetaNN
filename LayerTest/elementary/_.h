@@ -1,4 +1,4 @@
-namespace Test::Layer
+namespace Test::Layer::Elementary
 {
     void test_abs_layer();
     void test_add_layer();
@@ -12,7 +12,7 @@ namespace Test::Layer
     void test_transpose_layer();
     void test_weight_layer();
     
-    void test_elementary()
+    void Test()
     {
         test_abs_layer();
         test_add_layer();

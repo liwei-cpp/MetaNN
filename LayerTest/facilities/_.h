@@ -1,8 +1,8 @@
-namespace Test::Layer
+namespace Test::Layer::Facilities
 {
     void test_layer_io_map();
 
-    void test_facilities()
+    void Test()
     {
         test_layer_io_map();
     }

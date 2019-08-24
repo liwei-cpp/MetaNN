@@ -29,11 +29,6 @@ namespace MetaNN
         using TRightOperandFP = typename InputMap::template Find<RightOperand>;
         using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
         
-        auto FeedForwardCal(const TLeftOperandFP& val1, const TRightOperandFP& val2)
-        {
-            auto proShape = LayerTraits::ShapePromote(val1, val2);
-            return DuplicateOrKeep(val1, proShape) + DuplicateOrKeep(val2, proShape);
-        }
     public:
         AddLayer(std::string name)
             : m_name(std::move(name))
@@ -44,7 +39,8 @@ namespace MetaNN
         {
             const auto& input1 = LayerTraits::PickItemFromCont<InputMap, LeftOperand>(std::forward<TIn>(p_in));
             const auto& input2 = LayerTraits::PickItemFromCont<InputMap, RightOperand>(std::forward<TIn>(p_in));
-            auto res = FeedForwardCal(input1, input2);
+            auto proShape = LayerTraits::ShapePromote(input1, input2);
+            auto res = DuplicateOrKeep(input1, proShape) + DuplicateOrKeep(input2, proShape);
             
             if constexpr (IsFeedbackOutput)
             {

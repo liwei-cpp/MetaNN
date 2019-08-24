@@ -154,7 +154,7 @@ namespace
     }
 }
 
-namespace Test::Layer
+namespace Test::Layer::Loss
 {
     void test_nll_loss_layer()
     {

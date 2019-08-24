@@ -10,8 +10,9 @@ namespace MetaNN::ContMetaFun::MultiMap
         template <typename TProcessed, typename TKey, typename TValue, typename... TRemain>
         struct imp_
         {
+            using Value = ContMetaFun::Helper::ValueSequence<TValue>;
             using type = Sequential::PushBack<TProcessed,
-                                              MetaNN::ContMetaFun::Helper::Pair<TKey, TValue>>;
+                                              ContMetaFun::Helper::KVBinder<TKey, Value>>;
         };
         
         template <typename TProcessed,
@@ -23,12 +24,13 @@ namespace MetaNN::ContMetaFun::MultiMap
         
         template <typename TProcessed,
                   typename TKey, typename TValue,
-                  typename... TV, typename... TRemain>
+                  typename TVs, typename... TRemain>
         struct imp_<TProcessed, TKey, TValue,
-                    Helper::Pair<TKey, TV...>, TRemain...>
+                    Helper::KVBinder<TKey, TVs>, TRemain...>
         {
+            
             using type = Sequential::PushBack<TProcessed,
-                                              Helper::Pair<TKey, TV..., TValue>,
+                                              Helper::KVBinder<TKey, Sequential::PushBack<TVs, TValue>>,
                                               TRemain...>;
         };
     }
@@ -51,10 +53,10 @@ namespace MetaNN::ContMetaFun::MultiMap
         struct map_;
         
         template <template <typename... > typename TCon, typename...TItem>
-        struct map_<TCon<TItem...>> : ContMetaFun::Helper::KVBinder<typename TItem::KeyType, TItem>...
+        struct map_<TCon<TItem...>> : TItem...
         {
-            using ContMetaFun::Helper::KVBinder<typename TItem::KeyType, TItem>::apply...;
-            static void apply(...);
+            using TItem::apply...;
+            static Helper::ValueSequence<> apply(...);
         };
     }
     

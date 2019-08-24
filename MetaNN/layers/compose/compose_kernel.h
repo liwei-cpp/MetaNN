@@ -1,13 +1,18 @@
 #pragma once
+#include <MetaNN/facilities/cont_metafuns/_.h>
+#include <MetaNN/layers/facilities/policies.h>
+#include <MetaNN/layers/facilities/layer_io_map.h>
+#include <MetaNN/layers/facilities/traits.h>
 #include <MetaNN/policies/change_policy.h>
-#include <MetaNN/facilities/cont_metafuns/sequential.h>
-#include <MetaNN/facilities/cont_metafuns/multi_map.h>
-#include <MetaNN/facilities/cont_metafuns/set.h>
+#include <MetaNN/policies/policy_operations.h>
+#include <MetaNN/policies/policy_selector.h>
+#include <MetaNN/layers/elementary/add_layer.h>
+#include <MetaNN/layers/elementary/multiply_layer.h>
 #include <type_traits>
 
 namespace MetaNN
 {
-template <typename TLayerName, template<typename> class TLayer>
+template <typename TLayerName, template<typename, typename, typename> class TLayer>
 struct Sublayer
 {
     using LayerName = TLayerName;
@@ -69,7 +74,7 @@ struct SeparateClauses_
     };
     
     template <typename TS, typename TI, typename TO, typename TIt, 
-              typename TLayerName, template<typename> class TLayer, typename...T>
+              typename TLayerName, template<typename, typename, typename> class TLayer, typename...T>
     struct imp<TS, TI, TO, TIt, Sublayer<TLayerName, TLayer>, T...>
             : imp<ContMetaFun::Sequential::PushBack<TS, Sublayer<TLayerName, TLayer>>,
                   TI, TO, TIt,
@@ -132,6 +137,22 @@ template <typename TInternalClauses>
 using InternalBMap = ContMetaFun::Sequential::Fold<ClauseSeq<>, TInternalClauses,
                                                    InternalBMap_>;
 
+/// InputFMap
+template <typename TState, typename TInput>
+using InputFMap_ = ContMetaFun::MultiMap::Insert_<TState, typename TInput::InLayerName, TInput>;
+
+template <typename TInputClauses>
+using InputFMap = ContMetaFun::Sequential::Fold<ClauseSeq<>, TInputClauses,
+                                                InputFMap_>;
+
+/// OutputBMap
+template <typename TState, typename TOutput>
+using OutputBMap_ = ContMetaFun::MultiMap::Insert_<TState, typename TOutput::OutLayerName, TOutput>;
+
+template <typename TOutputClauses>
+using OutputBMap = ContMetaFun::Sequential::Fold<ClauseSeq<>, TOutputClauses,
+                                                 OutputBMap_>;
+
 /// SublayerNameSet
 template <typename TState, typename TInput>
 using SublayerNameSet_ = ContMetaFun::Set::Insert_<TState, typename TInput::LayerName, true>;
@@ -139,6 +160,15 @@ using SublayerNameSet_ = ContMetaFun::Set::Insert_<TState, typename TInput::Laye
 template <typename TSublayerClauses>
 using SublayerNameSet = ContMetaFun::Sequential::Fold<ClauseSeq<>, TSublayerClauses,
                                                       SublayerNameSet_>;
+
+template <typename TSublayer>
+struct SublayerNamePicker_
+{
+    using type = typename TSublayer::LayerName;
+};
+
+template <typename TSublayerClauses>
+using SublayerMap = ContMetaFun::Map::CreateFromItems<TSublayerClauses, SublayerNamePicker_, ClauseSeq>;
 
 /// InternalLayerSet
 template <typename TState, typename TInput>
@@ -328,24 +358,6 @@ namespace NSTPO
                                                            ContMetaFun::Set::Erase_>;
         using type = typename MainLoop<NewOrdered, NewUnordered, NewInter>::type;
     };
-    
-    template <typename TSublayerClause>
-    struct LayerName2Info;
-    
-    template <typename ... TSublayer>
-    struct LayerName2Info<ClauseSeq<TSublayer...>>
-        : public ContMetaFun::Helper::KVBinder<typename TSublayer::LayerName, TSublayer>...
-    {
-        using ContMetaFun::Helper::KVBinder<typename TSublayer::LayerName, TSublayer>::apply...;
-    };
-    
-    template <typename TSublayerClause>
-    struct SeqLayerName2Info_
-    {
-        template <typename TState, typename TInput>
-        using apply = ContMetaFun::Sequential::PushBack_<TState,
-                                                         decltype(LayerName2Info<TSublayerClause>::apply((TInput*)nullptr))>;
-    };
 }
 
 template <typename TSublayerClause, typename TInterClause>
@@ -357,216 +369,378 @@ struct TopologicalOrdering_<ClauseSeq<TSublayers...>, TInterClause>
     using SublayerPreRes = NSTPO::SublayerPreprocess_<ClauseRefine::InternalLayerSet<TInterClause>,
                                                       ClauseSeq<>, ClauseSeq<>, TSublayers...>;
 
-    using SublayerTags = typename NSTPO::MainLoop<typename SublayerPreRes::Ordered,
-                                                  typename SublayerPreRes::Unordered,
-                                                  TInterClause>::type;
-
-    using type = ContMetaFun::Sequential::Fold<ClauseSeq<>, SublayerTags,
-                                               NSTPO::SeqLayerName2Info_<ClauseSeq<TSublayers...>>::template apply>;
+    using type = typename NSTPO::MainLoop<typename SublayerPreRes::Ordered,
+                                          typename SublayerPreRes::Unordered,
+                                          TInterClause>::type;
 };
 
-/// ========= Sublayer Instantiation ===================================================
 namespace NSSI
 {
-    template <typename...> struct SublayerPolicyCont;
-    template <typename...> struct SublayerInputMap;
-    template <typename...> struct SublayerGradMap;
-    
-    template <typename TSublayerClause, typename TPolicy>
-    struct GetSublayerPolicy_;
-    
-    template <typename... TSublayers, typename TPolicy>
-    struct GetSublayerPolicy_<ClauseSeq<TSublayers...>, TPolicy>
+    // Assign policy
+    template <typename TPolicy>
+    struct GetSublayerPolicy_
     {
-        using type
-            = SublayerPolicyCont<SubPolicyPicker<TPolicyCont, typename TSublayers::LayerName> ...>;
-    }
-    
-    template <typename TPolicyCont, typename OrderedSublayers,
-              typename InConnects, typename InterConnects>
-    struct AssignPolicy
-    {
-        using OriPolicyCont = typename GetSublayerPolicy_<OrderedSublayers, TPolicyCont>::type;
-    };
-    
-///$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    template <typename TSublayer, typename TPolicy>
-    struct SublayerWithPolicy
-    {
-        using Sublayer = TSublayer;
-        using Policy = TPolicy;
-    };
-    
-    template <typename... TInst> struct SublayerPolicyCont;
-    
-    template <typename TPolicyCont>
-    struct GetSublayerPolicy
-    {
-        template <typename TState, typename TInput>
+        template <typename TSublayerName>
         struct apply
         {
-            using InputPolicy = SubPolicyPicker<TPolicyCont, typename TInput::LayerName>;
-            using type = ContMetaFun::Sequential::PushBack<TState, SublayerWithPolicy<TInput, InputPolicy>>;
+            using type = ContMetaFun::Helper::KVBinder<TSublayerName, SubPolicyPicker<TPolicy, TSublayerName>>;
         };
     };
     
-    template <typename TInst, typename InConnectSet>
-    struct FbSetByInConnectionHelper_
+    template <typename TInputPolicyCont, typename SublayerNameSeq, typename TInconnects>
+    struct FbSetByInConnection_
     {
-        using type = typename std::conditional_t<ContMetaFun::Set::HasKey<InConnectSet, typename TInst::Sublayer>,
-                                                 ChangePolicy_<PFeedbackOutput, typename TInst::Policy>,
-                                                 Identity_<typename TInst::Policy>>::type;
+        using type = TInputPolicyCont;
     };
     
-    template <typename TInstCont, typename InConnectSet>
-    struct FbSetByInConnection_;
-    
-    template <typename... TInst, typename InConnectSet>
-    struct FbSetByInConnection_<SublayerPolicyCont<TInst...>, InConnectSet>
+    template <typename TInputPolicyCont, typename SublayerNameSeq,
+              template<typename...> class TInCont, typename TCur, typename... TItems>
+    struct FbSetByInConnection_<TInputPolicyCont, SublayerNameSeq, TInCont<TCur, TItems...>>
     {
-        using type = SublayerPolicyCont<typename FbSetByInConnectionHelper_<TInst, InConnectSet>::type ...>;
+        constexpr static size_t pos = ContMetaFun::Sequential::Order<SublayerNameSeq, TCur>;
+        using OriType = ContMetaFun::Sequential::At<TInputPolicyCont, pos>;
+        using NewPolicy = ChangePolicy<PFeedbackOutput, typename OriType::ValueType>;
+        using NewInputPolicyCont
+            = ContMetaFun::Sequential::Set<TInputPolicyCont, pos,
+                                           ContMetaFun::Helper::KVBinder<typename OriType::KeyType, NewPolicy>>;
+        using type = typename FbSetByInConnection_<NewInputPolicyCont, SublayerNameSeq, TInCont<TItems...>>::type;
     };
     
-    template <typename TItem, typename TQuery>
-    constexpr bool HasInternalIn = false;
-    
-    template <typename TKey, typename...TValue, typename TQuery>
-    constexpr bool HasInternalIn<ContMetaFun::Helper::Pair<TKey, TValue...>, TQuery> = (std::is_same_v<typename TValue::InLayer, TQuery> || ...);
-    
-    template <typename TInItems>
-    struct FbOutModHelper_
+    template <typename TInternalConnect>
+    struct PickInLayerFromInternalConnect_
     {
-        template <typename TState, typename TInput>
+        using type = typename TInternalConnect::InLayer;
+    };
+    
+    template <typename TUpdateLayerSet>
+    struct UpdatePolicyThroughInterMapHelper_
+    {
+        template <typename TSublayerPolicy>
         struct apply
         {
-            constexpr static bool modify = HasInternalIn<TInItems, typename TInput::Sublayer::LayerName>;
-            using NewPolicy = typename std::conditional_t<modify,
-                                                          ChangePolicy_<PFeedbackOutput, typename TInput::Policy>,
-                                                          Identity_<typename TInput::Policy>>::type;
-            using NewItem = SublayerWithPolicy<typename TInput::Sublayer, NewPolicy>;
-            using type = ContMetaFun::Sequential::PushBack<TState, NewItem>;
+            using LayerName = typename TSublayerPolicy::KeyType;
+            using OriPolicy = typename TSublayerPolicy::ValueType;
+            constexpr static bool ShouldUpdate = ContMetaFun::Set::HasKey<TUpdateLayerSet, LayerName>;
+            using NewPolicy = typename std::conditional_t<ShouldUpdate,
+                                                          ChangePolicy_<PFeedbackOutput, OriPolicy>,
+                                                          Identity_<OriPolicy>>::type;
+            using type = ContMetaFun::Helper::KVBinder<LayerName, NewPolicy>;
         };
     };
-    
+
+    template <typename TOutLayerName, typename TSublayerPolicies, typename TInterMap>
+    struct UpdatePolicyThroughInterMap_
+    {
+        using LayerProcs = ContMetaFun::MultiMap::Find<TInterMap, TOutLayerName>;
+        using UpdateLayerSet = ContMetaFun::Set::CreateFromItems<LayerProcs, PickInLayerFromInternalConnect_, true>;
+        using NewSublayerPolicies
+            = ContMetaFun::Sequential::Transform<TSublayerPolicies,
+                                                 UpdatePolicyThroughInterMapHelper_<UpdateLayerSet>::template apply,
+                                                 std::tuple>;
+        using type = NewSublayerPolicies;
+    };
+
     template <typename TProcessed, typename TRemain, typename InterFMap>
-    struct FeedbackOutModif
+    struct FbSetByInternalConnection_
     {
         using type = TProcessed;
     };
 
     template <typename TProcessed, typename TCur, typename...TInstElements, typename InterFMap>
-    struct FeedbackOutModif<TProcessed, SublayerPolicyCont<TCur, TInstElements...>, InterFMap>
+    struct FbSetByInternalConnection_<TProcessed, std::tuple<TCur, TInstElements...>, InterFMap>
     {
-        constexpr static bool isUpdate = PolicySelect<GradPolicy, typename TCur::Policy>::IsFeedbackOutput || \
-                                         PolicySelect<GradPolicy, typename TCur::Policy>::IsUpdate;
-                                         
+        constexpr static bool isPolUpdate = PolicySelect<GradPolicy, typename TCur::ValueType>::IsFeedbackOutput ||
+                                            PolicySelect<GradPolicy, typename TCur::ValueType>::IsUpdate;
+
         using NewProcessed = ContMetaFun::Sequential::PushBack<TProcessed, TCur>;
 
-        using NewRemain = typename std::conditional_t<isUpdate && (sizeof...(TInstElements) != 0),
-                                                      ContMetaFun::Sequential::Fold_<SublayerPolicyCont<>, SublayerPolicyCont<TInstElements...>,
-                                                                                     FbOutModHelper_<ContMetaFun::MultiMap::Find<InterFMap, typename TCur::Sublayer::LayerName>>::template apply>,
-                                                      Identity_<SublayerPolicyCont<TInstElements...>>>::type;
-        using type = typename FeedbackOutModif<NewProcessed, NewRemain, InterFMap>::type;
+        using NewRemain = typename std::conditional_t<isPolUpdate && (sizeof...(TInstElements) != 0),
+                                                      UpdatePolicyThroughInterMap_<typename TCur::KeyType,
+                                                                                   std::tuple<TInstElements...>,
+                                                                                   InterFMap>,
+                                                      Identity_<std::tuple<TInstElements...>>>::type;
+        using type = typename FbSetByInternalConnection_<NewProcessed, NewRemain, InterFMap>::type;
     };
     
-    template <typename TState, typename TInput>
-    struct InstHelper_
-    {
-        template <typename T>
-        using Layer = typename TInput::Sublayer::template LayerType<T>;
-        
-        using Inst = InstantiatedSublayer<typename TInput::Sublayer::LayerName, Layer<typename TInput::Policy>>;
-        using type = ContMetaFun::Sequential::PushBack<TState, Inst>;
-    };
-    
-    template <bool Proc, typename TKVCont, typename TComposeInputMap, typename TInConnect>
-    struct InputTypeFillInConnectHelper2_
-    {
-        using type = TRes;
-    };
-    
-    template <typename TKVCont, typename TComposeInputMap, typename TInConnect>
-    struct InputTypeFillInConnectHelper2_<true, TKVCont, TComposeInputMap, TInConnect>
-    {
-        using InPort = typename TInConnect::TInPort;
-        using InType = typename TComposeInputMap::Find<InPort>;
-        using AimPort = typename TInConnect::InLayerPort;
-        using type = ContMetaFun::Sequential::PushBack<TKVCont, LayerKV<AimPort, InType>>;
-    };
-    
-    template <typename TRes, typename TLayerName, typename TComposeInputMap, typename TInConnects>
+    template <typename TOutputCont, typename TDataMap, typename TSeq>
     struct InputTypeFillInConnectHelper_
     {
-        using type = TRes;
+        using type = TOutputCont;
     };
     
-    template <typename TRes, typename TLayerName,
-              typename TComposeInputMap, typename TCurInConnect, typename... TInConnectRem>
-    struct InputTypeFillInConnectHelper_<TRes, TLayerName, TComposeInputMap, ClauseSeq<TCurInConnect, TInConnectRem...>>
+    template <typename TOutputCont, typename TDataMap, typename TCur, typename... TRemain>
+    struct InputTypeFillInConnectHelper_<TOutputCont, TDataMap, ContMetaFun::Helper::ValueSequence<TCur, TRemain...>>
     {
-        constexpr static bool bProcess = std::is_same_v<TLayerName, typename TCurInConnect::TInLayerName>;
-        using NewRes = typename InputTypeFillInConnectHelper2_<bProcess, TRes, TComposeInputMap, TCurInConnect>::type;
-        using type = typename InputTypeFillInConnectHelper_<NewRes, TLayerName, TComposeInputMap,
-                                                            ClauseSeq<TInConnectRem...>>::type;
-    }
+        using FromPort = typename TCur::InPort;
+        using ToPort = typename TCur::InLayerPort;
+        using AimType = typename TDataMap::template Find<FromPort>;
+        using NewCont = ContMetaFun::Sequential::PushBack<TOutputCont, LayerKV<ToPort, AimType>>;
+        using type = typename InputTypeFillInConnectHelper_<NewCont, TDataMap, ContMetaFun::Helper::ValueSequence<TRemain...>>::type;
+    };
     
-    template <size_t CurPos, size_t TotalSize,
-              typename TInputCont, typename TComposeInputMap,
-              typename TOrderedSublayers, typename TComposeInputMap>
-    struct InputTypeFillInConnect
+    template <typename TSublayerCont, typename TInFMap, typename TOutputCont, typename TInputDataMap>
+    struct InputTypeFillInConnect_
     {
-        using CurSublayer = ContMetaFun::Sequential::At<TOrderedSublayers, CurPos>;
+        using type = TOutputCont;
+    };
+    
+    template <typename TInFMap, typename TOutputCont, typename TInputDataMap, typename TCur, typename... TRemain>
+    struct InputTypeFillInConnect_<ClauseSeq<TCur, TRemain...>, TInFMap, TOutputCont, TInputDataMap>
+    {
+        using CurValueSeq = ContMetaFun::MultiMap::Find<TInFMap, TCur>;
+        using TCurDataMap = typename InputTypeFillInConnectHelper_<LayerIOMap<>, TInputDataMap, CurValueSeq>::type;
+        using NewOutputCont = ContMetaFun::Sequential::PushBack<TOutputCont, TCurDataMap>;
+        using type = typename InputTypeFillInConnect_<ClauseSeq<TRemain...>, TInFMap, NewOutputCont, TInputDataMap>::type;
+    };
 
-        using FillRes = typename InputTypeFillInConnectHelper_<LayerIOMap<>, typename CurSublayer::LayerName,
-                                                               TComposeInputMap, TComposeInputMap>::type;
-        using NewInputCont = ContMetaFun::Sequential::PushBack<TInputCont, FillRes>;
-        using type = typename InputTypeFillInConnect<CurPos + 1, TotalSize,
-                                                     NewInputCont, TComposeInputMap,
-                                                     TOrderedSublayers, TComposeInputMap>::type;
+    template <typename TSublayerOutputMap, typename TConnectInfo, typename SublayerSeq, typename TOutputCont>
+    struct InputTypeFillInternalConnectHelper2_
+    {
+        using type = TOutputCont;
     };
     
-    template <size_t TotalSize,
-              typename TInputCont, typename TComposeInputMap,
-              typename TOrderedSublayers, typename TComposeInputMap>
-    struct InputTypeFillInConnect<TotalSize, TotalSize, TInputCont, TComposeInputMap, TOrderedSublayers, TComposeInputMap>
+    template <typename TCur, typename... TRemain, typename TSublayerOutputMap, typename SublayerSeq, typename TOutputCont>
+    struct InputTypeFillInternalConnectHelper2_<TSublayerOutputMap, ContMetaFun::Helper::ValueSequence<TCur, TRemain...>,
+                                                SublayerSeq, TOutputCont>
     {
-        using type = TInputCont;
+        using InLayer = typename TCur::InLayer;
+        constexpr static size_t pos = ContMetaFun::Sequential::Order<SublayerSeq, InLayer>;
+        using OriOutput = ContMetaFun::Sequential::At<TOutputCont, pos>;
+        
+        using OutPort = typename TCur::OutPort;
+        using AimType = typename TSublayerOutputMap::template Find<OutPort>;
+        
+        using InPort = typename TCur::InPort;
+        static_assert(std::is_same_v<typename OriOutput::template Find<InPort>, NullParameter>);
+        
+        using NewOutput = ContMetaFun::Sequential::PushBack<OriOutput, LayerKV<InPort, AimType>>;
+        using NewOutputCont = ContMetaFun::Sequential::Set<TOutputCont, pos, NewOutput>;
+        
+        using type
+            = typename InputTypeFillInternalConnectHelper2_<TSublayerOutputMap, ContMetaFun::Helper::ValueSequence<TRemain...>,
+                                                            SublayerSeq, NewOutputCont>::type;
+    };
+    
+    template <typename TLayerTemp, typename TInputMap, typename TPolicy, typename SublayerSeq, typename TConnectInfo, typename TOutput>
+    struct InputTypeFillInternalConnectHelper_
+    {
+        using LayerType = typename TLayerTemp::template LayerType<TInputMap, LayerIOMap<>, TPolicy>;
+        using type = typename InputTypeFillInternalConnectHelper2_<LayerTraits::LayerOutputItemTypes<LayerType>,
+                                                                   TConnectInfo, SublayerSeq, TOutput>::type;
+    };
+    
+    template <size_t CurID, size_t MAXID,
+              typename TSublayerNameCont, typename TInputMapCont, typename TPolicyCont,
+              typename TSublayerMap, typename TInternalMap>
+    struct InputTypeFillInternalConnect_
+    {
+        static_assert(CurID < MAXID);
+        using TCurLayer = ContMetaFun::Sequential::At<TSublayerNameCont, CurID>;
+        using InternalConnections = ContMetaFun::MultiMap::Find<TInternalMap, TCurLayer>;
+        
+        using NewInputMapCont
+            = typename std::conditional_t<(ArraySize<InternalConnections> == 0),
+                                          Identity_<TInputMapCont>,
+                                          InputTypeFillInternalConnectHelper_<ContMetaFun::Map::Find<TSublayerMap, TCurLayer>,
+                                                                              ContMetaFun::Sequential::At<TInputMapCont, CurID>,
+                                                                              ContMetaFun::Map::Find<TPolicyCont, TCurLayer>,
+                                                                              TSublayerNameCont,
+                                                                              InternalConnections, TInputMapCont>>::type;
+        using type = typename InputTypeFillInternalConnect_<CurID + 1, MAXID,
+                                                            TSublayerNameCont, NewInputMapCont, TPolicyCont,
+                                                            TSublayerMap, TInternalMap>::type;
+    };
+    
+    template <size_t MAXID,
+              typename TSublayerNameCont, typename TInputMapCont, typename TPolicyCont,
+              typename TSublayerMap, typename TInternalMap>
+    struct InputTypeFillInternalConnect_<MAXID, MAXID, TSublayerNameCont, TInputMapCont, TPolicyCont,
+                                         TSublayerMap, TInternalMap>
+    {
+        using type = TInputMapCont;
+    };
+    
+    template <typename TCont, typename TKey, typename TOriValue, typename TNewValue>
+    struct GradAddTypeCal_
+    {
+        using NewValueType = decltype(std::declval<TOriValue>() + std::declval<TNewValue>());
+        constexpr static size_t pos = ContMetaFun::Sequential::Order<TCont, LayerKV<TKey, TOriValue>>;
+        using type = ContMetaFun::Sequential::Set<TCont, pos, LayerKV<TKey, NewValueType>>;
+    };
+    
+    template <typename TOutputCont, typename TDataMap, typename TSeq>
+    struct GradTypeFillInConnectHelper_
+    {
+        using type = TOutputCont;
+    };
+    
+    template <typename TOutputCont, typename TDataMap, typename TCur, typename... TRemain>
+    struct GradTypeFillInConnectHelper_<TOutputCont, TDataMap, ContMetaFun::Helper::ValueSequence<TCur, TRemain...>>
+    {
+        using FromPort = typename TCur::OutPort;
+        using ToPort = typename TCur::OutLayerPort;
+        using AimType = typename TDataMap::template Find<FromPort>;
+        
+        using OriType = typename TOutputCont::template Find<ToPort>;
+        using NewCont = typename std::conditional_t<std::is_same_v<OriType, NullParameter>,
+                                                    ContMetaFun::Sequential::PushBack_<TOutputCont, LayerKV<ToPort, AimType>>,
+                                                    GradAddTypeCal_<TOutputCont, ToPort, OriType, AimType>>::type;
+        using type = typename InputTypeFillInConnectHelper_<NewCont, TDataMap, ContMetaFun::Helper::ValueSequence<TRemain...>>::type;
+    };
+    
+    template <typename TSublayerCont, typename TOutBMap, typename TOutputCont, typename TGradDataMap>
+    struct GradTypeFillInConnect_
+    {
+        using type = TOutputCont;
+    };
+    
+    template <typename TOutBMap, typename TOutputCont, typename TGradDataMap, typename TCur, typename... TRemain>
+    struct GradTypeFillInConnect_<ClauseSeq<TCur, TRemain...>, TOutBMap, TOutputCont, TGradDataMap>
+    {
+        using CurValueSeq = ContMetaFun::MultiMap::Find<TOutBMap, TCur>;
+        using TCurDataMap = typename GradTypeFillInConnectHelper_<LayerIOMap<>, TGradDataMap, CurValueSeq>::type;
+        using NewOutputCont = ContMetaFun::Sequential::PushBack<TOutputCont, TCurDataMap>;
+        using type = typename GradTypeFillInConnect_<ClauseSeq<TRemain...>, TOutBMap, NewOutputCont, TGradDataMap>::type;
+    };
+    
+    template <typename TSublayerOutputMap, typename TConnectInfo, typename SublayerSeq, typename TOutputCont>
+    struct GradTypeFillInternalConnectHelper2_
+    {
+        using type = TOutputCont;
+    };
+    
+    template <typename TCur, typename... TRemain, typename TSublayerOutputMap, typename SublayerSeq, typename TOutputCont>
+    struct GradTypeFillInternalConnectHelper2_<TSublayerOutputMap, ContMetaFun::Helper::ValueSequence<TCur, TRemain...>,
+                                                SublayerSeq, TOutputCont>
+    {
+        constexpr static size_t pos = ContMetaFun::Sequential::Order<SublayerSeq, typename TCur::OutLayer>;
+        using OriOutput = ContMetaFun::Sequential::At<TOutputCont, pos>;
+        
+        using AimType = typename TSublayerOutputMap::template Find<typename TCur::InPort>;
+        
+        using OriGradType = typename OriOutput::template Find<typename TCur::OutPort>;
+
+        using NewOutput = typename std::conditional_t<std::is_same_v<OriGradType, NullParameter>,
+                                                      ContMetaFun::Sequential::PushBack_<OriOutput, LayerKV<typename TCur::OutPort, AimType>>,
+                                                      GradAddTypeCal_<OriOutput, typename TCur::OutPort, OriGradType, AimType>>::type;
+
+        using NewOutputCont = ContMetaFun::Sequential::Set<TOutputCont, pos, NewOutput>;
+        
+        using type
+            = typename GradTypeFillInternalConnectHelper2_<TSublayerOutputMap, ContMetaFun::Helper::ValueSequence<TRemain...>,
+                                                           SublayerSeq, NewOutputCont>::type;
+    };
+    
+    template <typename TLayerTemp, typename TGradMap, typename TInputMap, typename TPolicy,
+              typename SublayerSeq, typename TConnectInfo, typename TOutput>
+    struct GradTypeFillInternalConnectHelper_
+    {
+        using LayerType = typename TLayerTemp::template LayerType<TInputMap, TGradMap, TPolicy>;
+        using type = typename GradTypeFillInternalConnectHelper2_<LayerTraits::LayerOutputGradTypes<LayerType>,
+                                                                  TConnectInfo, SublayerSeq, TOutput>::type;
+    };
+    
+    template <size_t CurID,
+              typename TSublayerNameCont, typename TGradMapCont, typename TInputCont, typename TPolicyCont,
+              typename TSublayerMap, typename TInternalMap>
+    struct GradTypeFillInternalConnect_
+    {
+        static_assert(CurID > 0);
+        using TCurLayer = ContMetaFun::Sequential::At<TSublayerNameCont, CurID - 1>;
+        using InternalConnections = ContMetaFun::MultiMap::Find<TInternalMap, TCurLayer>;
+        
+        using NewGradMapCont
+            = typename std::conditional_t<(ArraySize<InternalConnections> == 0),
+                                          Identity_<TGradMapCont>,
+                                          GradTypeFillInternalConnectHelper_<ContMetaFun::Map::Find<TSublayerMap, TCurLayer>,
+                                                                             ContMetaFun::Sequential::At<TGradMapCont, CurID - 1>,
+                                                                             ContMetaFun::Sequential::At<TInputCont, CurID - 1>,
+                                                                             ContMetaFun::Map::Find<TPolicyCont, TCurLayer>,
+                                                                             TSublayerNameCont,
+                                                                             InternalConnections, TGradMapCont>>::type;
+        using type = typename GradTypeFillInternalConnect_<CurID - 1,
+                                                           TSublayerNameCont, NewGradMapCont, TInputCont, TPolicyCont,
+                                                           TSublayerMap, TInternalMap>::type;
+    };
+    
+    template <typename TSublayerNameCont, typename TGradMapCont, typename TInputCont, typename TPolicyCont,
+              typename TSublayerMap, typename TInternalMap>
+    struct GradTypeFillInternalConnect_<0, TSublayerNameCont, TGradMapCont, TInputCont, TPolicyCont,
+                                        TSublayerMap, TInternalMap>
+    {
+        using type = TGradMapCont;
+    };
+    
+    template <typename TOutCont, typename TLayerNames, typename TLayerMap, typename TInputMap, typename TOutputMap, typename TPolicies>
+    struct Instantiation_
+    {
+        using type = TOutCont;
+    };
+    
+    template <typename TCurLayer, typename... TRemainLayers, typename TInputHead, typename... TRemainInputMap,
+              typename TGradHead, typename... TRemainGradMap, typename TLayerMap, typename TPolicies, typename TOutCont>
+    struct Instantiation_<TOutCont, ClauseSeq<TCurLayer, TRemainLayers...>, TLayerMap, std::tuple<TInputHead, TRemainInputMap...>,
+                          std::tuple<TGradHead, TRemainGradMap...>, TPolicies>
+    {
+        using TLayerTemp = ContMetaFun::Map::Find<TLayerMap, TCurLayer>;
+        static_assert(!std::is_same_v<TLayerTemp, void>);
+        using TCurPolicy = ContMetaFun::Map::Find<TPolicies, TCurLayer>;
+        static_assert(!std::is_same_v<TCurPolicy, void>);
+        using LayerType = typename TLayerTemp::template LayerType<TInputHead, TGradHead, TCurPolicy>;
+        using NewOutCont = ContMetaFun::Sequential::PushBack<TOutCont, LayerType>;
+        using type = typename Instantiation_<NewOutCont, ClauseSeq<TRemainLayers...>, TLayerMap, std::tuple<TRemainInputMap...>,
+                                             std::tuple<TRemainGradMap...>, TPolicies>::type;
     };
 }
 
-template <typename TPolicyCont, typename OrderedSublayers, typename InConnects, typename InterConnects,
-          typename TInputs>
-struct SublayerInstantiation
+template <typename TInputs, typename TGrads, typename TPolicies,
+          typename OrderedSublayers, typename TSublayerClauses, typename InConnects, typename InterConnects, typename OutConnects>
+struct SublayerInstantiation_
 {
-    static_assert(IsPolicyContainer<TPolicyCont>, "Not a Policy Container");
+    static_assert(IsPolicyContainer<TPolicies>, "Not a Policy Container");
     
-    using SublayerWithPolicyRes = ContMetaFun::Sequential::Fold<NSSI::SublayerPolicyCont<>, OrderedSublayers,
-                                                                NSSI::GetSublayerPolicy<TPolicyCont>::template apply>;
+    using SublayerPolicy1 = ContMetaFun::Sequential::Transform<OrderedSublayers,
+                                                               NSSI::GetSublayerPolicy_<TPolicies>::template apply,
+                                                               std::tuple>;
 
     /// Policy modification
-    /// if feedbackout is set in parent layer, then each sublayer that includes in InConnects should also set it to true
-    constexpr static bool IsPlainPolicyFeedbackOut = PolicySelect<GradPolicy, PlainPolicy<TPolicyCont>>::IsFeedbackOutput;
-    using SublayerPolicyModif1
+    //  if feedbackout is set in parent layer, then each sublayer that includes in InConnects should also set it to true
+    constexpr static bool IsPlainPolicyFeedbackOut = PolicySelect<GradPolicy, PlainPolicy<TPolicies>>::IsFeedbackOutput;
+    using SublayerPolicy2
         =typename std::conditional_t<!IsPlainPolicyFeedbackOut,
-                                      Identity_<SublayerWithPolicyRes>,
-                                      NSSI::FbSetByInConnection_<SublayerWithPolicyRes,
+                                      Identity_<SublayerPolicy1>,
+                                      NSSI::FbSetByInConnection_<SublayerPolicy1, OrderedSublayers,
                                                                  ClauseRefine::InputLayerSet<InConnects>>>::type;
                                          
     /// for any instance A, if there is a connection A->B and A is feedbackin, then B should set to feedbackout
-    using SublayerPolicyModif2 = typename NSSI::FeedbackOutModif<NSSI::SublayerPolicyCont<>,
-                                                                 SublayerPolicyModif1,
-                                                                 ClauseRefine::InternalFMap<InterConnects>>::type;
+    using SublayerPolicyFinal = typename NSSI::FbSetByInternalConnection_<std::tuple<>,
+                                                                          SublayerPolicy2,
+                                                                          ClauseRefine::InternalFMap<InterConnects>>::type;
 
-    constexpr static size_t SublayerSize = ArraySize<OrderedSublayers>;
     /// Input type generation
-    using InputTypeCont = typename NSSI::InputTypeFillInConnect<0, SublayerSize,
-                                                                std::tuple<>, TInputs,
-                                                                OrderedSublayers, InConnects>::type;
+    //  Fill Input type container with in-connections
+    using InputTypeCont1 = typename NSSI::InputTypeFillInConnect_<OrderedSublayers,
+                                                                  ClauseRefine::InputFMap<InConnects>,
+                                                                  std::tuple<>, TInputs>::type;
     // Fill Input type container with inter-connections
-    
+    using InputTypeContFinal = typename NSSI::InputTypeFillInternalConnect_<0, ArraySize<OrderedSublayers>, OrderedSublayers,
+                                                                            InputTypeCont1, SublayerPolicyFinal,
+                                                                            ClauseRefine::SublayerMap<TSublayerClauses>,
+                                                                            ClauseRefine::InternalFMap<InterConnects>>::type;
+    /// Input grad generation
+    //  Fill grad type container with out-connections
+    using GradTypeCont1 = typename NSSI::GradTypeFillInConnect_<OrderedSublayers,
+                                                                ClauseRefine::OutputBMap<OutConnects>,
+                                                                std::tuple<>, TGrads>::type;
+    // Fill Grad type container with inter-connections
+    using GradTypeContFinal = typename NSSI::GradTypeFillInternalConnect_<ArraySize<OrderedSublayers>, OrderedSublayers,
+                                                                          GradTypeCont1, InputTypeContFinal, SublayerPolicyFinal,
+                                                                          ClauseRefine::SublayerMap<TSublayerClauses>,
+                                                                          ClauseRefine::InternalBMap<InterConnects>>::type;
+                                                                            
     /// Instantiation
-    using type = ContMetaFun::Sequential::Fold<std::tuple<>, SublayerPolicyModif2,
-                                               NSSI::InstHelper_>;
+    using type = typename NSSI::Instantiation_<std::tuple<>, OrderedSublayers, ClauseRefine::SublayerMap<TSublayerClauses>,
+                                               InputTypeContFinal, GradTypeContFinal, SublayerPolicyFinal>::type;
 };
 }
 
@@ -580,13 +754,10 @@ struct ComposeTopology
     using OutputConnects = typename NSComposeKernel::SeparateClauses_<TComposeClauses...>::OutConnectRes;
     
     using SublayerNameSet = NSComposeKernel::ClauseRefine::SublayerNameSet<Sublayers>;
-    using InternalFMap = NSComposeKernel::ClauseRefine::InternalFMap<InterConnects>;
-    using InternalBMap = NSComposeKernel::ClauseRefine::InternalBMap<InterConnects>;
-
+    
 /// ========== Asserts =================================================
     static_assert((ArraySize<Sublayers> != 0), "Sublayer is empty.");
-    static_assert((ArraySize<Sublayers> == ArraySize<SublayerNameSet>),
-                  "Two or more sublayers have same tag.");
+    static_assert((ArraySize<Sublayers> == ArraySize<SublayerNameSet>), "Two or more sublayers have same tag.");
     static_assert(ArraySize<InputConnects> + ArraySize<InterConnects> ==
                   ArraySize<NSComposeKernel::ClauseRefine::InputNamePortSet<InterConnects, InputConnects>>,
                   "One input corresponds to two or more sources.");
@@ -603,36 +774,40 @@ struct ComposeTopology
                                                             NSComposeKernel::ClauseRefine::InputLayerSet<InputConnects>,
                                                             NSComposeKernel::ClauseRefine::OutputLayerSet<OutputConnects>>,
                   "One ore more sublayer tags not belong to any connection containers.");
-
 /// ========== Topological Ordering ===================================
     using TopologicalOrdering = typename NSComposeKernel::TopologicalOrdering_<Sublayers, InterConnects>::type;
-
-    template <typename TPolicyCont>
-    using Instances = typename NSComposeKernel::SublayerInstantiation<TPolicyCont, TopologicalOrdering, InputConnects, InterConnects>::type;
+    
+    template <typename TInputMap, typename TGradMap, typename TPolicyCont>
+    using Instances
+        = typename NSComposeKernel::SublayerInstantiation_<TInputMap, TGradMap, TPolicyCont,
+                                                           TopologicalOrdering, Sublayers,
+                                                           InputConnects, InterConnects, OutputConnects>::type;
 };
-
 
 namespace NSComposeKernel
 {
-    template <typename TState, typename TInput>
-    using SublayerTypePicker_ = ContMetaFun::Sequential::PushBack_<TState, std::shared_ptr<typename TInput::LayerType>>;
-    
-    template <typename TLayers, typename TIndex>
-    struct MapLayerName2ID;
-    
-    template <typename... TLayer, int... TIndex>
-    struct MapLayerName2ID<std::tuple<TLayer...>, ContMetaFun::Helper::IndexSequence<TIndex...>>
-        : public ContMetaFun::Helper::KVBinder<typename TLayer::LayerName, ContMetaFun::Helper::Int_<TIndex>>...
+    template <typename TType>
+    struct AddSharedPtrWrapper_
     {
-        using ContMetaFun::Helper::KVBinder<typename TLayer::LayerName, ContMetaFun::Helper::Int_<TIndex>>::apply...;
+        using type = std::shared_ptr<TType>;
     };
     
-    template <typename TSublayerTuple>
+    template <typename TLayerInsts>
+    struct IsComposeLayerUpdate_;
+    
+    template <typename... TLayerInst>
+    struct IsComposeLayerUpdate_<std::tuple<TLayerInst...>>
+    {
+        constexpr static bool value = (TLayerInst::IsUpdate || ...);
+    };
+    
+    template <typename TSublayerNameTuple, typename TSublayerTuple>
     struct SublayerArrayMaker
     {
+        static_assert(ArraySize<TSublayerNameTuple> == ArraySize<TSublayerTuple>);
     public:
-        using SublayerArray = ContMetaFun::Sequential::Fold<std::tuple<>, TSublayerTuple,
-                                                            SublayerTypePicker_>;
+        using SublayerArray
+            = ContMetaFun::Sequential::Transform<TSublayerTuple, NSComposeKernel::AddSharedPtrWrapper_, std::tuple>;
 
     private:
         template <size_t N>
@@ -644,7 +819,7 @@ namespace NSComposeKernel
             }
             else
             {
-                using AimType = typename ContMetaFun::Sequential::At<TSublayerTuple, N>::LayerType;
+                using AimType = typename ContMetaFun::Sequential::At<TSublayerTuple, N>;
                 if constexpr (std::is_default_constructible_v<AimType>)
                 {
                     if (!std::get<N>(m_tuple))
@@ -665,13 +840,9 @@ namespace NSComposeKernel
         template <typename TLayerName, typename...TParams>
         auto Set(TParams&&... params)
         {
-            constexpr static size_t ArrayLength = ArraySize<TSublayerTuple>;
+            constexpr static size_t Pos = ContMetaFun::Sequential::Order<TSublayerNameTuple, TLayerName>;
             
-            constexpr static size_t Pos
-                = decltype(MapLayerName2ID<TSublayerTuple, ContMetaFun::Helper::MakeIndexSequence<ArrayLength>>::apply((TLayerName*)nullptr))::value;
-            static_assert(Pos < ArrayLength);
-            
-            using AimType = typename ContMetaFun::Sequential::At<TSublayerTuple, Pos>::LayerType;
+            using AimType = typename ContMetaFun::Sequential::At<TSublayerTuple, Pos>;
             std::get<Pos>(m_tuple) = std::make_shared<AimType>(std::forward<TParams>(params)...);
             return *this;
         }
@@ -684,6 +855,54 @@ namespace NSComposeKernel
         
     private:
         SublayerArray m_tuple;
+    };
+};
+
+template <typename TInputs, typename TGrads, typename TPolicyCont, typename TKernelTopo>
+class ComposeKernel
+{
+    static_assert(IsPolicyContainer<TPolicyCont>, "Parameter is not a policy container.");
+    using PlainPolicies = PlainPolicy<TPolicyCont>;
+    
+private:
+    using TOrderedSublayerSeq = typename TKernelTopo::TopologicalOrdering;
+    using TSublayerInstCont = typename TKernelTopo::template Instances<TInputs, TGrads, TPolicyCont>;
+    using SublayerArray = typename NSComposeKernel::SublayerArrayMaker<TOrderedSublayerSeq, TSublayerInstCont>::SublayerArray;
+    
+public:
+    static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, PlainPolicies>::IsFeedbackOutput;
+    static constexpr bool IsUpdate = NSComposeKernel::IsComposeLayerUpdate_<TSublayerInstCont>::value;
+    
+    using InputMap = TInputs;
+    using GradMap = TGrads;
+
+public:
+    static auto CreateSublayers()
+    {
+        return NSComposeKernel::SublayerArrayMaker<TOrderedSublayerSeq, TSublayerInstCont>();
+    }
+    
+public:
+    ComposeKernel(SublayerArray p_sublayers)
+        : sublayers(std::move(p_sublayers)) {}
+
+private:
+    SublayerArray sublayers;
+};
+/*
+namespace NSComposeKernel
+{
+    template <typename TState, typename TInput>
+    using SublayerTypePicker_ = ContMetaFun::Sequential::PushBack_<TState, std::shared_ptr<typename TInput::LayerType>>;
+    
+    template <typename TLayers, typename TIndex>
+    struct MapLayerName2ID;
+    
+    template <typename... TLayer, int... TIndex>
+    struct MapLayerName2ID<std::tuple<TLayer...>, ContMetaFun::Helper::IndexSequence<TIndex...>>
+        : public ContMetaFun::Helper::KVBinder<typename TLayer::LayerName, ContMetaFun::Helper::Int_<TIndex>>...
+    {
+        using ContMetaFun::Helper::KVBinder<typename TLayer::LayerName, ContMetaFun::Helper::Int_<TIndex>>::apply...;
     };
     
     template <typename TLayerInsts>
@@ -1090,5 +1309,5 @@ private:
 };
 
 template <template<typename> class Layer>
-struct Sublayerof;
+struct Sublayerof;*/
 }

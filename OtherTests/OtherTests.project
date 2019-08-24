@@ -116,5 +116,10 @@
   <VirtualDirectory Name="facilities">
     <File Name="facilities/test_sequential.cpp"/>
     <File Name="facilities/test_map.cpp"/>
+    <File Name="facilities/test_multi_map.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="policies">
+    <File Name="policies/test_policy_operations.cpp"/>
+    <File Name="policies/_.h"/>
   </VirtualDirectory>
 </CodeLite_Project>

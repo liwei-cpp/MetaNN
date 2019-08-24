@@ -48,9 +48,6 @@ namespace MetaNN
         using type = VarTypeDict<typename TLayerKVs::KeyType ...>;
     };
     
-    template <typename TMap>
-    using LayerContainer = typename TMap::type;
-    
     template <typename TLayer>
     auto LayerInputCont()
     {
