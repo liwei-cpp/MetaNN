@@ -4,6 +4,21 @@
 
 namespace MetaNN
 {
+    template <typename... TPorts> struct LayerPortSet;
+    
+    template <template <typename, typename, typename> class TLayer>
+    struct LayerInputPortSet_
+    {
+        using type = LayerPortSet<struct LayerInput>;
+    };
+    
+    template <template <typename, typename, typename> class TLayer>
+    struct LayerOutputPortSet_
+    {
+        using type = LayerPortSet<struct LayerOutput>;
+    };
+    
+    
     template <typename TKey, typename TValue>
     struct LayerKV : ContMetaFun::Helper::KVBinder<TKey, RemConstRef<TValue>>
     { };
@@ -24,20 +39,29 @@ namespace MetaNN
         using Find = typename Find_<TKey>::type;
     };
     
-    template <typename TGradMap, typename... TKeys>
-    struct FillGradMap_
-    {
-        using type = TGradMap;
-    };
+    template <typename TLayerPorts>
+    struct EmptyLayerIOMap_;
     
-    template <typename ... TKeys>
-    struct FillGradMap_<LayerIOMap<>, TKeys...>
+    template <typename... TKeys>
+    struct EmptyLayerIOMap_<LayerPortSet<TKeys...>>
     {
         using type = LayerIOMap<LayerKV<TKeys, NullParameter>...>;
     };
     
-    template <typename TGradMap, typename... TKeys>
-    using FillGradMap = typename FillGradMap_<TGradMap, TKeys...>::type;
+    template <typename TLayerPorts>
+    using EmptyLayerIOMap = typename EmptyLayerIOMap_<TLayerPorts>::type;
+    
+    template <typename TIoMap>
+    struct IsEmptyLayerIOMap_;
+    
+    template <typename... TKVs>
+    struct IsEmptyLayerIOMap_<LayerIOMap<TKVs...>>
+    {
+        constexpr static bool value = (std::is_same_v<typename TKVs::ValueType, NullParameter> && ...);
+    };
+    
+    template <typename TIoMap>
+    constexpr bool IsEmptyLayerIOMap = IsEmptyLayerIOMap_<TIoMap>::value;
     
     template <typename TMap>
     struct LayerContainer_;

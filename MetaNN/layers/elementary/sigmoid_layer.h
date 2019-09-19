@@ -9,8 +9,21 @@
 
 namespace MetaNN
 {
-    struct LayerInput;
-    struct LayerOutput;
+    namespace NSSigmoidLayer
+    {
+        template <bool IsFeedbackOutput, typename TInputType>
+        struct InternalDataTypeCalculator
+        {
+            using type = NullParameter;
+        };
+        
+        template <typename TInputType>
+        struct InternalDataTypeCalculator<true, TInputType>
+        {
+            using OutputType = decltype(Sigmoid(std::declval<TInputType>()));
+            using type = LayerTraits::LayerInternalBuf<OutputType, true>;
+        };
+    }
     
     template <typename TInputs, typename TGrads, typename TPolicies>
     class SigmoidLayer
@@ -23,16 +36,11 @@ namespace MetaNN
         static constexpr bool IsUpdate = false;
 
         using InputMap = TInputs;
-        using GradMap = FillGradMap<TGrads, LayerOutput>;
+        using GradMap = TGrads;
         
     private:
         using TLayerInputFP = typename InputMap::template Find<LayerInput>;
         using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
-
-        auto FeedForwardCal(const TLayerInputFP& val)
-        {
-            return Sigmoid(val);
-        }
 
     public:
         SigmoidLayer(std::string name)
@@ -43,7 +51,7 @@ namespace MetaNN
         auto FeedForward(TIn&& p_in)
         {
             auto val = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
-            auto res = FeedForwardCal(val);
+            auto res = Sigmoid(val);
 
             if constexpr (IsFeedbackOutput)
             {
@@ -94,8 +102,8 @@ namespace MetaNN
 
     private:
         std::string m_name;
-        using TempDataType = RemConstRef<std::invoke_result_t<decltype(&SigmoidLayer::FeedForwardCal), SigmoidLayer, TLayerInputFP>>;
-        LayerTraits::LayerInternalBuf<TempDataType, IsFeedbackOutput> m_data;
+        using InternalDataType = typename NSSigmoidLayer::InternalDataTypeCalculator<IsFeedbackOutput, TLayerInputFP>::type;
+        InternalDataType m_data;
 
         LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
         LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;

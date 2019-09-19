@@ -7,9 +7,17 @@
 
 namespace MetaNN
 {
-    struct InterpolateLayerWeight1; struct InterpolateLayerWeight2; struct InterpolateLayerLambda;
-    struct LayerOutput;
-
+    template <typename TInputs, typename TGrads, typename TPolicies>
+    class InterpolateLayer;
+    
+    template <>
+    struct LayerInputPortSet_<InterpolateLayer>
+    {
+        using type = LayerPortSet<struct InterpolateLayerWeight1,
+                                  struct InterpolateLayerWeight2,
+                                  struct InterpolateLayerLambda>;
+    };
+    
     template <typename TInputs, typename TGrads, typename TPolicies>
     class InterpolateLayer
     {
@@ -21,7 +29,7 @@ namespace MetaNN
         static constexpr bool IsUpdate = false;
         
         using InputMap = TInputs;
-        using GradMap = FillGradMap<TGrads, LayerOutput>;
+        using GradMap = TGrads;
         
     private:
         using TInterpolateLayerWeight1FP = typename InputMap::template Find<InterpolateLayerWeight1>;

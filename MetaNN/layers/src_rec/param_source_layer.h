@@ -7,7 +7,20 @@
 
 namespace MetaNN
 {
-    struct LayerOutput;
+    template <typename TInputs, typename TGrads, typename TPolicies>
+    class ParamSourceLayer;
+    
+    template <>
+    struct LayerInputPortSet_<ParamSourceLayer>
+    {
+        using type = LayerPortSet<>;
+    };
+    
+    template <>
+    struct LayerOutputPortSet_<ParamSourceLayer>
+    {
+        using type = LayerPortSet<struct LayerOutput>;
+    };
 
     template <typename TInputs, typename TGrads, typename TPolicies>
     class ParamSourceLayer
@@ -26,8 +39,8 @@ namespace MetaNN
         using ParamType = PrincipalDataType<ParamCategory, ElementType, DeviceType>;
 
     public:
-        using InputMap = LayerIOMap<>;
-        using GradMap = FillGradMap<TGrads, LayerOutput>;
+        using InputMap = TInputs;
+        using GradMap = TGrads;
 
     public:
         template <typename... TShapeParams>

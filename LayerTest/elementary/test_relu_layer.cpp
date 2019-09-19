@@ -14,7 +14,7 @@ namespace
     void test_relu_layer1()
     {
         cout << "Test ReLU layer case 1 ...\t";
-        using RootLayer = MakeLayer<ReLULayer, CommonInputMap>;
+        using RootLayer = MakeInferLayer<ReLULayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

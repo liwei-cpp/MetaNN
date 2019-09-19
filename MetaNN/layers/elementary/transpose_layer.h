@@ -7,9 +7,6 @@
 
 namespace MetaNN
 {
-    struct LayerInput;
-    struct LayerOutput;
-    
     template <typename TInputs, typename TGrads, typename TPolicies>
     class TransposeLayer
     {
@@ -21,7 +18,7 @@ namespace MetaNN
         static constexpr bool IsUpdate = false;
 
         using InputMap = TInputs;
-        using GradMap = FillGradMap<TGrads, LayerOutput>;
+        using GradMap = TGrads;
         
     private:
         using TLayerInputFP = typename InputMap::template Find<LayerInput>;

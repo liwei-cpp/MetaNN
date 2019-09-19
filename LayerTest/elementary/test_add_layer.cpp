@@ -16,7 +16,7 @@ namespace
     void test_add_layer1()
     {
         cout << "Test add layer case 1 ...\t";
-        using RootLayer = MakeLayer<AddLayer, CommonInputMap>;
+        using RootLayer = MakeInferLayer<AddLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

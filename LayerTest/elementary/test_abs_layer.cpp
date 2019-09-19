@@ -13,7 +13,7 @@ namespace
     void test_abs_layer1()
     {
         cout << "Test abs layer case 1 ...\t";
-        using RootLayer = MakeLayer<AbsLayer, CommonInputMap>;
+        using RootLayer = MakeInferLayer<AbsLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

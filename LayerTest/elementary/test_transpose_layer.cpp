@@ -13,7 +13,7 @@ namespace
     void test_transpose_layer1()
     {
         cout << "Test transpose layer case 1 ...\t";
-        using RootLayer = MakeLayer<TransposeLayer, CommonInputMap>;
+        using RootLayer = MakeInferLayer<TransposeLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

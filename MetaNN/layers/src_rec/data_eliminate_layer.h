@@ -16,7 +16,20 @@ namespace MetaNN
         }
     }
     
-    struct LayerInput;
+    template <typename TInputs, typename TGrads, typename TPolicies>
+    class DataEliminateLayer;
+    
+    template <>
+    struct LayerInputPortSet_<DataEliminateLayer>
+    {
+        using type = LayerPortSet<struct LayerInput>;
+    };
+    
+    template <>
+    struct LayerOutputPortSet_<DataEliminateLayer>
+    {
+        using type = LayerPortSet<>;
+    };
     
     template <typename TInputs, typename TGrads, typename TPolicies>
     class DataEliminateLayer

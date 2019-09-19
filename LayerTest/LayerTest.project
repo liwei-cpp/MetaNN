@@ -134,5 +134,6 @@
   <VirtualDirectory Name="compose">
     <File Name="compose/_.h"/>
     <File Name="compose/test_compose_kernel.cpp"/>
+    <File Name="compose/test_bias_layer.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

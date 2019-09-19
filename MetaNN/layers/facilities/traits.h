@@ -41,25 +41,31 @@ void ParamGradCollect(const TWeight& weight,
 template <typename TTypeMap, typename TKey, typename TCont>
 auto PickItemFromCont(TCont&& cont)
 {
-    using TAim = typename TTypeMap::template Find<TKey>;
     auto itemOri = std::forward<TCont>(cont).template Get<TKey>();
     static_assert(!std::is_same_v<decltype(itemOri), NullParameter>);
-    static_assert(!std::is_same_v<TAim, NullParameter>);
     
-    if constexpr (IsOutOfDataCategory<TAim>)
+    using TAim = typename TTypeMap::template Find<TKey>;
+    if constexpr (std::is_same_v<TAim, NullParameter>)
     {
-        return TAim(itemOri);
-    }
-    else if constexpr (IsDynamic<TAim>)
-    {
-        auto res = MakeDynamic(std::move(itemOri));
-        static_assert(std::is_same_v<decltype(res), TAim>);
-        return res;
+        return itemOri;
     }
     else
     {
-        static_assert(std::is_same_v<RemConstRef<decltype(itemOri)>, TAim>);
-        return itemOri;
+        if constexpr (IsOutOfDataCategory<TAim>)
+        {
+            return TAim(itemOri);
+        }
+        else if constexpr (IsDynamic<TAim>)
+        {
+            auto res = MakeDynamic(std::move(itemOri));
+            static_assert(std::is_same_v<decltype(res), TAim>);
+            return res;
+        }
+        else
+        {
+            static_assert(std::is_same_v<RemConstRef<decltype(itemOri)>, TAim>);
+            return itemOri;
+        }
     }
 }
 

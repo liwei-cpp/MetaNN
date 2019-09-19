@@ -45,6 +45,9 @@ struct IsArrayEmpty_<Cont<>>
 template <typename TArray>
 constexpr static bool IsArrayEmpty = IsArrayEmpty_<TArray>::value;
 
+template <typename T>
+using RemConstRef = std::remove_cv_t<std::remove_reference_t<T>>;
+
 // Array size
 template <typename TArray>
 struct ArraySize_;
@@ -56,7 +59,7 @@ struct ArraySize_<Cont<T...>>
 };
 
 template <typename TArray>
-constexpr static size_t ArraySize = ArraySize_<TArray>::value;
+constexpr static size_t ArraySize = ArraySize_<RemConstRef<TArray>>::value;
 
 template <typename TSeqCont>
 struct SeqHead_;
@@ -84,7 +87,4 @@ using SeqTail = typename SeqTail_<TSeqCont>::type;
 
 template <typename... T>
 constexpr static bool DependencyFalse = false;
-
-template <typename T>
-using RemConstRef = std::remove_cv_t<std::remove_reference_t<T>>;
 }

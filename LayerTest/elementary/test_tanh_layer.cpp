@@ -14,7 +14,7 @@ namespace
     void test_tanh_layer1()
     {
         cout << "Test tanh layer case 1 ...\t";
-        using RootLayer = MakeLayer<TanhLayer, CommonInputMap>;
+        using RootLayer = MakeInferLayer<TanhLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

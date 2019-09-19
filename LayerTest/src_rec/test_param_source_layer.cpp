@@ -135,7 +135,7 @@ namespace
     {
         cout << "Test param source layer case 5...\t";
         
-        using RootLayer = MakeBPLayer<ParamSourceLayer, NullParameter, CommonGradMap>;
+        using RootLayer = MakeBPLayer<ParamSourceLayer, LayerIOMap<>, CommonGradMap>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -165,7 +165,7 @@ namespace
     {
         cout << "Test param source layer case 6...\t";
         
-        using RootLayer = MakeBPLayer<ParamSourceLayer, NullParameter, CommonGradMap, PUpdate>;
+        using RootLayer = MakeBPLayer<ParamSourceLayer, LayerIOMap<>, CommonGradMap, PUpdate>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
         

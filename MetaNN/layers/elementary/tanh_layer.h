@@ -8,8 +8,22 @@
 
 namespace MetaNN
 {
-    struct LayerInput;
-    struct LayerOutput;
+    namespace NSTanhLayer
+    {
+        template <bool IsFeedbackOutput, typename TInputType>
+        struct InternalDataTypeCalculator
+        {
+            using type = NullParameter;
+        };
+        
+        template <typename TInputType>
+        struct InternalDataTypeCalculator<true, TInputType>
+        {
+            using OutputType = decltype(Tanh(std::declval<TInputType>()));
+            using type = LayerTraits::LayerInternalBuf<OutputType, true>;
+        };
+    }
+
     
     template <typename TInputs, typename TGrads, typename TPolicies>
     class TanhLayer
@@ -22,16 +36,11 @@ namespace MetaNN
         static constexpr bool IsUpdate = false;
 
         using InputMap = TInputs;
-        using GradMap = FillGradMap<TGrads, LayerOutput>;
+        using GradMap = TGrads;
         
     private:
         using TLayerInputFP = typename InputMap::template Find<LayerInput>;
         using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
-
-        auto FeedForwardCal(const TLayerInputFP& val)
-        {
-            return Tanh(val);
-        }
 
     public:
         TanhLayer(std::string name)
@@ -42,7 +51,7 @@ namespace MetaNN
         auto FeedForward(TIn&& p_in)
         {
             auto val = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
-            auto res = FeedForwardCal(val);
+            auto res = Tanh(val);
 
             if constexpr (IsFeedbackOutput)
             {
@@ -92,8 +101,8 @@ namespace MetaNN
         }
     private:
         std::string m_name;
-        using TempDataType = RemConstRef<std::invoke_result_t<decltype(&TanhLayer::FeedForwardCal), TanhLayer, TLayerInputFP>>;
-        LayerTraits::LayerInternalBuf<TempDataType, IsFeedbackOutput> m_data;
+        using InternalDataType = typename NSTanhLayer::InternalDataTypeCalculator<IsFeedbackOutput, TLayerInputFP>::type;
+        InternalDataType m_data;
 
         LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
         LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;

@@ -2,8 +2,20 @@
 
 namespace MetaNN
 {
-    struct LayerInput; struct LossLayerWeight;
-    struct LayerOutput;
+    template <typename TInputs, typename TGrads, typename TPolicies>
+    class NLLLossLayer;
+    
+    template <>
+    struct LayerInputPortSet_<NLLLossLayer>
+    {
+        using type = LayerPortSet<struct LayerInput, struct LossLayerWeight>;
+    };
+    
+    template <>
+    struct LayerOutputPortSet_<NLLLossLayer>
+    {
+        using type = LayerPortSet<struct LayerOutput>;
+    };
     
     template <typename TInputs, typename TGrads, typename TPolicies>
     class NLLLossLayer
@@ -16,7 +28,7 @@ namespace MetaNN
         static constexpr bool IsUpdate = false;
 
         using InputMap = TInputs;
-        using GradMap = FillGradMap<TGrads, LayerOutput>;
+        using GradMap = TGrads;
         
     private:
         using TLayerInputFP      = typename InputMap::template Find<LayerInput>;

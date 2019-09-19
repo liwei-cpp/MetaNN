@@ -16,7 +16,7 @@ namespace
     void test_multiply_layer1()
     {
         cout << "Test multiply layer case 1 ...\t";
-        using RootLayer = MakeLayer<MultiplyLayer, CommonInputMap>;
+        using RootLayer = MakeInferLayer<MultiplyLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

@@ -15,7 +15,7 @@ namespace
     void test_interpolate_layer1()
     {
         cout << "Test interpolate layer case 1 ...\t";
-        using RootLayer = MakeLayer<InterpolateLayer, CommonInputMap>;
+        using RootLayer = MakeInferLayer<InterpolateLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

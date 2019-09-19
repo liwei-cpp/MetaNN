@@ -8,9 +8,15 @@
 #include <stack>
 namespace MetaNN
 {
-    struct LeftOperand; struct RightOperand;
-    struct LayerOutput;
-
+    template <typename TInputs, typename TGrads, typename TPolicies>
+    class AddLayer;
+    
+    template <>
+    struct LayerInputPortSet_<AddLayer>
+    {
+        using type = LayerPortSet<struct LeftOperand, struct RightOperand>;
+    };
+    
     template <typename TInputs, typename TGrads, typename TPolicies>
     class AddLayer
     {
@@ -22,7 +28,7 @@ namespace MetaNN
         static constexpr bool IsUpdate = false;
         
         using InputMap = TInputs;
-        using GradMap = FillGradMap<TGrads, LayerOutput>;
+        using GradMap = TGrads;
         
     private:
         using TLeftOperandFP = typename InputMap::template Find<LeftOperand>;

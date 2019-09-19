@@ -14,7 +14,7 @@ namespace
     void test_sigmoid_layer1()
     {
         cout << "Test sigmoid layer case 1 ...\t";
-        using RootLayer = MakeLayer<SigmoidLayer, CommonInputMap>;
+        using RootLayer = MakeInferLayer<SigmoidLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
