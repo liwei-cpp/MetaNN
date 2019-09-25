@@ -9,7 +9,6 @@ using namespace std;
 namespace
 {
     using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_relu_layer1()
     {
@@ -46,7 +45,7 @@ namespace
     void test_relu_layer2()
     {
         cout << "Test ReLU layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<ReLULayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<ReLULayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

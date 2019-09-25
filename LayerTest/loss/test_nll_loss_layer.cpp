@@ -10,12 +10,11 @@ namespace
 {
     using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<LossLayerWeight, Matrix<CheckElement, CheckDevice>>>;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Scalar<CheckElement, CheckDevice>>>;
 
     void test_nll_loss_layer1()
     {
         cout << "Test NLL loss layer case 1 ...\t";
-        using RootLayer = MakeLayer<NLLLossLayer, CommonInputMap>;
+        using RootLayer = MakeInferLayer<NLLLossLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -55,7 +54,7 @@ namespace
     void test_nll_loss_layer2()
     {
         cout << "Test NLL loss layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<NLLLossLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<NLLLossLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -99,7 +98,7 @@ namespace
     void test_nll_loss_layer3()
     {
         cout << "Test NLL loss layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<NLLLossLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<NLLLossLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

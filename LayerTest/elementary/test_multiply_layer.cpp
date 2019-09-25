@@ -11,7 +11,6 @@ namespace
     using CommonInputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                      >;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_multiply_layer1()
     {
@@ -57,7 +56,7 @@ namespace
     void test_multiply_layer2()
     {
         cout << "Test multiply layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<MultiplyLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<MultiplyLayer, CommonInputMap, PFeedbackOutput>;
 
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
@@ -121,7 +120,7 @@ namespace
     void test_multiply_layer3()
     {
         cout << "Test multiply layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<MultiplyLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<MultiplyLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -189,7 +188,7 @@ namespace
                                     LayerKV<RightOperand, int>
                                    >;
 
-        using RootLayer = MakeBPLayer<MultiplyLayer, InputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<MultiplyLayer, InputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -240,7 +239,7 @@ namespace
                                     LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                    >;
 
-        using RootLayer = MakeBPLayer<MultiplyLayer, InputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<MultiplyLayer, InputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

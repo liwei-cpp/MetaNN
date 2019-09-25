@@ -11,8 +11,6 @@ namespace
     using CommonInputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                      >;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
-    
     void test_add_layer1()
     {
         cout << "Test add layer case 1 ...\t";
@@ -51,7 +49,7 @@ namespace
     {
         cout << "Test add layer case 2 ...\t";
 
-        using RootLayer = MakeBPLayer<AddLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<AddLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -101,7 +99,7 @@ namespace
     void test_add_layer3()
     {
         cout << "Test add layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<AddLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<AddLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -198,7 +196,7 @@ namespace
                                     LayerKV<RightOperand, int>
                                    >;
 
-        using RootLayer = MakeBPLayer<AddLayer, InputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<AddLayer, InputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -249,7 +247,7 @@ namespace
                                     LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                    >;
 
-        using RootLayer = MakeBPLayer<AddLayer, InputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<AddLayer, InputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

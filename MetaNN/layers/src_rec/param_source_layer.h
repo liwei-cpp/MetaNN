@@ -16,12 +16,6 @@ namespace MetaNN
         using type = LayerPortSet<>;
     };
     
-    template <>
-    struct LayerOutputPortSet_<ParamSourceLayer>
-    {
-        using type = LayerPortSet<struct LayerOutput>;
-    };
-
     template <typename TInputs, typename TGrads, typename TPolicies>
     class ParamSourceLayer
     {
@@ -131,7 +125,7 @@ namespace MetaNN
                 {
                     throw std::runtime_error("Parameter and its grad shape mismatch.");
                 }
-                m_paramGradStack.push(grad);
+                m_paramGradStack.push(MakeDynamic(grad));
             }
             return LayerInputCont<ParamSourceLayer>();
         }
@@ -141,7 +135,7 @@ namespace MetaNN
         Shape<ParamCategory> m_dataShape;
         ParamType m_data;
         
-        using AimGradType = typename GradMap::template Find<LayerOutput>;
+        using AimGradType = DynamicData<ElementType, DeviceType, ParamCategory>;
         LayerTraits::LayerInternalBuf<AimGradType, IsUpdate> m_paramGradStack;
     };
 }

@@ -9,7 +9,6 @@ using namespace std;
 namespace
 {
     using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     void test_abs_layer1()
     {
         cout << "Test abs layer case 1 ...\t";
@@ -50,7 +49,7 @@ namespace
     void test_abs_layer2()
     {
         cout << "Test abs layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<AbsLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -94,7 +93,7 @@ namespace
     void test_abs_layer3()
     {
         cout << "Test abs layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<AbsLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -151,7 +150,7 @@ namespace
     void test_abs_layer4()
     {
         cout << "Test abs layer case 4 ...\t";
-        using RootLayer = MakeBPLayer<AbsLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<AbsLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

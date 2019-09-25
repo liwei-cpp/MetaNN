@@ -525,7 +525,7 @@ namespace NSSI
     template <typename TLayerTemp, typename TInputMap, typename TPolicy, typename SublayerSeq, typename TConnectInfo, typename TOutput>
     struct InputTypeFillInternalConnectHelper_
     {
-        using LayerType = MakeLayer<TLayerTemp::template LayerType, TInputMap, TPolicy>;
+        using LayerType = MakeTrainLayer<TLayerTemp::template LayerType, TInputMap, TPolicy>;
         using type = typename InputTypeFillInternalConnectHelper2_<LayerTraits::LayerOutputItemTypes<LayerType>,
                                                                    TConnectInfo, SublayerSeq, TOutput>::type;
     };

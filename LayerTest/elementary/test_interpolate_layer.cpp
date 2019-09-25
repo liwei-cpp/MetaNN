@@ -11,7 +11,6 @@ namespace
     using CommonInputMap = LayerIOMap<LayerKV<InterpolateLayerWeight1, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<InterpolateLayerWeight2, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<InterpolateLayerLambda, Matrix<CheckElement, CheckDevice>>>;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     void test_interpolate_layer1()
     {
         cout << "Test interpolate layer case 1 ...\t";
@@ -64,7 +63,7 @@ namespace
     void test_interpolate_layer2()
     {
         cout << "Test interpolate layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<InterpolateLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<InterpolateLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput);
         static_assert(!RootLayer::IsUpdate);
 
@@ -134,7 +133,7 @@ namespace
     void test_interpolate_layer3()
     {
         cout << "Test interpolate layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<InterpolateLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<InterpolateLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

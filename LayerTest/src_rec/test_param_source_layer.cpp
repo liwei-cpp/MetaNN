@@ -11,7 +11,7 @@ namespace
     {
         cout << "Test param source layer case 1 (Init from initializer-data)...\t";
         
-        using RootLayer = MakeLayer<ParamSourceLayer, NullParameter>;
+        using RootLayer = MakeInferLayer<ParamSourceLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -48,7 +48,7 @@ namespace
         
         struct RootFiller;
 
-        using RootLayer = MakeLayer<ParamSourceLayer, NullParameter, PInitializerIs<RootFiller>>;
+        using RootLayer = MakeInferLayer<ParamSourceLayer, PInitializerIs<RootFiller>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -83,7 +83,7 @@ namespace
     {
         cout << "Test param source layer case 3 (Init from load buffer)...\t";
         
-        using RootLayer = MakeLayer<ParamSourceLayer, NullParameter>;
+        using RootLayer = MakeInferLayer<ParamSourceLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -109,7 +109,7 @@ namespace
     {
         cout << "Test param source layer case 4...\t";
         
-        using RootLayer = MakeLayer<ParamSourceLayer, NullParameter>;
+        using RootLayer = MakeInferLayer<ParamSourceLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -130,12 +130,11 @@ namespace
         cout << "done" << endl;
     }
 
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     void test_param_source_layer5()
     {
         cout << "Test param source layer case 5...\t";
         
-        using RootLayer = MakeBPLayer<ParamSourceLayer, LayerIOMap<>, CommonGradMap>;
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -165,7 +164,7 @@ namespace
     {
         cout << "Test param source layer case 6...\t";
         
-        using RootLayer = MakeBPLayer<ParamSourceLayer, LayerIOMap<>, CommonGradMap, PUpdate>;
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
         

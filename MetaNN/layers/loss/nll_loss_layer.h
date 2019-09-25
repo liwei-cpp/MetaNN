@@ -35,10 +35,6 @@ namespace MetaNN
         using TLossLayerWeightFP = typename InputMap::template Find<LossLayerWeight>;
         using TLayerOutputBP     = typename GradMap::template Find<LayerOutput>;
 
-        auto FeedForwardCal(const TLayerInputFP& val, const TLossLayerWeightFP& weight)
-        {
-            return NLLLoss(weight, val);
-        }
     public:
         NLLLossLayer(std::string name)
             : m_name(std::move(name))
@@ -49,7 +45,7 @@ namespace MetaNN
         {
             auto val = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
             auto weight = LayerTraits::PickItemFromCont<InputMap, LossLayerWeight>(std::forward<TIn>(p_in));
-            auto res = FeedForwardCal(val, weight);
+            auto res = NLLLoss(weight, val);
             
             if constexpr (IsFeedbackOutput)
             {

@@ -9,12 +9,11 @@ using namespace std;
 namespace
 {
     using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_softmax_layer1()
     {
         cout << "Test softmax layer case 1 ...\t";
-        using RootLayer = MakeBPLayer<SoftmaxLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<SoftmaxLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -60,7 +59,7 @@ namespace
     void test_softmax_layer2()
     {
         cout << "Test softmax layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<SoftmaxLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<SoftmaxLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

@@ -8,7 +8,7 @@ namespace
     void test_value_source_layer1()
     {
         cout << "Test value source layer case 1...\t";
-        using RootLayer = MakeLayer<ValueSourceLayer, NullParameter>;
+        using RootLayer = MakeInferLayer<ValueSourceLayer>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -24,7 +24,7 @@ namespace
     void test_value_source_layer2()
     {
         cout << "Test value source layer case 2...\t";
-        using RootLayer = MakeLayer<ValueSourceLayer, NullParameter, PNumeratorIs<-1>, PDenominatorIs<2>>;
+        using RootLayer = MakeInferLayer<ValueSourceLayer, PNumeratorIs<-1>, PDenominatorIs<2>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -40,7 +40,7 @@ namespace
     void test_value_source_layer3()
     {
         cout << "Test value source layer case 3...\t";
-        using RootLayer = MakeLayer<ValueSourceLayer, NullParameter, PValueTypeIs<int>, PNumeratorIs<3>, PDenominatorIs<2>>;
+        using RootLayer = MakeInferLayer<ValueSourceLayer, PValueTypeIs<int>, PNumeratorIs<3>, PDenominatorIs<2>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         

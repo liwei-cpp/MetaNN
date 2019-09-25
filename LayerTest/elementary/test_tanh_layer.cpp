@@ -9,8 +9,6 @@ using namespace std;
 namespace
 {
     using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
-    
     void test_tanh_layer1()
     {
         cout << "Test tanh layer case 1 ...\t";
@@ -45,7 +43,7 @@ namespace
     void test_tanh_layer2()
     {
         cout << "Test tanh layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<TanhLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<TanhLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
@@ -79,7 +77,7 @@ namespace
     void test_tanh_layer3()
     {
         cout << "Test tanh layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<TanhLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<TanhLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

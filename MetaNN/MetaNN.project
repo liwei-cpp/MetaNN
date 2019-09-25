@@ -215,7 +215,6 @@
     <VirtualDirectory Name="src_rec">
       <File Name="layers/src_rec/value_source_layer.h"/>
       <File Name="layers/src_rec/param_source_layer.h"/>
-      <File Name="layers/src_rec/data_eliminate_layer.h"/>
       <File Name="layers/src_rec/_.h"/>
     </VirtualDirectory>
   </VirtualDirectory>

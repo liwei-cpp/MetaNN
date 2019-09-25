@@ -9,7 +9,6 @@ using namespace std;
 namespace
 {
     using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
     void test_transpose_layer1()
     {
         cout << "Test transpose layer case 1 ...\t";
@@ -49,7 +48,7 @@ namespace
     void test_transpose_layer2()
     {
         cout << "Test transpose layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<TransposeLayer, CommonInputMap, CommonGradMap, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<TransposeLayer, CommonInputMap, PFeedbackOutput>;
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
 

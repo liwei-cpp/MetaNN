@@ -129,7 +129,6 @@
     <File Name="src_rec/test_value_source_layer.cpp"/>
     <File Name="src_rec/test_param_source_layer.cpp"/>
     <File Name="src_rec/_.h"/>
-    <File Name="src_rec/test_data_eliminate_layer.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="compose">
     <File Name="compose/_.h"/>
