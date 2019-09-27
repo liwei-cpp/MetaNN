@@ -213,7 +213,7 @@ namespace
     }
 }
 
-namespace Test::Layer::SrcRec
+namespace Test::Layer::Source
 {
     void test_param_source_layer()
     {

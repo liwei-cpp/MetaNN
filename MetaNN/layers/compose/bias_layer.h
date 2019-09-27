@@ -2,7 +2,7 @@
 
 #include <MetaNN/layers/compose/compose_kernel.h>
 #include <MetaNN/layers/elementary/add_layer.h>
-#include <MetaNN/layers/src_rec/param_source_layer.h>
+#include <MetaNN/layers/source/param_source_layer.h>
 
 namespace MetaNN
 {

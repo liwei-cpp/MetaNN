@@ -125,14 +125,14 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="src_rec">
-    <File Name="src_rec/test_value_source_layer.cpp"/>
-    <File Name="src_rec/test_param_source_layer.cpp"/>
-    <File Name="src_rec/_.h"/>
-  </VirtualDirectory>
   <VirtualDirectory Name="compose">
     <File Name="compose/_.h"/>
     <File Name="compose/test_compose_kernel.cpp"/>
     <File Name="compose/test_bias_layer.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="source">
+    <File Name="source/_.h"/>
+    <File Name="source/test_param_source_layer.cpp"/>
+    <File Name="source/test_value_source_layer.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

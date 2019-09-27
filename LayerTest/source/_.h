@@ -1,4 +1,4 @@
-namespace Test::Layer::SrcRec
+namespace Test::Layer::Source
 {
     void test_param_source_layer();
     void test_value_source_layer();

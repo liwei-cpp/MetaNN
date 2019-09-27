@@ -212,10 +212,10 @@
       <File Name="layers/loss/nll_loss_layer.h"/>
       <File Name="layers/loss/loss.h"/>
     </VirtualDirectory>
-    <VirtualDirectory Name="src_rec">
-      <File Name="layers/src_rec/value_source_layer.h"/>
-      <File Name="layers/src_rec/param_source_layer.h"/>
-      <File Name="layers/src_rec/_.h"/>
+    <VirtualDirectory Name="source">
+      <File Name="layers/source/_.h"/>
+      <File Name="layers/source/param_source_layer.h"/>
+      <File Name="layers/source/value_source_layer.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="operators">
