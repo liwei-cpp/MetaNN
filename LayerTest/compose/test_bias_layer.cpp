@@ -24,7 +24,7 @@ namespace
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
 
         auto mat = GenMatrix<CheckElement>(2, 1);
-        filler.SetParam("root-param", mat);
+        filler.SetParam("root", mat);
         
         layer.Init(filler, loadBuffer);
 
@@ -43,7 +43,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        auto* w = loadBuffer.TryGet<CategoryTags::Matrix>("root-param");
+        auto* w = loadBuffer.TryGet<CategoryTags::Matrix>("root");
         assert(w);
         
         auto wInfo = *w;
@@ -73,7 +73,7 @@ namespace
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
 
         auto mat = GenMatrix<CheckElement>(1, 2);
-        filler.SetParam("root-param", mat);
+        filler.SetParam("root", mat);
         
         layer.Init(filler, loadBuffer);
     
@@ -95,7 +95,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root-param"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
 
         cout << "done" << endl;
     }
@@ -114,7 +114,7 @@ namespace
         w.SetValue(1, 0, -0.13f);
 
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root-param", w);
+        initializer.SetParam("root", w);
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
 
@@ -158,7 +158,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root-param"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
 
         cout << "done" << endl;
     }
@@ -177,7 +177,7 @@ namespace
         w.SetValue(1, 0, -0.13f);
 
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root-param", w);
+        initializer.SetParam("root", w);
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
 
@@ -224,7 +224,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root-param"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
 
         cout << "done" << endl;
     }
@@ -243,7 +243,7 @@ namespace
         w.SetValue(1, 0, -0.13f);
         
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root-param", w);
+        initializer.SetParam("root", w);
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
 
@@ -312,7 +312,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root-param"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
         cout << "done" << endl;
     }
     
@@ -330,9 +330,9 @@ namespace
         auto initializer = MakeInitializer<CheckElement>(InitializerKV<RootFiller>(ConstantFiller{0}));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root-param"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
     
-        auto val = loadBuffer.TryGet<CategoryTags::Matrix>("root-param");
+        auto val = loadBuffer.TryGet<CategoryTags::Matrix>("root");
         assert(val);
     
         for (size_t i = 0; i < val->Shape().RowNum(); ++i)
@@ -358,9 +358,9 @@ namespace
         auto initializer = MakeInitializer<CheckElement>(InitializerKV<RootFiller>(ConstantFiller{1.5}));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root-param"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
     
-        auto val = loadBuffer.TryGet<CategoryTags::Matrix>("root-param");
+        auto val = loadBuffer.TryGet<CategoryTags::Matrix>("root");
         assert(val);
     
         for (size_t i = 0; i < val->Shape().RowNum(); ++i)

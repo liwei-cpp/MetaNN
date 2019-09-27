@@ -39,15 +39,16 @@ namespace MetaNN
 
     public:
         template <typename... TShapeParams>
-        ParamSourceLayer(std::string name, TShapeParams&&... shapeParams)
+        ParamSourceLayer(std::string name, std::string paramName, TShapeParams&&... shapeParams)
             : m_name(std::move(name))
+            , m_paramName(std::move(paramName))
             , m_dataShape(std::forward<TShapeParams>(shapeParams)...)
         {}
 
         template <typename TInitializer, typename TBuffer>
         void Init(TInitializer& initializer, TBuffer& loadBuffer)
         {
-            if (auto matPtr = loadBuffer.template TryGet<ParamCategory>(m_name); matPtr)
+            if (auto matPtr = loadBuffer.template TryGet<ParamCategory>(m_paramName); matPtr)
             {
                 if (matPtr->Shape() != m_dataShape)
                 {
@@ -58,9 +59,9 @@ namespace MetaNN
             }
             
             m_data = ParamType(m_dataShape);
-            if (initializer.template IsParamExist<ParamCategory>(m_name))
+            if (initializer.template IsParamExist<ParamCategory>(m_paramName))
             {
-                initializer.GetParam(m_name, m_data);
+                initializer.GetParam(m_paramName, m_data);
             }
             else
             {
@@ -76,18 +77,18 @@ namespace MetaNN
                     throw std::runtime_error("Cannot get the initializer.");
                 }
             }
-            loadBuffer.Set(m_name, m_data);
+            loadBuffer.Set(m_paramName, m_data);
         }
         
         template <typename TSave>
         void SaveWeights(TSave& saver) const
         {
-            auto matPtr = saver.template TryGet<ParamCategory>(m_name);
+            auto matPtr = saver.template TryGet<ParamCategory>(m_paramName);
             if (matPtr && (*matPtr != m_data))
             {
-                throw std::runtime_error("Duplicate save for data: " + m_name);
+                throw std::runtime_error("Duplicate save for data: " + m_paramName);
             }
-            saver.Set(m_name, m_data);
+            saver.Set(m_paramName, m_data);
         }
         
         template <typename TGradCollector>
@@ -133,6 +134,7 @@ namespace MetaNN
 
     private:
         std::string m_name;
+        std::string m_paramName;
         Shape<ParamCategory> m_dataShape;
         ParamType m_data;
         

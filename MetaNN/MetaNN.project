@@ -193,6 +193,7 @@
       <File Name="layers/elementary/multiply_layer.h"/>
       <File Name="layers/elementary/transpose_layer.h"/>
       <File Name="layers/elementary/_.h"/>
+      <File Name="layers/elementary/dot_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
       <File Name="layers/facilities/common_io.h"/>

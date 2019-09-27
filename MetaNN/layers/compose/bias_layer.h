@@ -30,7 +30,7 @@ namespace MetaNN
         template <typename... TShapeParams>
         BiasLayer(const std::string& p_name, TShapeParams&&... shapeParams)
             : TBase(TBase::CreateSublayers()
-                        .template Set<ParameterSublayer>(p_name + "-param", std::forward<TShapeParams>(shapeParams)...)
+                        .template Set<ParameterSublayer>(p_name + "-param", p_name, std::forward<TShapeParams>(shapeParams)...)
                         .template Set<AddSublayer>(p_name + "-add"))
         { }
     };
