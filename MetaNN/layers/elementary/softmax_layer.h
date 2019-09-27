@@ -8,7 +8,7 @@
 
 namespace MetaNN
 {
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class SoftmaxLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -18,12 +18,12 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
+        using InputPortSet = LayerInputPortSet<SoftmaxLayer>;
+        using OutputPortSet = LayerOutputPortSet<SoftmaxLayer>;
         using InputMap = TInputs;
-        using GradMap = TGrads;
 
     private:
         using TLayerInputFP = typename InputMap::template Find<LayerInput>;
-        using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
 
         auto FeedForwardCal(const TLayerInputFP& val)
         {
@@ -42,7 +42,6 @@ namespace MetaNN
             if constexpr (IsFeedbackOutput)
             {
                 m_inputShape.PushDataShape(val);
-                m_outputShape.PushDataShape(res);
                 m_data.push(res);
             }
             return LayerOutputCont<SoftmaxLayer>().template Set<LayerOutput>(std::move(res));
@@ -60,8 +59,7 @@ namespace MetaNN
                 auto softmaxRes = m_data.top();
                 m_data.pop();
                 
-                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckDataShapeAndPop(grad);
+                auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
 
                 auto res = SoftmaxGrad(std::move(grad), std::move(softmaxRes));
                 m_inputShape.CheckDataShapeAndPop(res);
@@ -82,7 +80,6 @@ namespace MetaNN
                     throw std::runtime_error("NeutralInvariant Fail!");
                 }
                 m_inputShape.AssertEmpty();
-                m_outputShape.AssertEmpty();
             }
         }
     private:
@@ -91,6 +88,5 @@ namespace MetaNN
         LayerTraits::LayerInternalBuf<TempDataType, IsFeedbackOutput> m_data;
 
         LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
-        LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;
     };
 }

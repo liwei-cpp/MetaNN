@@ -25,7 +25,7 @@ namespace MetaNN
     }
 
     
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class TanhLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -35,12 +35,12 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
 
+        using InputPortSet = LayerInputPortSet<TanhLayer>;
+        using OutputPortSet = LayerOutputPortSet<TanhLayer>;
         using InputMap = TInputs;
-        using GradMap = TGrads;
         
     private:
         using TLayerInputFP = typename InputMap::template Find<LayerInput>;
-        using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
 
     public:
         TanhLayer(std::string name)
@@ -56,7 +56,6 @@ namespace MetaNN
             if constexpr (IsFeedbackOutput)
             {
                 m_inputShape.PushDataShape(val);
-                m_outputShape.PushDataShape(res);
                 m_data.push(res);
             }
             return LayerOutputCont<TanhLayer>().template Set<LayerOutput>(std::move(res));
@@ -74,8 +73,7 @@ namespace MetaNN
                 auto tanhRes = m_data.top();
                 m_data.pop();
 
-                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckDataShapeAndPop(grad);
+                auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
 
                 auto res = TanhGrad(std::move(grad), std::move(tanhRes));
                 m_inputShape.CheckDataShapeAndPop(res);
@@ -96,7 +94,6 @@ namespace MetaNN
                     throw std::runtime_error("NeutralInvariant Fail!");
                 }
                 m_inputShape.AssertEmpty();
-                m_outputShape.AssertEmpty();
             }
         }
     private:
@@ -105,6 +102,5 @@ namespace MetaNN
         InternalDataType m_data;
 
         LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
-        LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;
     };
 }

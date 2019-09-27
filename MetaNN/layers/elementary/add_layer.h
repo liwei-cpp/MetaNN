@@ -8,7 +8,7 @@
 #include <stack>
 namespace MetaNN
 {
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class AddLayer;
     
     template <>
@@ -17,7 +17,7 @@ namespace MetaNN
         using type = LayerPortSet<struct LeftOperand, struct RightOperand>;
     };
     
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class AddLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -27,13 +27,13 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
+        using InputPortSet = LayerInputPortSet<AddLayer>;
+        using OutputPortSet = LayerOutputPortSet<AddLayer>;
         using InputMap = TInputs;
-        using GradMap = TGrads;
         
     private:
         using TLeftOperandFP = typename InputMap::template Find<LeftOperand>;
         using TRightOperandFP = typename InputMap::template Find<RightOperand>;
-        using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
         
     public:
         AddLayer(std::string name)
@@ -54,7 +54,6 @@ namespace MetaNN
                 m_inputShapeChecker2.PushDataShape(input2);
                 m_input1.push(std::move(input1));
                 m_input2.push(std::move(input2));
-                m_outputShape.PushDataShape(res);
             }
 
             return LayerOutputCont<AddLayer>().template Set<LayerOutput>(std::move(res));
@@ -73,8 +72,7 @@ namespace MetaNN
                 auto input1 = m_input1.top(); m_input1.pop();
                 auto input2 = m_input2.top(); m_input2.pop();
                 
-                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckDataShapeAndPop(grad);
+                auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
 
                 auto res1 = CollapseOrOmit(grad, std::move(input1));
                 auto res2 = CollapseOrOmit(grad, std::move(input2));
@@ -100,7 +98,6 @@ namespace MetaNN
                 }
                 m_inputShapeChecker1.AssertEmpty();
                 m_inputShapeChecker2.AssertEmpty();
-                m_outputShape.AssertEmpty();
             }
         }
     private:
@@ -111,6 +108,5 @@ namespace MetaNN
         
         LayerTraits::ShapeChecker<TLeftOperandFP,  IsFeedbackOutput> m_inputShapeChecker1;
         LayerTraits::ShapeChecker<TRightOperandFP, IsFeedbackOutput> m_inputShapeChecker2;
-        LayerTraits::ShapeChecker<TLayerOutputBP,  IsFeedbackOutput> m_outputShape;
     };
 }

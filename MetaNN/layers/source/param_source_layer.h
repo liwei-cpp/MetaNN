@@ -7,7 +7,7 @@
 
 namespace MetaNN
 {
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class ParamSourceLayer;
     
     template <>
@@ -16,7 +16,7 @@ namespace MetaNN
         using type = LayerPortSet<>;
     };
     
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class ParamSourceLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -33,8 +33,9 @@ namespace MetaNN
         using ParamType = PrincipalDataType<ParamCategory, ElementType, DeviceType>;
 
     public:
+        using InputPortSet = LayerInputPortSet<ParamSourceLayer>;
+        using OutputPortSet = LayerOutputPortSet<ParamSourceLayer>;
         using InputMap = TInputs;
-        using GradMap = TGrads;
 
     public:
         template <typename... TShapeParams>
@@ -120,7 +121,7 @@ namespace MetaNN
         {
             if constexpr (IsUpdate)
             {
-                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(p_grad);
+                auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
                 if (grad.Shape() != m_data.Shape())
                 {
                     throw std::runtime_error("Parameter and its grad shape mismatch.");

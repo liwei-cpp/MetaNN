@@ -27,7 +27,7 @@ namespace MetaNN
     ValuePolicyTemplate(PDenominatorIs, ValueSourcePolicy, Denominator);
 #include <MetaNN/policies/policy_macro_end.h>
 
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class ValueSourceLayer;
     
     template <>
@@ -42,7 +42,7 @@ namespace MetaNN
         using type = LayerPortSet<struct LayerOutput>;
     };
 
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class ValueSourceLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -58,8 +58,9 @@ namespace MetaNN
         constexpr static int Denominator = PolicySelect<ValueSourcePolicy, CurLayerPolicy>::Denominator;
 
     public:
+        using InputPortSet = LayerInputPortSet<ValueSourceLayer>;
+        using OutputPortSet = LayerOutputPortSet<ValueSourceLayer>;
         using InputMap = TInputs;
-        using GradMap = TGrads;
         
     public:
         ValueSourceLayer(std::string name)

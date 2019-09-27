@@ -6,18 +6,23 @@ namespace MetaNN
 {
     template <typename... TPorts> struct LayerPortSet;
     
-    template <template <typename, typename, typename> class TLayer>
+    template <template <typename, typename> class TLayer>
     struct LayerInputPortSet_
     {
         using type = LayerPortSet<struct LayerInput>;
     };
     
-    template <template <typename, typename, typename> class TLayer>
+    template <template <typename, typename> class TLayer>
+    using LayerInputPortSet = typename LayerInputPortSet_<TLayer>::type;
+    
+    template <template <typename, typename> class TLayer>
     struct LayerOutputPortSet_
     {
         using type = LayerPortSet<struct LayerOutput>;
     };
     
+    template <template <typename, typename> class TLayer>
+    using LayerOutputPortSet = typename LayerOutputPortSet_<TLayer>::type;
     
     template <typename TKey, typename TValue>
     struct LayerKV : ContMetaFun::Helper::KVBinder<TKey, RemConstRef<TValue>>
@@ -63,19 +68,19 @@ namespace MetaNN
     template <typename TIoMap>
     constexpr bool IsEmptyLayerIOMap = IsEmptyLayerIOMap_<TIoMap>::value;
     
-    template <typename TMap>
+    template <typename TSet>
     struct LayerContainer_;
     
-    template <typename... TLayerKVs>
-    struct LayerContainer_<LayerIOMap<TLayerKVs...>>
+    template <typename... TPorts>
+    struct LayerContainer_<LayerPortSet<TPorts...>>
     {
-        using type = VarTypeDict<typename TLayerKVs::KeyType ...>;
+        using type = VarTypeDict<TPorts ...>;
     };
     
     template <typename TLayer>
     auto LayerInputCont()
     {
-        using TMap = typename TLayer::InputMap;
+        using TMap = typename TLayer::InputPortSet;
         using TCont = typename LayerContainer_<TMap>::type;
         return TCont::Create();
     }
@@ -83,7 +88,7 @@ namespace MetaNN
     template <typename TLayer>
     auto LayerOutputCont()
     {
-        using TMap = typename TLayer::GradMap;
+        using TMap = typename TLayer::OutputPortSet;
         using TCont = typename LayerContainer_<TMap>::type;
         return TCont::Create();
     }

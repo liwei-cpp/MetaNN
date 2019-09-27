@@ -2,7 +2,7 @@
 
 namespace MetaNN
 {
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class NLLLossLayer;
     
     template <>
@@ -17,7 +17,7 @@ namespace MetaNN
         using type = LayerPortSet<struct LayerOutput>;
     };
     
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class NLLLossLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -27,13 +27,13 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
 
+        using InputPortSet = LayerInputPortSet<NLLLossLayer>;
+        using OutputPortSet = LayerOutputPortSet<NLLLossLayer>;
         using InputMap = TInputs;
-        using GradMap = TGrads;
         
     private:
         using TLayerInputFP      = typename InputMap::template Find<LayerInput>;
         using TLossLayerWeightFP = typename InputMap::template Find<LossLayerWeight>;
-        using TLayerOutputBP     = typename GradMap::template Find<LayerOutput>;
 
     public:
         NLLLossLayer(std::string name)
@@ -50,7 +50,6 @@ namespace MetaNN
             if constexpr (IsFeedbackOutput)
             {
                 m_inputShape.PushDataShape(val);
-                m_outputShape.PushDataShape(res);
                 m_input.push(std::move(val));
                 m_weight.push(std::move(weight));
             }
@@ -69,8 +68,7 @@ namespace MetaNN
                 auto input = m_input.top(); m_input.pop();
                 auto weight = m_weight.top(); m_weight.pop();
 
-                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckDataShapeAndPop(grad);
+                auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
                 auto res = NLLLossGrad(std::move(grad), std::move(weight), std::move(input));
                 m_inputShape.CheckDataShapeAndPop(res);
 
@@ -91,7 +89,6 @@ namespace MetaNN
                     throw std::runtime_error("NeutralInvariant Fail!");
                 }
                 m_inputShape.AssertEmpty();
-                m_outputShape.AssertEmpty();
             }
         }
     private:
@@ -100,6 +97,5 @@ namespace MetaNN
         LayerTraits::LayerInternalBuf<TLossLayerWeightFP, IsFeedbackOutput> m_weight;
 
         LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
-        LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;
     };
 }

@@ -7,7 +7,7 @@
 
 namespace MetaNN
 {
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class MultiplyLayer;
     
     template <>
@@ -16,7 +16,7 @@ namespace MetaNN
         using type = LayerPortSet<struct LeftOperand, struct RightOperand>;
     };
     
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class MultiplyLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -26,13 +26,13 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
+        using InputPortSet = LayerInputPortSet<MultiplyLayer>;
+        using OutputPortSet = LayerOutputPortSet<MultiplyLayer>;
         using InputMap = TInputs;
-        using GradMap = TGrads;
         
     private:
         using TLeftOperandFP = typename InputMap::template Find<LeftOperand>;
         using TRightOperandFP = typename InputMap::template Find<RightOperand>;
-        using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
 
     public:
         MultiplyLayer(std::string name)
@@ -53,7 +53,6 @@ namespace MetaNN
                 m_input2.push(input2);
                 m_inputShape1.PushDataShape(input1);
                 m_inputShape2.PushDataShape(input2);
-                m_outputShape.PushDataShape(res);
             }
 
             return LayerOutputCont<MultiplyLayer>().template Set<LayerOutput>(std::move(res));
@@ -74,8 +73,7 @@ namespace MetaNN
                 m_input1.pop();
                 m_input2.pop();
 
-                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckDataShapeAndPop(grad);
+                auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
 
                 auto grad1 = grad * DuplicateOrKeep(input1, grad.Shape());
                 auto grad2 = grad * DuplicateOrKeep(input2, grad.Shape());
@@ -102,7 +100,6 @@ namespace MetaNN
                 }
                 m_inputShape1.AssertEmpty();
                 m_inputShape2.AssertEmpty();
-                m_outputShape.AssertEmpty();
             }
         }
     private:
@@ -112,6 +109,5 @@ namespace MetaNN
 
         LayerTraits::ShapeChecker<TLeftOperandFP,  IsFeedbackOutput> m_inputShape1;
         LayerTraits::ShapeChecker<TRightOperandFP, IsFeedbackOutput> m_inputShape2;
-        LayerTraits::ShapeChecker<TLayerOutputBP,  IsFeedbackOutput> m_outputShape;
     };
 }

@@ -7,7 +7,7 @@
 
 namespace MetaNN
 {
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class AbsLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -17,12 +17,12 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
 
+        using InputPortSet = LayerInputPortSet<AbsLayer>;
+        using OutputPortSet = LayerOutputPortSet<AbsLayer>;
         using InputMap = TInputs;
-        using GradMap = TGrads;
         
     private:
         using TLayerInputFP = typename InputMap::template Find<LayerInput>;
-        using TLayerOutputBP = typename GradMap::template Find<LayerOutput>;
 
     public:
         AbsLayer(std::string name)
@@ -38,7 +38,6 @@ namespace MetaNN
             if constexpr (IsFeedbackOutput)
             {
                 m_inputShape.PushDataShape(val);
-                m_outputShape.PushDataShape(res);
                 m_data.push(std::move(val));
             }
             return LayerOutputCont<AbsLayer>().template Set<LayerOutput>(std::move(res));
@@ -56,8 +55,7 @@ namespace MetaNN
                 auto input = m_data.top();
                 m_data.pop();
 
-                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckDataShapeAndPop(grad);
+                auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
                 auto res = std::move(grad) * Sign(std::move(input));
                 m_inputShape.CheckDataShapeAndPop(res);
 
@@ -78,14 +76,11 @@ namespace MetaNN
                     throw std::runtime_error("NeutralInvariant Fail!");
                 }
                 m_inputShape.AssertEmpty();
-                m_outputShape.AssertEmpty();
             }
         }
     private:
         std::string m_name;
         LayerTraits::LayerInternalBuf<TLayerInputFP, IsFeedbackOutput> m_data;
-        
         LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
-        LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;
     };
 }

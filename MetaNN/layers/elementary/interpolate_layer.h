@@ -7,7 +7,7 @@
 
 namespace MetaNN
 {
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class InterpolateLayer;
     
     template <>
@@ -18,7 +18,7 @@ namespace MetaNN
                                   struct InterpolateLayerLambda>;
     };
     
-    template <typename TInputs, typename TGrads, typename TPolicies>
+    template <typename TInputs, typename TPolicies>
     class InterpolateLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -28,14 +28,14 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
+        using InputPortSet = LayerInputPortSet<InterpolateLayer>;
+        using OutputPortSet = LayerOutputPortSet<InterpolateLayer>;
         using InputMap = TInputs;
-        using GradMap = TGrads;
         
     private:
         using TInterpolateLayerWeight1FP = typename InputMap::template Find<InterpolateLayerWeight1>;
         using TInterpolateLayerWeight2FP = typename InputMap::template Find<InterpolateLayerWeight2>;
         using TInterpolateLayerLambdaFP  = typename InputMap::template Find<InterpolateLayerLambda>;
-        using TLayerOutputBP             = typename GradMap::template Find<LayerOutput>;
 
     public:
         InterpolateLayer(std::string name)
@@ -58,7 +58,6 @@ namespace MetaNN
                 m_weight1Shape.PushDataShape(input1);
                 m_weight2Shape.PushDataShape(input2);
                 m_lambdaShape.PushDataShape(lambda);
-                m_outputShape.PushDataShape(res);
 
                 m_input1Stack.push(std::move(input1));
                 m_input2Stack.push(std::move(input2));
@@ -77,8 +76,7 @@ namespace MetaNN
                 {
                     throw std::runtime_error("Cannot do FeedBackward for InterpolateLayer");
                 }
-                auto grad = LayerTraits::PickItemFromCont<GradMap, LayerOutput>(std::forward<TGrad>(p_grad));
-                m_outputShape.CheckDataShapeAndPop(grad);
+                auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
                 
                 auto curLambda = m_lambdaStack.top();
                 auto curInput1 = m_input1Stack.top();
@@ -121,7 +119,6 @@ namespace MetaNN
                 m_weight1Shape.AssertEmpty();
                 m_weight2Shape.AssertEmpty();
                 m_lambdaShape.AssertEmpty();
-                m_outputShape.AssertEmpty();
             }
         }
     private:
@@ -133,6 +130,5 @@ namespace MetaNN
         LayerTraits::ShapeChecker<TInterpolateLayerWeight1FP,  IsFeedbackOutput> m_weight1Shape;
         LayerTraits::ShapeChecker<TInterpolateLayerWeight2FP,  IsFeedbackOutput> m_weight2Shape;
         LayerTraits::ShapeChecker<TInterpolateLayerLambdaFP,   IsFeedbackOutput> m_lambdaShape;
-        LayerTraits::ShapeChecker<TLayerOutputBP, IsFeedbackOutput> m_outputShape;
     };
 }

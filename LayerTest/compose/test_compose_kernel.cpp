@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    struct Sublayer1; struct Sublayer2; struct Sublayer3; struct Sublayer4; struct Sublayer5; struct Sublayer6;
+/*    struct Sublayer1; struct Sublayer2; struct Sublayer3; struct Sublayer4; struct Sublayer5; struct Sublayer6;
     struct Input1; struct Input2; struct Output1;
     void test_compose_kernel1()
     {
@@ -479,14 +479,14 @@ namespace
                                              .Set<Sublayer4>("MySublayer4")
                                              .Set<Sublayer5>("MySublayer5"));
         cout << "done" << endl;
-    }
+    }*/
 }
 
 namespace Test::Layer::Compose
 {
     void test_compose_kenrel()
     {
-        test_compose_kernel1();
+/*        test_compose_kernel1();
         test_compose_kernel2();
         test_compose_kernel3();
         test_compose_kernel4();
@@ -494,6 +494,6 @@ namespace Test::Layer::Compose
         test_compose_kernel6();
         test_compose_kernel7();
         test_compose_kernel8();
-        test_compose_kernel9();
+        test_compose_kernel9();*/
     }
 }

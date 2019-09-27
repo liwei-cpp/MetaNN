@@ -6,7 +6,7 @@
 
 namespace MetaNN
 {
-    struct LayerInput;
+/*    struct LayerInput;
     struct LayerOutput;
     
     struct ParameterSublayer;
@@ -36,5 +36,5 @@ namespace MetaNN
                         .template Set<ParameterSublayer>(p_name + "-param", std::forward<TShapeParams>(shapeParams)...)
                         .template Set<AddSublayer>(p_name + "-add"))
         { }
-    };
+    };*/
 }

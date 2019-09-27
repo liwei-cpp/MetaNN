@@ -5,20 +5,19 @@
 
 namespace MetaNN
 {
-    template<template <typename, typename, typename> class T, typename...TPolicies>
+    template<template <typename, typename> class T, typename...TPolicies>
     struct MakeInferLayer_
     {
-        using type = T<EmptyLayerIOMap<typename LayerInputPortSet_<T>::type>,
-                       EmptyLayerIOMap<typename LayerOutputPortSet_<T>::type>,
+        using type = T<EmptyLayerIOMap<LayerInputPortSet<T>>,
                        PolicyContainer<TPolicies...>>;
         static_assert(!type::IsFeedbackOutput);
         static_assert(!type::IsUpdate);
     };
 	
-    template<template <typename, typename, typename> class T, typename...TPolicies>
+    template<template <typename, typename> class T, typename...TPolicies>
     struct MakeInferLayer_<T, PolicyContainer<TPolicies...>> : MakeInferLayer_<T, TPolicies...> {};
 
-    template<template <typename, typename, typename> class T, typename...TPolicies>
+    template<template <typename, typename> class T, typename...TPolicies>
     using MakeInferLayer = typename MakeInferLayer_<T, TPolicies...>::type;
 	
 	
@@ -34,20 +33,17 @@ namespace MetaNN
 		};
 	}
 	
-    template<template <typename, typename, typename> class T, typename TInputMap, typename...TPolicies>
+    template<template <typename, typename> class T, typename TInputMap, typename...TPolicies>
     struct MakeTrainLayer_
     {
-		using InputKeys = typename LayerInputPortSet_<T>::type;
-		static_assert(NSMakeTrainLayer::CheckInputMapAvailable_<TInputMap, InputKeys>::value);
-		static_assert(ArraySize<TInputMap> == ArraySize<InputKeys>);
-        using type = T<TInputMap,
-                       EmptyLayerIOMap<typename LayerOutputPortSet_<T>::type>,
-                       PolicyContainer<TPolicies...>>;
+        static_assert(NSMakeTrainLayer::CheckInputMapAvailable_<TInputMap, LayerInputPortSet<T>>::value);
+        static_assert(ArraySize<TInputMap> == ArraySize<LayerInputPortSet<T>>);
+        using type = T<TInputMap, PolicyContainer<TPolicies...>>;
     };
-	
-    template<template <typename, typename, typename> class T, typename TInputMap, typename...TPolicies>
+
+    template<template <typename, typename> class T, typename TInputMap, typename...TPolicies>
     struct MakeTrainLayer_<T, TInputMap, PolicyContainer<TPolicies...>> : MakeTrainLayer_<T, TInputMap, TPolicies...> {};
-	
-	template<template <typename, typename, typename> class T, typename TInputMap, typename...TPolicies>
+
+    template<template <typename, typename> class T, typename TInputMap, typename...TPolicies>
     using MakeTrainLayer = typename MakeTrainLayer_<T, TInputMap, TPolicies...>::type;
 }
