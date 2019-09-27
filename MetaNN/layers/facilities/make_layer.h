@@ -13,7 +13,7 @@ namespace MetaNN
         static_assert(!type::IsFeedbackOutput);
         static_assert(!type::IsUpdate);
     };
-	
+
     template<template <typename, typename> class T, typename...TPolicies>
     struct MakeInferLayer_<T, PolicyContainer<TPolicies...>> : MakeInferLayer_<T, TPolicies...> {};
 

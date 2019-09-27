@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-/*    struct Sublayer1; struct Sublayer2; struct Sublayer3; struct Sublayer4; struct Sublayer5; struct Sublayer6;
+    struct Sublayer1; struct Sublayer2; struct Sublayer3; struct Sublayer4; struct Sublayer5; struct Sublayer6;
     struct Input1; struct Input2; struct Output1;
     void test_compose_kernel1()
     {
@@ -246,10 +246,8 @@ namespace
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
         using Input2Type = TrivalMatrix<CheckElement, CheckDevice, Scalar<CheckElement, CheckDevice>>;
-        using GradType = ZeroData<CategoryTags::Matrix, CheckElement, CheckDevice>;
         using CheckInputs = LayerIOMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
-        using CheckGrads = LayerIOMap<LayerKV<Output1, GradType>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
                                                      SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer2, PUpdate, PFeedbackNoOutput>,
@@ -270,7 +268,7 @@ namespace
                                              InternalConnect<Sublayer4, LayerOutput, Sublayer5, RightOperand>>;
         using CheckOutConnects = ClauseSeq<OutConnect<Sublayer5, LayerOutput, Output1>>;
 
-        using Check = SublayerInstantiation_<CheckInputs, CheckGrads, CheckPolicyContainer,
+        using Check = SublayerInstantiation_<CheckInputs, CheckPolicyContainer,
                                              CheckSublayerCont, CheckSublayerClause, CheckInConnects, CheckInterConnects, CheckOutConnects>;
         static_assert(std::is_same_v<Check::SublayerPolicy1,
                                      std::tuple<KVBinder<Sublayer1, PolicyContainer<PNoUpdate, PFeedbackNoOutput>>,
@@ -293,53 +291,20 @@ namespace
                                                 KVBinder<Sublayer5, PolicyContainer<PFeedbackOutput>>>>);
 
 
-        static_assert(std::is_same_v<Check::InputTypeCont1,
-                                     std::tuple<LayerIOMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
-                                                LayerIOMap<LayerKV<RightOperand, Input1Type>>,
-                                                LayerIOMap<>, LayerIOMap<>, LayerIOMap<>>>);
-
         using Sublayer2Left = decltype(declval<Input1Type>() + declval<Input2Type>());
         using Sublayer2Output = decltype(declval<Sublayer2Left>() * declval<Input1Type>());
         using Sublayer3Output = decltype(Sigmoid(declval<Sublayer2Output>()));
         using Sublayer4Output = decltype(Tanh(declval<Sublayer2Output>()));
-        static_assert(std::is_same_v<Check::InputTypeContFinal,
-                                     std::tuple<LayerIOMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
-                                                LayerIOMap<LayerKV<RightOperand, Input1Type>, LayerKV<LeftOperand, Sublayer2Left>>,
-                                                LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
-                                                LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
-                                                LayerIOMap<LayerKV<LeftOperand, Sublayer3Output>, LayerKV<RightOperand, Sublayer4Output>>
-                                                >>);
-
-
-        static_assert(std::is_same_v<Check::GradTypeCont1,
-                                     std::tuple<LayerIOMap<>,
-                                                LayerIOMap<>,
-                                                LayerIOMap<>, LayerIOMap<>, LayerIOMap<LayerKV<LayerOutput, GradType>>>>);
-
-        using Sublayer2Grad = decltype(TanhGrad(declval<GradType>(), declval<Sublayer4Output>()) +
-                                       SigmoidGrad(declval<GradType>(), declval<Sublayer3Output>()));
-        using Sublayer1LeftGrad = decltype(declval<Sublayer2Grad>() * declval<Input1Type>());
-        static_assert(std::is_same_v<Check::GradTypeContFinal,
-                                     std::tuple<LayerIOMap<LayerKV<LayerOutput, Sublayer1LeftGrad>>,
-                                                LayerIOMap<LayerKV<LayerOutput, Sublayer2Grad>>,
-                                                LayerIOMap<LayerKV<LayerOutput, GradType>>,
-                                                LayerIOMap<LayerKV<LayerOutput, GradType>>,
-                                                LayerIOMap<LayerKV<LayerOutput, GradType>>>>);
 
         using Layer1Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
-                                     LayerIOMap<LayerKV<LayerOutput, Sublayer1LeftGrad>>,
                                      PolicyContainer<PNoUpdate, PFeedbackOutput>>;
         using Layer2Final = MultiplyLayer<LayerIOMap<LayerKV<RightOperand, Input1Type>, LayerKV<LeftOperand, Sublayer2Left>>,
-                                          LayerIOMap<LayerKV<LayerOutput, Sublayer2Grad>>,
                                           PolicyContainer<PUpdate, PFeedbackOutput>>;
         using Layer3Final = SigmoidLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
-                                         LayerIOMap<LayerKV<LayerOutput, GradType>>,
                                          PolicyContainer<PFeedbackOutput>>;
         using Layer4Final = TanhLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
-                                      LayerIOMap<LayerKV<LayerOutput, GradType>>,
                                       PolicyContainer<PFeedbackOutput>>;
         using Layer5Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Sublayer3Output>, LayerKV<RightOperand, Sublayer4Output>>,
-                                     LayerIOMap<LayerKV<LayerOutput, GradType>>,
                                      PolicyContainer<PFeedbackOutput>>;
         static_assert(std::is_same_v<Check::type, std::tuple<Layer1Final, Layer2Final, Layer3Final, Layer4Final, Layer5Final>>);
         cout << "done" << endl;
@@ -348,6 +313,59 @@ namespace
     void test_compose_kernel8()
     {
         cout << "Test compose kernel case 8...\t";
+        using namespace MetaNN::NSComposeKernel;
+        using namespace MetaNN::ContMetaFun::Helper;
+        
+        using CheckInputs = LayerIOMap<LayerKV<Input1, NullParameter>,
+                                       LayerKV<Input2, NullParameter>>;
+        using CheckPolicyContainer = PolicyContainer<SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
+                                                     SubPolicyContainer<Sublayer2, PFeedbackNoOutput>,
+                                                     SubPolicyContainer<Sublayer5, PFeedbackNoOutput>>;
+        using CheckSublayerCont = ClauseSeq<Sublayer1, Sublayer2, Sublayer3, Sublayer4, Sublayer5>;
+        using CheckSublayerClause = ClauseSeq<Sublayer<Sublayer1, AddLayer>,
+                                              Sublayer<Sublayer2, MultiplyLayer>,
+                                              Sublayer<Sublayer3, SigmoidLayer>,
+                                              Sublayer<Sublayer4, TanhLayer>,
+                                              Sublayer<Sublayer5, AddLayer>>;
+        using CheckInConnects = ClauseSeq<InConnect<Input1, Sublayer1, LeftOperand>,
+                                          InConnect<Input2, Sublayer1, RightOperand>,
+                                          InConnect<Input1, Sublayer2, RightOperand>>;
+        using CheckInterConnects = ClauseSeq<InternalConnect<Sublayer1, LayerOutput, Sublayer2, LeftOperand>,
+                                             InternalConnect<Sublayer2, LayerOutput, Sublayer3, LayerInput>,
+                                             InternalConnect<Sublayer2, LayerOutput, Sublayer4, LayerInput>,
+                                             InternalConnect<Sublayer3, LayerOutput, Sublayer5, LeftOperand>,
+                                             InternalConnect<Sublayer4, LayerOutput, Sublayer5, RightOperand>>;
+        using CheckOutConnects = ClauseSeq<OutConnect<Sublayer5, LayerOutput, Output1>>;
+
+        using Check = SublayerInstantiation_<CheckInputs, CheckPolicyContainer,
+                                             CheckSublayerCont, CheckSublayerClause, CheckInConnects, CheckInterConnects, CheckOutConnects>;
+
+        static_assert(std::is_same_v<Check::SublayerPolicyFinal,
+                                     std::tuple<KVBinder<Sublayer1, PolicyContainer<PNoUpdate, PFeedbackNoOutput>>,
+                                                KVBinder<Sublayer2, PolicyContainer<PFeedbackNoOutput>>,
+                                                KVBinder<Sublayer3, PolicyContainer<>>,
+                                                KVBinder<Sublayer4, PolicyContainer<>>,
+                                                KVBinder<Sublayer5, PolicyContainer<PFeedbackNoOutput>>>>);
+
+
+        using Layer1Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, NullParameter>, LayerKV<RightOperand, NullParameter>>,
+                                     PolicyContainer<PNoUpdate, PFeedbackNoOutput>>;
+        using Layer2Final = MultiplyLayer<LayerIOMap<LayerKV<LeftOperand, NullParameter>, LayerKV<RightOperand, NullParameter>>,
+                                          PolicyContainer<PFeedbackNoOutput>>;
+        using Layer3Final = SigmoidLayer<LayerIOMap<LayerKV<LayerInput, NullParameter>>,
+                                         PolicyContainer<>>;
+        using Layer4Final = TanhLayer<LayerIOMap<LayerKV<LayerInput, NullParameter>>,
+                                      PolicyContainer<>>;
+        using Layer5Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, NullParameter>, LayerKV<RightOperand, NullParameter>>,
+                                     PolicyContainer<PFeedbackNoOutput>>;
+
+        static_assert(std::is_same_v<Check::type, std::tuple<Layer1Final, Layer2Final, Layer3Final, Layer4Final, Layer5Final>>);
+        cout << "done" << endl;
+    }
+    
+    void test_compose_kernel9()
+    {
+        cout << "Test compose kernel case 9...\t";
         
         using CT = ComposeTopology<Sublayer<Sublayer1, AddLayer>,
                                    Sublayer<Sublayer2, MultiplyLayer>,
@@ -366,10 +384,8 @@ namespace
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
         using Input2Type = TrivalMatrix<CheckElement, CheckDevice, Scalar<CheckElement, CheckDevice>>;
-        using GradType = ZeroData<CategoryTags::Matrix, CheckElement, CheckDevice>;
         using CheckInputs = LayerIOMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
-        using CheckGrads = LayerIOMap<LayerKV<Output1, GradType>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
                                                      SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer2, PUpdate, PFeedbackNoOutput>,
@@ -380,34 +396,25 @@ namespace
         using Sublayer3Output = decltype(Sigmoid(declval<Sublayer2Output>()));
         using Sublayer4Output = decltype(Tanh(declval<Sublayer2Output>()));
         
-        using Sublayer2Grad = decltype(TanhGrad(declval<GradType>(), declval<Sublayer4Output>()) +
-                                       SigmoidGrad(declval<GradType>(), declval<Sublayer3Output>()));
-        using Sublayer1LeftGrad = decltype(declval<Sublayer2Grad>() * declval<Input1Type>());
-        
         using Layer1Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
-                                     LayerIOMap<LayerKV<LayerOutput, Sublayer1LeftGrad>>,
                                      PolicyContainer<PNoUpdate, PFeedbackOutput>>;
         using Layer2Final = MultiplyLayer<LayerIOMap<LayerKV<RightOperand, Input1Type>, LayerKV<LeftOperand, Sublayer2Left>>,
-                                          LayerIOMap<LayerKV<LayerOutput, Sublayer2Grad>>,
                                           PolicyContainer<PUpdate, PFeedbackOutput>>;
         using Layer3Final = SigmoidLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
-                                         LayerIOMap<LayerKV<LayerOutput, GradType>>,
                                          PolicyContainer<PFeedbackOutput>>;
         using Layer4Final = TanhLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
-                                      LayerIOMap<LayerKV<LayerOutput, GradType>>,
                                       PolicyContainer<PFeedbackOutput>>;
         using Layer5Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Sublayer3Output>, LayerKV<RightOperand, Sublayer4Output>>,
-                                     LayerIOMap<LayerKV<LayerOutput, GradType>>,
                                      PolicyContainer<PFeedbackOutput>>;
 
-        using check = CT::Instances<CheckInputs, CheckGrads, CheckPolicyContainer>;
+        using check = CT::Instances<CheckInputs, CheckPolicyContainer>;
         static_assert(std::is_same_v<check, std::tuple<Layer1Final, Layer2Final, Layer3Final, Layer4Final, Layer5Final>>);
         cout << "done" << endl;
     }
     
-    void test_compose_kernel9()
+    void test_compose_kernel10()
     {
-        cout << "Test compose kernel case 9...\t";
+        cout << "Test compose kernel case 10...\t";
         using CT = ComposeTopology<Sublayer<Sublayer1, AddLayer>,
                                    Sublayer<Sublayer2, MultiplyLayer>,
                                    Sublayer<Sublayer3, SigmoidLayer>,
@@ -425,42 +432,31 @@ namespace
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
         using Input2Type = TrivalMatrix<CheckElement, CheckDevice, Scalar<CheckElement, CheckDevice>>;
-        using GradType = ZeroData<CategoryTags::Matrix, CheckElement, CheckDevice>;
         using CheckInputs = LayerIOMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
-        using CheckGrads = LayerIOMap<LayerKV<Output1, GradType>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
                                                      SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer2, PUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer5, PFeedbackNoOutput>>;
-        using Check = ComposeKernel<CheckInputs, CheckGrads, CheckPolicyContainer, CT>;
+        using Check = ComposeKernel<CheckInputs, CheckPolicyContainer, CT>;
         
         auto sublayerArray = Check::CreateSublayers();
         using ArrayType = decltype(sublayerArray);
         
-                using Sublayer2Left = decltype(declval<Input1Type>() + declval<Input2Type>());
+        using Sublayer2Left = decltype(declval<Input1Type>() + declval<Input2Type>());
         using Sublayer2Output = decltype(declval<Sublayer2Left>() * declval<Input1Type>());
         using Sublayer3Output = decltype(Sigmoid(declval<Sublayer2Output>()));
         using Sublayer4Output = decltype(Tanh(declval<Sublayer2Output>()));
         
-        using Sublayer2Grad = decltype(TanhGrad(declval<GradType>(), declval<Sublayer4Output>()) +
-                                       SigmoidGrad(declval<GradType>(), declval<Sublayer3Output>()));
-        using Sublayer1LeftGrad = decltype(declval<Sublayer2Grad>() * declval<Input1Type>());
-        
         using Layer1Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
-                                     LayerIOMap<LayerKV<LayerOutput, Sublayer1LeftGrad>>,
                                      PolicyContainer<PNoUpdate, PFeedbackOutput>>;
         using Layer2Final = MultiplyLayer<LayerIOMap<LayerKV<RightOperand, Input1Type>, LayerKV<LeftOperand, Sublayer2Left>>,
-                                          LayerIOMap<LayerKV<LayerOutput, Sublayer2Grad>>,
                                           PolicyContainer<PUpdate, PFeedbackOutput>>;
         using Layer3Final = SigmoidLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
-                                         LayerIOMap<LayerKV<LayerOutput, GradType>>,
                                          PolicyContainer<PFeedbackOutput>>;
         using Layer4Final = TanhLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
-                                      LayerIOMap<LayerKV<LayerOutput, GradType>>,
                                       PolicyContainer<PFeedbackOutput>>;
         using Layer5Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Sublayer3Output>, LayerKV<RightOperand, Sublayer4Output>>,
-                                     LayerIOMap<LayerKV<LayerOutput, GradType>>,
                                      PolicyContainer<PFeedbackOutput>>;
 
         static_assert(std::is_same_v<ArrayType,
@@ -479,14 +475,14 @@ namespace
                                              .Set<Sublayer4>("MySublayer4")
                                              .Set<Sublayer5>("MySublayer5"));
         cout << "done" << endl;
-    }*/
+    }
 }
 
 namespace Test::Layer::Compose
 {
     void test_compose_kenrel()
     {
-/*        test_compose_kernel1();
+        test_compose_kernel1();
         test_compose_kernel2();
         test_compose_kernel3();
         test_compose_kernel4();
@@ -494,6 +490,7 @@ namespace Test::Layer::Compose
         test_compose_kernel6();
         test_compose_kernel7();
         test_compose_kernel8();
-        test_compose_kernel9();*/
+        test_compose_kernel9();
+        test_compose_kernel10();
     }
 }
