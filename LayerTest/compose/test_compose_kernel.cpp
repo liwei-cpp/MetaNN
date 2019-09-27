@@ -438,7 +438,7 @@ namespace
                                                      SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer2, PUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer5, PFeedbackNoOutput>>;
-        using Check = ComposeKernel<CheckInputs, CheckPolicyContainer, CT>;
+        using Check = ComposeKernel<LayerPortSet<LayerInput>, LayerPortSet<LayerOutput>, CheckInputs, CheckPolicyContainer, CT>;
         
         auto sublayerArray = Check::CreateSublayers();
         using ArrayType = decltype(sublayerArray);

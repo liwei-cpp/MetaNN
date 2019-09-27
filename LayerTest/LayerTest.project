@@ -21,7 +21,6 @@
     <File Name="elementary/test_sigmoid_layer.cpp"/>
     <File Name="elementary/test_tanh_layer.cpp"/>
     <File Name="elementary/test_add_layer.cpp"/>
-    <File Name="elementary/test_bias_layer.cpp"/>
     <File Name="elementary/test_weight_layer.cpp"/>
     <File Name="elementary/test_softmax_layer.cpp"/>
     <File Name="elementary/test_interpolate_layer.cpp"/>

@@ -184,16 +184,15 @@
     <VirtualDirectory Name="elementary">
       <File Name="layers/elementary/abs_layer.h"/>
       <File Name="layers/elementary/add_layer.h"/>
-      <File Name="layers/elementary/bias_layer.h"/>
       <File Name="layers/elementary/interpolate_layer.h"/>
       <File Name="layers/elementary/sigmoid_layer.h"/>
       <File Name="layers/elementary/softmax_layer.h"/>
       <File Name="layers/elementary/tanh_layer.h"/>
       <File Name="layers/elementary/weight_layer.h"/>
-      <File Name="layers/elementary/elementary.h"/>
       <File Name="layers/elementary/relu_layer.h"/>
       <File Name="layers/elementary/multiply_layer.h"/>
       <File Name="layers/elementary/transpose_layer.h"/>
+      <File Name="layers/elementary/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
       <File Name="layers/facilities/common_io.h"/>

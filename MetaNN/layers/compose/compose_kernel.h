@@ -664,6 +664,7 @@ struct ComposeTopology
     
     using SublayerNameSet = NSComposeKernel::ClauseRefine::SublayerNameSet<Sublayers>;
     using InternalFMap = NSComposeKernel::ClauseRefine::InternalFMap<InterConnects>;
+    using InternalBMap = NSComposeKernel::ClauseRefine::InternalBMap<InterConnects>;
     
 /// ========== Asserts =================================================
     static_assert((ArraySize<Sublayers> != 0), "Sublayer is empty.");
@@ -1020,14 +1021,14 @@ namespace NSComposeKernel
         }
         else
         {
-            using TCur = ContMetaFun::Sequential::At<TLayerInfo, N - 1>;
-            auto source = std::move(p_input).template Get<typename TCur::LayerName>();
+            using TCurLayerName = ContMetaFun::Sequential::At<TLayerInfo, N - 1>;
+            auto source = std::move(p_input).template Get<TCurLayerName>();
             auto backwardRes = std::get<N - 1>(sublayers)->FeedBackward(std::move(source));
             
-            using ItemsFromMap = ContMetaFun::MultiMap::Find<TBMap, typename TCur::LayerName>;
+            using ItemsFromMap = ContMetaFun::MultiMap::Find<TBMap, TCurLayerName>;
             
             auto newInput = BackwardFillInternal<0, ItemsFromMap>(backwardRes, std::move(p_input));
-            auto newOutput = std::move(m_output).template Set<typename TCur::LayerName>(backwardRes);
+            auto newOutput = std::move(m_output).template Set<TCurLayerName>(backwardRes);
             
             return FeedBackward<N-1, TLayerInfo, TBMap>(sublayers, std::move(newInput), std::move(newOutput));
         }
@@ -1063,7 +1064,7 @@ namespace NSComposeKernel
     }
 };
 
-template <typename TInputs, typename TPolicyCont, typename TKernelTopo>
+template <typename TInputPortSet, typename TOutputPortSet, typename TInputs, typename TPolicyCont, typename TKernelTopo>
 class ComposeKernel
 {
     static_assert(IsPolicyContainer<TPolicyCont>, "Parameter is not a policy container.");
@@ -1079,6 +1080,8 @@ public:
     static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, PlainPolicies>::IsFeedbackOutput;
     static constexpr bool IsUpdate = NSComposeKernel::IsComposeLayerUpdate_<TSublayerInstCont>::value;
     
+    using InputPortSet = TInputPortSet;
+    using OutputPortSet = TOutputPortSet;
     using InputMap = TInputs;
 
 public:
@@ -1139,8 +1142,7 @@ public:
 
             auto inputGrads = NSComposeKernel::FillInputGrad<0, typename TKernelTopo::OutputConnects>(p_grad, std::move(outInternal));
         
-            auto outputs = NSComposeKernel::FeedBackward<ArraySize<SublayerArray>, TOrderedSublayerSeq,
-                                                         typename TKernelTopo::InternalBMap>(sublayers, std::move(inputGrads), std::move(inInternal));
+            auto outputs = NSComposeKernel::FeedBackward<ArraySize<SublayerArray>, TOrderedSublayerSeq, typename TKernelTopo::InternalBMap>(sublayers, std::move(inputGrads), std::move(inInternal));
                                                      
             return NSComposeKernel::FillOutputGrad<0, typename TKernelTopo::InputConnects>(outputs, LayerInputCont<ComposeKernel>());
         }

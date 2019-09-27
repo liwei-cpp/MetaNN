@@ -2,7 +2,6 @@ namespace Test::Layer::Elementary
 {
     void test_abs_layer();
     void test_add_layer();
-    void test_bias_layer();
     void test_multiply_layer();
     void test_interpolate_layer();
     void test_relu_layer();
@@ -16,7 +15,6 @@ namespace Test::Layer::Elementary
     {
         test_abs_layer();
         test_add_layer();
-        test_bias_layer();
         test_multiply_layer();
         test_interpolate_layer();
         test_relu_layer();

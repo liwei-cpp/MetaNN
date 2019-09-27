@@ -6,9 +6,6 @@
 
 namespace MetaNN
 {
-/*    struct LayerInput;
-    struct LayerOutput;
-    
     struct ParameterSublayer;
     struct AddSublayer;
     
@@ -20,14 +17,14 @@ namespace MetaNN
                                          InternalConnect<ParameterSublayer, LayerOutput, AddSublayer, RightOperand>,
                                          OutConnect<AddSublayer, LayerOutput, LayerOutput>>;
 
-        template <typename TInputs, typename TGrads, typename TPolicies>
-        using Base = ComposeKernel<TInputs, TGrads, TPolicies, Topology>;
+        template <typename TInSet, typename TOutSet, typename TInputs, typename TPolicies>
+        using Base = ComposeKernel<TInSet, TOutSet, TInputs, TPolicies, Topology>;
     }
     
-    template <typename TInputs, typename TGrads, typename TPolicies>
-    class BiasLayer : public NSBiasLayer::Base<TInputs, TGrads, TPolicies>
+    template <typename TInputs, typename TPolicies>
+    class BiasLayer : public NSBiasLayer::Base<LayerInputPortSet<BiasLayer>, LayerOutputPortSet<BiasLayer>, TInputs, TPolicies>
     {
-        using TBase = NSBiasLayer::Base<TInputs, TGrads, TPolicies>;
+        using TBase = NSBiasLayer::Base<LayerInputPortSet<BiasLayer>, LayerOutputPortSet<BiasLayer>, TInputs, TPolicies>;
 
     public:
         template <typename... TShapeParams>
@@ -36,5 +33,5 @@ namespace MetaNN
                         .template Set<ParameterSublayer>(p_name + "-param", std::forward<TShapeParams>(shapeParams)...)
                         .template Set<AddSublayer>(p_name + "-add"))
         { }
-    };*/
+    };
 }
