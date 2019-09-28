@@ -147,8 +147,12 @@ class Shape<CategoryTags::Batch<TSubCate>> : public Shape<TSubCate>
     static_assert(NSShape::IsCardinalTag<TSubCate>);
     
 public:
+    explicit Shape()
+        : Shape(0)
+    {}
+    
     template <typename...TParams>
-    explicit Shape(size_t p_batchNum = 0, TParams&&... params)
+    explicit Shape(size_t p_batchNum, TParams&&... params)
         : Shape<TSubCate>(std::forward<TParams>(params)...)
         , m_batchNum(p_batchNum)
     {}
