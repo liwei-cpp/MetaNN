@@ -8,6 +8,89 @@
 
 namespace MetaNN
 {
+    namespace NSDotLayer
+    {
+        template <typename TDataCategory>
+        constexpr unsigned CategoryWeight = 0;
+
+        template <>
+        constexpr unsigned CategoryWeight<CategoryTags::Matrix> = 1;
+
+        template <>
+        constexpr unsigned CategoryWeight<CategoryTags::BatchMatrix> = 2;
+
+        template <>
+        constexpr unsigned CategoryWeight<CategoryTags::MatrixSequence> = 2;
+
+        template <>
+        constexpr unsigned CategoryWeight<CategoryTags::BatchMatrixSequence> = 3;
+
+        template <bool Swap = false, typename TFirstOper, typename TSecondOper>
+        auto ShapePrompt(TFirstOper&& first, TSecondOper&& second)
+        {
+            static_assert(CategoryWeight<DataCategory<TFirstOper>>, "First operand is illegal.");
+            static_assert(CategoryWeight<DataCategory<TSecondOper>>, "Second operand is illegal.");
+
+            if constexpr (CategoryWeight<DataCategory<TFirstOper>> == CategoryWeight<DataCategory<TSecondOper>>)
+            {
+                static_assert(std::is_same_v<DataCategory<TFirstOper>, DataCategory<TSecondOper>>,
+                              "Cannot know how to prompt the shape.");
+                static_assert(!Swap);
+                return std::pair{std::forward<TFirstOper>(first), std::forward<TSecondOper>(second)};
+            }
+            else if constexpr (CategoryWeight<DataCategory<TFirstOper>> < CategoryWeight<DataCategory<TSecondOper>>)
+            {
+                return ShapePrompt<true>(std::forward<TFirstOper>(first), std::forward<TSecondOper>(second));
+            }
+            else if constexpr (std::is_same_v<DataCategory<TFirstOper>, CategoryTags::BatchMatrix> &&
+                               std::is_same_v<DataCategory<TSecondOper>, CategoryTags::Matrix>)
+            {
+                Shape<CategoryTags::BatchMatrix> promptShape{first.Shape().BatchNum(), second.Shape()};
+                auto promoted = Duplicate(std::forward<TSecondOper>(second), promptShape);
+                if constexpr (Swap)
+                {
+                    return std::pair{std::move(promoted), std::forward<TFirstOper>(first)};
+                }
+                else
+                {
+                    return std::pair{std::forward<TFirstOper>(first), std::move(promoted)};
+                }
+            }
+            else if constexpr (std::is_same_v<DataCategory<TFirstOper>, CategoryTags::MatrixSequence> &&
+                               std::is_same_v<DataCategory<TSecondOper>, CategoryTags::Matrix>)
+            {
+                Shape<CategoryTags::MatrixSequence> promptShape{first.Shape().Length(), second.Shape()};
+                auto promoted = Duplicate(std::forward<TSecondOper>(second), promptShape);
+                if constexpr (Swap)
+                {
+                    return std::pair{std::move(promoted), std::forward<TFirstOper>(first)};
+                }
+                else
+                {
+                    return std::pair{std::forward<TFirstOper>(first), std::move(promoted)};
+                }
+            }
+            else if constexpr (std::is_same_v<DataCategory<TFirstOper>, CategoryTags::BatchMatrixSequence> &&
+                               std::is_same_v<DataCategory<TSecondOper>, CategoryTags::Matrix>)
+            {
+                Shape<CategoryTags::MatrixSequence> promptShape{first.Shape().SeqLenContainer(), second.Shape()};
+                auto promoted = Duplicate(std::forward<TSecondOper>(second), promptShape);
+                if constexpr (Swap)
+                {
+                    return std::pair{std::move(promoted), std::forward<TFirstOper>(first)};
+                }
+                else
+                {
+                    return std::pair{std::forward<TFirstOper>(first), std::move(promoted)};
+                }
+            }
+            else
+            {
+                static_assert(DependencyFalse<TFirstOper, TSecondOper>, "Illegal operand combination.");
+            }
+        }
+    }
+
     template <typename TInputs, typename TPolicies>
     class DotLayer;
     
@@ -45,8 +128,8 @@ namespace MetaNN
         {
             const auto& input1 = LayerTraits::PickItemFromCont<InputMap, LeftOperand>(std::forward<TIn>(p_in));
             const auto& input2 = LayerTraits::PickItemFromCont<InputMap, RightOperand>(std::forward<TIn>(p_in));
-            auto proShape = LayerTraits::ShapePromote(input1, input2);
-            auto res = Dot(DuplicateOrKeep(input1, proShape), DuplicateOrKeep(input2, proShape));
+            auto [proInput1, proInput2] = NSDotLayer::ShapePrompt(input1, input2);
+            auto res = Dot(proInput1, proInput2);
             
             if constexpr (IsFeedbackOutput)
             {
