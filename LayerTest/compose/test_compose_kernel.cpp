@@ -245,7 +245,7 @@ namespace
         using namespace MetaNN::ContMetaFun::Helper;
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
-        using Input2Type = TrivalMatrix<CheckElement, CheckDevice, Scalar<CheckElement, CheckDevice>>;
+        using Input2Type = TrivalMatrix<Scalar<CheckElement, CheckDevice>>;
         using CheckInputs = LayerIOMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
@@ -383,7 +383,7 @@ namespace
                                    OutConnect<Sublayer5, LayerOutput, Output1>>;
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
-        using Input2Type = TrivalMatrix<CheckElement, CheckDevice, Scalar<CheckElement, CheckDevice>>;
+        using Input2Type = TrivalMatrix<Scalar<CheckElement, CheckDevice>>;
         using CheckInputs = LayerIOMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
@@ -431,7 +431,7 @@ namespace
                                    OutConnect<Sublayer5, LayerOutput, Output1>>;
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
-        using Input2Type = TrivalMatrix<CheckElement, CheckDevice, Scalar<CheckElement, CheckDevice>>;
+        using Input2Type = TrivalMatrix<Scalar<CheckElement, CheckDevice>>;
         using CheckInputs = LayerIOMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
