@@ -1,6 +1,6 @@
 #include <MetaNN/meta_nn2.h>
-#include <data_gen.h>
 #include <calculate_tags.h>
+#include <data_gen.h>
 #include <cassert>
 #include <iostream>
 using namespace MetaNN;
@@ -8,15 +8,14 @@ using namespace std;
 
 namespace
 {
-/*    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
-    using CommonGradMap = LayerIOMap<LayerKV<LayerOutput, Matrix<CheckElement, CheckDevice>>>;
+    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_weight_layer1()
     {
         cout << "Test weight layer case 1 ...\t";
-        using RootLayer = MakeLayer<WeightLayer, CommonInputMap>;
-        static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
-        static_assert(!RootLayer::IsUpdate, "Test Error");
+        using RootLayer = MakeInferLayer<WeightLayer>;
+        static_assert(!RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
 
         RootLayer layer("root", 1, 2);
     
@@ -42,7 +41,7 @@ namespace
 
         auto out_grad = layer.FeedBackward(NullParameter{});
         auto fbOut = out_grad.Get<LayerInput>();
-        static_assert(is_same<decltype(fbOut), NullParameter>::value, "Test error");
+        static_assert(is_same<decltype(fbOut), NullParameter>::value);
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
@@ -51,13 +50,13 @@ namespace
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
     }
-
+    
     void test_weight_layer2()
     {
         cout << "Test weight layer case 2 ...\t";
-        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonGradMap, PUpdate>;
-        static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
-        static_assert(RootLayer::IsUpdate, "Test Error");
+        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate>;
+        static_assert(!RootLayer::IsFeedbackOutput);
+        static_assert(RootLayer::IsUpdate);
 
         RootLayer layer("root", 1, 2);
     
@@ -86,7 +85,7 @@ namespace
         g.SetValue(0, 1, -0.0997f);
         auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(g));
         auto fbOut = out_grad.Get<LayerInput>();
-        static_assert(is_same<decltype(fbOut), NullParameter>::value, "Test error");
+        static_assert(is_same_v<decltype(fbOut), NullParameter>);
 
         GradCollector<CheckElement, CheckDevice> grad_collector;
         layer.GradCollect(grad_collector);
@@ -113,13 +112,13 @@ namespace
 
         cout << "done" << endl;
     }
-
+    
     void test_weight_layer3()
     {
         cout << "Test weight layer case 3 ...\t";
-        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
-        static_assert(RootLayer::IsFeedbackOutput, "Test Error");
-        static_assert(RootLayer::IsUpdate, "Test Error");
+        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput);
+        static_assert(RootLayer::IsUpdate);
 
         RootLayer layer("root", 2, 2);
 
@@ -180,13 +179,13 @@ namespace
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
     }
-
+    
     void test_weight_layer4()
     {
         cout << "Test weight layer case 4 ...\t";
-        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
-        static_assert(RootLayer::IsFeedbackOutput, "Test Error");
-        static_assert(RootLayer::IsUpdate, "Test Error");
+        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput);
+        static_assert(RootLayer::IsUpdate);
 
         RootLayer layer("root", 8, 4);
 
@@ -275,15 +274,15 @@ namespace
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
     }
-
+    
+    struct RootFiller;
     void test_weight_layer5()
     {
         cout << "Test weight layer case 5 ...\t";
-        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>>;
         RootLayer layer("root", 800, 400);
-    
-        auto initializer = MakeInitializer<CheckElement, PInitializerIs<struct UniformTag>>()
-                            .SetFiller<UniformTag>(UniformFiller{-1, 1});
+
+        auto initializer = MakeInitializer<CheckElement>(InitializerKV<RootFiller>(UniformFiller{-1, 1}));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         LayerInit(layer, initializer, loadBuffer);
         assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
@@ -314,15 +313,14 @@ namespace
         cout << "mean-delta = " << fabs(mean) << " Variance-delta = " << fabs(var-0.333) << ' ';
         cout << "done" << endl;
     }
-
+    
     void test_weight_layer6()
     {
         cout << "Test weight layer case 6 ...\t";
-        using RootLayer = MakeBPLayer<WeightLayer, CommonInputMap, CommonGradMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>>;
         RootLayer layer("root", 400, 200);
-    
-        auto initializer = MakeInitializer<CheckElement, PWeightInitializerIs<struct UniformTag>>()
-                            .SetFiller<UniformTag>(UniformFiller{-1.5, 1.5});
+
+        auto initializer = MakeInitializer<CheckElement>(InitializerKV<RootFiller>(UniformFiller{-1.5, 1.5}));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         LayerInit(layer, initializer, loadBuffer);
         assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
@@ -352,18 +350,18 @@ namespace
         cout << "mean-delta = " << fabs(mean) << " Variance-delta = " << fabs(var-0.75) << ' ';
 
         cout << "done" << endl;
-    }*/
+    }
 }
 
-namespace Test::Layer::Elementary
+namespace Test::Layer::Compose
 {
     void test_weight_layer()
     {
-/*        test_weight_layer1();
+        test_weight_layer1();
         test_weight_layer2();
         test_weight_layer3();
         test_weight_layer4();
         test_weight_layer5();
-        test_weight_layer6();*/
+        test_weight_layer6();
     }
 }

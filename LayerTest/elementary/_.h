@@ -10,7 +10,6 @@ namespace Test::Layer::Elementary
     void test_softmax_layer();
     void test_tanh_layer();
     void test_transpose_layer();
-    void test_weight_layer();
     
     void Test()
     {
@@ -24,6 +23,5 @@ namespace Test::Layer::Elementary
         test_softmax_layer();
         test_tanh_layer();
         test_transpose_layer();
-        test_weight_layer();
     }
 }

@@ -1143,8 +1143,14 @@ public:
             auto inputGrads = NSComposeKernel::FillInputGrad<0, typename TKernelTopo::OutputConnects>(p_grad, std::move(outInternal));
         
             auto outputs = NSComposeKernel::FeedBackward<ArraySize<SublayerArray>, TOrderedSublayerSeq, typename TKernelTopo::InternalBMap>(sublayers, std::move(inputGrads), std::move(inInternal));
-                                                     
-            return NSComposeKernel::FillOutputGrad<0, typename TKernelTopo::InputConnects>(outputs, LayerInputCont<ComposeKernel>());
+            if constexpr (IsFeedbackOutput)
+            {
+                return NSComposeKernel::FillOutputGrad<0, typename TKernelTopo::InputConnects>(outputs, LayerInputCont<ComposeKernel>());
+            }
+            else
+            {
+                return LayerInputCont<ComposeKernel>();
+            }
         }
     }
 private:

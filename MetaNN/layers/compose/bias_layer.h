@@ -6,15 +6,15 @@
 
 namespace MetaNN
 {
-    struct ParameterSublayer;
+    struct ParamSublayer;
     struct AddSublayer;
     
     namespace NSBiasLayer
     {
-        using Topology = ComposeTopology<Sublayer<ParameterSublayer, ParamSourceLayer>,
+        using Topology = ComposeTopology<Sublayer<ParamSublayer, ParamSourceLayer>,
                                          Sublayer<AddSublayer, AddLayer>,
                                          InConnect<LayerInput, AddSublayer, LeftOperand>,
-                                         InternalConnect<ParameterSublayer, LayerOutput, AddSublayer, RightOperand>,
+                                         InternalConnect<ParamSublayer, LayerOutput, AddSublayer, RightOperand>,
                                          OutConnect<AddSublayer, LayerOutput, LayerOutput>>;
 
         template <typename TInSet, typename TOutSet, typename TInputs, typename TPolicies>
@@ -30,7 +30,7 @@ namespace MetaNN
         template <typename... TShapeParams>
         BiasLayer(const std::string& p_name, TShapeParams&&... shapeParams)
             : TBase(TBase::CreateSublayers()
-                        .template Set<ParameterSublayer>(p_name + "-param", p_name, std::forward<TShapeParams>(shapeParams)...)
+                        .template Set<ParamSublayer>(p_name + "-param", p_name, std::forward<TShapeParams>(shapeParams)...)
                         .template Set<AddSublayer>(p_name + "-add"))
         { }
     };

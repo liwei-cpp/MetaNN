@@ -4,3 +4,4 @@
 
 // demos
 #include <MetaNN/layers/compose/bias_layer.h>
+#include <MetaNN/layers/compose/weight_layer.h>

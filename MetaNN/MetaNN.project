@@ -180,6 +180,7 @@
       <File Name="layers/compose/single_layer.h"/>
       <File Name="layers/compose/_.h"/>
       <File Name="layers/compose/bias_layer.h"/>
+      <File Name="layers/compose/weight_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="elementary">
       <File Name="layers/elementary/abs_layer.h"/>
@@ -290,12 +291,12 @@
         <File Name="model/param_initializer/facilities/fill_with_spec_dist.h"/>
         <File Name="model/param_initializer/facilities/policies.h"/>
       </VirtualDirectory>
-      <File Name="model/param_initializer/param_initializer_pack.h"/>
+      <File Name="model/param_initializer/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="weight_cont">
       <File Name="model/weight_cont/load_buffer.h"/>
       <File Name="model/weight_cont/grad_collector.h"/>
-      <File Name="model/weight_cont/weight_cont_pack.h"/>
+      <File Name="model/weight_cont/_.h"/>
     </VirtualDirectory>
     <File Name="model/model.h"/>
   </VirtualDirectory>
