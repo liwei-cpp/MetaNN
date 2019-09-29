@@ -50,26 +50,18 @@ private:
 };
 }
 
-template<typename TElem, typename TDevice, typename TScalar>
+template<typename TScalar>
 class TrivalMatrix
 {
-    static_assert(std::is_same<RemConstRef<TElem>, TElem>::value,
-                  "TElem is not a valid type");
-    static_assert(std::is_same<RemConstRef<TScalar>, TScalar>::value,
-                  "TScalar is not a valid type");
 public:
     using CategoryTag = CategoryTags::Matrix;
-    using ElementType = TElem;
-    using DeviceType = TDevice;
+    using ElementType = typename TScalar::ElementType;
+    using DeviceType = typename TScalar::DeviceType;
 
 public:
-    explicit TrivalMatrix(TScalar p_scalar, size_t rowNum, size_t colNum)
-        : m_shape(rowNum, colNum)
-        , m_scalar(std::move(p_scalar))
-    {}
-    
-    explicit TrivalMatrix(TScalar p_scalar, MetaNN::Shape<CategoryTag> p_shape)
-        : m_shape(std::move(p_shape))
+    template <typename...TParams>
+    explicit TrivalMatrix(TScalar p_scalar, TParams&&... params)
+        : m_shape(std::forward<TParams>(params)...)
         , m_scalar(std::move(p_scalar))
     {}
     
@@ -108,24 +100,4 @@ private:
     TScalar  m_scalar;
     EvalBuffer<Matrix<ElementType, DeviceType>> m_evalBuf;
 };
-
-template<typename TElem, typename TDevice, typename TVal, typename... TShapeParams>
-auto MakeTrivalMatrix(TVal&& m_val, TShapeParams&&... shapeParams)
-{
-    using RawVal = RemConstRef<TVal>;
-        
-    MetaNN::Shape<CategoryTags::Matrix> shape(std::forward<TShapeParams>(shapeParams)...);
-    if constexpr (IsScalar<RawVal>)
-    {
-        static_assert(std::is_same<typename RawVal::DeviceType, TDevice>::value ||
-                      std::is_same<typename RawVal::DeviceType, DeviceTags::CPU>::value);
-        return TrivalMatrix<TElem, TDevice, RawVal>(std::forward<TVal>(m_val), std::move(shape));
-    }
-    else
-    {
-        TElem tmpElem = static_cast<TElem>(m_val);
-        Scalar<TElem, DeviceTags::CPU> scalar(std::move(tmpElem));
-        return TrivalMatrix<TElem, TDevice, Scalar<TElem, DeviceTags::CPU>>(std::move(scalar), std::move(shape));
-    }
-}
 }

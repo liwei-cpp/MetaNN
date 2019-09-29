@@ -10,13 +10,13 @@ namespace
     void test_trival_matrix_case1()
     {
         cout << "Test trival matrix case 1...\t";
-        static_assert(IsMatrix<TrivalMatrix<CheckElement, CheckDevice, Scalar<int, DeviceTags::CPU>>>, "Test Error");
-        static_assert(IsMatrix<TrivalMatrix<CheckElement, CheckDevice, Scalar<int, DeviceTags::CPU>> &>, "Test Error");
-        static_assert(IsMatrix<TrivalMatrix<CheckElement, CheckDevice, Scalar<int, DeviceTags::CPU>> &&>, "Test Error");
-        static_assert(IsMatrix<const TrivalMatrix<CheckElement, CheckDevice, Scalar<int, DeviceTags::CPU>> &>, "Test Error");
-        static_assert(IsMatrix<const TrivalMatrix<CheckElement, CheckDevice, Scalar<int, DeviceTags::CPU>> &&>, "Test Error");
+        static_assert(IsMatrix<TrivalMatrix<Scalar<CheckElement, CheckDevice>>>, "Test Error");
+        static_assert(IsMatrix<TrivalMatrix<Scalar<CheckElement, CheckDevice>> &>, "Test Error");
+        static_assert(IsMatrix<TrivalMatrix<Scalar<CheckElement, CheckDevice>> &&>, "Test Error");
+        static_assert(IsMatrix<const TrivalMatrix<Scalar<CheckElement, CheckDevice>> &>, "Test Error");
+        static_assert(IsMatrix<const TrivalMatrix<Scalar<CheckElement, CheckDevice>> &&>, "Test Error");
 
-        auto rm = MakeTrivalMatrix<CheckElement, CheckDevice>(100, 10, 20);
+        auto rm = TrivalMatrix(Scalar<CheckElement, CheckDevice>{100}, 10, 20);
         assert(rm.Shape().RowNum() == 10);
         assert(rm.Shape().ColNum() == 20);
 
@@ -37,8 +37,11 @@ namespace
     void test_trival_matrix_case2()
     {
         cout << "Test trival matrix case 2...\t";
-        auto rm1 = MakeTrivalMatrix<int, CheckDevice>(14, 100, 10);
-        auto rm2 = MakeTrivalMatrix<int, CheckDevice>(35, 10, 20);
+        const Scalar<CheckElement, CheckDevice> sca1(14);
+        const Scalar<CheckElement, CheckDevice> sca2(35);
+        const Scalar<CheckElement, CheckDevice>& sca3(sca2);
+        auto rm1 = TrivalMatrix(sca1, 100, 10);
+        auto rm2 = TrivalMatrix(sca3, 10, 20);
 
         const auto& evalRes1 = rm1.EvalRegister();
         const auto& evalRes2 = rm2.EvalRegister();
