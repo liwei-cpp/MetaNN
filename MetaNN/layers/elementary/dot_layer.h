@@ -159,8 +159,9 @@ namespace MetaNN
 
                 auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
 
-                auto grad1 = Dot(grad, Transpose(DuplicateOrKeep(input2, grad.Shape())));
-                auto grad2 = Dot(Transpose(DuplicateOrKeep(input1, grad.Shape())), grad);
+                auto [proInput1, proInput2] = NSDotLayer::ShapePrompt(input1, input2);
+                auto grad1 = Dot(grad, Transpose(proInput2));
+                auto grad2 = Dot(Transpose(proInput1), grad);
                 
                 auto res1 = CollapseOrOmit(std::move(grad1), input1);
                 auto res2 = CollapseOrOmit(std::move(grad2), input2);
