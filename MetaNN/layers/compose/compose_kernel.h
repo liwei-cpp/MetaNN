@@ -1083,6 +1083,10 @@ public:
     using InputPortSet = TInputPortSet;
     using OutputPortSet = TOutputPortSet;
     using InputMap = TInputs;
+    
+    template <typename TSublayerName>
+    using SublayerType = typename ContMetaFun::Sequential::At<TSublayerInstCont,
+                                                              ContMetaFun::Sequential::Order<TOrderedSublayerSeq, TSublayerName>>;
 
 public:
     static auto CreateSublayers()

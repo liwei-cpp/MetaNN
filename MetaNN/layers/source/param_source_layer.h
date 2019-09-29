@@ -26,7 +26,6 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = false;
         static constexpr bool IsUpdate = PolicySelect<GradPolicy, CurLayerPolicy>::IsUpdate;
 
-    private:
         using ParamCategory = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamCategory;
         using ElementType = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamType;
         using DeviceType  = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamDevice;
