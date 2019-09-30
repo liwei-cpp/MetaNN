@@ -89,15 +89,20 @@ struct CreateVarTypeDict_<TVarTypeDictOutter, TVarTypeDictInner, TCur, TKVs...>
     using type = typename CreateVarTypeDict_<NewOutter, NewInner, TKVs...>::type;
 };
 
+template <typename TVarTypeDict, int ID>
+struct VarTypeDict2IOMapHelper_
+{
+    using KeyType = typename TVarTypeDict::template KeyType<ID>;
+    using type = LayerKV<KeyType, typename TVarTypeDict::template ValueType<KeyType>>;
+};
+
 template <typename TVarTypeDict, typename SeqCont>
 struct VarTypeDict2IOMap_;
 
 template <typename TVarTypeDict, int... IDs>
 struct VarTypeDict2IOMap_<TVarTypeDict, ContMetaFun::Helper::IndexSequence<IDs...>>
 {
-    using type = LayerIOMap<LayerKV<typename TVarTypeDict::template KeyType<IDs>,
-                                    typename TVarTypeDict::template ValueType<IDs>
-                                   >...>;
+    using type = LayerIOMap<typename VarTypeDict2IOMapHelper_<TVarTypeDict, IDs>::type ...>;
 };
 
 template <typename TLayer, typename TLayerIOMap>
@@ -120,9 +125,7 @@ struct LayerIOMapBackwardTrasfer_<TLayer, LayerIOMap<TKVs...>>
 {
     using TVarTypeDictFill = typename CreateVarTypeDict_<std::tuple<>, std::tuple<>, TKVs...>::type;    
     using TForwardRes = decltype(std::declval<TLayer>().FeedBackward(std::declval<TVarTypeDictFill>()));
-    
     using IndexSeq = ContMetaFun::Helper::MakeIndexSequence<TForwardRes::Length>;
-    
     using type = typename VarTypeDict2IOMap_<TForwardRes, IndexSeq>::type;
 };
 }

@@ -189,7 +189,6 @@
       <File Name="layers/elementary/sigmoid_layer.h"/>
       <File Name="layers/elementary/softmax_layer.h"/>
       <File Name="layers/elementary/tanh_layer.h"/>
-      <File Name="layers/elementary/weight_layer.h"/>
       <File Name="layers/elementary/relu_layer.h"/>
       <File Name="layers/elementary/multiply_layer.h"/>
       <File Name="layers/elementary/transpose_layer.h"/>
