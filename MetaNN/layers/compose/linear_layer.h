@@ -24,14 +24,14 @@ namespace MetaNN
                                          InternalConnect<BiasParamSublayer, LayerOutput, AddSublayer, RightOperand>,
                                          OutConnect<AddSublayer, LayerOutput, LayerOutput>>;
 
-        template <typename TInSet, typename TOutSet, typename TInputs, typename TPolicies>
-        using Base = ComposeKernel<TInSet, TOutSet, TInputs, TPolicies, Topology>;
+        template <template<typename, typename> class TLayerName, typename TInputs, typename TPolicies>
+        using Base = ComposeKernel<TLayerName, TInputs, TPolicies, Topology>;
     }
     
     template <typename TInputs, typename TPolicies>
-    class LinearLayer : public NSLinearLayer::Base<LayerInputPortSet<LinearLayer>, LayerOutputPortSet<LinearLayer>, TInputs, TPolicies>
+    class LinearLayer : public NSLinearLayer::Base<LinearLayer, TInputs, TPolicies>
     {
-        using TBase = NSLinearLayer::Base<LayerInputPortSet<LinearLayer>, LayerOutputPortSet<LinearLayer>, TInputs, TPolicies>;
+        using TBase = NSLinearLayer::Base<LinearLayer, TInputs, TPolicies>;
         using WeightParamType = typename TBase::template SublayerType<WeightParamSublayer>::ParamType;
         using BiasParamType = typename TBase::template SublayerType<BiasParamSublayer>::ParamType;
         using WeightParamShapeType = RemConstRef<decltype(std::declval<WeightParamType>().Shape())>;

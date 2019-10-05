@@ -1064,7 +1064,7 @@ namespace NSComposeKernel
     }
 };
 
-template <typename TInputPortSet, typename TOutputPortSet, typename TInputs, typename TPolicyCont, typename TKernelTopo>
+template <template<typename, typename> class TLayerName, typename TInputs, typename TPolicyCont, typename TKernelTopo>
 class ComposeKernel
 {
     static_assert(IsPolicyContainer<TPolicyCont>, "Parameter is not a policy container.");
@@ -1080,8 +1080,8 @@ public:
     static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, PlainPolicies>::IsFeedbackOutput;
     static constexpr bool IsUpdate = NSComposeKernel::IsComposeLayerUpdate_<TSublayerInstCont>::value;
     
-    using InputPortSet = TInputPortSet;
-    using OutputPortSet = TOutputPortSet;
+    using InputPortSet = LayerInputPortSet<TLayerName>;
+    using OutputPortSet = LayerOutputPortSet<TLayerName>;
     using InputMap = TInputs;
     
     template <typename TSublayerName>

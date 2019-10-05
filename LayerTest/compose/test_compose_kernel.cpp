@@ -412,6 +412,7 @@ namespace
         cout << "done" << endl;
     }
     
+    template<typename, typename> class DummyComposeLayer;
     void test_compose_kernel10()
     {
         cout << "Test compose kernel case 10...\t";
@@ -438,7 +439,7 @@ namespace
                                                      SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer2, PUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer5, PFeedbackNoOutput>>;
-        using Check = ComposeKernel<LayerPortSet<LayerInput>, LayerPortSet<LayerOutput>, CheckInputs, CheckPolicyContainer, CT>;
+        using Check = ComposeKernel<DummyComposeLayer, CheckInputs, CheckPolicyContainer, CT>;
         
         auto sublayerArray = Check::CreateSublayers();
         using ArrayType = decltype(sublayerArray);

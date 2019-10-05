@@ -17,14 +17,14 @@ namespace MetaNN
                                          InternalConnect<ParamSublayer, LayerOutput, AddSublayer, RightOperand>,
                                          OutConnect<AddSublayer, LayerOutput, LayerOutput>>;
 
-        template <typename TInSet, typename TOutSet, typename TInputs, typename TPolicies>
-        using Base = ComposeKernel<TInSet, TOutSet, TInputs, TPolicies, Topology>;
+        template <template<typename, typename> class TLayerName, typename TInputs, typename TPolicies>
+        using Base = ComposeKernel<TLayerName, TInputs, TPolicies, Topology>;
     }
     
     template <typename TInputs, typename TPolicies>
-    class BiasLayer : public NSBiasLayer::Base<LayerInputPortSet<BiasLayer>, LayerOutputPortSet<BiasLayer>, TInputs, TPolicies>
+    class BiasLayer : public NSBiasLayer::Base<BiasLayer, TInputs, TPolicies>
     {
-        using TBase = NSBiasLayer::Base<LayerInputPortSet<BiasLayer>, LayerOutputPortSet<BiasLayer>, TInputs, TPolicies>;
+        using TBase = NSBiasLayer::Base<BiasLayer, TInputs, TPolicies>;
 
     public:
         template <typename... TShapeParams>

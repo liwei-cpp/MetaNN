@@ -17,14 +17,14 @@ namespace MetaNN
                                          InternalConnect<ParamSublayer, LayerOutput, DotSublayer, RightOperand>,
                                          OutConnect<DotSublayer, LayerOutput, LayerOutput>>;
 
-        template <typename TInSet, typename TOutSet, typename TInputs, typename TPolicies>
-        using Base = ComposeKernel<TInSet, TOutSet, TInputs, TPolicies, Topology>;
+        template <template<typename, typename> class TLayerName, typename TInputs, typename TPolicies>
+        using Base = ComposeKernel<TLayerName, TInputs, TPolicies, Topology>;
     }
     
     template <typename TInputs, typename TPolicies>
-    class WeightLayer : public NSWeightLayer::Base<LayerInputPortSet<WeightLayer>, LayerOutputPortSet<WeightLayer>, TInputs, TPolicies>
+    class WeightLayer : public NSWeightLayer::Base<WeightLayer, TInputs, TPolicies>
     {
-        using TBase = NSWeightLayer::Base<LayerInputPortSet<WeightLayer>, LayerOutputPortSet<WeightLayer>, TInputs, TPolicies>;
+        using TBase = NSWeightLayer::Base<WeightLayer, TInputs, TPolicies>;
 
     public:
         template <typename... TShapeParams>
