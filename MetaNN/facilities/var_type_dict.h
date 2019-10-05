@@ -78,10 +78,7 @@ struct VarTypeDict
             return std::move(*res);
         }
         
-        constexpr static size_t Length = sizeof...(TTypes);
-        
-        template <size_t ID>
-        using KeyType = ContMetaFun::Sequential::At<VarTypeDict, ID>;
+        using Keys = VarTypeDict;
         
         template <typename TKey>
         using ValueType = ContMetaFun::Sequential::At<Values, ContMetaFun::Sequential::Order<VarTypeDict, TKey>>;

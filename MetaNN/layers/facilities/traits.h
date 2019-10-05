@@ -89,20 +89,14 @@ struct CreateVarTypeDict_<TVarTypeDictOutter, TVarTypeDictInner, TCur, TKVs...>
     using type = typename CreateVarTypeDict_<NewOutter, NewInner, TKVs...>::type;
 };
 
-template <typename TVarTypeDict, int ID>
-struct VarTypeDict2IOMapHelper_
-{
-    using KeyType = typename TVarTypeDict::template KeyType<ID>;
-    using type = LayerKV<KeyType, typename TVarTypeDict::template ValueType<KeyType>>;
-};
-
-template <typename TVarTypeDict, typename SeqCont>
+template <typename TVarTypeDict, typename TKeySet>
 struct VarTypeDict2IOMap_;
 
-template <typename TVarTypeDict, int... IDs>
-struct VarTypeDict2IOMap_<TVarTypeDict, ContMetaFun::Helper::IndexSequence<IDs...>>
+template <typename TVarTypeDict, typename... TKeys>
+struct VarTypeDict2IOMap_<TVarTypeDict, VarTypeDict<TKeys...>>
 {
-    using type = LayerIOMap<typename VarTypeDict2IOMapHelper_<TVarTypeDict, IDs>::type ...>;
+    using type = LayerIOMap<LayerKV<TKeys, typename TVarTypeDict::template ValueType<TKeys>>
+                            ...>;
 };
 
 template <typename TLayer, typename TLayerIOMap>
@@ -113,34 +107,13 @@ struct LayerIOMapForwardTrasfer_<TLayer, LayerIOMap<TKVs...>>
 {
     using TVarTypeDictFill = typename CreateVarTypeDict_<std::tuple<>, std::tuple<>, TKVs...>::type;    
     using TForwardRes = decltype(std::declval<TLayer>().FeedForward(std::declval<TVarTypeDictFill>()));
-    using IndexSeq = ContMetaFun::Helper::MakeIndexSequence<TForwardRes::Length>;
-    using type = typename VarTypeDict2IOMap_<TForwardRes, IndexSeq>::type;
-};
-
-template <typename TLayer, typename TLayerIOMap>
-struct LayerIOMapBackwardTrasfer_;
-
-template <typename TLayer, typename... TKVs>
-struct LayerIOMapBackwardTrasfer_<TLayer, LayerIOMap<TKVs...>>
-{
-    using TVarTypeDictFill = typename CreateVarTypeDict_<std::tuple<>, std::tuple<>, TKVs...>::type;    
-    using TForwardRes = decltype(std::declval<TLayer>().FeedBackward(std::declval<TVarTypeDictFill>()));
-    using IndexSeq = ContMetaFun::Helper::MakeIndexSequence<TForwardRes::Length>;
-    using type = typename VarTypeDict2IOMap_<TForwardRes, IndexSeq>::type;
+    using KeySet = typename TForwardRes::Keys;
+    using type = typename VarTypeDict2IOMap_<TForwardRes, KeySet>::type;
 };
 }
 
 template <typename TLayer>
-using LayerInputItemTypes = typename TLayer::InputMap;
-
-template <typename TLayer>
 using LayerOutputItemTypes = typename NSLayerIOMapTrasfer::LayerIOMapForwardTrasfer_<TLayer, typename TLayer::InputMap>::type;
-
-template <typename TLayer>
-using LayerInputGradTypes = typename TLayer::GradMap;
-
-template <typename TLayer>
-using LayerOutputGradTypes = typename NSLayerIOMapTrasfer::LayerIOMapBackwardTrasfer_<TLayer, typename TLayer::GradMap>::type;
 
 template <typename TStoreType, bool store>
 using LayerInternalBuf = std::conditional_t<store, std::stack<TStoreType>, NullParameter>;
