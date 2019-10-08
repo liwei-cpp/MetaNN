@@ -48,24 +48,28 @@ namespace MetaNN
         template <typename TGrad>
         auto FeedBackward(TGrad&& p_grad)
         {
-            if constexpr (IsFeedbackOutput)
+            if constexpr (!IsFeedbackOutput || RemConstRef<TGrad>::template IsValueEmpty<LayerOutput>)
+            {
+                if constexpr (IsFeedbackOutput)
+                {
+                    LayerTraits::PopoutFromStack(m_data, m_inputShape);
+                }
+                return LayerInputCont<ReLULayer>();
+            }
+            else
             {
                 if (m_data.empty())
                 {
                     throw std::runtime_error("Cannot feed back in ReLULayer");
                 }
+                auto input = m_data.top();
                 auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
                 
-                auto input = m_data.top();
-                m_data.pop();
-                
                 auto res = ReLUGrad(std::move(grad), std::move(input));
-                m_inputShape.CheckDataShapeAndPop(res);
+                m_inputShape.CheckDataShape(res);
+                
+                LayerTraits::PopoutFromStack(m_data, m_inputShape);
                 return LayerInputCont<ReLULayer>().template Set<LayerInput>(std::move(res));
-            }
-            else
-            {
-                return LayerInputCont<ReLULayer>();
             }
         }
 
@@ -73,18 +77,13 @@ namespace MetaNN
         {
             if constexpr(IsFeedbackOutput)
             {
-                if (!m_data.empty())
-                {
-                    throw std::runtime_error("NeutralInvariant Fail!");
-                }
-                m_inputShape.AssertEmpty();
+                LayerTraits::CheckStackEmpty(m_data, m_inputShape);
             }
         }
 
     private:
         std::string m_name;
         LayerTraits::LayerInternalBuf<TLayerInputFP, IsFeedbackOutput> m_data;
-
         LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
     };
 }

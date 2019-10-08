@@ -30,10 +30,8 @@ namespace
         assert(fabs(res(0, 0) - (1/(1+exp(0.27f)))) < 0.001);
         assert(fabs(res(1, 0) - (1/(1+exp(0.41f)))) < 0.001);
 
-        NullParameter fbIn;
-        auto out_grad = layer.FeedBackward(fbIn);
-        auto fb1 = out_grad.Get<LayerInput>();
-        static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
@@ -129,6 +127,34 @@ namespace
 
         cout << "done" << endl;
     }
+    
+    void test_sigmoid_layer4()
+    {
+        cout << "Test sigmoid layer case 4 (dummy grad input)...\t";
+        using RootLayer = MakeTrainLayer<SigmoidLayer, CommonInputMap, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
+
+        RootLayer layer("root");
+
+        Matrix<CheckElement, CheckDevice> in(2, 1);
+        in.SetValue(0, 0, -0.27f);
+        in.SetValue(1, 0, -0.41f);
+
+        auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
+
+        LayerNeutralInvariant(layer);
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        assert(fabs(res(0, 0) - (1/(1+exp(0.27f)))) < 0.001);
+        assert(fabs(res(1, 0) - (1/(1+exp(0.41f)))) < 0.001);
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
+
+        LayerNeutralInvariant(layer);
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Elementary
@@ -138,5 +164,6 @@ namespace Test::Layer::Elementary
         test_sigmoid_layer1();
         test_sigmoid_layer2();
         test_sigmoid_layer3();
+        test_sigmoid_layer4();
     }
 }

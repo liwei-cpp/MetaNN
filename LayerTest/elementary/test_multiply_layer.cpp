@@ -43,11 +43,9 @@ namespace
         assert(fabs(res(1, 1) - 0.30f) < 0.001);
         assert(fabs(res(1, 2) - 0.42f) < 0.001);
 
-        auto out_grad = layer.FeedBackward(NullParameter{});
-        auto fb1 = out_grad.Get<LeftOperand>();
-        auto fb2 = out_grad.Get<RightOperand>();
-        static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");
-        static_assert(std::is_same<decltype(fb2), NullParameter>::value, "Test error");
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LeftOperand>);
+        static_assert(decltype(out_grad)::template IsValueEmpty<RightOperand>);
 
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
@@ -58,8 +56,8 @@ namespace
         cout << "Test multiply layer case 2 ...\t";
         using RootLayer = MakeTrainLayer<MultiplyLayer, CommonInputMap, PFeedbackOutput>;
 
-        static_assert(RootLayer::IsFeedbackOutput, "Test Error");
-        static_assert(!RootLayer::IsUpdate, "Test Error");
+        static_assert(RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
 
         RootLayer layer("root");
 
@@ -281,6 +279,40 @@ namespace
         }
         cout << "done" << endl;
     }
+    
+    void test_multiply_layer6()
+    {
+        cout << "Test multiply layer case 6 (dummy grad input)...\t";
+        using RootLayer = MakeTrainLayer<MultiplyLayer, CommonInputMap, PFeedbackOutput>;
+
+        static_assert(RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
+
+        RootLayer layer("root");
+
+        Matrix<CheckElement, CheckDevice> i1(2, 3);
+        i1.SetValue(0, 0, 0.1f);  i1.SetValue(0, 1, 0.2f); i1.SetValue(0, 2, 0.3f);
+        i1.SetValue(1, 0, 0.4f);  i1.SetValue(1, 1, 0.5f); i1.SetValue(1, 2, 0.6f);
+
+        Matrix<CheckElement, CheckDevice> i2(2, 3);
+        i2.SetValue(0, 0, 0.2f);  i2.SetValue(0, 1, 0.3f); i2.SetValue(0, 2, 0.4f);
+        i2.SetValue(1, 0, 0.5f);  i2.SetValue(1, 1, 0.6f); i2.SetValue(1, 2, 0.7f);
+
+        auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
+                                                .Set<RightOperand>(i2);
+
+        LayerNeutralInvariant(layer);
+
+        auto out = layer.FeedForward(input);
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LeftOperand>);
+        static_assert(decltype(out_grad)::template IsValueEmpty<RightOperand>);
+
+        LayerNeutralInvariant(layer);
+
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Elementary
@@ -292,5 +324,6 @@ namespace Test::Layer::Elementary
         test_multiply_layer3();
         test_multiply_layer4();
         test_multiply_layer5();
+        test_multiply_layer6();
     }
 }

@@ -115,6 +115,43 @@ namespace
 
         cout << "done" << endl;
     }
+
+    void test_softmax_layer3()
+    {
+        cout << "Test softmax layer case 3 (dummy grad input)...\t";
+        using RootLayer = MakeTrainLayer<SoftmaxLayer, CommonInputMap, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
+
+        RootLayer layer("root");
+
+        Matrix<CheckElement, CheckDevice> in(1, 2);
+        in.SetValue(0, 0, -0.27f);
+        in.SetValue(0, 1, -0.41f);
+
+        auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
+
+        LayerNeutralInvariant(layer);
+
+        auto out = layer.FeedForward(input);
+        auto check = Softmax(in);
+
+        auto handle1 = out.Get<LayerOutput>().EvalRegister();
+        auto handle2 = check.EvalRegister();
+        EvalPlan<CheckDevice>::Eval();
+
+        auto res = handle1.Data();
+        auto c = handle2.Data();
+
+        assert(fabs(res(0, 0) - c(0, 0)) < 0.001);
+        assert(fabs(res(0, 1) - c(0, 1)) < 0.001);
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
+        LayerNeutralInvariant(layer);
+
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Elementary
@@ -123,5 +160,6 @@ namespace Test::Layer::Elementary
     {
         test_softmax_layer1();
         test_softmax_layer2();
+        test_softmax_layer3();
     }
 }

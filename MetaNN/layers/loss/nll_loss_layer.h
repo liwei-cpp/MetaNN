@@ -65,13 +65,12 @@ namespace MetaNN
                 {
                     throw std::runtime_error("Cannot feed back in NLL loss layer");
                 }
-                auto input = m_input.top(); m_input.pop();
-                auto weight = m_weight.top(); m_weight.pop();
-
+                auto input = m_input.top(); auto weight = m_weight.top();
                 auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
                 auto res = NLLLossGrad(std::move(grad), std::move(weight), std::move(input));
-                m_inputShape.CheckDataShapeAndPop(res);
-
+                m_inputShape.CheckDataShape(res);
+                
+                LayerTraits::PopoutFromStack(m_input, m_weight, m_inputShape);
                 return LayerInputCont<NLLLossLayer>().template Set<LayerInput>(std::move(res));
             }
             else
@@ -84,11 +83,7 @@ namespace MetaNN
         {
             if constexpr(IsFeedbackOutput)
             {
-                if ((!m_input.empty()) || (!m_weight.empty()))
-                {
-                    throw std::runtime_error("NeutralInvariant Fail!");
-                }
-                m_inputShape.AssertEmpty();
+                LayerTraits::CheckStackEmpty(m_input, m_weight, m_inputShape);
             }
         }
     private:

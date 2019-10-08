@@ -82,6 +82,9 @@ struct VarTypeDict
         
         template <typename TKey>
         using ValueType = ContMetaFun::Sequential::At<Values, ContMetaFun::Sequential::Order<VarTypeDict, TKey>>;
+        
+        template <typename TKey>
+        constexpr static bool IsValueEmpty = std::is_same_v<ValueType<TKey>, NullParameter>;
 
     private:
         std::shared_ptr<void> m_tuple[sizeof...(TTypes)];

@@ -36,10 +36,8 @@ namespace
             }
         }
 
-        NullParameter fbIn;
-        auto out_grad = layer.FeedBackward(fbIn);
-        auto fb1 = out_grad.Get<LayerInput>();
-        static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
@@ -86,6 +84,38 @@ namespace
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
     }
+    
+    void test_transpose_layer3()
+    {
+        cout << "Test transpose layer case 3 (dummy grad input)...\t";
+        using RootLayer = MakeTrainLayer<TransposeLayer, CommonInputMap, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
+
+        RootLayer layer("root");
+
+        auto in = GenMatrix<CheckElement>(4, 5, -3.3f, 0.1f);
+        auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
+
+        LayerNeutralInvariant(layer);
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        assert(res.Shape().RowNum() == 5);
+        assert(res.Shape().ColNum() == 4);
+    
+        for (size_t i = 0; i < 4; ++i)
+        {
+            for (size_t j = 0; j < 5; ++j)
+            {
+                assert(fabs(res(j, i) - in(i, j)) < 0.0001);
+            }
+        }
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
+        LayerNeutralInvariant(layer);
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Elementary
@@ -94,5 +124,6 @@ namespace Test::Layer::Elementary
     {
         test_transpose_layer1();
         test_transpose_layer2();
+        test_transpose_layer3();
     }
 }

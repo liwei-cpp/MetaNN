@@ -36,12 +36,9 @@ namespace
             }
         }
 
-        NullParameter fbIn;
-        auto out_grad = layer.FeedBackward(fbIn);
-        auto fb1 = out_grad.Get<LeftOperand>();
-        auto fb2 = out_grad.Get<RightOperand>();
-        static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");
-        static_assert(std::is_same<decltype(fb2), NullParameter>::value, "Test error");
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LeftOperand>);
+        static_assert(decltype(out_grad)::template IsValueEmpty<RightOperand>);
         cout << "done" << endl;
     }
 
@@ -236,6 +233,7 @@ namespace
                 assert(fb1(i, j) == grad(i, j));
             }
         }
+        layer.NeutralInvariant();
         cout << "done" << endl;
     }
     
@@ -287,6 +285,39 @@ namespace
                 assert(fb1(i, j) == grad(i, j));
             }
         }
+        layer.NeutralInvariant();
+        cout << "done" << endl;
+    }
+    
+    void test_add_layer6()
+    {
+        cout << "Test add layer case 6 (dummy grad input)...\t";
+
+        using RootLayer = MakeTrainLayer<AddLayer, CommonInputMap, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput, "Test Error");
+        static_assert(!RootLayer::IsUpdate, "Test Error");
+
+        RootLayer layer("root");
+        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
+        auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
+
+        auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
+                                                .Set<RightOperand>(i2);
+
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        for (size_t i = 0; i < 2; ++i)
+        {
+            for (size_t j = 0; j < 3; ++j)
+            {
+                assert(fabs(res(i, j) - i1(i, j) - i2(i, j)) < 0.001);
+            }
+        }
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LeftOperand>);
+        static_assert(decltype(out_grad)::template IsValueEmpty<RightOperand>);
+        layer.NeutralInvariant();
         cout << "done" << endl;
     }
 }
@@ -300,5 +331,6 @@ namespace Test::Layer::Elementary
         test_add_layer3();
         test_add_layer4();
         test_add_layer5();
+        test_add_layer6();
     }
 }

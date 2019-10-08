@@ -37,10 +37,8 @@ namespace
             }
         }
 
-        NullParameter fbIn;
-        auto out_grad = layer.FeedBackward(fbIn);
-        auto fb1 = out_grad.Get<LayerInput>();
-        static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
@@ -177,7 +175,41 @@ namespace
         LayerNeutralInvariant(layer);
 
         cout << "done" << endl;
-}
+    }
+    
+    void test_abs_layer5()
+    {
+        cout << "Test abs layer case 5 (dummy grad input)...\t";
+        using RootLayer = MakeTrainLayer<AbsLayer, CommonInputMap, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput, "Test Error");
+        static_assert(!RootLayer::IsUpdate, "Test Error");
+
+        RootLayer layer("root");
+
+        auto in = GenMatrix<CheckElement>(4, 5, -3.3f, 0.1f);
+        auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
+
+        LayerNeutralInvariant(layer);
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        assert(res.Shape().RowNum() == 4);
+        assert(res.Shape().ColNum() == 5);
+    
+        for (size_t i = 0; i < 4; ++i)
+        {
+            for (size_t j = 0; j < 5; ++j)
+            {
+                auto check = fabs(in(i, j));
+                assert(fabs(res(i, j) - check) < 0.0001);
+            }
+        }
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
+
+        LayerNeutralInvariant(layer);
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Elementary
@@ -188,5 +220,6 @@ namespace Test::Layer::Elementary
         test_abs_layer2();
         test_abs_layer3();
         test_abs_layer4();
+        test_abs_layer5();
     }
 }

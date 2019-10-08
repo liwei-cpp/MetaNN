@@ -13,7 +13,7 @@ namespace
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
         RootLayer layer("root");
-        auto out = layer.FeedForward(NullParameter{});
+        auto out = layer.FeedForward(LayerInputCont<RootLayer>());
         
         auto res = out.Get<LayerOutput>();
         assert(fabs(res < 0.001));
@@ -29,7 +29,7 @@ namespace
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
         RootLayer layer("root");
-        auto out = layer.FeedForward(NullParameter{});
+        auto out = layer.FeedForward(LayerInputCont<RootLayer>());
         
         auto res = out.Get<LayerOutput>();
         assert(fabs(res + 0.5 < 0.001));
@@ -45,7 +45,7 @@ namespace
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
         RootLayer layer("root");
-        auto out = layer.FeedForward(NullParameter{});
+        auto out = layer.FeedForward(LayerInputCont<RootLayer>());
         
         auto res = out.Get<LayerOutput>();
         static_assert(std::is_same_v<decltype(res), int>);

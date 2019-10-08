@@ -42,11 +42,9 @@ namespace
             }
         }
 
-        auto out_grad = layer.FeedBackward(NullParameter{});
-        auto fb1 = out_grad.Get<LeftOperand>();
-        auto fb2 = out_grad.Get<RightOperand>();
-        static_assert(std::is_same<decltype(fb1), NullParameter>::value);
-        static_assert(std::is_same<decltype(fb2), NullParameter>::value);
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LeftOperand>);
+        static_assert(decltype(out_grad)::template IsValueEmpty<RightOperand>);
 
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
@@ -191,6 +189,32 @@ namespace
         cout << "done" << endl;
     }
 
+    void test_dot_layer4()
+    {
+        cout << "Test dot layer case 4 (dummy grad input)...\t";
+        using RootLayer = MakeTrainLayer<DotLayer, CommonInputMap, PFeedbackOutput>;
+
+        static_assert(RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
+
+        RootLayer layer("root");
+
+        auto i1 = GenMatrix<CheckElement>(2, 3, -3.3f, 0.1f);
+        auto i2 = GenMatrix<CheckElement>(3, 4, -0.7f, 1.3f);
+        auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
+                                                .Set<RightOperand>(i2);
+
+        LayerNeutralInvariant(layer);
+
+        auto out = layer.FeedForward(input);
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LeftOperand>);
+        static_assert(decltype(out_grad)::template IsValueEmpty<RightOperand>);
+
+        LayerNeutralInvariant(layer);
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Elementary
@@ -200,5 +224,6 @@ namespace Test::Layer::Elementary
         test_dot_layer1();
         test_dot_layer2();
         test_dot_layer3();
+        test_dot_layer4();
     }
 }

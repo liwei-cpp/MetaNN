@@ -14,8 +14,8 @@ namespace
     {
         cout << "Test ReLU layer case 1 ...\t";
         using RootLayer = MakeInferLayer<ReLULayer>;
-        static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
-        static_assert(!RootLayer::IsUpdate, "Test Error");
+        static_assert(!RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
 
         RootLayer layer("root");
 
@@ -33,10 +33,8 @@ namespace
         assert(fabs(res(1, 0) - 0.41f) < 0.001);
         assert(fabs(res(2, 0)) < 0.001);
 
-        NullParameter fbIn;
-        auto out_grad = layer.FeedBackward(fbIn);
-        auto fb1 = out_grad.Get<LayerInput>();
-        static_assert(std::is_same<decltype(fb1), NullParameter>::value, "Test error");
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
@@ -46,8 +44,8 @@ namespace
     {
         cout << "Test ReLU layer case 2 ...\t";
         using RootLayer = MakeTrainLayer<ReLULayer, CommonInputMap, PFeedbackOutput>;
-        static_assert(RootLayer::IsFeedbackOutput, "Test Error");
-        static_assert(!RootLayer::IsUpdate, "Test Error");
+        static_assert(RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
 
         RootLayer layer("root");
 
@@ -78,6 +76,35 @@ namespace
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
     }
+    
+    void test_relu_layer3()
+    {
+        cout << "Test ReLU layer case 3 (dummy grad input)...\t";
+        using RootLayer = MakeTrainLayer<ReLULayer, CommonInputMap, PFeedbackOutput>;
+        static_assert(RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
+
+        RootLayer layer("root");
+
+        Matrix<CheckElement, CheckDevice> in(3, 1);
+        in.SetValue(0, 0, -0.27f);
+        in.SetValue(1, 0, 0.41f);
+
+        auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
+
+        LayerNeutralInvariant(layer);
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        assert(fabs(res(0, 0)) < 0.001);
+        assert(fabs(res(1, 0) - 0.41f) < 0.001);
+        assert(fabs(res(2, 0)) < 0.001);
+
+        auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
+
+        LayerNeutralInvariant(layer);
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Elementary
@@ -86,5 +113,6 @@ namespace Test::Layer::Elementary
     {
         test_relu_layer1();
         test_relu_layer2();
+        test_relu_layer3();
     }
 }

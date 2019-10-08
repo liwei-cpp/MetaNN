@@ -238,9 +238,11 @@ namespace NSShapeChecker
         void PushDataShape(const TData&) {}
         
         template <typename TData>
-        void CheckDataShapeAndPop(const TData&) {}
-    
+        void CheckDataShape(const TData&) {}
+        
         void AssertEmpty() const {}
+        
+        void Pop() {}
     };
     
     template <typename TShape>
@@ -254,7 +256,7 @@ namespace NSShapeChecker
         }
         
         template <typename TData>
-        void CheckDataShapeAndPop(const TData& data)
+        void CheckDataShape(const TData& data)
         {
             if (m_buffer.empty())
             {
@@ -264,9 +266,8 @@ namespace NSShapeChecker
             {
                 throw std::runtime_error("Shape check fail.");
             }
-            m_buffer.pop();
         }
-    
+        
         void AssertEmpty() const
         {
             if (!m_buffer.empty())
@@ -274,7 +275,16 @@ namespace NSShapeChecker
                 throw std::runtime_error("Shape checker is not empty.");
             }
         }
-
+        
+        void Pop()
+        {
+            if (m_buffer.empty())
+            {
+                throw std::runtime_error("ShapeStack is empty, cannot check shape.");
+            }
+            m_buffer.pop();
+        }
+        
     private:
         std::stack<TShape> m_buffer;
     };
@@ -296,4 +306,43 @@ namespace NSShapeChecker
 
 template <typename TData, bool bTrigger>
 using ShapeChecker = typename NSShapeChecker::DataToShape_<TData, bTrigger && (IsInDataCategory<TData>)>::type;
+
+template <typename T>
+void PopoutFromStackHelper(std::stack<T>& stack)
+{
+    stack.pop();
+}
+
+template <typename TShape, bool bTrigger>
+void PopoutFromStackHelper(NSShapeChecker::ShapeChecker_<TShape, bTrigger>& stack)
+{
+    stack.Pop();
+}
+
+template <typename... TDataStacks>
+void PopoutFromStack(TDataStacks&&... stacks)
+{
+    (PopoutFromStackHelper(std::forward<TDataStacks>(stacks)), ...);
+}
+
+template <typename T>
+void CheckStackEmptyHelper(const std::stack<T>& stack)
+{
+    if (!stack.empty())
+    {
+        throw std::runtime_error("Stack is not empty.");
+    }
+}
+
+template <typename TShape, bool bTrigger>
+void CheckStackEmptyHelper(const NSShapeChecker::ShapeChecker_<TShape, bTrigger>& stack)
+{
+    stack.AssertEmpty();
+}
+
+template <typename... TDataStacks>
+void CheckStackEmpty(const TDataStacks&... stacks)
+{
+    (CheckStackEmptyHelper(stacks), ...);
+}
 }

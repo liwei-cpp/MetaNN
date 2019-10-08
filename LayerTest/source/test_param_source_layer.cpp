@@ -122,7 +122,7 @@ namespace
         RootLayer layer("root", "root", 10, 3);
         layer.Init(filler, loadBuffer);
         
-        auto check = layer.FeedForward(NullParameter{});
+        auto check = layer.FeedForward(LayerInputCont<RootLayer>());
         auto w = check.template Get<LayerOutput>();
         
         assert(w == mat);
@@ -147,7 +147,7 @@ namespace
         RootLayer layer("root", "root", 10, 3);
         layer.Init(filler, loadBuffer);
         
-        auto fpRes = layer.FeedForward(NullParameter{});
+        auto fpRes = layer.FeedForward(LayerInputCont<RootLayer>());
         auto w = fpRes.template Get<LayerOutput>();
         assert(w == mat);
         
@@ -177,7 +177,7 @@ namespace
         RootLayer layer("root", "root", 10, 3);
         layer.Init(filler, loadBuffer);
         
-        auto fpRes = layer.FeedForward(NullParameter{});
+        auto fpRes = layer.FeedForward(LayerInputCont<RootLayer>());
         auto w = fpRes.template Get<LayerOutput>();
         assert(w == mat);
         
@@ -211,6 +211,34 @@ namespace
         layer.NeutralInvariant();
         cout << "done" << endl;
     }
+    
+    void test_param_source_layer7()
+    {
+        cout << "Test param source layer case 7 (dummy grad input)...\t";
+        
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate>;
+        static_assert(!RootLayer::IsFeedbackOutput);
+        static_assert(RootLayer::IsUpdate);
+        
+        auto filler = MakeInitializer<CheckElement>();
+        LoadBuffer<CheckElement, CheckDevice> loadBuffer;
+        
+        auto mat = GenMatrix<CheckElement>(10, 3);
+        loadBuffer.Set("root", mat);
+
+        RootLayer layer("root", "root", 10, 3);
+        layer.Init(filler, loadBuffer);
+        
+        auto fpRes = layer.FeedForward(LayerInputCont<RootLayer>());
+        auto w = fpRes.template Get<LayerOutput>();
+        assert(w == mat);
+        
+        auto grad = GenMatrix<CheckElement>(10, 3);
+        
+        layer.FeedBackward(LayerOutputCont<RootLayer>());
+        layer.NeutralInvariant();
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Source
@@ -223,5 +251,6 @@ namespace Test::Layer::Source
         test_param_source_layer4();
         test_param_source_layer5();
         test_param_source_layer6();
+        test_param_source_layer7();
     }
 }

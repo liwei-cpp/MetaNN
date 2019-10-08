@@ -1,5 +1,6 @@
 #pragma once
 
+#include <MetaNN/facilities/var_type_dict.h>
 #include <MetaNN/layers/facilities/policies.h>
 #include <MetaNN/layers/facilities/traits.h>
 #include <MetaNN/policies/policy_operations.h>
@@ -110,8 +111,7 @@ namespace MetaNN
             }
         }
         
-        template <typename TIn>
-        auto FeedForward(TIn&& p_in)
+        auto FeedForward(const VarTypeDict<>::Values<>&)
         {
             return LayerOutputCont<ParamSourceLayer>().template Set<LayerOutput>(m_data);
         }
@@ -119,7 +119,7 @@ namespace MetaNN
         template <typename TGrad>
         auto FeedBackward(TGrad&& p_grad)
         {
-            if constexpr (IsUpdate)
+            if constexpr (IsUpdate && (!RemConstRef<TGrad>::template IsValueEmpty<LayerOutput>))
             {
                 auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
                 if (grad.Shape() != m_data.Shape())

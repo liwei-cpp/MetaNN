@@ -145,34 +145,36 @@ namespace MetaNN
         template <typename TGrad>
         auto FeedBackward(TGrad&& p_grad)
         {
-            if constexpr (IsFeedbackOutput)
+            if constexpr (!IsFeedbackOutput || RemConstRef<TGrad>::template IsValueEmpty<LayerOutput>)
+            {
+                if constexpr (IsFeedbackOutput)
+                {
+                    LayerTraits::PopoutFromStack(m_input1, m_input2, m_inputShape1, m_inputShape2);
+                }
+                return LayerInputCont<DotLayer>();
+            }
+            else
             {
                 if ((m_input1.empty()) || (m_input2.empty()))
                 {
-                    throw std::runtime_error("Cannot feed back in MultiplyLayer");
+                    throw std::runtime_error("Cannot feed back in DotLayer");
                 }
-                
-                auto input1 = m_input1.top();
-                auto input2 = m_input2.top();
-                m_input1.pop();
-                m_input2.pop();
 
+                auto input1 = m_input1.top(); auto input2 = m_input2.top();
                 auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
 
                 auto [proInput1, proInput2] = NSDotLayer::ShapePrompt(input1, input2);
                 auto grad1 = Dot(grad, Transpose(proInput2));
                 auto grad2 = Dot(Transpose(proInput1), grad);
-                
+
                 auto res1 = CollapseOrOmit(std::move(grad1), input1);
                 auto res2 = CollapseOrOmit(std::move(grad2), input2);
-                m_inputShape1.CheckDataShapeAndPop(res1);
-                m_inputShape2.CheckDataShapeAndPop(res2);
+                m_inputShape1.CheckDataShape(res1);
+                m_inputShape2.CheckDataShape(res2);
+
+                LayerTraits::PopoutFromStack(m_input1, m_input2, m_inputShape1, m_inputShape2);
                 return LayerInputCont<DotLayer>().template Set<LeftOperand>(std::move(res1))
                                                  .template Set<RightOperand>(std::move(res2));
-            }
-            else
-            {
-                return LayerInputCont<DotLayer>();
             }
         }
         
@@ -180,12 +182,7 @@ namespace MetaNN
         {
             if constexpr(IsFeedbackOutput)
             {
-                if ((!m_input1.empty()) || (!m_input2.empty()))
-                {
-                    throw std::runtime_error("NeutralInvariant Fail!");
-                }
-                m_inputShape1.AssertEmpty();
-                m_inputShape2.AssertEmpty();
+                LayerTraits::CheckStackEmpty(m_input1, m_input2, m_inputShape1, m_inputShape2);
             }
         }
     private:

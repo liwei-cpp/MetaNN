@@ -46,24 +46,28 @@ namespace MetaNN
         template <typename TGrad>
         auto FeedBackward(TGrad&& p_grad)
         {
-            if constexpr (IsFeedbackOutput)
+            if constexpr (!IsFeedbackOutput || RemConstRef<TGrad>::template IsValueEmpty<LayerOutput>)
+            {
+                if constexpr (IsFeedbackOutput)
+                {
+                    LayerTraits::PopoutFromStack(m_data, m_inputShape);
+                }
+                return LayerInputCont<AbsLayer>();
+            }
+            else
             {
                 if (m_data.empty())
                 {
                     throw std::runtime_error("Cannot feed back in AbsLayer");
                 }
                 auto input = m_data.top();
-                m_data.pop();
 
                 auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
                 auto res = std::move(grad) * Sign(std::move(input));
-                m_inputShape.CheckDataShapeAndPop(res);
-
+                m_inputShape.CheckDataShape(res);
+                
+                LayerTraits::PopoutFromStack(m_data, m_inputShape);
                 return LayerInputCont<AbsLayer>().template Set<LayerInput>(std::move(res));
-            }
-            else
-            {
-                return LayerInputCont<AbsLayer>();
             }
         }
 
@@ -71,11 +75,7 @@ namespace MetaNN
         {
             if constexpr(IsFeedbackOutput)
             {
-                if (!m_data.empty())
-                {
-                    throw std::runtime_error("NeutralInvariant Fail!");
-                }
-                m_inputShape.AssertEmpty();
+                LayerTraits::CheckStackEmpty(m_data, m_inputShape);
             }
         }
     private:

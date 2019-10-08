@@ -70,7 +70,16 @@ namespace MetaNN
         template <typename TGrad>
         auto FeedBackward(TGrad&& p_grad)
         {
-            if constexpr (IsFeedbackOutput)
+            if constexpr (!IsFeedbackOutput || RemConstRef<TGrad>::template IsValueEmpty<LayerOutput>)
+            {
+                if constexpr (IsFeedbackOutput)
+                {
+                    LayerTraits::PopoutFromStack(m_lambdaStack, m_input1Stack, m_input2Stack,
+                                                 m_weight1Shape, m_weight2Shape, m_lambdaShape);
+                }
+                return LayerInputCont<InterpolateLayer>();
+            }
+            else
             {
                 if ((m_input1Stack.empty()) || (m_input2Stack.empty()) || (m_lambdaStack.empty()))
                 {
@@ -81,9 +90,6 @@ namespace MetaNN
                 auto curLambda = m_lambdaStack.top();
                 auto curInput1 = m_input1Stack.top();
                 auto curInput2 = m_input2Stack.top();
-                m_lambdaStack.pop();
-                m_input1Stack.pop();
-                m_input2Stack.pop();
 
                 auto res2 = grad * Duplicate(1 - curLambda, grad.Shape());
                 auto res1 = grad * Duplicate(curLambda, grad.Shape());
@@ -93,18 +99,16 @@ namespace MetaNN
                 auto out2 = Collapse(std::move(res2), curInput2.Shape());
                 auto outLambda = Collapse(std::move(resLambda), curLambda.Shape());
                 
-                m_weight1Shape.CheckDataShapeAndPop(out1);
-                m_weight2Shape.CheckDataShapeAndPop(out2);
-                m_lambdaShape.CheckDataShapeAndPop(outLambda);
+                m_weight1Shape.CheckDataShape(out1);
+                m_weight2Shape.CheckDataShape(out2);
+                m_lambdaShape.CheckDataShape(outLambda);
 
+                LayerTraits::PopoutFromStack(m_lambdaStack, m_input1Stack, m_input2Stack,
+                                             m_weight1Shape, m_weight2Shape, m_lambdaShape);
                 return LayerInputCont<InterpolateLayer>()
                     .template Set<InterpolateLayerWeight1>(std::move(out1))
                     .template Set<InterpolateLayerWeight2>(std::move(out2))
                     .template Set<InterpolateLayerLambda>(std::move(outLambda));
-            }
-            else
-            {
-                return LayerInputCont<InterpolateLayer>();
             }
         }
 
@@ -112,13 +116,8 @@ namespace MetaNN
         {
             if constexpr(IsFeedbackOutput)
             {
-                if ((!m_input1Stack.empty()) || (!m_input2Stack.empty()) || (!m_lambdaStack.empty()))
-                {
-                    throw std::runtime_error("NeutralInvariant Fail!");
-                }
-                m_weight1Shape.AssertEmpty();
-                m_weight2Shape.AssertEmpty();
-                m_lambdaShape.AssertEmpty();
+                LayerTraits::CheckStackEmpty(m_lambdaStack, m_input1Stack, m_input2Stack,
+                                             m_weight1Shape, m_weight2Shape, m_lambdaShape);
             }
         }
     private:

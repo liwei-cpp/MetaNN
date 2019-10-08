@@ -1,5 +1,6 @@
 #pragma once
 
+#include <MetaNN/facilities/var_type_dict.h>
 #include <MetaNN/layers/facilities/policies.h>
 #include <MetaNN/layers/facilities/traits.h>
 #include <MetaNN/policies/policy_operations.h>
@@ -67,8 +68,7 @@ namespace MetaNN
             : m_name(std::move(name))
         {}
         
-        template <typename TIn>
-        auto FeedForward(TIn&& p_in)
+        auto FeedForward(const VarTypeDict<>::Values<>&)
         {
             static const ValueType val = static_cast<ValueType>(Numerator * 1.0 / Denominator);
             return LayerOutputCont<ValueSourceLayer>().template Set<LayerOutput>(val);

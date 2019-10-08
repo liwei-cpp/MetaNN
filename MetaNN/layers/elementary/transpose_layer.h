@@ -45,17 +45,22 @@ namespace MetaNN
         template <typename TGrad>
         auto FeedBackward(TGrad&& p_grad)
         {
-            if constexpr (IsFeedbackOutput)
+            if constexpr (!IsFeedbackOutput || RemConstRef<TGrad>::template IsValueEmpty<LayerOutput>)
             {
-                auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
-                auto res = Transpose(std::move(grad));
-                m_inputShape.CheckDataShapeAndPop(res);
-
-                return LayerInputCont<TransposeLayer>().template Set<LayerInput>(std::move(res));
+                if constexpr (IsFeedbackOutput)
+                {
+                    LayerTraits::PopoutFromStack(m_inputShape);
+                }
+                return LayerInputCont<TransposeLayer>();
             }
             else
             {
-                return LayerInputCont<TransposeLayer>();
+                auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
+                auto res = Transpose(std::move(grad));
+                m_inputShape.CheckDataShape(res);
+                
+                LayerTraits::PopoutFromStack(m_inputShape);
+                return LayerInputCont<TransposeLayer>().template Set<LayerInput>(std::move(res));
             }
         }
 
@@ -63,7 +68,7 @@ namespace MetaNN
         {
             if constexpr(IsFeedbackOutput)
             {
-                m_inputShape.AssertEmpty();
+                LayerTraits::CheckStackEmpty(m_inputShape);
             }
         }
     private:
