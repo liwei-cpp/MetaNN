@@ -19,25 +19,6 @@ ValuePolicyObj(PNoUpdate,         GradPolicy, IsUpdate, false);
 ValuePolicyObj(PFeedbackOutput,   GradPolicy, IsFeedbackOutput, true);
 ValuePolicyObj(PFeedbackNoOutput, GradPolicy, IsFeedbackOutput, false);
 
-struct SingleLayerPolicy
-{
-    using MajorClass = SingleLayerPolicy;
-    
-    struct ActionTypeCate
-    {
-        struct Sigmoid;
-        struct Tanh;
-    };
-    struct HasBiasValueCate;
-
-    using Action = ActionTypeCate::Sigmoid;
-    static constexpr bool HasBias = true;
-};
-TypePolicyObj(PSigmoidAction, SingleLayerPolicy, Action, Sigmoid);
-TypePolicyObj(PTanhAction, SingleLayerPolicy, Action, Tanh);
-ValuePolicyObj(PBiasSingleLayer,  SingleLayerPolicy, HasBias, true);
-ValuePolicyObj(PNoBiasSingleLayer, SingleLayerPolicy, HasBias, false);
-
 struct RecurrentLayerPolicy
 {
     using MajorClass = RecurrentLayerPolicy;
@@ -89,6 +70,10 @@ ValuePolicyObj(PDisableBptt,  RecurrentLayerPolicy, UseBptt, false);
     
     struct LayerStructurePolicy
     {
+    private:
+        template <template<typename, typename> class> struct ActFuncComp;
+
+    public:
         using MajorClass = LayerStructurePolicy;
         // ActFunc
         struct ActFuncTemplateCate;
@@ -98,6 +83,9 @@ ValuePolicyObj(PDisableBptt,  RecurrentLayerPolicy, UseBptt, false);
 
         template <typename TInputMap, typename TPolicies>
         using ActFunc = DummyActFun<TInputMap, TPolicies>;
+        
+        template <template<typename, typename> class T>
+        static constexpr bool IsDummyActFun = std::is_same_v<ActFuncComp<T>, ActFuncComp<DummyActFun>>;
         
         // Bias Involved
         struct BiasInvolvedValueCate;

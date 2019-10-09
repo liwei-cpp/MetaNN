@@ -68,6 +68,9 @@ namespace MetaNN
             template <typename UInput, typename UPolicies>
             using ActFunc = typename PolicySelectRes::template ActFunc<UInput, UPolicies>;
             
+            static_assert(!LayerStructurePolicy::template IsDummyActFun<ActFunc>,
+                          "Use PActFuncIs<...> to set activate function.");
+
             using TopoPickRes = TopoPicker_<biasInvolved, ActFunc>;
             using type = ComposeKernel<SingleLayerPerceptron, TInput, TPolicies,
                                        typename TopoPickRes::type>;
