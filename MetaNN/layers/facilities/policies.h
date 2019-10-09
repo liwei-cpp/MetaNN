@@ -19,22 +19,6 @@ ValuePolicyObj(PNoUpdate,         GradPolicy, IsUpdate, false);
 ValuePolicyObj(PFeedbackOutput,   GradPolicy, IsFeedbackOutput, true);
 ValuePolicyObj(PFeedbackNoOutput, GradPolicy, IsFeedbackOutput, false);
 
-struct ParamPolicyDeprecate
-{
-    using MajorClass = ParamPolicyDeprecate;
-    
-    struct ParamTypeCate
-    {
-        using Scalar = CategoryTags::Scalar;
-        using Matrix = CategoryTags::Matrix;
-        using ThreeDArray = CategoryTags::ThreeDArray;
-    };
-    using ParamType = ParamTypeCate::Matrix;
-};
-TypePolicyObj(PScalarParamDeprecate,      ParamPolicyDeprecate, Param, Scalar);
-TypePolicyObj(PMatrixParamDeprecate,      ParamPolicyDeprecate, Param, Matrix);
-TypePolicyObj(PThreeDArrayParamDeprecate, ParamPolicyDeprecate, Param, ThreeDArray);
-
 struct SingleLayerPolicy
 {
     using MajorClass = SingleLayerPolicy;
@@ -100,9 +84,35 @@ ValuePolicyObj(PDisableBptt,  RecurrentLayerPolicy, UseBptt, false);
     TypePolicyObj(PThreeDArrayParam,          ParamPolicy, ParamCategory, ThreeDArray);
     
     TypePolicyTemplate(PParamElementTypeIs,   ParamPolicy, ParamType);
-
     TypePolicyObj(PCPUDeviceParam,            ParamPolicy, ParamDevice,   CPU);
-    
     TypePolicyTemplate(PInitializerIs,        ParamPolicy, Initializer);
+    
+    struct LayerStructurePolicy
+    {
+        using MajorClass = LayerStructurePolicy;
+        // ActFunc
+        struct ActFuncTemplateCate;
+        
+        template <typename TInputMap, typename TPolicies>
+        struct DummyActFun;
+
+        template <typename TInputMap, typename TPolicies>
+        using ActFunc = DummyActFun<TInputMap, TPolicies>;
+        
+        // Bias Involved
+        struct BiasInvolvedValueCate;
+        static constexpr bool BiasInvolved = true;
+    };
+
+    template <template <typename, typename> class T>
+    struct PActFuncIs : virtual public LayerStructurePolicy
+    {
+        using MinorClass = LayerStructurePolicy::ActFuncTemplateCate;
+        
+        template <typename TInputMap, typename TPolicies>
+        using ActFunc = T<TInputMap, TPolicies>;
+    };
+    ValuePolicyObj(PBiasInvolved,    LayerStructurePolicy, BiasInvolved, true);
+    ValuePolicyObj(PBiasNotInvolved, LayerStructurePolicy, BiasInvolved, false);
 }
 #include <MetaNN/policies/policy_macro_end.h>

@@ -29,9 +29,9 @@ namespace
         Matrix<CheckElement, CheckDevice> b1(1, 3);
         b1.SetValue(0, 0, 0.7f);  b1.SetValue(0, 1, 0.8f); b1.SetValue(0, 2, 0.9f);
     
-        auto initializer = MakeInitializer<float>();
-        initializer.SetParam("root-weight", w1);
-        initializer.SetParam("root-bias", b1);
+        auto initializer = MakeInitializer<CheckElement>();
+        initializer.SetParam("root/weight", w1);
+        initializer.SetParam("root/bias", b1);
         LoadBuffer<CheckElement, CheckDevice> params;
         layer.Init(initializer, params);
 
@@ -46,12 +46,12 @@ namespace
         assert(fabs(out(0, 2) - 1.07f) < 0.00001);
 
         auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
-        static_assert(is_same_v<decltype(out_grad)::ValueType<LayerInput>, NullParameter>);
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         params.Clear();
         layer.SaveWeights(params);
-        assert(params.IsParamExist<CategoryTags::Matrix>("root-weight"));
-        assert(params.IsParamExist<CategoryTags::Matrix>("root-bias"));
+        assert(params.IsParamExist<CategoryTags::Matrix>("root/weight"));
+        assert(params.IsParamExist<CategoryTags::Matrix>("root/bias"));
 
         cout << "done" << endl;
     }
@@ -76,8 +76,8 @@ namespace
         b1.SetValue(0, 0, 0.7f);  b1.SetValue(0, 1, 0.8f); b1.SetValue(0, 2, 0.9f);
 
         auto initializer = MakeInitializer<float>();
-        initializer.SetParam("root-weight", w1);
-        initializer.SetParam("root-bias", b1);
+        initializer.SetParam("root/weight", w1);
+        initializer.SetParam("root/bias", b1);
         LoadBuffer<CheckElement, CheckDevice> params;
         layer.Init(initializer, params);
 
@@ -147,8 +147,8 @@ namespace
 
         params.Clear();
         layer.SaveWeights(params);
-        assert(params.IsParamExist<CategoryTags::Matrix>("root-weight"));
-        assert(params.IsParamExist<CategoryTags::Matrix>("root-bias"));
+        assert(params.IsParamExist<CategoryTags::Matrix>("root/weight"));
+        assert(params.IsParamExist<CategoryTags::Matrix>("root/bias"));
 
         cout << "done" << endl;
     }
@@ -175,8 +175,8 @@ namespace
         b1.SetValue(0, 0, 0.7f);  b1.SetValue(0, 1, 0.8f); b1.SetValue(0, 2, 0.9f);
         
         auto initializer = MakeInitializer<float>();
-        initializer.SetParam("root-weight", w1);
-        initializer.SetParam("root-bias", b1);
+        initializer.SetParam("root/weight", w1);
+        initializer.SetParam("root/bias", b1);
         LoadBuffer<CheckElement, CheckDevice> params;
         layer.Init(initializer, params);
 
@@ -217,8 +217,8 @@ namespace
 
         params.Clear();
         layer.SaveWeights(params);
-        assert(params.IsParamExist<CategoryTags::Matrix>("root-weight"));
-        assert(params.IsParamExist<CategoryTags::Matrix>("root-bias"));
+        assert(params.IsParamExist<CategoryTags::Matrix>("root/weight"));
+        assert(params.IsParamExist<CategoryTags::Matrix>("root/bias"));
         cout << "done" << endl;
     }
     
@@ -244,8 +244,8 @@ namespace
         b1.SetValue(0, 0, 0.7f);  b1.SetValue(0, 1, 0.8f); b1.SetValue(0, 2, 0.9f);
         
         auto initializer = MakeInitializer<float>();
-        initializer.SetParam("root-weight", w1);
-        initializer.SetParam("root-bias", b1);
+        initializer.SetParam("root/weight", w1);
+        initializer.SetParam("root/bias", b1);
         LoadBuffer<CheckElement, CheckDevice> params;
         layer.Init(initializer, params);
 
@@ -287,8 +287,8 @@ namespace
         
         params.Clear();
         layer.SaveWeights(params);
-        assert(params.IsParamExist<CategoryTags::Matrix>("root-weight"));
-        assert(params.IsParamExist<CategoryTags::Matrix>("root-bias"));
+        assert(params.IsParamExist<CategoryTags::Matrix>("root/weight"));
+        assert(params.IsParamExist<CategoryTags::Matrix>("root/bias"));
         cout << "done" << endl;
     }
 }

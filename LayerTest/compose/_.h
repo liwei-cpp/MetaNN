@@ -4,6 +4,7 @@ namespace Test::Layer::Compose
     void test_bias_layer();
     void test_weight_layer();
     void test_linear_layer();
+    void test_single_layer_perceptron();
     
     void Test()
     {
@@ -12,5 +13,6 @@ namespace Test::Layer::Compose
         test_bias_layer();
         test_weight_layer();
         test_linear_layer();
+        test_single_layer_perceptron();
     }
 }

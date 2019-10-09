@@ -177,10 +177,10 @@
     <VirtualDirectory Name="compose">
       <File Name="layers/compose/compose_kernel.h"/>
       <File Name="layers/compose/linear_layer.h"/>
-      <File Name="layers/compose/single_layer.h"/>
       <File Name="layers/compose/_.h"/>
       <File Name="layers/compose/bias_layer.h"/>
       <File Name="layers/compose/weight_layer.h"/>
+      <File Name="layers/compose/single_layer_perceptron.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="elementary">
       <File Name="layers/elementary/abs_layer.h"/>
