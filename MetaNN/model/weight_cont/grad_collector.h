@@ -33,38 +33,16 @@ struct GradInfo
         return weight;
     }
     
-    auto Grad(size_t div) const
+    auto Grad() const
     {
-        if (grad.Shape().BatchNum() == 0)
+        switch (grad.Shape().BatchNum())
         {
+        case 0:
             throw std::runtime_error("Empty grad.");
-        }
-        
-        if (div == 0)
-        {
-            throw std::runtime_error("Grad divident is 0.");
-        }
-        if (grad.Shape().BatchNum() == 1)
-        {
-            if (div == 1)
-            {
-                return MakeDynamic(grad[0]);
-            }
-            else
-            {
-                return MakeDynamic(grad[0] / div);
-            }
-        }
-        else
-        {
-            if (div == 1)
-            {
-                return MakeDynamic(Collapse(grad, weight.Shape()));
-            }
-            else
-            {
-                return MakeDynamic(Collapse(grad, weight.Shape()) / div);
-            }
+        case 1:
+            return MakeDynamic(grad[0]);
+        default:
+            return MakeDynamic(Collapse(grad, weight.Shape()));
         }
     }    
     

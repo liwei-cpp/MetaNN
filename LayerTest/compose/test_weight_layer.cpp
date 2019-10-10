@@ -93,7 +93,7 @@ namespace
         assert(gradCont.size() == 1);
 
         auto handle1 = gradCont.front().Weight().EvalRegister();
-        auto handle2 = gradCont.front().Grad(1).EvalRegister();
+        auto handle2 = gradCont.front().Grad().EvalRegister();
         EvalPlan<DeviceTags::CPU>::Eval();
 
         auto w1 = handle1.Data();
@@ -158,7 +158,7 @@ namespace
 
         auto w1 = gradCont.front().Weight();
         
-        auto handle2 = gradCont.front().Grad(1).EvalRegister();
+        auto handle2 = gradCont.front().Grad().EvalRegister();
         EvalPlan<DeviceTags::CPU>::Eval();
         auto g1 = handle2.Data();
         
@@ -257,7 +257,7 @@ namespace
             aim = Evaluate(aim + Dot(Transpose(op_in[loop_count]), op_grad[loop_count]));
         }
 
-        auto g1 = Evaluate(gradCont.front().Grad(1));
+        auto g1 = Evaluate(gradCont.front().Grad());
 
         for (size_t i = 0; i < 8; ++i)
         {

@@ -110,7 +110,7 @@ namespace
         for (auto& p : gradCont)
         {
             auto w = p.Weight();
-            auto info = Evaluate(p.Grad(1));
+            auto info = Evaluate(p.Grad());
             if (w.Shape() == w1.Shape())
             {
                 weight_update_valid = true;
@@ -205,7 +205,7 @@ namespace
 
         auto w = gradCont.begin()->Weight();
         assert(w.Shape() == b1.Shape());
-        auto info = Evaluate(gradCont.begin()->Grad(1));
+        auto info = Evaluate(gradCont.begin()->Grad());
         for (size_t i = 0; i < info.Shape().RowNum(); ++i)
         {
             for (size_t j = 0; j < info.Shape().ColNum(); ++j)
@@ -275,7 +275,7 @@ namespace
         auto w = gradCont.begin()->Weight();
         assert(w.Shape() == w1.Shape());
         
-        auto info = Evaluate(gradCont.begin()->Grad(1));
+        auto info = Evaluate(gradCont.begin()->Grad());
         auto tmp = Evaluate(Dot(Transpose(i), g));
         for (size_t i = 0; i < info.Shape().RowNum(); ++i)
         {

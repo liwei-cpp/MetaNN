@@ -144,7 +144,7 @@ namespace
         assert(gradCont.size() == 1);
 
         auto handle1 = gradCont.front().Weight().EvalRegister();
-        auto handle2 = gradCont.front().Grad(1).EvalRegister();
+        auto handle2 = gradCont.front().Grad().EvalRegister();
         EvalPlan<DeviceTags::CPU>::Eval();
 
         auto w1 = handle1.Data();
@@ -210,7 +210,7 @@ namespace
         assert(gradCont.size() == 1);
 
         auto handle1 = gradCont.front().Weight().EvalRegister();
-        auto handle2 = gradCont.front().Grad(1).EvalRegister();
+        auto handle2 = gradCont.front().Grad().EvalRegister();
         EvalPlan<DeviceTags::CPU>::Eval();
 
         auto w1 = handle1.Data();
@@ -298,7 +298,7 @@ namespace
         assert(gradCont.size() == 1);
 
         auto handle1 = gradCont.front().Weight().EvalRegister();
-        auto handle2 = gradCont.front().Grad(1).EvalRegister();
+        auto handle2 = gradCont.front().Grad().EvalRegister();
         EvalPlan<DeviceTags::CPU>::Eval();
 
         auto w1 = handle1.Data();

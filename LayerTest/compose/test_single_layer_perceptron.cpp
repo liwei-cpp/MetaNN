@@ -151,7 +151,7 @@ namespace
         for (auto& p : gradCont)
         {
             auto w = p.Weight();
-            auto info = Evaluate(p.Grad(1));
+            auto info = Evaluate(p.Grad());
             if (w.Shape() == w1.Shape())
             {
                 weight_update_valid = true;
