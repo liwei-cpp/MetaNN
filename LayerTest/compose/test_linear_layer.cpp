@@ -97,7 +97,7 @@ namespace
         g.SetValue(0, 2, 0.3f);
         auto fbIn = LayerOutputCont<RootLayer>().Set<LayerOutput>(g);
         auto out_grad = layer.FeedBackward(fbIn);
-        static_assert(is_same_v<decltype(out_grad)::ValueType<LayerInput>, NullParameter>);
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         GradCollector<CheckElement, CheckDevice> grad_collector;
         layer.GradCollect(grad_collector);
