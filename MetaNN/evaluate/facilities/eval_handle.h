@@ -24,24 +24,6 @@ public:
         return m_data->m_eval;
     }
     
-    TData& MutableData()
-    {
-        if (IsEvaluated())
-        {
-            throw std::runtime_error("Data is already evaluated.");
-        }
-        return m_data->m_data;
-    }
-    
-    void SetEval()
-    {
-        if (IsEvaluated())
-        {
-            throw std::runtime_error("Data is already evaluated.");
-        }
-        m_data->m_eval = true;
-    }
-    
     const TData& Data() const
     {
         if (!IsEvaluated())
@@ -56,16 +38,6 @@ public:
         return m_data.get();
     }
 
-    template <typename...TParams>
-    void Allocate(TParams&&... params) const
-    {
-        if (IsEvaluated())
-        {
-            throw std::runtime_error("Data is already evaluated.");
-        }
-        m_data->m_data = TData(std::forward<TParams>(params)...);
-    }
-    
     void SetData(TData p_data)
     {
         if (IsEvaluated())
@@ -73,6 +45,7 @@ public:
             throw std::runtime_error("Data is already evaluated.");
         }
         m_data->m_data = std::move(p_data);
+        m_data->m_eval = true;
     }
 
 private:

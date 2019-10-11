@@ -30,11 +30,11 @@ public:
     void Eval() override final
     {
         const auto& in = m_inputHandle.Data();
-        m_outputHandle.Allocate(in.Shape());
-        auto& out = m_outputHandle.MutableData();
-        
-        using ElementType = ElementTypePicker<decltype(out)>;
-        
+
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+        ResType out(in.Shape());
+
         const size_t count = in.Shape().Count();
         assert(count == out.Shape().Count());
         
@@ -50,7 +50,7 @@ public:
         {
             mem_out[i] = (ElementType)(tanh(mem_in[i]));
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:
@@ -96,11 +96,10 @@ public:
         const auto& in = m_inputHandle.Data();
         assert(grad.Shape() == in.Shape());
         
-        m_outputHandle.Allocate(grad.Shape());
-        auto& out = m_outputHandle.MutableData();
-        
-        using ElementType = ElementTypePicker<decltype(out)>;
-        
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+        ResType out(in.Shape());
+
         const size_t count = in.Shape().Count();
         assert(count == out.Shape().Count());
         
@@ -118,7 +117,7 @@ public:
         {
             mem_out[i] = mem_grad[i] * (1 - mem_in[i] * mem_in[i]);
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:

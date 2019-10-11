@@ -33,11 +33,10 @@ public:
         const auto& in2 = m_inputHandle2.Data();
         assert(in1.Shape() == in2.Shape());
         
-        m_outputHandle.Allocate(in1.Shape());
-        auto& out = m_outputHandle.MutableData();
-        
-        using ElementType = ElementTypePicker<decltype(out)>;
-        
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+        ResType out(in1.Shape());
+
         const size_t count = in1.Shape().Count();
         assert(count == out.Shape().Count());
         
@@ -55,7 +54,7 @@ public:
         {
             mem_out[i] = mem_in1[i] - mem_in2[i];
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:
@@ -104,11 +103,10 @@ public:
     {
         const auto& input = m_inputHandle.Data();
         
-        m_outputHandle.Allocate(input.Shape());
-        auto& out = m_outputHandle.MutableData();
-        
-        using ElementType = ElementTypePicker<decltype(out)>;
-        
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+        ResType out(input.Shape());
+
         const size_t count = input.Shape().Count();
         assert(count == out.Shape().Count());
         
@@ -124,7 +122,7 @@ public:
         {
             mem_out[i] = m_minuend - mem_in[i];
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:

@@ -68,11 +68,11 @@ public:
     
     void Eval() override final
     {
-        m_outputHandle.Allocate(m_shape);
+        using ResType = typename TOutputHandle::DataType;
+        ResType out(m_shape);
         
         const auto& in = m_inputHandle.Data();
-        auto& out = m_outputHandle.MutableData();
-        using ElementType = ElementTypePicker<decltype(out)>;
+        using ElementType = typename ResType::ElementType;
         
         const size_t inCount = in.Shape().Count();
         auto low_in = LowerAccess(in);
@@ -91,7 +91,7 @@ public:
             memcpy(mem_out, mem_in, sizeof(ElementType) * inCount);
             mem_out += inCount;
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:

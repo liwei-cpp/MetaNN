@@ -37,11 +37,10 @@ public:
         assert(in1.Shape() == in2.Shape());
         assert(in1.Shape() == in3.Shape());
         
-        m_outputHandle.Allocate(in1.Shape());
-        auto& out = m_outputHandle.MutableData();
-        
-        using ElementType = ElementTypePicker<decltype(out)>;
-        
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+        ResType out(in1.Shape());
+
         const size_t count = in1.Shape().Count();
         assert(count == out.Shape().Count());
         
@@ -61,7 +60,7 @@ public:
         {
             mem_out[i] = mem_in1[i] * mem_in3[i] + mem_in2[i] * (1 - mem_in3[i]);
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:

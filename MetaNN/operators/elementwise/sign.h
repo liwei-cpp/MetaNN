@@ -29,11 +29,11 @@ public:
     void Eval() override final
     {
         const auto& in = m_inputHandle.Data();
-        m_outputHandle.Allocate(in.Shape());
-        auto& out = m_outputHandle.MutableData();
-        
-        using ElementType = ElementTypePicker<decltype(out)>;
-        
+
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+        ResType out(in.Shape());
+
         const size_t count = in.Shape().Count();
         assert(count == out.Shape().Count());
         
@@ -55,7 +55,7 @@ public:
             else
                 mem_out[i] = (mem_in[i] > zero) ? one : negOne;
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:

@@ -29,9 +29,8 @@ public:
                       std::is_same_v<typename TScalar::DeviceType, DeviceTags::CPU>,
                       "Currently only CPU is supported.");
 
-        m_resHandle.Allocate(m_shape);
-        auto& mutableData = m_resHandle.MutableData();
-        auto lowLayer = LowerAccess(mutableData);
+        Matrix<TElem, TDevice> out(m_shape);
+        auto lowLayer = LowerAccess(out);
         auto mem = lowLayer.MutableRawMemory();
         
         const size_t elemCount = m_shape.Count();
@@ -40,7 +39,7 @@ public:
         {
             mem[i] = val;
         }
-        m_resHandle.SetEval();
+        m_resHandle.SetData(std::move(out));
     }
 
 private:

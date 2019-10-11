@@ -24,7 +24,9 @@ namespace OperSoftmax::NSCaseGen
 template <typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
-    using ElementType = ElementTypeFromHandle<TOutputHandle>;
+    using ResType = typename TOutputHandle::DataType;
+    using ElementType = typename ResType::ElementType;
+
 public:
     template <typename TAuxParams>
     EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
@@ -35,8 +37,7 @@ public:
     void Eval() override final
     {
         const auto& in = m_inputHandle.Data();
-        m_outputHandle.Allocate(in.Shape());
-        auto& out = m_outputHandle.MutableData();
+        ResType out(in.Shape());
         
         const size_t count = in.Shape().Count();
         assert(count == out.Shape().Count());
@@ -58,7 +59,7 @@ public:
             mem_out += matrixSize;
             mem_in += matrixSize;
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:
@@ -119,8 +120,8 @@ constexpr bool Valid<Operator<OpTags::NLLLossGrad, T1, T2, T3>,
 template <typename TGradHandle, typename TSoftmaxHandle, typename TOutputHandle>
 class EuOneHotWeight : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
-    using ElementType = ElementTypeFromHandle<TOutputHandle>;
-
+    using ResType = typename TOutputHandle::DataType;
+    using ElementType = typename ResType::ElementType;
 public:
     EuOneHotWeight(TGradHandle gradHandle, TSoftmaxHandle softmaxHandle,
                    TOutputHandle outputHandle, size_t hotPos)
@@ -139,8 +140,7 @@ public:
         size_t colNum = softmaxRes.Shape().ColNum();
         assert(m_hotPos < colNum);
         
-        m_outputHandle.Allocate(1, colNum);
-        auto& res = m_outputHandle.MutableData();
+        ResType res(1, colNum);
 
         auto mem_res = LowerAccess(res);
         ElementType* r = mem_res.MutableRawMemory();
@@ -150,7 +150,7 @@ public:
             r[i] = softmaxRes(0, i) * grad;
         }
         r[m_hotPos] -= grad;
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(res));
     }
 
 private:
@@ -164,8 +164,8 @@ template <typename TGradHandle, typename TWeightHandle,
           typename TSoftmaxHandle, typename TOutputHandle>
 class EuGenWeight : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
-    using ElementType = ElementTypeFromHandle<TOutputHandle>;
-
+    using ResType = typename TOutputHandle::DataType;
+    using ElementType = typename ResType::ElementType;
 public:
     EuGenWeight(TGradHandle gradHandle, TWeightHandle weightHandle,
                 TSoftmaxHandle softmaxHandle, TOutputHandle outputHandle)
@@ -188,9 +188,8 @@ public:
         assert(weight.Shape().Count() % cardinalCount == 0);
         assert(loopCount == weight.Shape().Count() / cardinalCount);
         
-        m_outputHandle.Allocate(weight.Shape());
-        auto& out = m_outputHandle.MutableData();
-        
+        ResType out(weight.Shape());
+
         auto low_grad = LowerAccess(grad);
         ElementType* mem_grad = low_grad.RawMemory();
         auto low_weight = LowerAccess(weight);
@@ -219,7 +218,7 @@ public:
             mem_softmaxRes += cardinalCount;
             ++mem_grad;
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
 private:
     TGradHandle    m_gradHandle;
@@ -299,7 +298,8 @@ namespace OperSoftmaxGrad::NSCaseGen
 template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
 class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
 {
-    using ElementType = ElementTypeFromHandle<TOutputHandle>;
+    using ResType = typename TOutputHandle::DataType;
+    using ElementType = typename ResType::ElementType;
 public:
     template <typename TAuxParams>
     EvalUnit(TGradHandle gradHandle, TInputHandle inputHandle, TOutputHandle outputHandle, const TAuxParams&)
@@ -314,9 +314,8 @@ public:
         const auto& in = m_inputHandle.Data();
         assert(grad.Shape() == in.Shape());
         
-        m_outputHandle.Allocate(grad.Shape());
-        auto& out = m_outputHandle.MutableData();
-        
+        ResType out(in.Shape());
+
         const size_t count = in.Shape().Count();
         assert(count == out.Shape().Count());
         const size_t matrixSize = in.Shape().RowNum() * in.Shape().ColNum();
@@ -340,7 +339,7 @@ public:
             mem_in += matrixSize;
             mem_grad += matrixSize;
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
 
 private:

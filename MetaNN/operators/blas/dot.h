@@ -40,11 +40,11 @@ public:
 
         auto aimShape = in1.Shape();
         aimShape.ColNum() = in2.Shape().ColNum();
-        m_outputHandle.Allocate(aimShape);
-        auto& out = m_outputHandle.MutableData();
-        
-        using ElementType = ElementTypePicker<decltype(out)>;
-        
+
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+        ResType out(aimShape);
+
         const size_t m = in1.Shape().RowNum();
         const size_t k = in1.Shape().ColNum();
         const size_t n = in2.Shape().ColNum();
@@ -81,7 +81,7 @@ public:
             mem_in1 += m * k;
             mem_in2 += k * n;
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:

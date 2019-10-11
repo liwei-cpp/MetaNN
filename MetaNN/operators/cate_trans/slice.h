@@ -32,7 +32,6 @@ namespace OperSlice::NSCaseGen
             using InputDatType = typename TInputHandle::DataType;
             const InputDatType& in = m_inputHandle.Data();
             m_outputHandle.SetData(in[m_id]);
-            m_outputHandle.SetEval();
         }
     
     private:

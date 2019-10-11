@@ -210,7 +210,7 @@
     <File Name="layers/layers.h"/>
     <VirtualDirectory Name="loss">
       <File Name="layers/loss/nll_loss_layer.h"/>
-      <File Name="layers/loss/loss.h"/>
+      <File Name="layers/loss/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="source">
       <File Name="layers/source/_.h"/>
@@ -233,7 +233,7 @@
         <File Name="operators/loss/facilities/organizer.h"/>
       </VirtualDirectory>
       <File Name="operators/loss/nll_loss.h"/>
-      <File Name="operators/loss/loss.h"/>
+      <File Name="operators/loss/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="cate_trans">
       <File Name="operators/cate_trans/duplicate.h"/>
@@ -242,7 +242,6 @@
       <File Name="operators/cate_trans/slice.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="elementwise">
-      <File Name="operators/elementwise/elementwise.h"/>
       <File Name="operators/elementwise/asin.h"/>
       <File Name="operators/elementwise/acos.h"/>
       <File Name="operators/elementwise/abs.h"/>
@@ -253,22 +252,23 @@
       <File Name="operators/elementwise/sign.h"/>
       <File Name="operators/elementwise/substract.h"/>
       <File Name="operators/elementwise/negative.h"/>
+      <File Name="operators/elementwise/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="mutating">
       <File Name="operators/mutating/transpose.h"/>
-      <File Name="operators/mutating/mutating.h"/>
+      <File Name="operators/mutating/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="blas">
       <File Name="operators/blas/dot.h"/>
-      <File Name="operators/blas/blas.h"/>
+      <File Name="operators/blas/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="activations">
       <File Name="operators/activations/softmax.h"/>
-      <File Name="operators/activations/activations.h"/>
       <File Name="operators/activations/relu.h"/>
       <File Name="operators/activations/sigmoid.h"/>
       <File Name="operators/activations/tags.h"/>
       <File Name="operators/activations/tanh.h"/>
+      <File Name="operators/activations/_.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">

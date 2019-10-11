@@ -97,9 +97,9 @@ public:
     
     void Eval()
     {
-        m_output.Allocate(m_outputShape);
-        const auto& res = m_output.MutableData();
-        using TElem = typename RemConstRef<decltype(res)>::ElementType;
+        using ResType = typename TOutputHandle::DataType;
+        ResType res(m_outputShape);
+        using TElem = typename ResType::ElementType;
         
         static_assert(std::is_same_v<TDevice, DeviceTags::CPU>,
                       "Currently only CPU is supported");
@@ -126,7 +126,7 @@ public:
         }
         
         assert(startPoint == res.Shape().Count());
-        m_output.SetEval();
+        m_output.SetData(std::move(res));
     }
     
 private:

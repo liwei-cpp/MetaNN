@@ -26,16 +26,15 @@ public:
     
     void Eval() override final
     {
-        auto& mutableData = m_resHandle.MutableData();
-        m_resHandle.Allocate(MetaNN::Shape<CategoryTags::Matrix>{1, m_colNum});
+        Matrix<TElem, TDevice> out(1, m_colNum);
         
         static_assert(std::is_same_v<TDevice, DeviceTags::CPU>,
                       "Currently only CPU is supported.");
-        auto lowLayer = LowerAccess(mutableData);
+        auto lowLayer = LowerAccess(out);
         auto mem = lowLayer.MutableRawMemory();
         memset(mem, 0, sizeof(TElem) * m_colNum);
         mem[m_val] = 1;
-        m_resHandle.SetEval();
+        m_resHandle.SetData(std::move(out));
     }
 
 private:

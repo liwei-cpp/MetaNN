@@ -29,14 +29,13 @@ public:
     void Eval() override final
     {
         const auto& in = m_inputHandle.Data();
-
         auto aimShape = in.Shape();
         std::swap(aimShape.RowNum(), aimShape.ColNum());
-        m_outputHandle.Allocate(aimShape);
-        auto& out = m_outputHandle.MutableData();
-        
-        using ElementType = ElementTypePicker<decltype(out)>;
-        
+
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+        ResType out(aimShape);
+
         const size_t count = in.Shape().Count();
         assert(count == out.Shape().Count());
         
@@ -67,7 +66,7 @@ public:
             mem_out += matrixSize;
             mem_in += matrixSize;
         }
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:

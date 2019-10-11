@@ -36,10 +36,9 @@ public:
         const auto& in = m_inputHandle.Data();
         assert(weight.Shape() == in.Shape());
         
-        m_outputHandle.Allocate();
-        auto& out = m_outputHandle.MutableData();
-        
-        using ElementType = ElementTypePicker<decltype(out)>;
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+        ResType out;
         
         const size_t inCount = in.Shape().Count();
         
@@ -64,7 +63,7 @@ public:
             res /= (inCount / cardinalCount);
         }
         out.SetValue(res);
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:
@@ -125,11 +124,10 @@ public:
         const auto& in = m_inputHandle.Data();
         assert(weight.Shape() == in.Shape());
         
-        m_outputHandle.Allocate(weight.Shape());
-        auto& out = m_outputHandle.MutableData();
-        
-        using ElementType = ElementTypePicker<decltype(out)>;
-        
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+        ResType out(weight.Shape());
+
         const size_t count = in.Shape().Count();
         const size_t cardinalCount = in.Shape().CardinalShape().Count();
         assert(count % cardinalCount == 0);
@@ -158,7 +156,7 @@ public:
             mem_in += cardinalCount;
         }
 
-        m_outputHandle.SetEval();
+        m_outputHandle.SetData(std::move(out));
     }
     
 private:

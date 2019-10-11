@@ -1,8 +1,8 @@
 #pragma once
 
-#include <MetaNN/operators/activations/activations.h>
-#include <MetaNN/operators/blas/blas.h>
+#include <MetaNN/operators/activations/_.h>
+#include <MetaNN/operators/blas/_.h>
 #include <MetaNN/operators/cate_trans/_.h>
-#include <MetaNN/operators/elementwise/elementwise.h>
-#include <MetaNN/operators/loss/loss.h>
-#include <MetaNN/operators/mutating/mutating.h>
+#include <MetaNN/operators/elementwise/_.h>
+#include <MetaNN/operators/loss/_.h>
+#include <MetaNN/operators/mutating/_.h>

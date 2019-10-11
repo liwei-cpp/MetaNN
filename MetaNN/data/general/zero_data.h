@@ -25,14 +25,14 @@ namespace MetaNN
 
             void Eval() override
             {
-                m_resHandle.Allocate(m_shape);
-                auto lowLayer = LowerAccess(m_resHandle.MutableData());
+                PrincipalDataType<TCategory, TElement, TDevice> res(m_shape);
+                auto lowLayer = LowerAccess(res);
                 auto mem = lowLayer.MutableRawMemory();
         
                 static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, 
                               "Memset not support for other device tag.");
                 memset(mem, 0, sizeof(TElement) * m_shape.Count());
-                m_resHandle.SetEval();
+                m_resHandle.SetData(std::move(res));
             }
 
         private:
