@@ -173,6 +173,7 @@
       <File Name="operators/cate_trans/test_collapse.cpp"/>
       <File Name="operators/cate_trans/test_duplicate.cpp"/>
       <File Name="operators/cate_trans/_.h"/>
+      <File Name="operators/cate_trans/test_slice.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="blas">
       <File Name="operators/blas/test_dot.cpp"/>

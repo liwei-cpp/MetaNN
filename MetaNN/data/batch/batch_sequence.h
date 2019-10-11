@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MetaNN/data/linear_table/linear_table_pack.h>
+#include <MetaNN/data/linear_table/_.h>
 
 namespace MetaNN
 {

@@ -17,6 +17,8 @@ class EvalHandle
     };
     
 public:
+    using DataType = TData;
+
     bool IsEvaluated() const noexcept
     {
         return m_data->m_eval;
@@ -63,6 +65,15 @@ public:
         }
         m_data->m_data = TData(std::forward<TParams>(params)...);
     }
+    
+    void SetData(TData p_data)
+    {
+        if (IsEvaluated())
+        {
+            throw std::runtime_error("Data is already evaluated.");
+        }
+        m_data->m_data = std::move(p_data);
+    }
 
 private:
     std::shared_ptr<DataWithEvalInfo> m_data = std::make_shared<DataWithEvalInfo>();
@@ -72,6 +83,8 @@ template <typename TData>
 class ConstEvalHandle
 {
 public:
+    using DataType = TData;
+
     ConstEvalHandle(TData data)
         : m_constData(std::move(data))
     {}
@@ -94,6 +107,8 @@ template <typename TData>
 class ConstEvalHandle<EvalHandle<TData>>
 {
 public:
+    using DataType = TData;
+
     ConstEvalHandle(EvalHandle<TData> data)
         : m_constData(std::move(data))
     {}
@@ -184,6 +199,7 @@ class DynamicConstEvalHandle
 {
     using TBaseData = NSEvalHandle::DynamicHandleDataBase<TData>;
 public:
+    using DataType = TData;
     template <typename TRealHandle>
     DynamicConstEvalHandle(TRealHandle data)
         : m_data(std::make_shared<NSEvalHandle::DynamicHandleData<TRealHandle>>(std::move(data)))

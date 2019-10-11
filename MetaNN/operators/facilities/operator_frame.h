@@ -5,6 +5,11 @@
 #include <MetaNN/evaluate/facilities/eval_buffer.h>
 #include <MetaNN/operators/facilities/organizer.h>
 
+namespace MetaNN::OpTags
+{
+    struct Slice;
+}
+
 namespace MetaNN
 {
 template <typename TOpTag, typename...TOperands>
@@ -58,6 +63,8 @@ public:
         return (m_auxParams == val.m_auxParams) &&
                (m_operands == val.m_operands);
     }
+    
+    Operator<OpTags::Slice, Operator> operator[](size_t index) const;
 
     auto EvalRegister() const
     {
