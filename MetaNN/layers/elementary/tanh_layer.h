@@ -35,9 +35,12 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
 
-        using InputPortSet = LayerInputPortSet<TanhLayer>;
-        using OutputPortSet = LayerOutputPortSet<TanhLayer>;
-        using InputMap = TInputs;
+        using InputPortSet = LayerPortSet<struct LayerInput>;
+        using OutputPortSet = LayerPortSet<struct LayerOutput>;
+        using InputMap = typename std::conditional_t<std::is_same_v<TInputs, NullParameter>,
+                                                     EmptyLayerIOMap_<InputPortSet>,
+                                                     Identity_<TInputs>>::type;
+        static_assert(CheckInputMapAvailable_<InputMap, InputPortSet>::value);
         
     private:
         using TLayerInputFP = typename InputMap::template Find<LayerInput>;

@@ -72,7 +72,7 @@ namespace MetaNN
                           "Use PActFuncIs<...> to set activate function.");
 
             using TopoPickRes = TopoPicker_<biasInvolved, ActFunc>;
-            using type = ComposeKernel<SingleLayerPerceptron, TInput, TPolicies,
+            using type = ComposeKernel<LayerPortSet<LayerInput>, LayerPortSet<LayerOutput>, TInput, TPolicies,
                                        typename TopoPickRes::type>;
             
             template <typename... TParams>

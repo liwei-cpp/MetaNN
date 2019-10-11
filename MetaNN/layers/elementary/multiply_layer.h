@@ -8,15 +8,6 @@
 namespace MetaNN
 {
     template <typename TInputs, typename TPolicies>
-    class MultiplyLayer;
-    
-    template <>
-    struct LayerInputPortSet_<MultiplyLayer<void, void>>
-    {
-        using type = LayerPortSet<struct LeftOperand, struct RightOperand>;
-    };
-    
-    template <typename TInputs, typename TPolicies>
     class MultiplyLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -26,10 +17,13 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
         
-        using InputPortSet = LayerInputPortSet<MultiplyLayer>;
-        using OutputPortSet = LayerOutputPortSet<MultiplyLayer>;
-        using InputMap = TInputs;
-        
+        using InputPortSet = LayerPortSet<struct LeftOperand, struct RightOperand>;
+        using OutputPortSet = LayerPortSet<struct LayerOutput>;
+        using InputMap = typename std::conditional_t<std::is_same_v<TInputs, NullParameter>,
+                                                     EmptyLayerIOMap_<InputPortSet>,
+                                                     Identity_<TInputs>>::type;
+        static_assert(CheckInputMapAvailable_<InputMap, InputPortSet>::value);
+
     private:
         using TLeftOperandFP = typename InputMap::template Find<LeftOperand>;
         using TRightOperandFP = typename InputMap::template Find<RightOperand>;

@@ -8,7 +8,7 @@ namespace MetaNN
     template<template <typename, typename> class T, typename...TPolicies>
     struct MakeInferLayer_
     {
-        using type = T<EmptyLayerIOMap<LayerInputPortSet<T>>,
+        using type = T<NullParameter,
                        PolicyContainer<TPolicies...>>;
         static_assert(!type::IsFeedbackOutput);
         static_assert(!type::IsUpdate);
@@ -19,25 +19,10 @@ namespace MetaNN
 
     template<template <typename, typename> class T, typename...TPolicies>
     using MakeInferLayer = typename MakeInferLayer_<T, TPolicies...>::type;
-	
-	
-	namespace NSMakeTrainLayer
-	{
-		template <typename TInputMap, typename TKeySet>
-		struct CheckInputMapAvailable_;
-		
-		template <typename... TKVs, typename TKeySet>
-		struct CheckInputMapAvailable_<LayerIOMap<TKVs...>, TKeySet>
-		{
-			constexpr static bool value = (ContMetaFun::Set::HasKey<TKeySet, typename TKVs::KeyType> && ...);
-		};
-	}
-	
+
     template<template <typename, typename> class T, typename TInputMap, typename...TPolicies>
     struct MakeTrainLayer_
     {
-        static_assert(NSMakeTrainLayer::CheckInputMapAvailable_<TInputMap, LayerInputPortSet<T>>::value);
-        static_assert(ArraySize<TInputMap> == ArraySize<LayerInputPortSet<T>>);
         using type = T<TInputMap, PolicyContainer<TPolicies...>>;
     };
 

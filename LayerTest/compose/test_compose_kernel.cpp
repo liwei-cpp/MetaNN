@@ -348,16 +348,11 @@ namespace
                                                 KVBinder<Sublayer5, PolicyContainer<PFeedbackNoOutput>>>>);
 
 
-        using Layer1Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, NullParameter>, LayerKV<RightOperand, NullParameter>>,
-                                     PolicyContainer<PNoUpdate, PFeedbackNoOutput>>;
-        using Layer2Final = MultiplyLayer<LayerIOMap<LayerKV<LeftOperand, NullParameter>, LayerKV<RightOperand, NullParameter>>,
-                                          PolicyContainer<PFeedbackNoOutput>>;
-        using Layer3Final = SigmoidLayer<LayerIOMap<LayerKV<LayerInput, NullParameter>>,
-                                         PolicyContainer<>>;
-        using Layer4Final = TanhLayer<LayerIOMap<LayerKV<LayerInput, NullParameter>>,
-                                      PolicyContainer<>>;
-        using Layer5Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, NullParameter>, LayerKV<RightOperand, NullParameter>>,
-                                     PolicyContainer<PFeedbackNoOutput>>;
+        using Layer1Final = AddLayer<NullParameter, PolicyContainer<PNoUpdate, PFeedbackNoOutput>>;
+        using Layer2Final = MultiplyLayer<NullParameter, PolicyContainer<PFeedbackNoOutput>>;
+        using Layer3Final = SigmoidLayer<NullParameter, PolicyContainer<>>;
+        using Layer4Final = TanhLayer<NullParameter, PolicyContainer<>>;
+        using Layer5Final = AddLayer<NullParameter, PolicyContainer<PFeedbackNoOutput>>;
 
         static_assert(std::is_same_v<Check::type, std::tuple<Layer1Final, Layer2Final, Layer3Final, Layer4Final, Layer5Final>>);
         cout << "done" << endl;
@@ -412,7 +407,6 @@ namespace
         cout << "done" << endl;
     }
     
-    template<typename, typename> class DummyComposeLayer;
     void test_compose_kernel10()
     {
         cout << "Test compose kernel case 10...\t";
@@ -439,7 +433,7 @@ namespace
                                                      SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer2, PUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer5, PFeedbackNoOutput>>;
-        using Check = ComposeKernel<DummyComposeLayer, CheckInputs, CheckPolicyContainer, CT>;
+        using Check = ComposeKernel<LayerPortSet<Input1, Input2>, LayerPortSet<Output1>, CheckInputs, CheckPolicyContainer, CT>;
         
         auto sublayerArray = Check::CreateSublayers();
         using ArrayType = decltype(sublayerArray);

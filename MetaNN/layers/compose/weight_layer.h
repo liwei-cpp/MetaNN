@@ -9,6 +9,7 @@ namespace MetaNN
     struct ParamSublayer;
     struct DotSublayer;
     
+    struct LayerInput; struct LayerOutput;
     namespace NSWeightLayer
     {
         using Topology = ComposeTopology<Sublayer<ParamSublayer, ParamSourceLayer>,
@@ -17,14 +18,14 @@ namespace MetaNN
                                          InternalConnect<ParamSublayer, LayerOutput, DotSublayer, RightOperand>,
                                          OutConnect<DotSublayer, LayerOutput, LayerOutput>>;
 
-        template <template<typename, typename> class TLayerName, typename TInputs, typename TPolicies>
-        using Base = ComposeKernel<TLayerName, TInputs, TPolicies, Topology>;
+        template <typename TInputs, typename TPolicies>
+        using Base = ComposeKernel<LayerPortSet<LayerInput>, LayerPortSet<LayerOutput>, TInputs, TPolicies, Topology>;
     }
     
     template <typename TInputs, typename TPolicies>
-    class WeightLayer : public NSWeightLayer::Base<WeightLayer, TInputs, TPolicies>
+    class WeightLayer : public NSWeightLayer::Base<TInputs, TPolicies>
     {
-        using TBase = NSWeightLayer::Base<WeightLayer, TInputs, TPolicies>;
+        using TBase = NSWeightLayer::Base<TInputs, TPolicies>;
 
     public:
         template <typename... TShapeParams>

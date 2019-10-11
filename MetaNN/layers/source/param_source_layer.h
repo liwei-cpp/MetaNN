@@ -9,15 +9,6 @@
 namespace MetaNN
 {
     template <typename TInputs, typename TPolicies>
-    class ParamSourceLayer;
-    
-    template <>
-    struct LayerInputPortSet_<ParamSourceLayer<void, void>>
-    {
-        using type = LayerPortSet<>;
-    };
-    
-    template <typename TInputs, typename TPolicies>
     class ParamSourceLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -33,9 +24,9 @@ namespace MetaNN
         using ParamType = PrincipalDataType<ParamCategory, ElementType, DeviceType>;
 
     public:
-        using InputPortSet = LayerInputPortSet<ParamSourceLayer>;
-        using OutputPortSet = LayerOutputPortSet<ParamSourceLayer>;
-        using InputMap = TInputs;
+        using InputPortSet = LayerPortSet<>;
+        using OutputPortSet = LayerPortSet<struct LayerOutput>;
+        using InputMap = typename EmptyLayerIOMap_<InputPortSet>::type;
 
     public:
         template <typename... TShapeParams>

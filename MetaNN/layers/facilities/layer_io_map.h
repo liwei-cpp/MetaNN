@@ -6,24 +6,6 @@ namespace MetaNN
 {
     template <typename... TPorts> struct LayerPortSet;
     
-    template <typename TLayer>
-    struct LayerInputPortSet_
-    {
-        using type = LayerPortSet<struct LayerInput>;
-    };
-    
-    template <template <typename, typename> class TLayer>
-    using LayerInputPortSet = typename LayerInputPortSet_<TLayer<void, void>>::type;
-    
-    template <typename TLayer>
-    struct LayerOutputPortSet_
-    {
-        using type = LayerPortSet<struct LayerOutput>;
-    };
-    
-    template <template <typename, typename> class TLayer>
-    using LayerOutputPortSet = typename LayerOutputPortSet_<TLayer<void, void>>::type;
-    
     template <typename TKey, typename TValue>
     struct LayerKV : ContMetaFun::Helper::KVBinder<TKey, RemConstRef<TValue>>
     { };
@@ -52,9 +34,6 @@ namespace MetaNN
     {
         using type = LayerIOMap<LayerKV<TKeys, NullParameter>...>;
     };
-    
-    template <typename TLayerPorts>
-    using EmptyLayerIOMap = typename EmptyLayerIOMap_<TLayerPorts>::type;
     
     template <typename TIoMap>
     struct IsEmptyLayerIOMap_;
@@ -92,4 +71,13 @@ namespace MetaNN
         using TCont = typename LayerContainer_<TMap>::type;
         return TCont::Create();
     }
+    
+    template <typename TInputMap, typename TKeySet>
+    struct CheckInputMapAvailable_;
+
+    template <typename... TKVs, typename TKeySet>
+    struct CheckInputMapAvailable_<LayerIOMap<TKVs...>, TKeySet>
+    {
+        constexpr static bool value = (ContMetaFun::Set::HasKey<TKeySet, typename TKVs::KeyType> && ...);
+    };
 }

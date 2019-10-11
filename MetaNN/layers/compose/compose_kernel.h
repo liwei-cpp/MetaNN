@@ -1064,31 +1064,34 @@ namespace NSComposeKernel
     }
 };
 
-template <template<typename, typename> class TLayerName, typename TInputs, typename TPolicyCont, typename TKernelTopo>
+template <typename TInputPortSet, typename TOutputPortSet, typename TInputMap, typename TPolicyCont, typename TKernelTopo>
 class ComposeKernel
 {
     static_assert(IsPolicyContainer<TPolicyCont>, "Parameter is not a policy container.");
     using PlainPolicies = PlainPolicy<TPolicyCont>;
     
+public:
+    using InputPortSet = TInputPortSet;
+    using OutputPortSet = TOutputPortSet;
+    using InputMap = typename std::conditional_t<std::is_same_v<TInputMap, NullParameter>,
+                                                 EmptyLayerIOMap_<InputPortSet>,
+                                                 Identity_<TInputMap>>::type;
+    static_assert(CheckInputMapAvailable_<InputMap, InputPortSet>::value);
+    
 private:
     using TOrderedSublayerSeq = typename TKernelTopo::TopologicalOrdering;
-    using TSublayerInstCont = typename TKernelTopo::template Instances<TInputs, TPolicyCont>;
+    using TSublayerInstCont = typename TKernelTopo::template Instances<InputMap, TPolicyCont>;
     using SublayerArray = typename NSComposeKernel::SublayerArrayMaker<TOrderedSublayerSeq, TSublayerInstCont>::SublayerArray;
     using InternalResult = NSComposeKernel::InternalResult<TOrderedSublayerSeq>;
-    
+
 public:
-    static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, PlainPolicies>::IsFeedbackOutput;
-    static constexpr bool IsUpdate = NSComposeKernel::IsComposeLayerUpdate_<TSublayerInstCont>::value;
-    
-    using InputPortSet = LayerInputPortSet<TLayerName>;
-    using OutputPortSet = LayerOutputPortSet<TLayerName>;
-    using InputMap = TInputs;
-    
     template <typename TSublayerName>
     using SublayerType = typename ContMetaFun::Sequential::At<TSublayerInstCont,
                                                               ContMetaFun::Sequential::Order<TOrderedSublayerSeq, TSublayerName>>;
 
-public:
+    static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, PlainPolicies>::IsFeedbackOutput;
+    static constexpr bool IsUpdate = NSComposeKernel::IsComposeLayerUpdate_<TSublayerInstCont>::value;
+
     static auto CreateSublayers()
     {
         return NSComposeKernel::SublayerArrayMaker<TOrderedSublayerSeq, TSublayerInstCont>();

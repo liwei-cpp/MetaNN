@@ -3,21 +3,6 @@
 namespace MetaNN
 {
     template <typename TInputs, typename TPolicies>
-    class NLLLossLayer;
-    
-    template <>
-    struct LayerInputPortSet_<NLLLossLayer<void, void>>
-    {
-        using type = LayerPortSet<struct LayerInput, struct LossLayerWeight>;
-    };
-    
-    template <>
-    struct LayerOutputPortSet_<NLLLossLayer<void, void>>
-    {
-        using type = LayerPortSet<struct LayerOutput>;
-    };
-    
-    template <typename TInputs, typename TPolicies>
     class NLLLossLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
@@ -27,9 +12,12 @@ namespace MetaNN
         static constexpr bool IsFeedbackOutput = PolicySelect<GradPolicy, CurLayerPolicy>::IsFeedbackOutput;
         static constexpr bool IsUpdate = false;
 
-        using InputPortSet = LayerInputPortSet<NLLLossLayer>;
-        using OutputPortSet = LayerOutputPortSet<NLLLossLayer>;
-        using InputMap = TInputs;
+        using InputPortSet = LayerPortSet<struct LayerInput, struct LossLayerWeight>;
+        using OutputPortSet = LayerPortSet<struct LayerOutput>;
+        using InputMap = typename std::conditional_t<std::is_same_v<TInputs, NullParameter>,
+                                                     EmptyLayerIOMap_<InputPortSet>,
+                                                     Identity_<TInputs>>::type;
+        static_assert(CheckInputMapAvailable_<InputMap, InputPortSet>::value);
         
     private:
         using TLayerInputFP      = typename InputMap::template Find<LayerInput>;

@@ -9,6 +9,7 @@ namespace MetaNN
     struct ParamSublayer;
     struct AddSublayer;
     
+    struct LayerInput; struct LayerOutput;
     namespace NSBiasLayer
     {
         using Topology = ComposeTopology<Sublayer<ParamSublayer, ParamSourceLayer>,
@@ -17,14 +18,14 @@ namespace MetaNN
                                          InternalConnect<ParamSublayer, LayerOutput, AddSublayer, RightOperand>,
                                          OutConnect<AddSublayer, LayerOutput, LayerOutput>>;
 
-        template <template<typename, typename> class TLayerName, typename TInputs, typename TPolicies>
-        using Base = ComposeKernel<TLayerName, TInputs, TPolicies, Topology>;
+        template <typename TInputMap, typename TPolicies>
+        using Base = ComposeKernel<LayerPortSet<LayerInput>, LayerPortSet<LayerOutput>, TInputMap, TPolicies, Topology>;
     }
     
     template <typename TInputs, typename TPolicies>
-    class BiasLayer : public NSBiasLayer::Base<BiasLayer, TInputs, TPolicies>
+    class BiasLayer : public NSBiasLayer::Base<TInputs, TPolicies>
     {
-        using TBase = NSBiasLayer::Base<BiasLayer, TInputs, TPolicies>;
+        using TBase = NSBiasLayer::Base<TInputs, TPolicies>;
 
     public:
         template <typename... TShapeParams>

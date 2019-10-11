@@ -100,10 +100,10 @@ struct VarTypeDict2IOMap_<TVarTypeDict, VarTypeDict<TKeys...>>
 };
 
 template <typename TLayer, typename TLayerIOMap>
-struct LayerIOMapForwardTrasfer_;
+struct LayerIOMapForwardTransfer_;
 
 template <typename TLayer, typename... TKVs>
-struct LayerIOMapForwardTrasfer_<TLayer, LayerIOMap<TKVs...>>
+struct LayerIOMapForwardTransfer_<TLayer, LayerIOMap<TKVs...>>
 {
     using TVarTypeDictFill = typename CreateVarTypeDict_<std::tuple<>, std::tuple<>, TKVs...>::type;    
     using TForwardRes = decltype(std::declval<TLayer>().FeedForward(std::declval<TVarTypeDictFill>()));
@@ -113,7 +113,7 @@ struct LayerIOMapForwardTrasfer_<TLayer, LayerIOMap<TKVs...>>
 }
 
 template <typename TLayer>
-using LayerOutputItemTypes = typename NSLayerIOMapTrasfer::LayerIOMapForwardTrasfer_<TLayer, typename TLayer::InputMap>::type;
+using LayerOutputItemTypes = typename NSLayerIOMapTrasfer::LayerIOMapForwardTransfer_<TLayer, typename TLayer::InputMap>::type;
 
 template <typename TStoreType, bool store>
 using LayerInternalBuf = std::conditional_t<store, std::stack<TStoreType>, NullParameter>;
