@@ -147,8 +147,11 @@ class Shape<CategoryTags::Batch<TSubCate>> : public Shape<TSubCate>
     static_assert(NSShape::IsCardinalTag<TSubCate>);
     
 public:
+    explicit Shape()
+        : Shape(0) {}
+
     template <typename...TParams>
-    explicit Shape(size_t p_batchNum = 0, TParams&&... params)
+    explicit Shape(size_t p_batchNum, TParams&&... params)
         : Shape<TSubCate>(std::forward<TParams>(params)...)
         , m_batchNum(p_batchNum)
     {}
@@ -201,8 +204,11 @@ class Shape<CategoryTags::Sequence<TSubCate>> : public Shape<TSubCate>
     static_assert(NSShape::IsCardinalTag<TSubCate>);
     
 public:
+    explicit Shape()
+        : Shape(0) {}
+
     template <typename...TParams>
-    explicit Shape(size_t p_seqLen = 0, TParams&&... params)
+    explicit Shape(size_t p_seqLen, TParams&&... params)
         : Shape<TSubCate>(std::forward<TParams>(params)...)
         , m_seqLen(p_seqLen)
     {}
@@ -255,8 +261,11 @@ class Shape<CategoryTags::BatchSequence<TSubCate>> : public Shape<TSubCate>
     static_assert(NSShape::IsCardinalTag<TSubCate>);
     
 public:
+    explicit Shape()
+        : Shape(std::vector<size_t>{}) {}
+
     template <typename TSeq = std::vector<size_t>, typename...TParams>
-    explicit Shape(const TSeq& seq = TSeq{}, TParams&&... params)
+    explicit Shape(const TSeq& seq, TParams&&... params)
         : Shape<TSubCate>(std::forward<TParams>(params)...)
     {
         m_seqLenCont.reserve(seq.size());

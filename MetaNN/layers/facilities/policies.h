@@ -70,10 +70,6 @@ ValuePolicyObj(PDisableBptt,  RecurrentLayerPolicy, UseBptt, false);
     
     struct LayerStructurePolicy
     {
-    private:
-        template <template<typename, typename> class> struct ActFuncComp;
-
-    public:
         using MajorClass = LayerStructurePolicy;
         // ActFunc
         struct ActFuncTemplateCate;
@@ -85,7 +81,7 @@ ValuePolicyObj(PDisableBptt,  RecurrentLayerPolicy, UseBptt, false);
         using ActFunc = DummyActFun<TInputMap, TPolicies>;
         
         template <template<typename, typename> class T>
-        static constexpr bool IsDummyActFun = std::is_same_v<ActFuncComp<T>, ActFuncComp<DummyActFun>>;
+        static constexpr bool IsDummyActFun = std::is_same_v<T<void, void>, DummyActFun<void, void>>;
         
         // Bias Involved
         struct BiasInvolvedValueCate;

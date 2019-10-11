@@ -11,7 +11,7 @@ namespace MetaNN
     class InterpolateLayer;
     
     template <>
-    struct LayerInputPortSet_<InterpolateLayer>
+    struct LayerInputPortSet_<InterpolateLayer<void, void>>
     {
         using type = LayerPortSet<struct InterpolateLayerWeight1,
                                   struct InterpolateLayerWeight2,

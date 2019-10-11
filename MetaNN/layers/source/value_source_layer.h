@@ -32,13 +32,13 @@ namespace MetaNN
     class ValueSourceLayer;
     
     template <>
-    struct LayerInputPortSet_<ValueSourceLayer>
+    struct LayerInputPortSet_<ValueSourceLayer<void, void>>
     {
         using type = LayerPortSet<>;
     };
     
     template <>
-    struct LayerOutputPortSet_<ValueSourceLayer>
+    struct LayerOutputPortSet_<ValueSourceLayer<void, void>>
     {
         using type = LayerPortSet<struct LayerOutput>;
     };

@@ -12,7 +12,7 @@ namespace MetaNN
     class ParamSourceLayer;
     
     template <>
-    struct LayerInputPortSet_<ParamSourceLayer>
+    struct LayerInputPortSet_<ParamSourceLayer<void, void>>
     {
         using type = LayerPortSet<>;
     };

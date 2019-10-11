@@ -95,7 +95,7 @@ namespace MetaNN
     class DotLayer;
     
     template <>
-    struct LayerInputPortSet_<DotLayer>
+    struct LayerInputPortSet_<DotLayer<void, void>>
     {
         using type = LayerPortSet<struct LeftOperand, struct RightOperand>;
     };

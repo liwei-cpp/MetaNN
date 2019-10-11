@@ -71,8 +71,8 @@ public:
         , m_mem(m_shape.Count())
     {}
     
-    template <template<typename T> class Cont, typename TVal, typename... TShapeParams>
-    explicit StaticArray(const Cont<TVal>& p_lens,
+    template <typename TLensCont, typename... TShapeParams>
+    explicit StaticArray(const TLensCont& p_lens,
                          TShapeParams&&... shapeParams)
         : m_shape(p_lens, std::forward<TShapeParams>(shapeParams)...)
         , m_mem(m_shape.Count())

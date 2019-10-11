@@ -6,23 +6,23 @@ namespace MetaNN
 {
     template <typename... TPorts> struct LayerPortSet;
     
-    template <template <typename, typename> class TLayer>
+    template <typename TLayer>
     struct LayerInputPortSet_
     {
         using type = LayerPortSet<struct LayerInput>;
     };
     
     template <template <typename, typename> class TLayer>
-    using LayerInputPortSet = typename LayerInputPortSet_<TLayer>::type;
+    using LayerInputPortSet = typename LayerInputPortSet_<TLayer<void, void>>::type;
     
-    template <template <typename, typename> class TLayer>
+    template <typename TLayer>
     struct LayerOutputPortSet_
     {
         using type = LayerPortSet<struct LayerOutput>;
     };
     
     template <template <typename, typename> class TLayer>
-    using LayerOutputPortSet = typename LayerOutputPortSet_<TLayer>::type;
+    using LayerOutputPortSet = typename LayerOutputPortSet_<TLayer<void, void>>::type;
     
     template <typename TKey, typename TValue>
     struct LayerKV : ContMetaFun::Helper::KVBinder<TKey, RemConstRef<TValue>>

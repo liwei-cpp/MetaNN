@@ -12,7 +12,7 @@ namespace MetaNN
     class AddLayer;
     
     template <>
-    struct LayerInputPortSet_<AddLayer>
+    struct LayerInputPortSet_<AddLayer<void, void>>
     {
         using type = LayerPortSet<struct LeftOperand, struct RightOperand>;
     };

@@ -11,7 +11,7 @@ namespace MetaNN
     class MultiplyLayer;
     
     template <>
-    struct LayerInputPortSet_<MultiplyLayer>
+    struct LayerInputPortSet_<MultiplyLayer<void, void>>
     {
         using type = LayerPortSet<struct LeftOperand, struct RightOperand>;
     };

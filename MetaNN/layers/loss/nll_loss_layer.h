@@ -6,13 +6,13 @@ namespace MetaNN
     class NLLLossLayer;
     
     template <>
-    struct LayerInputPortSet_<NLLLossLayer>
+    struct LayerInputPortSet_<NLLLossLayer<void, void>>
     {
         using type = LayerPortSet<struct LayerInput, struct LossLayerWeight>;
     };
     
     template <>
-    struct LayerOutputPortSet_<NLLLossLayer>
+    struct LayerOutputPortSet_<NLLLossLayer<void, void>>
     {
         using type = LayerPortSet<struct LayerOutput>;
     };
