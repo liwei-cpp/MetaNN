@@ -111,7 +111,7 @@ public:
     
     const auto operator [] (size_t id) const
     {
-        if constexpr (IsBatchSequenceategoryTag<CategoryTag>)
+        if constexpr (IsBatchSequenceCategoryTag<CategoryTag>)
         {
             const auto& seqLenCont = m_shape.SeqLenContainer();
             if (id >= seqLenCont.size())

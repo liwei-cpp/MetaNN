@@ -45,10 +45,16 @@ constexpr bool IsValidCategoryTag = std::is_same_v<T, CategoryTags::Scalar> ||
                                     std::is_same_v<T, CategoryTags::BatchThreeDArraySequence>;
 
 template <typename T>
-constexpr bool IsBatchSequenceategoryTag = false;
+constexpr bool IsBatchCategoryTag = false;
 
 template <typename TCardinal>
-constexpr bool IsBatchSequenceategoryTag<CategoryTags::BatchSequence<TCardinal>> = true;
+constexpr bool IsBatchCategoryTag<CategoryTags::Batch<TCardinal>> = true;
+
+template <typename T>
+constexpr bool IsBatchSequenceCategoryTag = false;
+
+template <typename TCardinal>
+constexpr bool IsBatchSequenceCategoryTag<CategoryTags::BatchSequence<TCardinal>> = true;
 /// device types
 struct DeviceTags
 {

@@ -181,6 +181,7 @@
       <File Name="layers/compose/bias_layer.h"/>
       <File Name="layers/compose/weight_layer.h"/>
       <File Name="layers/compose/single_layer_perceptron.h"/>
+      <File Name="layers/compose/batch_iter_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="elementary">
       <File Name="layers/elementary/abs_layer.h"/>
