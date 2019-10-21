@@ -131,6 +131,7 @@
     <File Name="compose/test_bias_layer.cpp"/>
     <File Name="compose/test_weight_layer.cpp"/>
     <File Name="compose/test_single_layer_perceptron.cpp"/>
+    <File Name="compose/test_batch_iter_layer.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="source">
     <File Name="source/_.h"/>

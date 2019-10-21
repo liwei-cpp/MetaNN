@@ -190,6 +190,11 @@ public:
 
     void PushBack(TData data)
     {
+        if (m_buffer->empty() && (m_shape.Cardinal() == MetaNN::Shape<CardinalTag>()))
+        {
+            m_shape = HelperBlob::ShapeInit(data.Shape());
+        }
+
         if (!HelperBlob::TryUpdateShape(m_shape, data.Shape()))
         {
             throw std::runtime_error("Shape mismatch");
@@ -216,6 +221,14 @@ public:
         assert(AvailableForWrite());
         m_buffer.clear();
         m_shape = HelperBlob::ShapeInit(m_shape.Cardinal());
+    }
+    
+    void Reverse()
+    {
+        assert(AvailableForWrite());
+        if (!m_buffer) return;
+        auto& cont = *m_buffer;
+        std::reverse(cont.begin(), cont.end());
     }
     
     bool IsEmpty() const

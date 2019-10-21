@@ -1,5 +1,7 @@
 namespace Test::Layer::Compose
 {
+    void test_batch_iter_layer();
+
     void test_compose_kenrel();
     void test_bias_layer();
     void test_weight_layer();
@@ -8,6 +10,8 @@ namespace Test::Layer::Compose
     
     void Test()
     {
+        test_batch_iter_layer();
+
         test_compose_kenrel();
         
         test_bias_layer();

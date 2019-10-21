@@ -25,6 +25,7 @@ namespace MetaNN
             using ValueType = typename std::conditional_t<IsBatchCategory<TValue>,
                                                           RemoveBatchHelper_<TValue>,
                                                           Identity_<TValue>>::type;
+            using type = LayerKV<TKey, ValueType>;
         };
         
         template <typename TInputs, typename TPolicies>
@@ -50,6 +51,12 @@ namespace MetaNN
         
         template <typename TInputs>
         struct IsIOMapNonBatch_;
+        
+        template <>
+        struct IsIOMapNonBatch_<NullParameter>
+        {
+            constexpr static bool value = false;
+        };
         
         template <typename... TKeys, typename... TValues>
         struct IsIOMapNonBatch_<LayerIOMap<LayerKV<TKeys, TValues>...>>
@@ -140,7 +147,7 @@ namespace MetaNN
                 DynamicBatch<CurValueType> aimValue;
                 aimValue.PushBack(std::forward<TInput>(p_input).template Get<CurType>());
                 auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(aimValue);
-                return Split<SeqTail<TKeyCont>>(std::forward<TInput>(p_input), std::forward<TOutput>(p_output));
+                return InitOutputCont<SeqTail<TKeyCont>>(std::forward<TInput>(p_input), std::move(newOutput));
             }
         }
 
@@ -153,10 +160,22 @@ namespace MetaNN
             {
                 using CurType = SeqHead<TKeyCont>;
                 p_output.template Get<CurType>().PushBack(std::forward<TInput>(p_input).template Get<CurType>());
-                return Split<SeqTail<TKeyCont>>(std::forward<TInput>(p_input), std::forward<TOutput>(p_output));
+                return FillOutputCont<SeqTail<TKeyCont>>(std::forward<TInput>(p_input), std::forward<TOutput>(p_output));
             }
         }
-
+        
+        template <typename TKeyCont, typename TOutput>
+        auto ReverseOutputCont(TOutput&& p_output)
+        {
+            if constexpr (ArraySize<TKeyCont> == 0)
+                return std::forward<TOutput>(p_output);
+            else
+            {
+                using CurType = SeqHead<TKeyCont>;
+                p_output.template Get<CurType>().Reverse();
+                return ReverseOutputCont<SeqTail<TKeyCont>>(std::forward<TOutput>(p_output));
+            }
+        }
     }
     
     template <typename TInputs, typename TPolicies>
@@ -176,13 +195,13 @@ namespace MetaNN
                                                      Identity_<TInputs>>::type;
         static_assert(CheckInputMapAvailable_<InputMap, InputPortSet>::value);
 
-        static constexpr bool IsTrivalLayer = std::is_same_v<TInputs, NullParameter> ? false : NSBatchIterLayer::IsIOMapNonBatch_<TInputs>::value;
+        static constexpr bool IsTrivalLayer = NSBatchIterLayer::IsIOMapNonBatch_<TInputs>::value;
 
     public:
         template <typename... TParams>
-        BatchIterLayer(std::string p_name, TParams&&... kernelParams)
-            : m_name(std::move(p_name))
-            , m_kernel(std::forward<TParams>(kernelParams)...)
+        BatchIterLayer(const std::string& p_name, TParams&&... kernelParams)
+            : m_name(p_name)
+            , m_kernel(p_name + "/kernel", std::forward<TParams>(kernelParams)...)
         {}
 
         template <typename TInitializer, typename TBuffer>
@@ -215,11 +234,11 @@ namespace MetaNN
             if constexpr (IsTrivalLayer)
             {
                 static_assert(NSBatchIterLayer::IsFBContNonBatch_<typename TOriInputCont::Keys, TOriInputCont>::value);
-                return m_kernel.FeedForward<std::forward<TIn>>(p_in);
+                return m_kernel.FeedForward(p_in);
             }
             else
             {
-                if constexpr (IsEmptyLayerIOMap<InputPortSet> && IsFeedbackOutput)
+                if constexpr (IsEmptyLayerIOMap<InputMap> && IsFeedbackOutput)
                 {
                     // if IsFeedbackOutput, and we have no input type info, the input should required be batch for BP.
                     static_assert(NSBatchIterLayer::IsFBContAllBatch_<typename TOriInputCont::Keys, TOriInputCont>::value, "All inputs should be batch.");
@@ -233,13 +252,14 @@ namespace MetaNN
                 
                 auto firstInputCont = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), 0);
                 auto firstOutput = m_kernel.FeedForward(std::move(firstInputCont));
-                auto outputCont = NSBatchIterLayer::InitOutputCont<typename TOriInputCont::Keys>(std::move(firstOutput), TOriInputCont::Keys::Create());
+                using OutputKeys = typename decltype(firstOutput)::Keys;
+                auto outputCont = NSBatchIterLayer::InitOutputCont<OutputKeys>(std::move(firstOutput), OutputKeys::Create());
 
                 for (size_t i = 1; i < batchNum; ++i)
                 {
                     auto curInputCont = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), i);
                     auto curOutput = m_kernel.FeedForward(std::move(curInputCont));
-                    NSBatchIterLayer::FillOutputCont<typename TOriInputCont::Keys>(std::move(curOutput), outputCont);
+                    NSBatchIterLayer::FillOutputCont<OutputKeys>(std::move(curOutput), outputCont);
                 }
                 return std::move(outputCont);
             }
@@ -252,7 +272,27 @@ namespace MetaNN
             if constexpr (IsTrivalLayer)
             {
                 static_assert(NSBatchIterLayer::IsFBContNonBatch_<typename TOriInputCont::Keys, TOriInputCont>::value);
-                return m_kernel.FeedBackward<std::forward<TIn>>(p_in);
+                return m_kernel.FeedBackward(p_in);
+            }
+            else if constexpr ((!IsFeedbackOutput) && (!IsUpdate))
+            {
+                return LayerInputCont<BatchIterLayer>();
+            }
+            else if constexpr (!IsFeedbackOutput)
+            {// Note: update internal parameter
+                static_assert(NSBatchIterLayer::IsFBContAllBatch_<typename TOriInputCont::Keys, TOriInputCont>::value, "All grads should be batch.");
+
+                const size_t batchNum = NSBatchIterLayer::GetBatchNum<typename TOriInputCont::Keys>(p_in);
+                if (batchNum == 0)
+                {
+                    throw std::runtime_error("Empty batch as grad input.");
+                }
+                
+                for (size_t i = 1; i <= batchNum; ++i)
+                {
+                    auto curInputCont = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), batchNum - i);
+                    m_kernel.FeedBackward(std::move(curInputCont));
+                }
             }
             else
             {
@@ -266,13 +306,17 @@ namespace MetaNN
                 
                 auto firstInputGrad = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), batchNum - 1);
                 auto firstOutputGrad = m_kernel.FeedBackward(std::move(firstInputGrad));
-                auto outputGrad = NSBatchIterLayer::InitOutputCont<typename TOriInputCont::Keys>(std::move(firstOutputGrad), TOriInputCont::Keys::Create());
+                using OutputGradKeys = typename decltype(firstOutputGrad)::Keys;
+                auto outputGrad = NSBatchIterLayer::InitOutputCont<OutputGradKeys>(std::move(firstOutputGrad), OutputGradKeys::Create());
                 for (size_t i = 2; i <= batchNum; ++i)
                 {
                     auto curInputCont = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), batchNum - i);
-                    auto curOutput = m_kernel.FeedForward(std::move(curInputCont));
-                    NSBatchIterLayer::FillOutputCont<typename TOriInputCont::Keys>(std::move(curOutput), outputGrad);
+                    auto curOutput = m_kernel.FeedBackward(std::move(curInputCont));
+                    NSBatchIterLayer::FillOutputCont<OutputGradKeys>(std::move(curOutput), outputGrad);
                 }
+                
+                // Note: should collapse based on the input shape.
+                NSBatchIterLayer::ReverseOutputCont<OutputGradKeys>(outputGrad);
                 return std::move(outputGrad);
             }
         }
