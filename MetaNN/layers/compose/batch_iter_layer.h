@@ -104,6 +104,58 @@ namespace MetaNN
                 return GetBatchNum<TKeyCont, TIn, pos + 1>(p_in, prev);
             }
         }
+        
+        template <typename TKeyCont, typename TInput, typename TOutput>
+        auto Split(const TInput& p_input, TOutput&& p_output, size_t id)
+        {
+            if constexpr (ArraySize<TKeyCont> == 0)
+                return std::forward<TOutput>(p_output);
+            else
+            {
+                using CurType = SeqHead<TKeyCont>;
+                auto curValue = p_input.template Get<CurType>();
+                if constexpr (IsBatchCategory<decltype(curValue)>)
+                {
+                    auto inputValue = curValue[id];
+                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(inputValue);
+                    return Split<SeqTail<TKeyCont>>(p_input, std::move(newOutput), id);
+                }
+                else
+                {
+                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(curValue);
+                    return Split<SeqTail<TKeyCont>>(p_input, std::move(newOutput), id);
+                }
+            }
+        }
+        
+        template <typename TKeyCont, typename TInput, typename TOutput>
+        auto InitOutputCont(TInput&& p_input, TOutput&& p_output)
+        {
+            if constexpr (ArraySize<TKeyCont> == 0)
+                return std::forward<TOutput>(p_output);
+            else
+            {
+                using CurType = SeqHead<TKeyCont>;
+                using CurValueType = typename RemConstRef<TInput>::template ValueType<CurType>;
+                DynamicBatch<CurValueType> aimValue;
+                aimValue.PushBack(std::forward<TInput>(p_input).template Get<CurType>());
+                auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(aimValue);
+                return Split<SeqTail<TKeyCont>>(std::forward<TInput>(p_input), std::forward<TOutput>(p_output));
+            }
+        }
+
+        template <typename TKeyCont, typename TInput, typename TOutput>
+        auto FillOutputCont(TInput&& p_input, TOutput&& p_output)
+        {
+            if constexpr (ArraySize<TKeyCont> == 0)
+                return std::forward<TOutput>(p_output);
+            else
+            {
+                using CurType = SeqHead<TKeyCont>;
+                p_output.template Get<CurType>().PushBack(std::forward<TInput>(p_input).template Get<CurType>());
+                return Split<SeqTail<TKeyCont>>(std::forward<TInput>(p_input), std::forward<TOutput>(p_output));
+            }
+        }
 
     }
     
@@ -167,19 +219,29 @@ namespace MetaNN
             }
             else
             {
-                if constexpr (IsEmptyLayerIOMap<InputPortSet> && (IsFeedbackOutput || IsUpdate))
+                if constexpr (IsEmptyLayerIOMap<InputPortSet> && IsFeedbackOutput)
                 {
-                    // if true, we have no input type info, therefore the input should required be batch for BP.
+                    // if IsFeedbackOutput, and we have no input type info, the input should required be batch for BP.
                     static_assert(NSBatchIterLayer::IsFBContAllBatch_<typename TOriInputCont::Keys, TOriInputCont>::value, "All inputs should be batch.");
                 }
-                using KernelOutputCont = decltype(std::declval<KernelType>().FeedForward(std::declval<TIn>()));
 
                 const size_t batchNum = NSBatchIterLayer::GetBatchNum<typename TOriInputCont::Keys>(p_in);
                 if (batchNum == 0)
                 {
                     throw std::runtime_error("Empty batch as input.");
                 }
-                static_assert(DependencyFalse<TIn>, "Not implemented");
+                
+                auto firstInputCont = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), 0);
+                auto firstOutput = m_kernel.FeedForward(std::move(firstInputCont));
+                auto outputCont = NSBatchIterLayer::InitOutputCont<typename TOriInputCont::Keys>(std::move(firstOutput), TOriInputCont::Keys::Create());
+
+                for (size_t i = 1; i < batchNum; ++i)
+                {
+                    auto curInputCont = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), i);
+                    auto curOutput = m_kernel.FeedForward(std::move(curInputCont));
+                    NSBatchIterLayer::FillOutputCont<typename TOriInputCont::Keys>(std::move(curOutput), outputCont);
+                }
+                return std::move(outputCont);
             }
         }
 
@@ -195,14 +257,23 @@ namespace MetaNN
             else
             {
                 static_assert(NSBatchIterLayer::IsFBContAllBatch_<typename TOriInputCont::Keys, TOriInputCont>::value, "All grads should be batch.");
-                using KernelOutputCont = decltype(std::declval<KernelType>().FeedBackward(std::declval<TIn>()));
 
                 const size_t batchNum = NSBatchIterLayer::GetBatchNum<typename TOriInputCont::Keys>(p_in);
                 if (batchNum == 0)
                 {
                     throw std::runtime_error("Empty batch as grad input.");
                 }
-                static_assert(DependencyFalse<TIn>, "Not implemented");
+                
+                auto firstInputGrad = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), batchNum - 1);
+                auto firstOutputGrad = m_kernel.FeedBackward(std::move(firstInputGrad));
+                auto outputGrad = NSBatchIterLayer::InitOutputCont<typename TOriInputCont::Keys>(std::move(firstOutputGrad), TOriInputCont::Keys::Create());
+                for (size_t i = 2; i <= batchNum; ++i)
+                {
+                    auto curInputCont = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), batchNum - i);
+                    auto curOutput = m_kernel.FeedForward(std::move(curInputCont));
+                    NSBatchIterLayer::FillOutputCont<typename TOriInputCont::Keys>(std::move(curOutput), outputGrad);
+                }
+                return std::move(outputGrad);
             }
         }
     private:
