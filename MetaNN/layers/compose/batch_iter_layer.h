@@ -176,6 +176,75 @@ namespace MetaNN
                 return ReverseOutputCont<SeqTail<TKeyCont>>(std::forward<TOutput>(p_output));
             }
         }
+        
+        template <bool bFeedbackOutput, typename TInputMap>
+        struct ShapeDictHelper
+        {
+            static_assert(!bFeedbackOutput);
+            using type = NullParameter;
+
+            template <typename TIn>
+            static void PickShapeInfo(type&, const TIn&) {}
+            
+            template <typename TRes>
+            static auto Collapse(type&, TRes&& p_res)
+            {
+                return std::forward<TRes>(p_res);
+            }
+        };
+        
+        template <typename... TKeys, typename... TValues>
+        struct ShapeDictHelper<true, LayerIOMap<LayerKV<TKeys, TValues>...>>
+        {
+            using shapeDictType = typename VarTypeDict<TKeys...>::template Values<RemConstRef<decltype(std::declval<TValues>().Shape())>...>;
+            using type = std::stack<shapeDictType>;
+            
+            template <typename Key, typename TIn, typename Cont>
+            static void PickShapeInfoHelper(const TIn& p_in, Cont&& p_cont)
+            {
+                auto curShape = p_in.template Get<Key>().Shape();
+                static_assert(std::is_same_v<decltype(curShape), typename shapeDictType::template ValueType<Key>>);
+                p_cont.template Update<Key>(std::move(curShape));
+            }
+            
+            template <typename TIn>
+            static void PickShapeInfo(type& shapeStack, const TIn& p_in)
+            {
+                shapeDictType res;
+                (PickShapeInfoHelper<TKeys>(p_in, res), ...);
+                shapeStack.push(res);
+            }
+            
+            template <typename TKeysCont, typename TShapeCont, typename TCont>
+            static auto CollapseHelper(const TShapeCont& p_shape, TCont&& p_cont)
+            {
+                if constexpr (ArraySize<TKeysCont> == 0)
+                    return std::forward<TCont>(p_cont);
+                else
+                {
+                    using CurType = SeqHead<TKeysCont>;
+                    const auto& oriValue = p_cont.template Get<CurType>();
+                    auto newValue = MetaNN::Collapse(oriValue, p_shape.template Get<CurType>());
+                    if constexpr (!std::is_same_v<RemConstRef<decltype(newValue)>, RemConstRef<decltype(oriValue)>>)
+                    {
+                        auto newCont = std::forward<TCont>(p_cont).template Set<CurType>(newValue);
+                        return CollapseHelper<SeqTail<TKeysCont>>(p_shape, std::move(newCont));
+                    }
+                    else
+                        return CollapseHelper<SeqTail<TKeysCont>>(p_shape, std::forward<TCont>(p_cont));
+                }
+            }
+
+            template <typename TRes>
+            static auto Collapse(type& shapeStack, TRes&& p_res)
+            {
+                assert(!shapeStack.empty());
+                
+                auto currentShapeDict = shapeStack.top();
+                shapeStack.pop();
+                return CollapseHelper<VarTypeDict<TKeys...>>(currentShapeDict, std::forward<TRes>(p_res));
+            }
+        };
     }
     
     template <typename TInputs, typename TPolicies>
@@ -196,6 +265,9 @@ namespace MetaNN
         static_assert(CheckInputMapAvailable_<InputMap, InputPortSet>::value);
 
         static constexpr bool IsTrivalLayer = NSBatchIterLayer::IsIOMapNonBatch_<TInputs>::value;
+
+    private:
+        using TShapeDickHelper = typename NSBatchIterLayer::ShapeDictHelper<IsFeedbackOutput, InputMap>;
 
     public:
         template <typename... TParams>
@@ -225,6 +297,7 @@ namespace MetaNN
         void NeutralInvariant() const
         {
             LayerNeutralInvariant(m_kernel);
+            LayerTraits::CheckStackEmpty(m_inputShapeStack);
         }
     
         template <typename TIn>
@@ -238,17 +311,13 @@ namespace MetaNN
             }
             else
             {
-                if constexpr (IsEmptyLayerIOMap<InputMap> && IsFeedbackOutput)
-                {
-                    // if IsFeedbackOutput, and we have no input type info, the input should required be batch for BP.
-                    static_assert(NSBatchIterLayer::IsFBContAllBatch_<typename TOriInputCont::Keys, TOriInputCont>::value, "All inputs should be batch.");
-                }
-
                 const size_t batchNum = NSBatchIterLayer::GetBatchNum<typename TOriInputCont::Keys>(p_in);
                 if (batchNum == 0)
                 {
                     throw std::runtime_error("Empty batch as input.");
                 }
+                
+                TShapeDickHelper::PickShapeInfo(m_inputShapeStack, p_in);
                 
                 auto firstInputCont = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), 0);
                 auto firstOutput = m_kernel.FeedForward(std::move(firstInputCont));
@@ -314,14 +383,15 @@ namespace MetaNN
                     auto curOutput = m_kernel.FeedBackward(std::move(curInputCont));
                     NSBatchIterLayer::FillOutputCont<OutputGradKeys>(std::move(curOutput), outputGrad);
                 }
-                
-                // Note: should collapse based on the input shape.
-                NSBatchIterLayer::ReverseOutputCont<OutputGradKeys>(outputGrad);
-                return std::move(outputGrad);
+
+                NSBatchIterLayer::ReverseOutputCont<OutputGradKeys>(outputGrad);                
+                return TShapeDickHelper::Collapse(m_inputShapeStack, std::move(outputGrad));
             }
         }
     private:
         std::string m_name;
         KernelType m_kernel;
+
+        typename TShapeDickHelper::type m_inputShapeStack;
     };
 }

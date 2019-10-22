@@ -16,6 +16,15 @@ struct VarTypeDict
     struct Values
     {
     public:
+        using Keys = VarTypeDict;
+        
+        template <typename TKey>
+        using ValueType = ContMetaFun::Sequential::At<Values, ContMetaFun::Sequential::Order<VarTypeDict, TKey>>;
+        
+        template <typename TKey>
+        constexpr static bool IsValueEmpty = std::is_same_v<ValueType<TKey>, NullParameter>;
+
+    public:
         Values() = default;
         
         Values(Values&& val)
@@ -39,6 +48,19 @@ struct VarTypeDict
         }
 
     public:
+        template <typename TTag, typename... TParams>
+        void Update(TParams&&... params)
+        {
+            constexpr static auto TagPos = ContMetaFun::Sequential::Order<VarTypeDict, TTag>;
+            using rawVal = ContMetaFun::Sequential::At<Values, TagPos>;
+            rawVal* tmp = new rawVal(std::forward<TParams>(params)...);
+            m_tuple[TagPos] = std::shared_ptr<void>(tmp,
+                                    [](void* ptr){
+                                        rawVal* nptr = static_cast<rawVal*>(ptr);
+                                        delete nptr;
+                                    });
+        }
+        
         template <typename TTag, typename TVal>
         auto Set(TVal&& val) &&
         {
@@ -77,14 +99,6 @@ struct VarTypeDict
             AimType* res = static_cast<AimType*>(tmp);
             return std::move(*res);
         }
-        
-        using Keys = VarTypeDict;
-        
-        template <typename TKey>
-        using ValueType = ContMetaFun::Sequential::At<Values, ContMetaFun::Sequential::Order<VarTypeDict, TKey>>;
-        
-        template <typename TKey>
-        constexpr static bool IsValueEmpty = std::is_same_v<ValueType<TKey>, NullParameter>;
 
     private:
         std::shared_ptr<void> m_tuple[sizeof...(TTypes)];
