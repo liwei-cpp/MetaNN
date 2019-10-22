@@ -61,7 +61,7 @@ namespace MetaNN
         template <typename... TKeys, typename... TValues>
         struct IsIOMapNonBatch_<LayerIOMap<LayerKV<TKeys, TValues>...>>
         {
-            constexpr static bool value = (!IsBatchCategory<TValues> || ...);
+            constexpr static bool value = (!IsBatchCategory<TValues> && ...);
         };
         
         template <typename TKeys, typename TInputCont>
@@ -104,7 +104,7 @@ namespace MetaNN
                 }
 
                 if (prev == 0) prev = batchValue;
-                else if (prev != batchValue)
+                else if ((prev != batchValue) && (batchValue != 0))
                 {
                     throw std::runtime_error("Batch number mismatch.");
                 }
@@ -297,7 +297,8 @@ namespace MetaNN
         void NeutralInvariant() const
         {
             LayerNeutralInvariant(m_kernel);
-            LayerTraits::CheckStackEmpty(m_inputShapeStack);
+            if constexpr (IsFeedbackOutput)
+                LayerTraits::CheckStackEmpty(m_inputShapeStack);
         }
     
         template <typename TIn>
