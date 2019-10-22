@@ -79,25 +79,30 @@ struct VarTypeDict
         }
         
         template <typename TTag>
-        auto& Get() const
+        const auto& Get() const
         {
             constexpr static auto TagPos = ContMetaFun::Sequential::Order<VarTypeDict, TTag>;
             using AimType = ContMetaFun::Sequential::At<Values, TagPos>;
 
             void* tmp = m_tuple[TagPos].get();
+            if (!tmp)
+                throw std::runtime_error("Empty Value.");
             AimType* res = static_cast<AimType*>(tmp);
             return *res;
         }
         
         template <typename TTag>
-        auto Get() &&
+        auto& Get()
         {
             constexpr static auto TagPos = ContMetaFun::Sequential::Order<VarTypeDict, TTag>;
             using AimType = ContMetaFun::Sequential::At<Values, TagPos>;
 
             void* tmp = m_tuple[TagPos].get();
+            if (!tmp)
+                throw std::runtime_error("Empty Value.");
+
             AimType* res = static_cast<AimType*>(tmp);
-            return std::move(*res);
+            return *res;
         }
 
     private:

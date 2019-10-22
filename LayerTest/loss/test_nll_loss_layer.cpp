@@ -45,8 +45,7 @@ namespace
 
         NullParameter fbIn;
         auto out_grad = layer.FeedBackward(fbIn);
-        auto fb1 = out_grad.Get<LayerInput>();
-        static_assert(std::is_same<decltype(fb1), NullParameter>::value);
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         cout << "done" << endl;
     }

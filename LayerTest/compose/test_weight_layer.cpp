@@ -40,8 +40,7 @@ namespace
         assert(fabs(res(0, 1) + 0.41f) < 0.001);
 
         auto out_grad = layer.FeedBackward(NullParameter{});
-        auto fbOut = out_grad.Get<LayerInput>();
-        static_assert(is_same<decltype(fbOut), NullParameter>::value);
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
@@ -84,8 +83,7 @@ namespace
         g.SetValue(0, 0, -0.0495f);
         g.SetValue(0, 1, -0.0997f);
         auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(g));
-        auto fbOut = out_grad.Get<LayerInput>();
-        static_assert(is_same_v<decltype(fbOut), NullParameter>);
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         GradCollector<CheckElement, CheckDevice> grad_collector;
         layer.GradCollect(grad_collector);

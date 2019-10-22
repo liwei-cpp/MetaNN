@@ -38,8 +38,7 @@ namespace
         assert(fabs(res(1, 0) - input(1, 0) - mat(1, 0)) < 0.001);
 
         auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>());
-        auto fbOut = out_grad.Get<LayerInput>();
-        static_assert(is_same<decltype(fbOut), NullParameter>::value, "Test error");
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
@@ -88,8 +87,7 @@ namespace
 
         auto fbIn = LayerOutputCont<RootLayer>();
         auto out_grad = layer.FeedBackward(fbIn);
-        auto fbOut = out_grad.Get<LayerInput>();
-        static_assert(is_same<decltype(fbOut), NullParameter>::value, "Test error");
+        static_assert(decltype(out_grad)::template IsValueEmpty<LayerInput>);
 
         LayerNeutralInvariant(layer);
 

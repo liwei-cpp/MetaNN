@@ -957,8 +957,7 @@ namespace NSComposeKernel
             
             auto source = p_inGrad.template Get<typename TCur::OutPort>();
             auto dest = p_internal.template Get<typename TCur::OutLayerName>();
-            auto prevInfo = dest.template Get<typename TCur::OutLayerPort>();
-            if constexpr (std::is_same_v<RemConstRef<decltype(prevInfo)>, NullParameter>)
+            if constexpr (decltype(dest)::template IsValueEmpty<typename TCur::OutLayerPort>)
             {
                 auto fillRes = std::move(dest).template Set<typename TCur::OutLayerPort>(std::move(source));
                 auto newInternal = std::move(p_internal).template Set<typename TCur::OutLayerName>(std::move(fillRes));
@@ -966,6 +965,7 @@ namespace NSComposeKernel
             }
             else
             {
+                const auto& prevInfo = dest.template Get<typename TCur::OutLayerPort>();
                 auto fillRes = std::move(dest).template Set<typename TCur::OutLayerPort>(prevInfo + source);
                 auto newInternal = std::move(p_internal).template Set<typename TCur::OutLayerName>(std::move(fillRes));
                 return FillInputGrad<N + 1, TOutputClauses>(p_inGrad, std::move(newInternal));
@@ -990,18 +990,25 @@ namespace NSComposeKernel
             {
                 using TCur = ContMetaFun::Sequential::At<TMap, N>;
                 
-                auto value = input.template Get<typename TCur::InPort>();
-                
                 auto des = std::move(p_aim).template Get<typename TCur::OutLayer>();
-                auto prevInfo = std::move(des).template Get<typename TCur::OutPort>();
-                if constexpr (std::is_same_v<RemConstRef<decltype(prevInfo)>, NullParameter>)
+                if constexpr (decltype(des)::template IsValueEmpty<typename TCur::OutPort>)
                 {
-                    auto newDes = std::move(des).template Set<typename TCur::OutPort>(std::move(value));
-                    auto newAim = std::move(p_aim).template Set<typename TCur::OutLayer>(std::move(newDes));
-                    return BackwardFillInternal<N + 1, TMap>(input, std::move(newAim));
+                    if constexpr (!TBackwardRes::template IsValueEmpty<typename TCur::InPort>)
+                    {
+                        auto value = input.template Get<typename TCur::InPort>();
+                        auto newDes = std::move(des).template Set<typename TCur::OutPort>(std::move(value));
+                        auto newAim = std::move(p_aim).template Set<typename TCur::OutLayer>(std::move(newDes));
+                        return BackwardFillInternal<N + 1, TMap>(input, std::move(newAim));
+                    }
+                    else
+                    {
+                        return BackwardFillInternal<N + 1, TMap>(input, std::forward<TAim>(p_aim));
+                    }
                 }
                 else
                 {
+                    const auto& value = input.template Get<typename TCur::InPort>();
+                    const auto& prevInfo = std::move(des).template Get<typename TCur::OutPort>();
                     auto newDes = std::move(des).template Set<typename TCur::OutPort>(prevInfo + value);
                     auto newAim = std::move(p_aim).template Set<typename TCur::OutLayer>(std::move(newDes));
                     return BackwardFillInternal<N + 1, TMap>(input, std::move(newAim));
@@ -1048,15 +1055,14 @@ namespace NSComposeKernel
             auto sourceLayer = p_in.template Get<typename TCur::InLayerName>();
             auto source = sourceLayer.template Get<typename TCur::InLayerPort>();
             
-            auto prevInfo = std::move(p_aim).template Get<typename TCur::InPort>();
-            
-            if constexpr (std::is_same_v<RemConstRef<decltype(prevInfo)>, NullParameter>)
+            if constexpr (RemConstRef<TAim>::template IsValueEmpty<typename TCur::InPort>)
             {
                 auto newAim = std::move(p_aim).template Set<typename TCur::InPort>(std::move(source));
                 return FillOutputGrad<N + 1, TInputClauses>(p_in, std::move(newAim));
             }
             else
             {
+                const auto& prevInfo = std::move(p_aim).template Get<typename TCur::InPort>();
                 auto newAim = std::move(p_aim).template Set<typename TCur::InPort>(prevInfo + source);
                 return FillOutputGrad<N + 1, TInputClauses>(p_in, std::move(newAim));
             }

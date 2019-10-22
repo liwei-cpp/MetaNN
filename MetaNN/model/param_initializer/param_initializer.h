@@ -14,7 +14,7 @@ namespace MetaNN
         {}
         
         template <typename TKey>
-        auto& GetFiller() const
+        auto& GetFiller()
         {
             return m_filler.template Get<TKey>();
         }
