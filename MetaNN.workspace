@@ -3,8 +3,8 @@
   <Project Name="MetaNN" Path="MetaNN/MetaNN.project" Active="No"/>
   <Project Name="GeneralTest" Path="GeneralTest/GeneralTest.project" Active="No"/>
   <Project Name="GeneralTest2" Path="GeneralTest2/GeneralTest2.project" Active="No"/>
-  <Project Name="LayerTest" Path="LayerTest/LayerTest.project" Active="No"/>
-  <Project Name="OtherTests" Path="OtherTests/OtherTests.project" Active="Yes"/>
+  <Project Name="LayerTest" Path="LayerTest/LayerTest.project" Active="Yes"/>
+  <Project Name="OtherTests" Path="OtherTests/OtherTests.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="no">
       <Environment/>

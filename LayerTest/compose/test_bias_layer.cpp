@@ -13,7 +13,7 @@ namespace
     void test_bias_layer1()
     {
         cout << "Test bias layer case 1 ...\t";
-        using RootLayer = MakeInferLayer<BiasLayer>;
+        using RootLayer = MakeInferLayer<BiasLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsUpdate, "Test Error");
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
 
@@ -62,7 +62,7 @@ namespace
     void test_bias_layer2()
     {
         cout << "Test bias layer case 2 ...\t";
-        using RootLayer = MakeInferLayer<BiasLayer>;
+        using RootLayer = MakeInferLayer<BiasLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsUpdate, "Test Error");
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
 
@@ -101,7 +101,7 @@ namespace
     void test_bias_layer3()
     {
         cout << "Test bias layer case 3 ...\t";
-        using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate>;
+        using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
 
@@ -164,7 +164,7 @@ namespace
     void test_bias_layer4()
     {
         cout << "Test bias layer case 4 ...\t";
-        using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
 
@@ -230,7 +230,7 @@ namespace
     void test_bias_layer5()
     {
         cout << "Test bias layer case 5 ...\t";
-        using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
 
@@ -319,7 +319,7 @@ namespace
         cout << "Test bias layer case 6 ...\t";
         
         struct RootFiller;
-        using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>>;
+        using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
     
@@ -347,7 +347,7 @@ namespace
     {
         cout << "Test bias layer case 7 ...\t";
         struct RootFiller;
-        using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>>;
+        using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
 

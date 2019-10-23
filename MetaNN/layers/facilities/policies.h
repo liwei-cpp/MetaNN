@@ -40,33 +40,14 @@ ValuePolicyObj(PDisableBptt,  RecurrentLayerPolicy, UseBptt, false);
     {
         using MajorClass = ParamPolicy;
         
-        struct ParamDeviceTypeCate
-        {
-            using CPU = DeviceTags::CPU;
-        };
-        using ParamDevice = ParamDeviceTypeCate::CPU;
-        
         struct ParamTypeTypeCate;
-        using ParamType = float;
+        using ParamType = NullParameter;
 
-        struct ParamCategoryTypeCate
-        {
-            using Scalar = CategoryTags::Scalar;
-            using Matrix = CategoryTags::Matrix;
-            using ThreeDArray = CategoryTags::ThreeDArray;
-        };
-        using ParamCategory = ParamCategoryTypeCate::Matrix;
-        
         struct InitializerTypeCate;
         using Initializer = NullParameter;
     };
-    TypePolicyObj(PScalarParam,               ParamPolicy, ParamCategory, Scalar);
-    TypePolicyObj(PMatrixParam,               ParamPolicy, ParamCategory, Matrix);
-    TypePolicyObj(PThreeDArrayParam,          ParamPolicy, ParamCategory, ThreeDArray);
-    
-    TypePolicyTemplate(PParamElementTypeIs,   ParamPolicy, ParamType);
-    TypePolicyObj(PCPUDeviceParam,            ParamPolicy, ParamDevice,   CPU);
-    TypePolicyTemplate(PInitializerIs,        ParamPolicy, Initializer);
+    TypePolicyTemplate(PParamTypeIs,   ParamPolicy, ParamType);
+    TypePolicyTemplate(PInitializerIs, ParamPolicy, Initializer);
     
     struct LayerStructurePolicy
     {

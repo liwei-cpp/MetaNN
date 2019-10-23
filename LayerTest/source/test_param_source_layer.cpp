@@ -11,7 +11,7 @@ namespace
     {
         cout << "Test param source layer case 1 (Init from initializer-data)...\t";
         
-        using RootLayer = MakeInferLayer<ParamSourceLayer>;
+        using RootLayer = MakeInferLayer<ParamSourceLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -48,7 +48,7 @@ namespace
         
         struct RootFiller;
 
-        using RootLayer = MakeInferLayer<ParamSourceLayer, PInitializerIs<RootFiller>>;
+        using RootLayer = MakeInferLayer<ParamSourceLayer, PInitializerIs<RootFiller>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -83,7 +83,7 @@ namespace
     {
         cout << "Test param source layer case 3 (Init from load buffer)...\t";
         
-        using RootLayer = MakeInferLayer<ParamSourceLayer>;
+        using RootLayer = MakeInferLayer<ParamSourceLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -109,7 +109,7 @@ namespace
     {
         cout << "Test param source layer case 4...\t";
         
-        using RootLayer = MakeInferLayer<ParamSourceLayer>;
+        using RootLayer = MakeInferLayer<ParamSourceLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -134,7 +134,7 @@ namespace
     {
         cout << "Test param source layer case 5...\t";
         
-        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>>;
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -164,7 +164,7 @@ namespace
     {
         cout << "Test param source layer case 6...\t";
         
-        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate>;
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
         
@@ -216,7 +216,7 @@ namespace
     {
         cout << "Test param source layer case 7 (dummy grad input)...\t";
         
-        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate>;
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
         
@@ -239,6 +239,29 @@ namespace
         layer.NeutralInvariant();
         cout << "done" << endl;
     }
+    
+    void test_param_source_layer8()
+    {
+        cout << "Test param source layer case 8 (ZeroMatrix as parameter)...\t";
+        
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate, PParamTypeIs<ZeroData<CategoryTags::Matrix, CheckElement, CheckDevice>>>;
+        static_assert(!RootLayer::IsFeedbackOutput);
+        static_assert(!RootLayer::IsUpdate);
+        
+        RootLayer layer("root", "root", 10, 3);
+        
+        auto fpRes = layer.FeedForward(LayerInputCont<RootLayer>());
+        auto w = fpRes.template Get<LayerOutput>();
+        static_assert(std::is_same_v<decltype(w), ZeroData<CategoryTags::Matrix, CheckElement, CheckDevice>>);
+        assert(w.Shape().RowNum() == 10);
+        assert(w.Shape().ColNum() == 3);
+        
+        auto grad = GenMatrix<CheckElement>(10, 3);
+        
+        layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
+        layer.NeutralInvariant();
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Source
@@ -252,5 +275,6 @@ namespace Test::Layer::Source
         test_param_source_layer5();
         test_param_source_layer6();
         test_param_source_layer7();
+        test_param_source_layer8();
     }
 }

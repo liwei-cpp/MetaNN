@@ -13,7 +13,7 @@ namespace
     void test_linear_layer1()
     {
         cout << "Test linear layer case 1 ...\t";
-        using RootLayer = MakeInferLayer<LinearLayer>;
+        using RootLayer = MakeInferLayer<LinearLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
@@ -59,7 +59,7 @@ namespace
     void test_linear_layer2()
     {
         cout << "Test linear layer case 2 ...\t";
-        using RootLayer = MakeTrainLayer<LinearLayer, CommonInputMap, PUpdate>;
+        using RootLayer = MakeTrainLayer<LinearLayer, CommonInputMap, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
@@ -157,7 +157,7 @@ namespace
     {
         cout << "Test linear layer case 3 (update bias) ...\t";
         using RootLayer = MakeTrainLayer<LinearLayer, CommonInputMap,
-                                         PUpdate,
+                                         PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>,
                                          SubPolicyContainer<WeightParamSublayer, PNoUpdate>>;
         static_assert(RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
@@ -226,7 +226,7 @@ namespace
     {
         cout << "Test linear layer case 4 (update weight)...\t";
         using RootLayer = MakeTrainLayer<LinearLayer, CommonInputMap,
-                                         PUpdate,
+                                         PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>,
                                          SubPolicyContainer<BiasParamSublayer, PNoUpdate>>;
         static_assert(RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);

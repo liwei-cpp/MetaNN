@@ -12,7 +12,7 @@ namespace
     void test_single_layer_perceptron1()
     {
         cout << "Test SLP case 1 (noupdate, sigmoid-activate, with bias)...\t";
-        using RootLayer = MakeInferLayer<SingleLayerPerceptron, PActFuncIs<SigmoidLayer>>;
+        using RootLayer = MakeInferLayer<SingleLayerPerceptron, PActFuncIs<SigmoidLayer>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
@@ -59,7 +59,7 @@ namespace
     {
         cout << "Test SLP case 2 (noupdate, sigmoid-activate, without bias)...\t";
         using RootLayer = MakeInferLayer<SingleLayerPerceptron,
-                                         PActFuncIs<SigmoidLayer>, PBiasNotInvolved>;
+                                         PActFuncIs<SigmoidLayer>, PBiasNotInvolved, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
         
@@ -99,7 +99,7 @@ namespace
     void test_single_layer_perceptron3()
     {
         cout << "Test SLP case 3 (update, sigmoid-activate, with bias)...\t";
-        using RootLayer = MakeTrainLayer<SingleLayerPerceptron, CommonInputMap, PUpdate, PActFuncIs<SigmoidLayer>>;
+        using RootLayer = MakeTrainLayer<SingleLayerPerceptron, CommonInputMap, PUpdate, PActFuncIs<SigmoidLayer>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
@@ -190,7 +190,7 @@ namespace
     void test_single_layer_perceptron4()
     {
         cout << "Test SLP case 4 (noupdate, tanh-activate, with bias)...\t";
-        using RootLayer = MakeInferLayer<SingleLayerPerceptron, PActFuncIs<TanhLayer>>;
+        using RootLayer = MakeInferLayer<SingleLayerPerceptron, PActFuncIs<TanhLayer>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 

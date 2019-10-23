@@ -13,7 +13,7 @@ namespace
     void test_weight_layer1()
     {
         cout << "Test weight layer case 1 ...\t";
-        using RootLayer = MakeInferLayer<WeightLayer>;
+        using RootLayer = MakeInferLayer<WeightLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(!RootLayer::IsUpdate);
 
@@ -53,7 +53,7 @@ namespace
     void test_weight_layer2()
     {
         cout << "Test weight layer case 2 ...\t";
-        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate>;
+        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
 
@@ -114,7 +114,7 @@ namespace
     void test_weight_layer3()
     {
         cout << "Test weight layer case 3 ...\t";
-        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
 
@@ -181,7 +181,7 @@ namespace
     void test_weight_layer4()
     {
         cout << "Test weight layer case 4 ...\t";
-        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput>;
+        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
 
@@ -277,7 +277,7 @@ namespace
     void test_weight_layer5()
     {
         cout << "Test weight layer case 5 ...\t";
-        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>>;
+        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         RootLayer layer("root", 800, 400);
 
         auto initializer = MakeInitializer<CheckElement>(InitializerKV<RootFiller>(UniformFiller{-1, 1}));
@@ -315,7 +315,7 @@ namespace
     void test_weight_layer6()
     {
         cout << "Test weight layer case 6 ...\t";
-        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>>;
+        using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         RootLayer layer("root", 400, 200);
 
         auto initializer = MakeInitializer<CheckElement>(InitializerKV<RootFiller>(UniformFiller{-1.5, 1.5}));

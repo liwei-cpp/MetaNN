@@ -15,13 +15,18 @@ namespace MetaNN
         using CurLayerPolicy = PlainPolicy<TPolicies>;
 
     public:
-        static constexpr bool IsFeedbackOutput = false;
-        static constexpr bool IsUpdate = PolicySelect<GradPolicy, CurLayerPolicy>::IsUpdate;
+        using ParamType = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamType;
+        static_assert(!std::is_same_v<ParamType, NullParameter>, "Use PParamTypeIs<> to set parameter type.");
 
-        using ParamCategory = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamCategory;
-        using ElementType = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamType;
-        using DeviceType  = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ParamDevice;
-        using ParamType = PrincipalDataType<ParamCategory, ElementType, DeviceType>;
+    private:
+        using ParamCategory = typename ParamType::CategoryTag;
+        using ElementType = typename ParamType::ElementType;
+        using DeviceType  = typename ParamType::DeviceType;
+        constexpr static bool IsPrincipal = std::is_same_v<PrincipalDataType<ParamCategory, ElementType, DeviceType>, ParamType>;
+
+    public:
+        static constexpr bool IsFeedbackOutput = false;
+        static constexpr bool IsUpdate = IsPrincipal ? PolicySelect<GradPolicy, CurLayerPolicy>::IsUpdate : false;
 
     public:
         using InputPortSet = LayerPortSet<>;
@@ -29,57 +34,71 @@ namespace MetaNN
         using InputMap = typename EmptyLayerIOMap_<InputPortSet>::type;
 
     public:
-        template <typename... TShapeParams>
-        ParamSourceLayer(std::string name, std::string paramName, TShapeParams&&... shapeParams)
+        template <typename... TParams>
+        ParamSourceLayer(std::string name, std::string paramName, TParams&&... p_params)
             : m_name(std::move(name))
             , m_paramName(std::move(paramName))
-            , m_dataShape(std::forward<TShapeParams>(shapeParams)...)
-        {}
+        {
+            if constexpr (IsPrincipal)
+            {
+                m_dataShape = Shape<ParamCategory>(std::forward<TParams>(p_params)...);
+            }
+            else
+            {
+                m_data = ParamType(std::forward<TParams>(p_params)...);
+            }
+        }
 
         template <typename TInitializer, typename TBuffer>
         void Init(TInitializer& initializer, TBuffer& loadBuffer)
         {
-            if (auto matPtr = loadBuffer.template TryGet<ParamCategory>(m_paramName); matPtr)
+            if constexpr (IsPrincipal)
             {
-                if (matPtr->Shape() != m_dataShape)
+                if (auto matPtr = loadBuffer.template TryGet<ParamCategory>(m_paramName); matPtr)
                 {
-                    throw std::runtime_error("Load parameter error: shape mismatch");
+                    if (matPtr->Shape() != m_dataShape)
+                    {
+                        throw std::runtime_error("Load parameter error: shape mismatch");
+                    }
+                    m_data = *matPtr;
+                    return;
                 }
-                m_data = *matPtr;
-                return;
-            }
             
-            m_data = ParamType(m_dataShape);
-            if (initializer.template IsParamExist<ParamCategory>(m_paramName))
-            {
-                initializer.GetParam(m_paramName, m_data);
-            }
-            else
-            {
                 m_data = ParamType(m_dataShape);
-                using InitializerName = typename PolicySelect<ParamPolicy, CurLayerPolicy>::Initializer;
-                if constexpr (!std::is_same_v<InitializerName, NullParameter>)
+                if (initializer.template IsParamExist<ParamCategory>(m_paramName))
                 {
-                    auto& cur_init = initializer.template GetFiller<InitializerName>();
-                    cur_init.Fill(m_data);
+                    initializer.GetParam(m_paramName, m_data);
                 }
                 else
                 {
-                    throw std::runtime_error("Cannot get the initializer.");
+                    m_data = ParamType(m_dataShape);
+                    using InitializerName = typename PolicySelect<ParamPolicy, CurLayerPolicy>::Initializer;
+                    if constexpr (!std::is_same_v<InitializerName, NullParameter>)
+                    {
+                        auto& cur_init = initializer.template GetFiller<InitializerName>();
+                        cur_init.Fill(m_data);
+                    }
+                    else
+                    {
+                        throw std::runtime_error("Cannot get the initializer.");
+                    }
                 }
+                loadBuffer.Set(m_paramName, m_data);
             }
-            loadBuffer.Set(m_paramName, m_data);
         }
         
         template <typename TSave>
         void SaveWeights(TSave& saver) const
         {
-            auto matPtr = saver.template TryGet<ParamCategory>(m_paramName);
-            if (matPtr && (*matPtr != m_data))
+            if constexpr (IsPrincipal)
             {
-                throw std::runtime_error("Duplicate save for data: " + m_paramName);
+                auto matPtr = saver.template TryGet<ParamCategory>(m_paramName);
+                if (matPtr && (*matPtr != m_data))
+                {
+                    throw std::runtime_error("Duplicate save for data: " + m_paramName);
+                }
+                saver.Set(m_paramName, m_data);
             }
-            saver.Set(m_paramName, m_data);
         }
         
         template <typename TGradCollector>
