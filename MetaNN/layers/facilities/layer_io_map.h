@@ -7,7 +7,7 @@ namespace MetaNN
     template <typename... TPorts> struct LayerPortSet;
     
     template <typename TKey, typename TValue>
-    struct LayerKV : ContMetaFun::Helper::KVBinder<TKey, RemConstRef<TValue>>
+    struct LayerKV : Helper::KVBinder<TKey, RemConstRef<TValue>>
     { };
     
     template <typename... TLayerKVs>
@@ -78,6 +78,6 @@ namespace MetaNN
     template <typename... TKVs, typename TKeySet>
     struct CheckInputMapAvailable_<LayerIOMap<TKVs...>, TKeySet>
     {
-        constexpr static bool value = (ContMetaFun::Set::HasKey<TKeySet, typename TKVs::KeyType> && ...);
+        constexpr static bool value = (Set::HasKey<TKeySet, typename TKVs::KeyType> && ...);
     };
 }

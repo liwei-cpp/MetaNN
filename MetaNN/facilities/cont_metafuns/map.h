@@ -3,7 +3,7 @@
 #include <MetaNN/facilities/cont_metafuns/sequential.h>
 #include <tuple>
 
-namespace MetaNN::ContMetaFun::Map
+namespace MetaNN::Map
 {
 // Create from items ======================================================================
 namespace NSCreateFromItems
@@ -14,7 +14,7 @@ namespace NSCreateFromItems
         template <typename TItem>
         struct apply
         {
-            using type = ContMetaFun::Helper::KVBinder<typename KeyPicker<TItem>::type, TItem>;
+            using type = Helper::KVBinder<typename KeyPicker<TItem>::type, TItem>;
         };
     };
 }
@@ -25,10 +25,7 @@ namespace NSCreateFromItems
         template <typename TItem>
         using CurKVCreator = typename NSCreateFromItems::KVCreator<KeyPicker>::template apply<TItem>;
 
-        using type
-            = ContMetaFun::Sequential::Transform<TItemCont,
-                                                 CurKVCreator,
-                                                 TOutCont>;
+        using type = Sequential::Transform<TItemCont, CurKVCreator, TOutCont>;
     };
     
     template <typename TItemCont,

@@ -236,8 +236,8 @@ struct Calculator
         using TOperand1 = RemConstRef<decltype(oper.template Operand<1>())>;
         if constexpr (!Valid<TOperand0, TOperand1>)
         {
-            using THead = SeqHead<TCaseTail>;
-            using TTail = SeqTail<TCaseTail>;
+            using THead = Sequential::Head<TCaseTail>;
+            using TTail = Sequential::Tail<TCaseTail>;
             THead::template EvalRegister<TTail>(evalRes, oper);
         }
         else
@@ -247,8 +247,8 @@ struct Calculator
             const auto& softmax_res = oper0.template Operand<2>();
             if (softmax_res != oper1)
             {
-                using THead = SeqHead<TCaseTail>;
-                using TTail = SeqTail<TCaseTail>;
+                using THead = Sequential::Head<TCaseTail>;
+                using TTail = Sequential::Tail<TCaseTail>;
                 THead::template EvalRegister<TTail>(evalRes, oper);
                 return;
             }

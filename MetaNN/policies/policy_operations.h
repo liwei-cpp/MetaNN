@@ -40,12 +40,12 @@ struct Filter_
     using apply = std::conditional_t<decltype(PolicyExist<TSubPolicies>::apply((typename TInput::MajorClass*) nullptr,
                                                                                (typename TInput::MinorClass*) nullptr))::value,
                                      Identity_<TState>,
-                                     ContMetaFun::Sequential::PushBack_<TState, TInput>>;
+                                     Sequential::PushBack_<TState, TInput>>;
 };
 }
 
 template <typename TSubPolicies, typename TParentPolicies>
-using PolicyDerive = ContMetaFun::Sequential::Fold<TSubPolicies, TParentPolicies,
+using PolicyDerive = Sequential::Fold<TSubPolicies, TParentPolicies,
                                                    NSPolicyDerive::Filter_<TSubPolicies>::template apply>;
 /// ============== plain policy ============================
 namespace NSPlainPolicy
@@ -55,7 +55,7 @@ struct imp
     template <typename TState, typename TInput>
     struct apply
     {
-        using type = ContMetaFun::Sequential::PushBack<TState, TInput>;
+        using type = Sequential::PushBack<TState, TInput>;
     };
     
     template <typename TState, typename TLayerName, typename... TAdded>
@@ -67,7 +67,7 @@ struct imp
 }
 
 template <typename TPolicyContainer>
-using PlainPolicy = ContMetaFun::Sequential::Fold<PolicyContainer<>, TPolicyContainer,
+using PlainPolicy = Sequential::Fold<PolicyContainer<>, TPolicyContainer,
                                                   NSPlainPolicy::imp::template apply>;
 
 /// ============== sub policy picker============================
@@ -92,7 +92,7 @@ struct imp_
 template <typename TPolicyContainer, typename TLayerName>
 struct SubPolicyPicker_
 {
-    using tmp = ContMetaFun::Sequential::Fold<PolicyContainer<>, TPolicyContainer,
+    using tmp = Sequential::Fold<PolicyContainer<>, TPolicyContainer,
                                               imp_<TLayerName>::template apply>;
     using type = PolicyDerive<tmp, PlainPolicy<TPolicyContainer>>;
 };

@@ -2,7 +2,7 @@
 #include <MetaNN/facilities/cont_metafuns/helpers.h>
 #include <MetaNN/facilities/cont_metafuns/sequential.h>
 
-namespace MetaNN::ContMetaFun::MultiMap
+namespace MetaNN::MultiMap
 {
 // Insert =================================================================================
     namespace NSInsert
@@ -10,9 +10,9 @@ namespace MetaNN::ContMetaFun::MultiMap
         template <typename TProcessed, typename TKey, typename TValue, typename... TRemain>
         struct imp_
         {
-            using Value = ContMetaFun::Helper::ValueSequence<TValue>;
+            using Value = Helper::ValueSequence<TValue>;
             using type = Sequential::PushBack<TProcessed,
-                                              ContMetaFun::Helper::KVBinder<TKey, Value>>;
+                                              Helper::KVBinder<TKey, Value>>;
         };
         
         template <typename TProcessed,

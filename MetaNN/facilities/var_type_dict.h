@@ -19,7 +19,7 @@ struct VarTypeDict
         using Keys = VarTypeDict;
         
         template <typename TKey>
-        using ValueType = ContMetaFun::Sequential::At<Values, ContMetaFun::Sequential::Order<VarTypeDict, TKey>>;
+        using ValueType = Sequential::At<Values, Sequential::Order<VarTypeDict, TKey>>;
         
         template <typename TKey>
         constexpr static bool IsValueEmpty = std::is_same_v<ValueType<TKey>, NullParameter>;
@@ -49,23 +49,24 @@ struct VarTypeDict
 
     public:
         template <typename TTag, typename... TParams>
-        void Update(TParams&&... params)
+        void Update(TParams&&... p_params)
         {
-            constexpr static auto TagPos = ContMetaFun::Sequential::Order<VarTypeDict, TTag>;
-            using rawVal = ContMetaFun::Sequential::At<Values, TagPos>;
-            rawVal* tmp = new rawVal(std::forward<TParams>(params)...);
+            constexpr static auto TagPos = Sequential::Order<VarTypeDict, TTag>;
+            using rawVal = Sequential::At<Values, TagPos>;
+            rawVal* tmp = new rawVal(std::forward<TParams>(p_params)...);
             m_tuple[TagPos] = std::shared_ptr<void>(tmp,
                                     [](void* ptr){
                                         rawVal* nptr = static_cast<rawVal*>(ptr);
                                         delete nptr;
                                     });
+            return;
         }
-        
+
         template <typename TTag, typename TVal>
         auto Set(TVal&& val) &&
         {
-            constexpr static auto TagPos = ContMetaFun::Sequential::Order<VarTypeDict, TTag>;
-            
+            constexpr static auto TagPos = Sequential::Order<VarTypeDict, TTag>;
+
             using rawVal = RemConstRef<TVal>;
             rawVal* tmp = new rawVal(std::forward<TVal>(val));
             m_tuple[TagPos] = std::shared_ptr<void>(tmp,
@@ -73,16 +74,23 @@ struct VarTypeDict
                                         rawVal* nptr = static_cast<rawVal*>(ptr);
                                         delete nptr;
                                     });
-
-            using new_type = ContMetaFun::Sequential::Set<Values, TagPos, rawVal>;
-            return new_type(std::move(m_tuple));
+            
+            if constexpr (std::is_same_v<rawVal, Sequential::At<Values, TagPos>>)
+            {
+                return *this;
+            }
+            else
+            {
+                using new_type = Sequential::Set<Values, TagPos, rawVal>;
+                return new_type(std::move(m_tuple));
+            }
         }
         
         template <typename TTag>
         const auto& Get() const
         {
-            constexpr static auto TagPos = ContMetaFun::Sequential::Order<VarTypeDict, TTag>;
-            using AimType = ContMetaFun::Sequential::At<Values, TagPos>;
+            constexpr static auto TagPos = Sequential::Order<VarTypeDict, TTag>;
+            using AimType = Sequential::At<Values, TagPos>;
 
             void* tmp = m_tuple[TagPos].get();
             if (!tmp)
@@ -94,8 +102,8 @@ struct VarTypeDict
         template <typename TTag>
         auto& Get()
         {
-            constexpr static auto TagPos = ContMetaFun::Sequential::Order<VarTypeDict, TTag>;
-            using AimType = ContMetaFun::Sequential::At<Values, TagPos>;
+            constexpr static auto TagPos = Sequential::Order<VarTypeDict, TTag>;
+            using AimType = Sequential::At<Values, TagPos>;
 
             void* tmp = m_tuple[TagPos].get();
             if (!tmp)
@@ -112,7 +120,7 @@ struct VarTypeDict
 public:
     static auto Create()
     {
-        using type = ContMetaFun::Sequential::Create<Values, NullParameter, sizeof...(TParameters)>;
+        using type = Sequential::Create<Values, NullParameter, sizeof...(TParameters)>;
         return type{};
     }
 };

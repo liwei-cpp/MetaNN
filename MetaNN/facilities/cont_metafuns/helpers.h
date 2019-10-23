@@ -1,6 +1,6 @@
 #pragma once
 
-namespace MetaNN::ContMetaFun::Helper
+namespace MetaNN::Helper
 {
 // Int_ ===========================================================================
     template <int N>

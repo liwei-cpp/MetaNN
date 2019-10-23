@@ -15,7 +15,7 @@ public:
     friend struct LowerAccessImpl<Vector>;
 
 public:
-    explicit Vector(MetaNN::Shape<CategoryTags::Matrix> p_shape = MetaNN::Shape<CategoryTags::Matrix>())
+    explicit Vector(Shape<CategoryTags::Matrix> p_shape = Shape<CategoryTags::Matrix>())
         : TBase(std::move(p_shape))
     {
         if (TBase::Shape().RowNum() > 1)

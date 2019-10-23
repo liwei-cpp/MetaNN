@@ -72,8 +72,8 @@ public:
         {
             using TOperSeqCont = typename OperSeq_<TOpTag>::type;
             
-            using THead = SeqHead<TOperSeqCont>;
-            using TTail = SeqTail<TOperSeqCont>;
+            using THead = Sequential::Head<TOperSeqCont>;
+            using TTail = Sequential::Tail<TOperSeqCont>;
             THead::template EvalRegister<TTail>(m_evalBuf, *this);
         }
         return m_evalBuf.ConstHandle();

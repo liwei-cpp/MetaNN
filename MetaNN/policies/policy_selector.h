@@ -22,7 +22,7 @@ struct MajorFilter_
 {
     template <typename TState, typename TInput>
     using apply = typename std::conditional_t<std::is_same_v<typename TInput::MajorClass, TMajorClass>,
-                                              ContMetaFun::Sequential::PushBack_<TState, TInput>,
+                                              Sequential::PushBack_<TState, TInput>,
                                               Identity_<TState>
                                              >;
 };
@@ -47,10 +47,10 @@ struct MinorCheck_<PolicyContainer<TCurPolicy, TP...>>
 template <typename TMajorClass, typename TPolicyContainer>
 struct Selector_
 {
-    using TMF = ContMetaFun::Sequential::Fold<PolicyContainer<>, TPolicyContainer,
+    using TMF = Sequential::Fold<PolicyContainer<>, TPolicyContainer,
                                               MajorFilter_<TMajorClass>::template apply>;
     static_assert(MinorCheck_<TMF>::value, "Minor class set conflict!");
-    using type = std::conditional_t<IsArrayEmpty<TMF>, TMajorClass, PolicySelRes<TMF>>;
+    using type = std::conditional_t<Sequential::Size<TMF> == 0, TMajorClass, PolicySelRes<TMF>>;
 };
 }
 

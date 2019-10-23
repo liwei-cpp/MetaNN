@@ -17,13 +17,13 @@ namespace NSChangePolicy
         struct apply : std::conditional_t<std::is_same_v<typename TInput::MajorClass, TNewMajor> &&
                                           std::is_same_v<typename TInput::MinorClass, TNewMinor>,
                                           Identity_<TState>,
-                                          ContMetaFun::Sequential::PushBack_<TState, TInput>>
+                                          Sequential::PushBack_<TState, TInput>>
         {};
         
         template <typename TState, typename TLayer, typename...TParams>
         struct apply<TState, SubPolicyContainer<TLayer, TParams...>>
         {
-            using type = ContMetaFun::Sequential::PushBack<TState, SubPolicyContainer<TLayer, TParams...>>;
+            using type = Sequential::PushBack<TState, SubPolicyContainer<TLayer, TParams...>>;
         };
     };
 }
@@ -31,9 +31,9 @@ namespace NSChangePolicy
 template <typename TNewPolicy, typename TOriContainer>
 struct ChangePolicy_
 {
-    using type = ContMetaFun::Sequential::PushBack<ContMetaFun::Sequential::Fold<PolicyContainer<>, TOriContainer,
-                                                                                 NSChangePolicy::Filter_<TNewPolicy>::template apply>,
-                                                   TNewPolicy>;    
+    using type = Sequential::PushBack<Sequential::Fold<PolicyContainer<>, TOriContainer,
+                                                       NSChangePolicy::Filter_<TNewPolicy>::template apply>,
+                                      TNewPolicy>;    
 };
 
 template <typename TNewPolicy, typename TOriContainer>

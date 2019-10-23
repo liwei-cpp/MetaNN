@@ -15,8 +15,8 @@ namespace MetaNN
                           "General case is not the last one");
 
             const auto& operands = oper.OperandTuple();
-            constexpr size_t tupleSize = ArraySize<RemConstRef<decltype(operands)>>;
-            using IndexSeq = ContMetaFun::Helper::MakeIndexSequence<(int)tupleSize>;
+            constexpr size_t tupleSize = Sequential::Size<RemConstRef<decltype(operands)>>;
+            using IndexSeq = Helper::MakeIndexSequence<(int)tupleSize>;
             constexpr IndexSeq* dummyParam = nullptr;
         
             auto operandHandles = GetOperandHandles(operands, dummyParam);

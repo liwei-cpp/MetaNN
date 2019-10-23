@@ -84,8 +84,8 @@ struct CreateVarTypeDict_<std::tuple<TOutters...>, std::tuple<TInners...>>
 template <typename TVarTypeDictOutter, typename TVarTypeDictInner, typename TCur, typename... TKVs>
 struct CreateVarTypeDict_<TVarTypeDictOutter, TVarTypeDictInner, TCur, TKVs...>
 {
-    using NewOutter = ContMetaFun::Sequential::PushBack<TVarTypeDictOutter, typename TCur::KeyType>;
-    using NewInner = ContMetaFun::Sequential::PushBack<TVarTypeDictInner, typename TCur::ValueType>;
+    using NewOutter = Sequential::PushBack<TVarTypeDictOutter, typename TCur::KeyType>;
+    using NewInner = Sequential::PushBack<TVarTypeDictInner, typename TCur::ValueType>;
     using type = typename CreateVarTypeDict_<NewOutter, NewInner, TKVs...>::type;
 };
 

@@ -2,7 +2,7 @@
 #include <MetaNN/facilities/cont_metafuns/helpers.h>
 #include <MetaNN/facilities/cont_metafuns/sequential.h>
 
-namespace MetaNN::ContMetaFun::Set
+namespace MetaNN::Set
 {
 // HasKey =================================================================================
     template <typename TCon, typename TKey>
@@ -80,7 +80,7 @@ namespace NSCreateFromItems
         struct apply
         {
             using TItem = typename Picker<TInput>::type;
-            using type = ContMetaFun::Set::Insert<TState, TItem, bMute>;
+            using type = Set::Insert<TState, TItem, bMute>;
         };
     };
 }
@@ -89,7 +89,7 @@ namespace NSCreateFromItems
               template<typename...> typename TOutCont = std::tuple>
     struct CreateFromItems_
     {
-        using type = ContMetaFun::Sequential::Fold<TOutCont<>, TItemCont, NSCreateFromItems::Creator<Picker, bMute>::template apply>;
+        using type = Sequential::Fold<TOutCont<>, TItemCont, NSCreateFromItems::Creator<Picker, bMute>::template apply>;
     };
     
     template <typename TItemCont, template <typename> typename Picker, bool bMute,

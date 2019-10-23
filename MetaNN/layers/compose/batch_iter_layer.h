@@ -39,7 +39,7 @@ namespace MetaNN
 
             using KernelInputMap = typename std::conditional_t<std::is_same_v<TInputs, NullParameter>,
                                                                Identity_<NullParameter>,
-                                                               ContMetaFun::Sequential::Transform_<TInputs, RemoveBatchInfo_, LayerIOMap>>::type;
+                                                               Sequential::Transform_<TInputs, RemoveBatchInfo_, LayerIOMap>>::type;
 
             using KernelPolicy = SubPolicyPicker<TPolicies, KernelSublayer>;
             using AmendKernelPolicy = typename std::conditional_t<PolicySelect<GradPolicy, WrapperPolicy>::IsFeedbackOutput,
@@ -86,13 +86,13 @@ namespace MetaNN
         template <typename TKeyCont, typename TIn, size_t pos = 0>
         size_t GetBatchNum(const TIn& p_in, size_t prev = 0)
         {
-            if constexpr (pos == ArraySize<TKeyCont>)
+            if constexpr (pos == Sequential::Size<TKeyCont>)
             {
                 return prev;
             }
             else
             {
-                using TCurKey = ContMetaFun::Sequential::At<TKeyCont, pos>;
+                using TCurKey = Sequential::At<TKeyCont, pos>;
                 using TCurValue = typename TIn::template ValueType<TCurKey>;
                 
                 size_t batchValue = 0;
@@ -115,22 +115,22 @@ namespace MetaNN
         template <typename TKeyCont, typename TInput, typename TOutput>
         auto Split(const TInput& p_input, TOutput&& p_output, size_t id)
         {
-            if constexpr (ArraySize<TKeyCont> == 0)
+            if constexpr (Sequential::Size<TKeyCont> == 0)
                 return std::forward<TOutput>(p_output);
             else
             {
-                using CurType = SeqHead<TKeyCont>;
+                using CurType = Sequential::Head<TKeyCont>;
                 auto curValue = p_input.template Get<CurType>();
                 if constexpr (IsBatchCategory<decltype(curValue)>)
                 {
                     auto inputValue = curValue[id];
                     auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(inputValue);
-                    return Split<SeqTail<TKeyCont>>(p_input, std::move(newOutput), id);
+                    return Split<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
                 }
                 else
                 {
                     auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(curValue);
-                    return Split<SeqTail<TKeyCont>>(p_input, std::move(newOutput), id);
+                    return Split<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
                 }
             }
         }
@@ -138,42 +138,42 @@ namespace MetaNN
         template <typename TKeyCont, typename TInput, typename TOutput>
         auto InitOutputCont(TInput&& p_input, TOutput&& p_output)
         {
-            if constexpr (ArraySize<TKeyCont> == 0)
+            if constexpr (Sequential::Size<TKeyCont> == 0)
                 return std::forward<TOutput>(p_output);
             else
             {
-                using CurType = SeqHead<TKeyCont>;
+                using CurType = Sequential::Head<TKeyCont>;
                 using CurValueType = typename RemConstRef<TInput>::template ValueType<CurType>;
                 DynamicBatch<CurValueType> aimValue;
                 aimValue.PushBack(std::forward<TInput>(p_input).template Get<CurType>());
                 auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(aimValue);
-                return InitOutputCont<SeqTail<TKeyCont>>(std::forward<TInput>(p_input), std::move(newOutput));
+                return InitOutputCont<Sequential::Tail<TKeyCont>>(std::forward<TInput>(p_input), std::move(newOutput));
             }
         }
 
         template <typename TKeyCont, typename TInput, typename TOutput>
         auto FillOutputCont(TInput&& p_input, TOutput&& p_output)
         {
-            if constexpr (ArraySize<TKeyCont> == 0)
+            if constexpr (Sequential::Size<TKeyCont> == 0)
                 return std::forward<TOutput>(p_output);
             else
             {
-                using CurType = SeqHead<TKeyCont>;
+                using CurType = Sequential::Head<TKeyCont>;
                 p_output.template Get<CurType>().PushBack(std::forward<TInput>(p_input).template Get<CurType>());
-                return FillOutputCont<SeqTail<TKeyCont>>(std::forward<TInput>(p_input), std::forward<TOutput>(p_output));
+                return FillOutputCont<Sequential::Tail<TKeyCont>>(std::forward<TInput>(p_input), std::forward<TOutput>(p_output));
             }
         }
         
         template <typename TKeyCont, typename TOutput>
         auto ReverseOutputCont(TOutput&& p_output)
         {
-            if constexpr (ArraySize<TKeyCont> == 0)
+            if constexpr (Sequential::Size<TKeyCont> == 0)
                 return std::forward<TOutput>(p_output);
             else
             {
-                using CurType = SeqHead<TKeyCont>;
+                using CurType = Sequential::Head<TKeyCont>;
                 p_output.template Get<CurType>().Reverse();
-                return ReverseOutputCont<SeqTail<TKeyCont>>(std::forward<TOutput>(p_output));
+                return ReverseOutputCont<Sequential::Tail<TKeyCont>>(std::forward<TOutput>(p_output));
             }
         }
         
@@ -218,20 +218,20 @@ namespace MetaNN
             template <typename TKeysCont, typename TShapeCont, typename TCont>
             static auto CollapseHelper(const TShapeCont& p_shape, TCont&& p_cont)
             {
-                if constexpr (ArraySize<TKeysCont> == 0)
+                if constexpr (Sequential::Size<TKeysCont> == 0)
                     return std::forward<TCont>(p_cont);
                 else
                 {
-                    using CurType = SeqHead<TKeysCont>;
+                    using CurType = Sequential::Head<TKeysCont>;
                     const auto& oriValue = p_cont.template Get<CurType>();
                     auto newValue = MetaNN::Collapse(oriValue, p_shape.template Get<CurType>());
                     if constexpr (!std::is_same_v<RemConstRef<decltype(newValue)>, RemConstRef<decltype(oriValue)>>)
                     {
                         auto newCont = std::forward<TCont>(p_cont).template Set<CurType>(newValue);
-                        return CollapseHelper<SeqTail<TKeysCont>>(p_shape, std::move(newCont));
+                        return CollapseHelper<Sequential::Tail<TKeysCont>>(p_shape, std::move(newCont));
                     }
                     else
-                        return CollapseHelper<SeqTail<TKeysCont>>(p_shape, std::forward<TCont>(p_cont));
+                        return CollapseHelper<Sequential::Tail<TKeysCont>>(p_shape, std::forward<TCont>(p_cont));
                 }
             }
 

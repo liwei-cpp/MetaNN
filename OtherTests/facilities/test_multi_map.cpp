@@ -7,10 +7,10 @@ namespace TestFind
 {
 namespace Case0
 {
-    using Map1 = ContMetaFun::MultiMap::Insert<std::tuple<>, int, double>;
-    using Map2 = ContMetaFun::MultiMap::Insert<Map1, int, short>;
-    using Check = ContMetaFun::MultiMap::Find<Map2, int>;
-    static_assert(std::is_same_v<Check, ContMetaFun::Helper::ValueSequence<double, short>>);
+    using Map1 = MultiMap::Insert<std::tuple<>, int, double>;
+    using Map2 = MultiMap::Insert<Map1, int, short>;
+    using Check = MultiMap::Find<Map2, int>;
+    static_assert(std::is_same_v<Check, Helper::ValueSequence<double, short>>);
 }
 }
 }

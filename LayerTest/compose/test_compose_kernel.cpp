@@ -15,7 +15,6 @@ namespace
         cout << "Test compose kernel case 1...\t";
 
         using namespace MetaNN::NSComposeKernel;
-        using namespace MetaNN::ContMetaFun;
 
         using check1 = SeparateClauses_<Sublayer<Sublayer1, AddLayer>,
                                         Sublayer<Sublayer2, MultiplyLayer>,
@@ -138,7 +137,6 @@ namespace
         cout << "Test compose kernel case 2...\t";
 
         using namespace MetaNN::NSComposeKernel;
-        using namespace MetaNN::ContMetaFun;
         
         constexpr bool check1 = InternalTagInSublayer<ClauseSeq<InternalConnect<Sublayer1, LayerOutput, Sublayer2, LeftOperand>,
                                                                 InternalConnect<Sublayer2, LayerOutput, Sublayer3, LayerInput>,
@@ -242,7 +240,7 @@ namespace
     {
         cout << "Test compose kernel case 7...\t";
         using namespace MetaNN::NSComposeKernel;
-        using namespace MetaNN::ContMetaFun::Helper;
+        using namespace MetaNN::Helper;
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
         using Input2Type = TrivalMatrix<Scalar<CheckElement, CheckDevice>>;
@@ -314,7 +312,7 @@ namespace
     {
         cout << "Test compose kernel case 8...\t";
         using namespace MetaNN::NSComposeKernel;
-        using namespace MetaNN::ContMetaFun::Helper;
+        using namespace MetaNN::Helper;
         
         using CheckInputs = LayerIOMap<LayerKV<Input1, NullParameter>,
                                        LayerKV<Input2, NullParameter>>;
