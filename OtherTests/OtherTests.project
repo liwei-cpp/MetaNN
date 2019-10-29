@@ -117,6 +117,7 @@
     <File Name="facilities/test_sequential.cpp"/>
     <File Name="facilities/test_map.cpp"/>
     <File Name="facilities/test_multi_map.cpp"/>
+    <File Name="facilities/test_set.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/test_policy_operations.cpp"/>

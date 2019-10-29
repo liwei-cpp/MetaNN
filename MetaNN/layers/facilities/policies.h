@@ -19,22 +19,15 @@ ValuePolicyObj(PNoUpdate,         GradPolicy, IsUpdate, false);
 ValuePolicyObj(PFeedbackOutput,   GradPolicy, IsFeedbackOutput, true);
 ValuePolicyObj(PFeedbackNoOutput, GradPolicy, IsFeedbackOutput, false);
 
-struct RecurrentLayerPolicy
-{
-    using MajorClass = RecurrentLayerPolicy;
-    
-    struct StepTypeCate
+    struct RecurrentLayerPolicy
     {
-        struct GRU;
-    };
-    struct UseBpttValueCate;
+        using MajorClass = RecurrentLayerPolicy;
 
-    using Step = StepTypeCate::GRU;
-    constexpr static bool UseBptt = true;
-};
-TypePolicyObj(PRecGRUStep, RecurrentLayerPolicy, Step, GRU);
-ValuePolicyObj(PEnableBptt,  RecurrentLayerPolicy, UseBptt, true);
-ValuePolicyObj(PDisableBptt,  RecurrentLayerPolicy, UseBptt, false);
+        struct UseBpttValueCate;
+        constexpr static bool UseBptt = true;
+    };
+    ValuePolicyObj(PEnableBptt,  RecurrentLayerPolicy, UseBptt, true);
+    ValuePolicyObj(PDisableBptt,  RecurrentLayerPolicy, UseBptt, false);
 
     struct ParamPolicy
     {

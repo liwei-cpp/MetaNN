@@ -95,4 +95,20 @@ namespace NSCreateFromItems
     template <typename TItemCont, template <typename> typename Picker, bool bMute,
               template<typename...> typename TOutCont = std::tuple>
     using CreateFromItems = typename CreateFromItems_<TItemCont, Picker, bMute, TOutCont>::type;
+
+// Equals ======================================================================
+    template <typename TFirstSet, typename TSecondSet>
+    struct IsEqual_;
+
+    template <template <typename...> class Cont1, template <typename...> class Cont2,
+              typename... Params1, typename... Params2>
+    struct IsEqual_<Cont1<Params1...>, Cont2<Params2...>>
+    {
+        constexpr static bool value1 = (HasKey<Cont1<Params1...>, Params2> && ...);
+        constexpr static bool value2 = (HasKey<Cont2<Params2...>, Params1> && ...);
+        constexpr static bool value = value1 && value2;
+    };
+    
+    template <typename TFirstSet, typename TSecondSet>
+    constexpr bool IsEqual = IsEqual_<TFirstSet, TSecondSet>::value;
 }

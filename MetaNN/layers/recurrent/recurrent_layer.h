@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include <MetaNN/layers/recurrent/gru_step.h>
 #include <cassert>
 
@@ -142,4 +142,162 @@ private:
     DataType m_hiddens;
     bool     m_inForward;
 };
+}
+*/
+
+namespace MetaNN
+{
+    template <typename TPort> struct Previous;
+    
+    namespace NSRecurrentLayer
+    {
+        template <typename T>
+        constexpr bool IsBatchCategory = IsBatchCategoryTag<typename T::CategoryTag> || IsBatchSequenceCategoryTag<typename T::CategoryTag>;
+
+        template <typename TInputSet, typename TOutputSet>
+        struct NoIOPortOverLap_;
+        
+        template <typename TInputSet, typename... TOutputPorts>
+        struct NoIOPortOverLap_<TInputSet, LayerPortSet<TOutputPorts...>>
+        {
+            constexpr static bool value = !(Set::HasKey<TInputSet, Previous<TOutputPorts>> || ...);
+        };
+        
+        template <typename TInputSet, typename TOutputSet>
+        struct MergeIOPortSet_;
+        
+        template <typename... TInputPorts, typename... TOutputPorts>
+        struct MergeIOPortSet_<LayerPortSet<TInputPorts...>, LayerPortSet<TOutputPorts...>>
+        {
+            using type = LayerPortSet<TInputPorts..., Previous<TOutputPorts>...>;
+        };
+
+        template <typename TInputMap, typename TPolicies>
+        struct KernelGenerator_;
+        
+        template <typename TPolicies>
+        struct KernelGenerator_<NullParameter, TPolicies>
+        {
+            using WrapperPolicy = PlainPolicy<TPolicies>;
+            
+            template <typename UInput, typename UPolicies>
+            using Kernel = typename PolicySelect<LayerStructurePolicy, WrapperPolicy>::template ActFunc<UInput, UPolicies>;
+            static_assert(!LayerStructurePolicy::template IsDummyActFun<Kernel>, "Use PActFuncIs<...> to set kernel sublayer.");
+
+            using KernelPolicy = SubPolicyPicker<TPolicies, KernelSublayer>;
+            
+            constexpr static bool IsUpdate = PolicySelect<GradPolicy, KernelPolicy>::IsUpdate;
+            constexpr static bool UseBptt = PolicySelect<RecurrentLayerPolicy, KernelPolicy>::UseBptt;
+            constexpr static bool UpdateFeedbackOutput = PolicySelect<GradPolicy, WrapperPolicy>::IsFeedbackOutput ||
+                                                         (IsUpdate && UseBptt);
+            using AmendKernelPolicy = typename std::conditional_t<UpdateFeedbackOutput,
+                                                                  ChangePolicy_<PFeedbackOutput, KernelPolicy>,
+                                                                  Identity_<KernelPolicy>>::type;
+
+            using KernelType = Kernel<NullParameter, AmendKernelPolicy>;
+            
+            using OutputPortSet = typename KernelType::OutputPortSet;
+            static_assert(NoIOPortOverLap_<typename KernelType::InputPortSet, OutputPortSet>::value);
+            using InputPortSet = typename MergeIOPortSet_<typename KernelType::InputPortSet, OutputPortSet>::type;
+            
+            using InputMap = EmptyLayerIOMap_<InputPortSet>;
+            
+            constexpr static bool IsTrival = false;
+        };
+        
+        template <typename TKey>
+        constexpr bool IsPreviousPort = false;
+        
+        template <typename TKey>
+        constexpr bool IsPreviousPort<Previous<TKey>> = true;
+        
+        template <typename... TKeys, typename... TValues, typename TPolicies>
+        struct KernelGenerator_<LayerIOMap<LayerKV<TKeys, TValues>...>, TPolicies>
+        {
+            static_assert((!IsBatchCategory<TValues> && ...), "No batch input is allowed in RNN layer.");
+            static_assert((IsPreviousPort<TKeys> || ...), "No Previous port in the input port set.");
+            static_assert(!((IsPreviousPort<TKeys> && IsSequenceCategoryTag<typename TValues::CategoryTag>) || ...),
+                          "Previous ports should not be sequence.");
+
+            constexpr static bool IsTrival = !(IsSequenceCategoryTag<typename TValues::CategoryTag> || ...);
+            
+            using WrapperPolicy = PlainPolicy<TPolicies>;
+            
+            template <typename UInput, typename UPolicies>
+            using Kernel = typename PolicySelect<LayerStructurePolicy, WrapperPolicy>::template ActFunc<UInput, UPolicies>;
+            static_assert(!LayerStructurePolicy::template IsDummyActFun<Kernel>, "Use PActFuncIs<...> to set kernel sublayer.");
+
+            using KernelPolicy = SubPolicyPicker<TPolicies, KernelSublayer>;
+            
+            constexpr static bool IsUpdate = PolicySelect<GradPolicy, KernelPolicy>::IsUpdate;
+            constexpr static bool UseBptt = PolicySelect<RecurrentLayerPolicy, KernelPolicy>::UseBptt;
+            constexpr static bool UpdateFeedbackOutput =
+                PolicySelect<GradPolicy, WrapperPolicy>::IsFeedbackOutput || (!IsTrival && IsUpdate && UseBptt);
+                
+            using AmendKernelPolicy = typename std::conditional_t<UpdateFeedbackOutput,
+                                                                  ChangePolicy_<PFeedbackOutput, KernelPolicy>,
+                                                                  Identity_<KernelPolicy>>::type;
+
+            using KernelType = Kernel<NullParameter, AmendKernelPolicy>;
+
+            using OutputPortSet = typename KernelType::OutputPortSet;
+            static_assert(NoIOPortOverLap_<typename KernelType::InputPortSet, OutputPortSet>::value);
+            using InputPortSet = typename MergeIOPortSet_<typename KernelType::InputPortSet, OutputPortSet>::type;
+            static_assert(Set::IsEqual<LayerPortSet<TKeys...>, InputPortSet>, "Invalid input port set.");
+            
+            using InputMap = LayerIOMap<LayerKV<TKeys, TValues>...>;
+        };
+    }
+    
+    template <typename TInputs, typename TPolicies>
+    class RecurrentLayer
+    {
+        static_assert(IsPolicyContainer<TPolicies>);
+        using KernelGen = NSRecurrentLayer::KernelGenerator_<TInputs, TPolicies>;
+
+        using KernelType = typename KernelGen::KernelType;
+    public:
+        static constexpr bool IsFeedbackOutput = KernelType::IsFeedbackOutput;
+        static constexpr bool IsUpdate = KernelType::IsUpdate;
+
+        using InputPortSet = typename KernelGen::InputPortSet;
+        using OutputPortSet = typename KernelGen::OutputPortSet;
+        using InputMap = typename KernelGen::InputMap;
+        
+        constexpr static bool IsTrivalLayer = KernelGen::IsTrival;
+
+    public:
+        template <typename... TParams>
+        RecurrentLayer(const std::string& p_name, TParams&&... kernelParams)
+            : m_name(p_name)
+            , m_kernel(p_name + "/kernel", std::forward<TParams>(kernelParams)...)
+        {}
+
+        template <typename TInitializer, typename TBuffer>
+        void Init(TInitializer& initializer, TBuffer& loadBuffer)
+        {
+            LayerInit(m_kernel, initializer, loadBuffer);
+        }
+        
+        template <typename TSave>
+        void SaveWeights(TSave& saver) const
+        {
+            LayerSaveWeights(m_kernel, saver);
+        }
+        
+        template <typename TGradCollector>
+        void GradCollect(TGradCollector& col)
+        {
+            LayerGradCollect(m_kernel, col);
+        }
+
+        void NeutralInvariant() const
+        {
+            LayerNeutralInvariant(m_kernel);
+        }
+
+    private:
+        std::string m_name;
+        KernelType m_kernel;
+    };
 }

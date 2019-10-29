@@ -207,8 +207,8 @@
     <VirtualDirectory Name="recurrent">
       <File Name="layers/recurrent/gru_step.h"/>
       <File Name="layers/recurrent/recurrent_layer.h"/>
+      <File Name="layers/recurrent/_.h"/>
     </VirtualDirectory>
-    <File Name="layers/layers.h"/>
     <VirtualDirectory Name="loss">
       <File Name="layers/loss/nll_loss_layer.h"/>
       <File Name="layers/loss/_.h"/>
@@ -218,6 +218,7 @@
       <File Name="layers/source/param_source_layer.h"/>
       <File Name="layers/source/value_source_layer.h"/>
     </VirtualDirectory>
+    <File Name="layers/_.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="operators">
     <VirtualDirectory Name="facilities">

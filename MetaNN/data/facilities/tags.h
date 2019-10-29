@@ -51,6 +51,12 @@ template <typename TCardinal>
 constexpr bool IsBatchCategoryTag<CategoryTags::Batch<TCardinal>> = true;
 
 template <typename T>
+constexpr bool IsSequenceCategoryTag = false;
+
+template <typename TCardinal>
+constexpr bool IsSequenceCategoryTag<CategoryTags::Sequence<TCardinal>> = true;
+
+template <typename T>
 constexpr bool IsBatchSequenceCategoryTag = false;
 
 template <typename TCardinal>
