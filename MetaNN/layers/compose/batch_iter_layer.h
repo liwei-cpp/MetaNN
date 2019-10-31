@@ -65,20 +65,20 @@ namespace MetaNN
         };
         
         template <typename TKeys, typename TInputCont>
-        struct IsFBContNonBatch_;
+        struct IsNonBatch_;
         
         template <typename TInputCont, typename... TKeys>
-        struct IsFBContNonBatch_<VarTypeDict<TKeys...>, TInputCont>
+        struct IsNonBatch_<VarTypeDict<TKeys...>, TInputCont>
         {
             static constexpr bool value = 
                 !(IsBatchCategory<typename TInputCont::template ValueType<TKeys>> || ...);
         };
         
         template <typename TKeys, typename TInputCont>
-        struct IsFBContAllBatch_;
+        struct IsAllBatch_;
         
         template <typename TInputCont, typename... TKeys>
-        struct IsFBContAllBatch_<VarTypeDict<TKeys...>, TInputCont>
+        struct IsAllBatch_<VarTypeDict<TKeys...>, TInputCont>
         {
             static constexpr bool value = (IsBatchCategory<typename TInputCont::template ValueType<TKeys>> && ...);
         };
@@ -307,18 +307,17 @@ namespace MetaNN
             using TOriInputCont = RemConstRef<TIn>;
             if constexpr (IsTrivalLayer)
             {
-                static_assert(NSBatchIterLayer::IsFBContNonBatch_<typename TOriInputCont::Keys, TOriInputCont>::value);
+                static_assert(NSBatchIterLayer::IsNonBatch_<typename TOriInputCont::Keys, TOriInputCont>::value);
                 return m_kernel.FeedForward(p_in);
             }
             else
             {
                 const size_t batchNum = NSBatchIterLayer::GetBatchNum<typename TOriInputCont::Keys>(p_in);
                 if (batchNum == 0)
-                {
                     throw std::runtime_error("Empty batch as input.");
-                }
                 
-                TShapeDickHelper::PickShapeInfo(m_inputShapeStack, p_in);
+                if constexpr (IsFeedbackOutput)
+                    TShapeDickHelper::PickShapeInfo(m_inputShapeStack, p_in);
                 
                 auto firstInputCont = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), 0);
                 auto firstOutput = m_kernel.FeedForward(std::move(firstInputCont));
@@ -341,7 +340,7 @@ namespace MetaNN
             using TOriInputCont = RemConstRef<TIn>;
             if constexpr (IsTrivalLayer)
             {
-                static_assert(NSBatchIterLayer::IsFBContNonBatch_<typename TOriInputCont::Keys, TOriInputCont>::value);
+                static_assert(NSBatchIterLayer::IsNonBatch_<typename TOriInputCont::Keys, TOriInputCont>::value);
                 return m_kernel.FeedBackward(p_in);
             }
             else if constexpr ((!IsFeedbackOutput) && (!IsUpdate))
@@ -350,7 +349,7 @@ namespace MetaNN
             }
             else if constexpr (!IsFeedbackOutput)
             {// Note: update internal parameter
-                static_assert(NSBatchIterLayer::IsFBContAllBatch_<typename TOriInputCont::Keys, TOriInputCont>::value, "All grads should be batch.");
+                static_assert(NSBatchIterLayer::IsAllBatch_<typename TOriInputCont::Keys, TOriInputCont>::value, "All grads should be batch.");
 
                 const size_t batchNum = NSBatchIterLayer::GetBatchNum<typename TOriInputCont::Keys>(p_in);
                 if (batchNum == 0)
@@ -363,10 +362,11 @@ namespace MetaNN
                     auto curInputCont = NSBatchIterLayer::Split<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), batchNum - i);
                     m_kernel.FeedBackward(std::move(curInputCont));
                 }
+                return LayerInputCont<BatchIterLayer>();
             }
             else
             {
-                static_assert(NSBatchIterLayer::IsFBContAllBatch_<typename TOriInputCont::Keys, TOriInputCont>::value, "All grads should be batch.");
+                static_assert(NSBatchIterLayer::IsAllBatch_<typename TOriInputCont::Keys, TOriInputCont>::value, "All grads should be batch.");
 
                 const size_t batchNum = NSBatchIterLayer::GetBatchNum<typename TOriInputCont::Keys>(p_in);
                 if (batchNum == 0)
@@ -385,7 +385,7 @@ namespace MetaNN
                     NSBatchIterLayer::FillOutputCont<OutputGradKeys>(std::move(curOutput), outputGrad);
                 }
 
-                NSBatchIterLayer::ReverseOutputCont<OutputGradKeys>(outputGrad);                
+                NSBatchIterLayer::ReverseOutputCont<OutputGradKeys>(outputGrad);
                 return TShapeDickHelper::Collapse(m_inputShapeStack, std::move(outputGrad));
             }
         }
