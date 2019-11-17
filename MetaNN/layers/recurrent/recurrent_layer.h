@@ -158,23 +158,14 @@ namespace MetaNN
         constexpr bool IsSequenceCategory = IsSequenceCategoryTag<typename T::CategoryTag>;
 
         template <typename TInputSet, typename TOutputSet>
-        struct NoIOPortOverLap_;
+        struct CheckPortOverLap_;
         
         template <typename TInputSet, typename... TOutputPorts>
-        struct NoIOPortOverLap_<TInputSet, LayerPortSet<TOutputPorts...>>
+        struct CheckPortOverLap_<TInputSet, LayerPortSet<TOutputPorts...>>
         {
-            constexpr static bool value = !(Set::HasKey<TInputSet, Previous<TOutputPorts>> || ...);
+            constexpr static bool value = (Set::HasKey<TInputSet, Previous<TOutputPorts>> && ...);
         };
         
-        template <typename TInputSet, typename TOutputSet>
-        struct MergeIOPortSet_;
-        
-        template <typename... TInputPorts, typename... TOutputPorts>
-        struct MergeIOPortSet_<LayerPortSet<TInputPorts...>, LayerPortSet<TOutputPorts...>>
-        {
-            using type = LayerPortSet<TInputPorts..., Previous<TOutputPorts>...>;
-        };
-
         template <typename TInputMap, typename TPolicies>
         struct KernelGenerator_;
         
@@ -188,7 +179,7 @@ namespace MetaNN
             static_assert(!LayerStructurePolicy::template IsDummyActFun<Kernel>, "Use PActFuncIs<...> to set kernel sublayer.");
 
             using KernelPolicy = SubPolicyPicker<TPolicies, KernelSublayer>;
-            
+
             constexpr static bool IsUpdate = PolicySelect<GradPolicy, KernelPolicy>::IsUpdate;
             constexpr static bool UseBptt = PolicySelect<RecurrentLayerPolicy, KernelPolicy>::UseBptt;
             constexpr static bool UpdateFeedbackOutput = PolicySelect<GradPolicy, WrapperPolicy>::IsFeedbackOutput ||
@@ -199,9 +190,9 @@ namespace MetaNN
 
             using KernelType = Kernel<NullParameter, AmendKernelPolicy>;
             
+            using InputPortSet = typename KernelType::InputPortSet;
             using OutputPortSet = typename KernelType::OutputPortSet;
-            static_assert(NoIOPortOverLap_<typename KernelType::InputPortSet, OutputPortSet>::value);
-            using InputPortSet = typename MergeIOPortSet_<typename KernelType::InputPortSet, OutputPortSet>::type;
+            static_assert(CheckPortOverLap_<InputPortSet, OutputPortSet>::value);
             
             using InputMap = EmptyLayerIOMap_<InputPortSet>;
             
@@ -283,9 +274,9 @@ namespace MetaNN
             using KernelIOMap = typename Wrapper2KernelIOMap_<LayerIOMap<LayerKV<TKeys, TValues>...>>::type;
             using KernelType = Kernel<KernelIOMap, AmendKernelPolicy>;
 
+            using InputPortSet = typename KernelType::InputPortSet;
             using OutputPortSet = typename KernelType::OutputPortSet;
-            static_assert(NoIOPortOverLap_<typename KernelType::InputPortSet, OutputPortSet>::value);
-            using InputPortSet = typename MergeIOPortSet_<typename KernelType::InputPortSet, OutputPortSet>::type;
+            static_assert(CheckPortOverLap_<InputPortSet, OutputPortSet>::value);
             static_assert(Set::IsEqual<LayerPortSet<TKeys...>, InputPortSet>, "Invalid input port set.");
             
             using InputMap = LayerIOMap<LayerKV<TKeys, TValues>...>;
@@ -367,9 +358,10 @@ namespace MetaNN
                 {
                     using CurType = Sequential::Head<TKeysCont>;
                     const auto& oriValue = p_cont.template Get<CurType>();
-                    auto newValue = MetaNN::Collapse(oriValue, p_shape.template Get<CurType>());
-                    if constexpr (!std::is_same_v<RemConstRef<decltype(newValue)>, RemConstRef<decltype(oriValue)>>)
+                    if constexpr (!std::is_same_v<RemConstRef<decltype(oriValue.Shape())>,
+                                                  typename TShapeCont::template ValueType<CurType>>)
                     {
+                        auto newValue = MetaNN::Collapse(oriValue, p_shape.template Get<CurType>());
                         auto newCont = std::forward<TCont>(p_cont).template Set<CurType>(newValue);
                         return CollapseHelper<Sequential::Tail<TKeysCont>>(p_shape, std::move(newCont));
                     }
