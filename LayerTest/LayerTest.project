@@ -138,4 +138,8 @@
     <File Name="source/test_param_source_layer.cpp"/>
     <File Name="source/test_value_source_layer.cpp"/>
   </VirtualDirectory>
+  <VirtualDirectory Name="recurrent">
+    <File Name="recurrent/_.h"/>
+    <File Name="recurrent/test_recurrent_layer.cpp"/>
+  </VirtualDirectory>
 </CodeLite_Project>

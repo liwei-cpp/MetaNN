@@ -155,7 +155,7 @@ namespace MetaNN
         auto FillOutputCont(TInput&& p_input, TOutput&& p_output)
         {
             if constexpr (Sequential::Size<TKeyCont> == 0)
-                return std::forward<TOutput>(p_output);
+                return;
             else
             {
                 using CurType = Sequential::Head<TKeyCont>;
@@ -168,7 +168,7 @@ namespace MetaNN
         auto ReverseOutputCont(TOutput&& p_output)
         {
             if constexpr (Sequential::Size<TKeyCont> == 0)
-                return std::forward<TOutput>(p_output);
+                return;
             else
             {
                 using CurType = Sequential::Head<TKeyCont>;

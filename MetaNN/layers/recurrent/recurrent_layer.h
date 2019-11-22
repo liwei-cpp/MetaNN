@@ -1,149 +1,4 @@
 #pragma once
-/*
-#include <MetaNN/layers/recurrent/gru_step.h>
-#include <cassert>
-
-namespace MetaNN
-{
-namespace NSRecurrentLayer
-{
-template <typename TStep, typename TPolicy> struct StepEnum2Type_;
-
-template <typename TPolicy>
-struct StepEnum2Type_<RecurrentLayerPolicy::StepTypeCate::GRU, TPolicy>
-{
-    using type = GruStep<TPolicy>;
-};
-
-template <typename TStep, typename TPolicy>
-using StepEnum2Type = typename StepEnum2Type_<TStep, TPolicy>::type;
-}
-
-template <typename TPolicies>
-class RecurrentLayer
-{
-    static_assert(IsPolicyContainer<TPolicies>, "TPolicies is not policy container.");
-    using CurLayerPolicy = PlainPolicy<TPolicies>;
-
-public:
-    static constexpr bool IsFeedbackOutput = PolicySelect<FeedbackPolicy, TPolicies>::IsFeedbackOutput;
-    static constexpr bool IsUpdate = PolicySelect<FeedbackPolicy, TPolicies>::IsUpdate;
-
-private:
-    static constexpr bool UseBptt = PolicySelect<RecurrentLayerPolicy, CurLayerPolicy>::UseBptt;
-
-    using StepPolicy = typename std::conditional_t<(!IsFeedbackOutput) && IsUpdate && UseBptt,
-                                                   ChangePolicy_<PFeedbackOutput, TPolicies>,
-                                                   Identity_<TPolicies>>::type;
-
-    using StepEnum = typename PolicySelect<RecurrentLayerPolicy, CurLayerPolicy>::Step;
-    using StepType = NSRecurrentLayer::StepEnum2Type<StepEnum, StepPolicy>;
-
-    using ElementType = typename PolicySelect<OperandPolicy, CurLayerPolicy>::Element;
-    using DeviceType = typename PolicySelect<OperandPolicy, CurLayerPolicy>::Device;
-
-    constexpr static bool m_BatchMode = PolicySelect<InputPolicy, CurLayerPolicy>::BatchMode;
-    using DataType = std::conditional_t<m_BatchMode, 
-                                        DynamicData<ElementType, DeviceType, CategoryTags::BatchMatrix>,
-                                        DynamicData<ElementType, DeviceType, CategoryTags::Matrix>>;
-
-public:
-    using InputType = typename StepType::InputType;
-    using OutputType = typename StepType::OutputType;
-
-public:
-    template <typename...T>
-    RecurrentLayer(T&&... params)
-        : m_step(std::forward<T>(params)...)
-        , m_inForward(true)
-    {}
-
-public:
-    template <typename TInitializer, typename TBuffer, 
-              typename TInitPolicies = typename TInitializer::PolicyCont>
-    void Init(TInitializer& initializer, TBuffer& loadBuffer, std::ostream* log = nullptr)
-    {
-        m_step.template Init<TInitializer, TBuffer, TInitPolicies>(initializer, loadBuffer, log);
-    }
-
-    template <typename TSave>
-    void SaveWeights(TSave& saver)
-    {
-        m_step.SaveWeights(saver);
-    }
-
-    template <typename TGradCollector>
-    void GradCollect(TGradCollector& col)
-    {
-        m_step.GradCollect(col);
-    }
-
-    template <typename TIn>
-    auto FeedForward(TIn&& p_in)
-    {
-        auto& init = p_in.template Get<RnnLayerHiddenBefore>();
-        using rawType = std::decay_t<decltype(init)>;
-        m_inForward = true;
-
-        if constexpr(std::is_same<rawType, NullParameter>::value)
-        {
-            assert(!m_hiddens.IsEmpty());
-            auto real_in = std::move(p_in).template Set<RnnLayerHiddenBefore>(m_hiddens);
-            auto res = m_step.FeedForward(std::move(real_in));
-            m_hiddens = MakeDynamic(res.template Get<LayerIO>());
-            return res;
-        }
-        else
-        {
-            auto res = m_step.FeedForward(std::forward<TIn>(p_in));
-            m_hiddens = MakeDynamic(res.template Get<LayerIO>());
-            return res;
-        }
-    }
-
-    template <typename TGrad>
-    auto FeedBackward(const TGrad& p_grad)
-    {
-        if constexpr(UseBptt)
-        {
-            auto gradVal = p_grad.template Get<LayerIO>();
-            if (!m_inForward)
-            {
-                auto newGrad = MakeDynamic(gradVal + m_hiddens);
-                auto input = LayerIO::Create().template Set<LayerIO>(newGrad);
-                auto res = m_step.FeedBackward(std::move(input));
-                m_hiddens = MakeDynamic(res.template Get<RnnLayerHiddenBefore>());
-                return std::move(res);
-            }
-            else
-            {
-                m_inForward = false;
-                
-                auto newGrad = MakeDynamic(gradVal);
-                auto input = LayerIO::Create().template Set<LayerIO>(newGrad);
-                auto res = m_step.FeedBackward(std::move(input));
-                m_hiddens = MakeDynamic(res.template Get<RnnLayerHiddenBefore>());
-                return std::move(res);
-            }
-        }
-        else
-        {
-            return m_step.FeedBackward(std::forward<TGrad>(p_grad));
-        }
-    }
-
-    void NeutralInvariant()
-    {
-        m_step.NeutralInvariant();
-    }
-
-private:
-    StepType m_step;
-    DataType m_hiddens;
-    bool     m_inForward;
-};
-}
-*/
 
 namespace MetaNN
 {
@@ -241,16 +96,19 @@ namespace MetaNN
         {
             using type = 
                 LayerIOMap<LayerKV<TKeys, 
-                           typename Wrapper2KernelInputMapHelper_<TValues, IsSequenceCategory<TValues>, IsPreviousPort<TValues>>::type>...>;
+                           typename Wrapper2KernelInputMapHelper_<TValues, IsSequenceCategory<TValues>, IsPreviousPort<TKeys>>::type>...>;
         };
+        
+        template <typename TKey, typename TValue>
+        constexpr bool PreviousSeqCheck = !(IsPreviousPort<TKey> && IsSequenceCategoryTag<typename TValue::CategoryTag>);
         
         template <typename... TKeys, typename... TValues, typename TPolicies>
         struct KernelGenerator_<LayerIOMap<LayerKV<TKeys, TValues>...>, TPolicies>
         {
             static_assert((!IsBatchCategory<TValues> && ...), "No batch input is allowed in RNN layer.");
             static_assert((IsPreviousPort<TKeys> || ...), "No Previous port in the input port set.");
-            static_assert(!((IsPreviousPort<TKeys> && IsSequenceCategoryTag<typename TValues::CategoryTag>) || ...),
-                          "Previous ports should not be sequence.");
+            static_assert((PreviousSeqCheck<TKeys, TValues> && ...),
+                          "Previous ports should not be sequencal.");
 
             constexpr static bool IsTrival = !(IsSequenceCategory<TValues> || ...);
             
@@ -450,26 +308,28 @@ namespace MetaNN
             {
                 using CurType = Sequential::Head<TKeyCont>;
                 using CurValueType = typename RemConstRef<TInput>::template ValueType<CurType>;
-                if constexpr (IsSequenceCategory<CurValueType>)
-                {
-                    auto curValue = p_input.template Get<CurType>();
-                    auto inputValue = curValue[id];
-                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(inputValue);
-                    return SplitN<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
-                }
-                else if constexpr (IsPreviousPort<CurType>)
+                if constexpr (IsPreviousPort<CurType>)
                 {
                     using PrimeType = typename PreviousToPrimePort_<CurType>::type;
                     auto curValue = p_previous.template Get<PrimeType>();
                     auto inputValue = MakeDynamic(std::move(curValue));
                     auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(inputValue);
-                    return SplitN<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
+                    return SplitN<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), p_previous, id);
                 }
                 else
                 {
                     auto curValue = p_input.template Get<CurType>();
-                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(curValue);
-                    return SplitN<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
+                    if constexpr (IsSequenceCategory<CurValueType>)
+                    {
+                        auto inputValue = curValue[id];
+                        auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(inputValue);
+                        return SplitN<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), p_previous, id);
+                    }
+                    else
+                    {
+                        auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(curValue);
+                        return SplitN<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), p_previous, id);
+                    }
                 }
             }
         }
@@ -491,10 +351,10 @@ namespace MetaNN
         }
         
         template <typename TKeyCont, typename TInput, typename TOutput>
-        auto FillOutputCont(TInput&& p_input, TOutput&& p_output)
+        void FillOutputCont(TInput&& p_input, TOutput&& p_output)
         {
             if constexpr (Sequential::Size<TKeyCont> == 0)
-                return std::forward<TOutput>(p_output);
+                return;
             else
             {
                 using CurType = Sequential::Head<TKeyCont>;
@@ -504,7 +364,7 @@ namespace MetaNN
         }
         
         template <typename TKeyCont, bool bIsDynamicWrap, typename TInput, typename TOutput>
-        auto GradSplit(const TInput& p_input, TOutput&& p_output, size_t id)
+        auto GradSplit(const TInput& p_input, TOutput&& p_output)
         {
             if constexpr (Sequential::Size<TKeyCont> == 0)
                 return std::forward<TOutput>(p_output);
@@ -514,16 +374,16 @@ namespace MetaNN
                 auto curValue = p_input.template Get<CurType>();
                 static_assert(IsSequenceCategory<decltype(curValue)>);
                 
-                auto inputValue = curValue[id];
+                auto inputValue = curValue[curValue.Shape().Length() - 1];
                 if constexpr (bIsDynamicWrap)
                 {
                     auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(inputValue)));
-                    return GradSplit<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
+                    return GradSplit<Sequential::Tail<TKeyCont>, bIsDynamicWrap>(p_input, std::move(newOutput));
                 }
                 else
                 {
                     auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(std::move(inputValue));
-                    return GradSplit<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
+                    return GradSplit<Sequential::Tail<TKeyCont>, bIsDynamicWrap>(p_input, std::move(newOutput));
                 }
             }
         }
@@ -545,12 +405,12 @@ namespace MetaNN
                     if constexpr (bIsDynamicWrap)
                     {
                         auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(inputValue)));
-                        return GradSplit<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
+                        return GradSplitN<Sequential::Tail<TKeyCont>, UseBptt, bIsDynamicWrap>(p_input, p_previous, std::move(newOutput), id);
                     }
                     else
                     {
                         auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(std::move(inputValue));
-                        return GradSplit<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
+                        return GradSplitN<Sequential::Tail<TKeyCont>, UseBptt, bIsDynamicWrap>(p_input, p_previous, std::move(newOutput), id);
                     }
                 }
                 else
@@ -559,12 +419,12 @@ namespace MetaNN
                     if constexpr (bIsDynamicWrap)
                     {
                         auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(amendInput)));
-                        return GradSplit<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
+                        return GradSplitN<Sequential::Tail<TKeyCont>, UseBptt, bIsDynamicWrap>(p_input, p_previous, std::move(newOutput), id);
                     }
                     else
                     {
                         auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(std::move(amendInput));
-                        return GradSplitN<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), id);
+                        return GradSplitN<Sequential::Tail<TKeyCont>, UseBptt, bIsDynamicWrap>(p_input, p_previous, std::move(newOutput), id);
                     }
                 }
             }
@@ -574,12 +434,50 @@ namespace MetaNN
         auto ReverseOutputCont(TOutput&& p_output)
         {
             if constexpr (Sequential::Size<TKeyCont> == 0)
+                return;
+            else
+            {
+                using CurType = Sequential::Head<TKeyCont>;
+                if constexpr (!IsPreviousPort<CurType>)
+                    p_output.template Get<CurType>().Reverse();
+                return ReverseOutputCont<Sequential::Tail<TKeyCont>>(std::forward<TOutput>(p_output));
+            }
+        }
+        
+        template <typename TKeyCont, typename TInput, typename TOutput>
+        void FillNormalGradOutput(TInput&& p_input, TOutput&& p_output)
+        {
+            if constexpr (Sequential::Size<TKeyCont> == 0)
+                return;
+            else
+            {
+                using CurType = Sequential::Head<TKeyCont>;
+                if constexpr (!IsPreviousPort<CurType>)
+                {
+                    p_output.template Get<CurType>().PushBack(std::forward<TInput>(p_input).template Get<CurType>());
+                }
+                return FillNormalGradOutput<Sequential::Tail<TKeyCont>>(std::forward<TInput>(p_input), std::forward<TOutput>(p_output));
+            }
+        }
+
+        template <typename TKeyCont, typename TInput, typename TOutput>
+        auto FillPrevGradOutput(TInput&& p_input, TOutput&& p_output)
+        {
+            if constexpr (Sequential::Size<TKeyCont> == 0)
                 return std::forward<TOutput>(p_output);
             else
             {
                 using CurType = Sequential::Head<TKeyCont>;
-                p_output.template Get<CurType>().Reverse();
-                return ReverseOutputCont<Sequential::Tail<TKeyCont>>(std::forward<TOutput>(p_output));
+                if constexpr (IsPreviousPort<CurType>)
+                {
+                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(std::forward<TInput>(p_input).template Get<CurType>());
+                    return FillPrevGradOutput<Sequential::Tail<TKeyCont>>(std::forward<TInput>(p_input), std::move(newOutput));
+                }
+                else
+                {
+                    return FillPrevGradOutput<Sequential::Tail<TKeyCont>>(std::forward<TInput>(p_input),
+                                                                          std::forward<TOutput>(p_output));
+                }
             }
         }
     }
@@ -696,7 +594,7 @@ namespace MetaNN
                     throw std::runtime_error("Empty sequence as grad input.");
                 }
                 
-                auto curInputCont = NSRecurrentLayer::GradSplit<typename TOriInputCont::Keys, false>(p_in, TOriInputCont::Keys::Create(), seqNum - 1);
+                auto curInputCont = NSRecurrentLayer::GradSplit<typename TOriInputCont::Keys, false>(p_in, TOriInputCont::Keys::Create());
                 auto curOutputCont = m_kernel.FeedBackward(std::move(curInputCont));
 
                 for (size_t i = 2; i <= seqNum; ++i)
@@ -716,7 +614,7 @@ namespace MetaNN
                     throw std::runtime_error("Empty sequence as grad input.");
                 }
                 
-                auto firstInputGrad = NSRecurrentLayer::GradSplit<typename TOriInputCont::Keys, true>(p_in, TOriInputCont::Keys::Create(), seqNum - 1);
+                auto firstInputGrad = NSRecurrentLayer::GradSplit<typename TOriInputCont::Keys, true>(p_in, TOriInputCont::Keys::Create());
                 auto curOutputCont = m_kernel.FeedBackward(std::move(firstInputGrad));
                 using OutputGradKeys = typename decltype(curOutputCont)::Keys;
                 auto outputGrad = NSRecurrentLayer::InitOutputCont<OutputGradKeys>(curOutputCont, OutputGradKeys::Create());
@@ -724,11 +622,13 @@ namespace MetaNN
                 {
                     auto curInputCont = NSRecurrentLayer::GradSplitN<typename TOriInputCont::Keys, UseBptt, true>(p_in, curOutputCont, TOriInputCont::Keys::Create(), seqNum - i);
                     curOutputCont = m_kernel.FeedBackward(std::move(curInputCont));
-                    NSRecurrentLayer::FillOutputCont<OutputGradKeys>(curOutputCont, outputGrad);
+                    NSRecurrentLayer::FillNormalGradOutput<OutputGradKeys>(curOutputCont, outputGrad);
                 }
+                
+                auto filledPrevGrad = NSRecurrentLayer::FillPrevGradOutput<OutputGradKeys>(curOutputCont, std::move(outputGrad));
 
-                NSRecurrentLayer::ReverseOutputCont<OutputGradKeys>(outputGrad);                
-                return TShapeDickHelper::Collapse(m_inputShapeStack, std::move(outputGrad));
+                NSRecurrentLayer::ReverseOutputCont<OutputGradKeys>(filledPrevGrad);
+                return TShapeDickHelper::Collapse(m_inputShapeStack, std::move(filledPrevGrad));
             }
         }
     private:
