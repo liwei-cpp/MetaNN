@@ -224,33 +224,33 @@ namespace MetaNN
         };
         
         template <typename TValue, bool IsSequence, bool IsPrevious>
-        struct Wrapper2KernelIOMapHelper_
+        struct Wrapper2KernelInputMapHelper_
         {
             static_assert(!(IsSequence && IsPrevious), "Previous<> is sequence.");
             using type = TValue;
         };
         
         template <typename TValue>
-        struct Wrapper2KernelIOMapHelper_<TValue, true, false>
+        struct Wrapper2KernelInputMapHelper_<TValue, true, false>
         {
             using type = decltype(std::declval<TValue>().operator[](0));
         };
         
         template <typename TValue>
-        struct Wrapper2KernelIOMapHelper_<TValue, false, true>
+        struct Wrapper2KernelInputMapHelper_<TValue, false, true>
         {
             using type = decltype(MakeDynamic(std::declval<TValue>()));
         };
         
         template <typename TInputMap>
-        struct Wrapper2KernelIOMap_;
+        struct Wrapper2KernelInputMap_;
         
         template <typename... TKeys, typename... TValues>
-        struct Wrapper2KernelIOMap_<LayerIOMap<LayerKV<TKeys, TValues>...>>
+        struct Wrapper2KernelInputMap_<LayerIOMap<LayerKV<TKeys, TValues>...>>
         {
             using type = 
                 LayerIOMap<LayerKV<TKeys, 
-                           typename Wrapper2KernelIOMapHelper_<TValues, IsSequenceCategory<TValues>, IsPreviousPort<TValues>>::type>...>;
+                           typename Wrapper2KernelInputMapHelper_<TValues, IsSequenceCategory<TValues>, IsPreviousPort<TValues>>::type>...>;
         };
         
         template <typename... TKeys, typename... TValues, typename TPolicies>
@@ -261,7 +261,7 @@ namespace MetaNN
             static_assert(!((IsPreviousPort<TKeys> && IsSequenceCategoryTag<typename TValues::CategoryTag>) || ...),
                           "Previous ports should not be sequence.");
 
-            constexpr static bool IsTrival = !(IsSequenceCategoryTag<typename TValues::CategoryTag> || ...);
+            constexpr static bool IsTrival = !(IsSequenceCategory<TValues> || ...);
             
             using WrapperPolicy = PlainPolicy<TPolicies>;
             
@@ -280,8 +280,8 @@ namespace MetaNN
                                                                   ChangePolicy_<PFeedbackOutput, KernelPolicy>,
                                                                   Identity_<KernelPolicy>>::type;
 
-            using KernelIOMap = typename Wrapper2KernelIOMap_<LayerIOMap<LayerKV<TKeys, TValues>...>>::type;
-            using KernelType = Kernel<KernelIOMap, AmendKernelPolicy>;
+            using KernelInputMap = typename Wrapper2KernelInputMap_<LayerIOMap<LayerKV<TKeys, TValues>...>>::type;
+            using KernelType = Kernel<KernelInputMap, AmendKernelPolicy>;
 
             using OutputPortSet = typename KernelType::OutputPortSet;
             static_assert(NoIOPortOverLap_<typename KernelType::InputPortSet, OutputPortSet>::value);
