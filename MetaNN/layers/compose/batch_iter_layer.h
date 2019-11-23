@@ -330,7 +330,7 @@ namespace MetaNN
                     auto curOutput = m_kernel.FeedForward(std::move(curInputCont));
                     NSBatchIterLayer::FillOutputCont<OutputKeys>(std::move(curOutput), outputCont);
                 }
-                return std::move(outputCont);
+                return outputCont;
             }
         }
 

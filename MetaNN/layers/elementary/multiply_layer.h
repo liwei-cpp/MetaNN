@@ -1,5 +1,4 @@
 #pragma once
-#include <MetaNN/layers/facilities/common_io.h>
 #include <MetaNN/layers/facilities/policies.h>
 #include <MetaNN/layers/facilities/traits.h>
 #include <MetaNN/policies/policy_operations.h>

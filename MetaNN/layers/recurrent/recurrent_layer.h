@@ -564,7 +564,7 @@ namespace MetaNN
                     previousOutput = m_kernel.FeedForward(std::move(curInputCont));
                     NSRecurrentLayer::FillOutputCont<OutputKeys>(previousOutput, outputCont);
                 }
-                return std::move(outputCont);
+                return outputCont;
             }
         }
 

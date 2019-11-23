@@ -197,7 +197,6 @@
       <File Name="layers/elementary/dot_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
-      <File Name="layers/facilities/common_io.h"/>
       <File Name="layers/facilities/interface_fun.h"/>
       <File Name="layers/facilities/policies.h"/>
       <File Name="layers/facilities/traits.h"/>
