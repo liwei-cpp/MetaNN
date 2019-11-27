@@ -1,5 +1,6 @@
 #pragma once
 #include <MetaNN/meta_nn2.h>
+#include <cassert>
 
 template <typename TElem>
 inline auto GenMatrix(std::size_t r, std::size_t c, TElem start = 0, TElem step = 1)
@@ -14,6 +15,23 @@ inline auto GenMatrix(std::size_t r, std::size_t c, TElem start = 0, TElem step 
         {
             res.SetValue(i, j, (TElem)(start + cur));
             cur += step;
+        }
+    }
+    return res;
+}
+
+template <typename TElem, typename TIt>
+inline auto FillMatrix(std::size_t r, std::size_t c, TIt b)
+{
+    using namespace MetaNN;
+    Matrix<TElem, MetaNN::DeviceTags::CPU> res(r, c);
+    
+    for (std::size_t i = 0; i < r; ++i)
+    {
+        for (std::size_t j = 0; j < c; ++j)
+        {
+            res.SetValue(i, j, (TElem)(*b));
+            ++b;
         }
     }
     return res;
@@ -130,11 +148,30 @@ inline auto GenMatrixSequence(size_t p, size_t r, size_t c, TElem start = 0, TEl
     return res;
 }
 
+template <typename TElem, typename TIt>
+inline auto FillMatrixSequence(size_t p, size_t r, size_t c, TIt b)
+{
+    using namespace MetaNN;
+    MatrixSequence<TElem, DeviceTags::CPU> res(p, r, c);
+    for (size_t k = 0; k < p; ++k)
+    {
+        for (size_t i = 0; i < r; ++i)
+        {
+            for (size_t j = 0; j < c; ++j)
+            {
+                res.SetValue(k, i, j, (TElem)(*b));
+                ++b;
+            }
+        }
+    }
+    return res;
+}
+
 template <typename TElem>
 inline auto GenThreeDArraySequence(size_t b, size_t p, size_t r, size_t c, TElem start = 0, TElem scale = 1)
 {
     using namespace MetaNN;
-    ThreeDArraySequence<TElem, MetaNN::DeviceTags::CPU> res(b, p, r, c);
+    ThreeDArraySequence<TElem, DeviceTags::CPU> res(b, p, r, c);
     for (size_t l = 0; l < b; ++l)
     {
         for (size_t k = 0; k < p; ++k)
@@ -213,4 +250,50 @@ inline auto GenBatchThreeDArraySequence(const std::vector<TLen>& seqs, size_t pa
         }
     }
     return res;
+}
+
+template <typename TElem>
+bool Compare(const MetaNN::Matrix<TElem, MetaNN::DeviceTags::CPU>& v1,
+             const MetaNN::Matrix<TElem, MetaNN::DeviceTags::CPU>& v2, TElem availGap)
+{
+    assert(v1.Shape() == v2.Shape());
+
+    float diff = 0;
+    for (size_t i = 0; i < v1.Shape().RowNum(); ++i)
+    {
+        for (size_t j = 0; j < v1.Shape().ColNum(); ++j)
+        {
+            float val = fabs(v1(i, j) - v2(i, j));
+            if (val > diff)
+            {
+                diff = val;
+            }
+        }
+    }
+    
+    return diff <= availGap;
+}
+
+template <typename TElem>
+bool Compare(const MetaNN::MatrixSequence<TElem, MetaNN::DeviceTags::CPU>& v1,
+             const MetaNN::MatrixSequence<TElem, MetaNN::DeviceTags::CPU>& v2, TElem availGap)
+{
+    assert(v1.Shape() == v2.Shape());
+
+    float diff = 0;
+    for (size_t k = 0; k < v1.Shape().Length(); ++k)
+    {
+        for (size_t i = 0; i < v1.Shape().RowNum(); ++i)
+        {
+            for (size_t j = 0; j < v1.Shape().ColNum(); ++j)
+            {
+                float val = fabs(v1[k](i, j) - v2[k](i, j));
+                if (val > diff)
+                {
+                    diff = val;
+                }
+            }
+        }
+    }
+    return diff <= availGap;
 }

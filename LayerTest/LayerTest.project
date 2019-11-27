@@ -141,5 +141,6 @@
   <VirtualDirectory Name="recurrent">
     <File Name="recurrent/_.h"/>
     <File Name="recurrent/test_recurrent_layer.cpp"/>
+    <File Name="recurrent/test_gru.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

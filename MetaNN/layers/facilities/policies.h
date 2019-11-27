@@ -38,8 +38,16 @@ ValuePolicyObj(PFeedbackNoOutput, GradPolicy, IsFeedbackOutput, false);
 
         struct InitializerTypeCate;
         using Initializer = NullParameter;
+        
+        struct ElementTypeTypeCate;
+        using  ElementType = float;
+        
+        struct DeviceTypeTypeCate;
+        using  DeviceType = DeviceTags::CPU;
     };
     TypePolicyTemplate(PParamTypeIs,   ParamPolicy, ParamType);
+    TypePolicyTemplate(PElementTypeIs, ParamPolicy, ElementType);
+    TypePolicyTemplate(PDeviceTypeIs,  ParamPolicy, DeviceType);
     TypePolicyTemplate(PInitializerIs, ParamPolicy, Initializer);
     
     struct LayerStructurePolicy

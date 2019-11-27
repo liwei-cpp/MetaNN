@@ -59,29 +59,43 @@ namespace MetaNN
             OutConnect<Interpolate, LayerOutput, LayerOutput>>;
 
         template <typename TInputMap, typename TPolicies>
-        using Base = ComposeKernel<LayerPortSet<LayerInput>, LayerPortSet<LayerOutput>, TInputMap, TPolicies, Topology>;
+        using Base = ComposeKernel<LayerPortSet<LayerInput, Previous<LayerOutput>>,
+                                   LayerPortSet<LayerOutput>, TInputMap, TPolicies, Topology>;
+        
+        template <typename TPolicies>
+        struct CalParameterPolicy_
+        {
+            static_assert(IsPolicyContainer<TPolicies>, "TPolicies is not a policy container.");
+            using CurLayerPolicy = PlainPolicy<TPolicies>;
+            using ElementType = typename PolicySelect<ParamPolicy, CurLayerPolicy>::ElementType;
+            using DeviceType = typename PolicySelect<ParamPolicy, CurLayerPolicy>::DeviceType;
+
+            using type = ChangePolicy<PParamTypeIs<Matrix<ElementType, DeviceType>>, TPolicies>;
+        };
+        
+        template <typename TPolicies>
+        using CalParameterPolicy = typename CalParameterPolicy_<TPolicies>::type;
     }
     
     template <typename TInputMap, typename TPolicies>
-    class GruStep : public NSGruStep::Base<TInputMap, TPolicies>
+    class GruStep : public NSGruStep::Base<TInputMap, NSGruStep::CalParameterPolicy<TPolicies>>
     {
-        static_assert(IsPolicyContainer<TPolicies>, "TPolicies is not a policy container.");
-        using TBase = NSGruStep::Base<TInputMap, TPolicies>;
+        using ModifiedPolicy = NSGruStep::CalParameterPolicy<TPolicies>;
+        using TBase = NSGruStep::Base<TInputMap, ModifiedPolicy>;
 
     public:
-        template <typename... TShapeParams>
-        GruStep(const std::string& p_name, TShapeParams&&... shapeParams)
-            : TBase(TBase::CreateSubLayers()
-                        .template Set<NSGruStep::Wz>(p_name + "/Wz", shapeParams...)
-                        .template Set<NSGruStep::Uz>(p_name + "/Uz", shapeParams...)
+        GruStep(const std::string& p_name, size_t p_fanIn, size_t p_fanOut)
+            : TBase(TBase::CreateSublayers()
+                        .template Set<NSGruStep::Wz>(p_name + "/Wz", p_fanIn, p_fanOut)
+                        .template Set<NSGruStep::Uz>(p_name + "/Uz", p_fanOut, p_fanOut)
                         .template Set<NSGruStep::Add_z>(p_name + "/Add_z")
                         .template Set<NSGruStep::Act_z>(p_name + "/Act_z")
-                        .template Set<NSGruStep::Wr>(p_name + "/Wr", shapeParams...)
-                        .template Set<NSGruStep::Ur>(p_name + "/Ur", shapeParams...)
+                        .template Set<NSGruStep::Wr>(p_name + "/Wr", p_fanIn, p_fanOut)
+                        .template Set<NSGruStep::Ur>(p_name + "/Ur", p_fanOut, p_fanOut)
                         .template Set<NSGruStep::Add_r>(p_name + "/Add_r")
                         .template Set<NSGruStep::Act_r>(p_name + "/Act_r")
-                        .template Set<NSGruStep::W>(p_name + "/W", shapeParams...)
-                        .template Set<NSGruStep::U>(p_name + "/U", shapeParams...)
+                        .template Set<NSGruStep::W>(p_name + "/W", p_fanIn, p_fanOut)
+                        .template Set<NSGruStep::U>(p_name + "/U", p_fanOut, p_fanOut)
                         .template Set<NSGruStep::Mult>(p_name + "/Mult")
                         .template Set<NSGruStep::Add>(p_name + "/Add")
                         .template Set<NSGruStep::Act_Hat>(p_name + "/Act_Hat")

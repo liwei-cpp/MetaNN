@@ -6,7 +6,7 @@
   <Project Name="LayerTest" Path="LayerTest/LayerTest.project" Active="Yes"/>
   <Project Name="OtherTests" Path="OtherTests/OtherTests.project" Active="No"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="no">
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
       <Project Name="MetaNN" ConfigName="Debug"/>
       <Project Name="GeneralTest" ConfigName="Debug"/>
@@ -14,7 +14,7 @@
       <Project Name="LayerTest" ConfigName="Debug"/>
       <Project Name="OtherTests" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="yes">
+    <WorkspaceConfiguration Name="Release" Selected="no">
       <Environment/>
       <Project Name="MetaNN" ConfigName="Release"/>
       <Project Name="GeneralTest" ConfigName="Release"/>
