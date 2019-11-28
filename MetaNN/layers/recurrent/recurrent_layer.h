@@ -363,7 +363,7 @@ namespace MetaNN
             }
         }
         
-        template <typename TKeyCont, bool bIsDynamicWrap, typename TInput, typename TOutput>
+        template <typename TKeyCont, typename TInput, typename TOutput>
         auto GradSplit(const TInput& p_input, TOutput&& p_output)
         {
             if constexpr (Sequential::Size<TKeyCont> == 0)
@@ -375,20 +375,12 @@ namespace MetaNN
                 static_assert(IsSequenceCategory<decltype(curValue)>);
                 
                 auto inputValue = curValue[curValue.Shape().Length() - 1];
-                if constexpr (bIsDynamicWrap)
-                {
-                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(inputValue)));
-                    return GradSplit<Sequential::Tail<TKeyCont>, bIsDynamicWrap>(p_input, std::move(newOutput));
-                }
-                else
-                {
-                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(std::move(inputValue));
-                    return GradSplit<Sequential::Tail<TKeyCont>, bIsDynamicWrap>(p_input, std::move(newOutput));
-                }
+                auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(inputValue)));
+                return GradSplit<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput));
             }
         }
         
-        template <typename TKeyCont, bool UseBptt, bool bIsDynamicWrap, typename TInput, typename TPrevious, typename TOutput>
+        template <typename TKeyCont, bool UseBptt, typename TInput, typename TPrevious, typename TOutput>
         auto GradSplitN(const TInput& p_input, const TPrevious& p_previous, TOutput&& p_output, size_t id)
         {
             if constexpr (Sequential::Size<TKeyCont> == 0)
@@ -402,30 +394,14 @@ namespace MetaNN
                 auto inputValue = curValue[id];
                 if constexpr (!UseBptt)
                 {
-                    if constexpr (bIsDynamicWrap)
-                    {
-                        auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(inputValue)));
-                        return GradSplitN<Sequential::Tail<TKeyCont>, UseBptt, bIsDynamicWrap>(p_input, p_previous, std::move(newOutput), id);
-                    }
-                    else
-                    {
-                        auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(std::move(inputValue));
-                        return GradSplitN<Sequential::Tail<TKeyCont>, UseBptt, bIsDynamicWrap>(p_input, p_previous, std::move(newOutput), id);
-                    }
+                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(inputValue)));
+                    return GradSplitN<Sequential::Tail<TKeyCont>, UseBptt>(p_input, p_previous, std::move(newOutput), id);
                 }
                 else
                 {
                     auto amendInput = p_previous.template Get<Previous<CurType>>() + inputValue;
-                    if constexpr (bIsDynamicWrap)
-                    {
-                        auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(amendInput)));
-                        return GradSplitN<Sequential::Tail<TKeyCont>, UseBptt, bIsDynamicWrap>(p_input, p_previous, std::move(newOutput), id);
-                    }
-                    else
-                    {
-                        auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(std::move(amendInput));
-                        return GradSplitN<Sequential::Tail<TKeyCont>, UseBptt, bIsDynamicWrap>(p_input, p_previous, std::move(newOutput), id);
-                    }
+                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(amendInput)));
+                    return GradSplitN<Sequential::Tail<TKeyCont>, UseBptt>(p_input, p_previous, std::move(newOutput), id);
                 }
             }
         }
@@ -530,6 +506,13 @@ namespace MetaNN
 
         void NeutralInvariant() const
         {
+            if constexpr (IsFeedbackOutput)
+            {
+                if (!m_inputShapeStack.empty())
+                {
+                    throw std::runtime_error("[RecurrentLayer] NeutralInvariant fails: ShapeStack is not empty.");
+                }
+            }
             LayerNeutralInvariant(m_kernel);
         }
         
@@ -594,12 +577,12 @@ namespace MetaNN
                     throw std::runtime_error("Empty sequence as grad input.");
                 }
                 
-                auto curInputCont = NSRecurrentLayer::GradSplit<typename TOriInputCont::Keys, false>(p_in, TOriInputCont::Keys::Create());
+                auto curInputCont = NSRecurrentLayer::GradSplit<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create());
                 auto curOutputCont = m_kernel.FeedBackward(std::move(curInputCont));
 
                 for (size_t i = 2; i <= seqNum; ++i)
                 {
-                    auto curInputCont = NSRecurrentLayer::GradSplitN<typename TOriInputCont::Keys, UseBptt, false>(p_in, curOutputCont, TOriInputCont::Keys::Create(), seqNum - i);
+                    auto curInputCont = NSRecurrentLayer::GradSplitN<typename TOriInputCont::Keys, UseBptt>(p_in, curOutputCont, TOriInputCont::Keys::Create(), seqNum - i);
                     curOutputCont = m_kernel.FeedBackward(std::move(curInputCont));
                 }
                 
@@ -614,13 +597,13 @@ namespace MetaNN
                     throw std::runtime_error("Empty sequence as grad input.");
                 }
                 
-                auto firstInputGrad = NSRecurrentLayer::GradSplit<typename TOriInputCont::Keys, true>(p_in, TOriInputCont::Keys::Create());
+                auto firstInputGrad = NSRecurrentLayer::GradSplit<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create());
                 auto curOutputCont = m_kernel.FeedBackward(std::move(firstInputGrad));
                 using OutputGradKeys = typename decltype(curOutputCont)::Keys;
                 auto outputGrad = NSRecurrentLayer::InitOutputCont<OutputGradKeys>(curOutputCont, OutputGradKeys::Create());
                 for (size_t i = 2; i <= seqNum; ++i)
                 {
-                    auto curInputCont = NSRecurrentLayer::GradSplitN<typename TOriInputCont::Keys, UseBptt, true>(p_in, curOutputCont, TOriInputCont::Keys::Create(), seqNum - i);
+                    auto curInputCont = NSRecurrentLayer::GradSplitN<typename TOriInputCont::Keys, UseBptt>(p_in, curOutputCont, TOriInputCont::Keys::Create(), seqNum - i);
                     curOutputCont = m_kernel.FeedBackward(std::move(curInputCont));
                     NSRecurrentLayer::FillNormalGradOutput<OutputGradKeys>(curOutputCont, outputGrad);
                 }

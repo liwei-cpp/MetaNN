@@ -44,7 +44,7 @@ struct GradInfo
         default:
             return MakeDynamic(Collapse(grad, weight.Shape()));
         }
-    }    
+    }
     
 private:
     WeightType weight;
@@ -56,37 +56,45 @@ class GradCollector
 {
 private:
     template <typename TCont, typename TMap, typename TWeight>
-    auto GetEntry(TCont& p_cont, TMap& p_map, const TWeight& p_weight)
+    auto GetOrCreateEntry(std::string_view name, TCont& p_cont, TMap& p_map, const TWeight& p_weight)
     {
-        auto mem = LowerAccess(p_weight);
-        auto weightPtr = mem.RawMemory();
-        auto it = p_map.find(weightPtr);
+        auto it = p_map.find(name);
         if (it != p_map.end()) return it->second;
         
         using TGradInfo = typename TCont::value_type;
         p_cont.push_front(TGradInfo(p_weight));
-        p_map.insert({weightPtr, p_cont.begin()});
+        p_map.insert({name, p_cont.begin()});
         return p_cont.begin();
+    }
+    
+    template <typename TMap>
+    const auto& GetEntry(std::string_view name, TMap& p_map)
+    {
+        auto it = p_map.find(name);
+        if (it == p_map.end())
+        {
+            throw std::runtime_error(std::string("Cannot find the parameter with name: ") + std::string(name));
+        }
+        return *(it->second);
     }
     
 public:
     template<typename TWeight, typename TGrad>
-    void Collect(const TWeight& weight,
-                 TGrad&& grad)
+    void Collect(std::string_view name, const TWeight& weight, TGrad&& grad)
     {
         if constexpr (IsScalar<TWeight>)
         {
-            auto it = GetEntry(m_scalarGrad, m_scalarGradMap, weight);
+            auto it = GetOrCreateEntry(name, m_scalarGrad, m_scalarGradMap, weight);
             it->Push(std::forward<TGrad>(grad));
         }
         else if constexpr (IsMatrix<TWeight>)
         {
-            auto it = GetEntry(m_matrixGrad, m_matrixGradMap, weight);
+            auto it = GetOrCreateEntry(name, m_matrixGrad, m_matrixGradMap, weight);
             it->Push(std::forward<TGrad>(grad));
         }
         else if constexpr (IsThreeDArray<TWeight>)
         {
-            auto it = GetEntry(m_3dArrayGrad, m_3dArrayGradMap, weight);
+            auto it = GetOrCreateEntry(name, m_3dArrayGrad, m_3dArrayGradMap, weight);
             it->Push(std::forward<TGrad>(grad));
         }
         else
@@ -125,6 +133,27 @@ public:
             static_assert(DependencyFalse<TCategory>);
         }
     }
+    
+    template <typename TCategory>
+    const auto& GetGradInfo(std::string_view p_paramName)
+    {
+        if constexpr (std::is_same_v<TCategory, CategoryTags::Scalar>)
+        {
+            return GetEntry(p_paramName, m_scalarGradMap);
+        }
+        else if constexpr (std::is_same_v<TCategory, CategoryTags::Matrix>)
+        {
+            return GetEntry(p_paramName, m_matrixGradMap);
+        }
+        else if constexpr (std::is_same_v<TCategory, CategoryTags::ThreeDArray>)
+        {
+            return GetEntry(p_paramName, m_3dArrayGradMap);
+        }
+        else
+        {
+            static_assert(DependencyFalse<TCategory>);
+        }
+    }
 
 private:
     template <typename TCategory>
@@ -134,12 +163,12 @@ private:
     using GradContIter = typename GradContainer<TCategory>::iterator;
     
     GradContainer<CategoryTags::Scalar> m_scalarGrad;
-    std::unordered_map<const TElement*, GradContIter<CategoryTags::Scalar>> m_scalarGradMap;
+    std::unordered_map<std::string_view, GradContIter<CategoryTags::Scalar>> m_scalarGradMap;
     
     GradContainer<CategoryTags::Matrix> m_matrixGrad;
-    std::unordered_map<const TElement*, GradContIter<CategoryTags::Matrix>> m_matrixGradMap;
+    std::unordered_map<std::string_view, GradContIter<CategoryTags::Matrix>> m_matrixGradMap;
     
     GradContainer<CategoryTags::ThreeDArray> m_3dArrayGrad;
-    std::unordered_map<const TElement*, GradContIter<CategoryTags::ThreeDArray>> m_3dArrayGradMap;
+    std::unordered_map<std::string_view, GradContIter<CategoryTags::ThreeDArray>> m_3dArrayGradMap;
 };
 }

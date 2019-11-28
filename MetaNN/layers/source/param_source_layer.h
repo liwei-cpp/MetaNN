@@ -106,7 +106,7 @@ namespace MetaNN
         {
             if constexpr (IsUpdate)
             {
-                LayerTraits::ParamGradCollect(m_data, m_paramGradStack, col);
+                LayerTraits::ParamGradCollect(m_paramName, m_data, m_paramGradStack, col);
             }
         }
         

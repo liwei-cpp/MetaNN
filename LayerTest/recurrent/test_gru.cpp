@@ -51,14 +51,64 @@ namespace
          +0.41502982, +0.03049517, +0.66101068, -0.59646982, +0.36144584, -0.52966756};
 
     // input sequence, one line per vector, sequence length = 3
-    double x_np[] = {+0.06803755, -0.02112342, +0.05661985, +0.05968801,
-                     -0.04444506, +0.01079400, -0.00452059, +0.02577419,
-                     +0.02714235, +0.04345939, -0.07167949, +0.02139378};
+    double x_np_1[] = {+0.06803755, -0.02112342, +0.05661985, +0.05968801,
+                       -0.04444506, +0.01079400, -0.00452059, +0.02577419,
+                       +0.02714235, +0.04345939, -0.07167949, +0.02139378};
     
-    double fres_0[] = {+0.57356697, +0.67493051, +0.29173079, +0.91266167, +0.84974384, +0.98380929,
+    double fres_1[] = {+0.57356697, +0.67493051, +0.29173079, +0.91266167, +0.84974384, +0.98380929,
                        +0.08489671, +0.46299744, +0.03604220, +0.81269711, +0.74108052, +0.94202799,
                        -0.25375497, +0.34222481, -0.00472301, +0.74003857, +0.61487955, +0.86550480};
-    
+
+    // input sequence, 2 lines per matrix, sequence length = 3
+    double x_np_2[] = {+0.06803755, -0.02112342, +0.05661985, +0.05968801,
+                       +0.08232947, -0.06048973, -0.03295545, +0.05364592,
+                       -0.04444506, +0.01079400, -0.00452059, +0.02577419,
+                       -0.02704310, +0.00268018, +0.09044594, +0.08323903,
+                       +0.02714235, +0.04345939, -0.07167949, +0.02139378,
+                       -0.09673989, -0.05142265, -0.07255369, +0.06083535};
+
+    double fres_2[] = {+0.57356697, +0.67493051, +0.29173079, +0.91266167, +0.84974384, +0.98380929,
+                       +0.55533367, +0.67668849, +0.30710635, +0.92483586, +0.82781047, +0.98345935,
+                       +0.08489671, +0.46299744, +0.03604220, +0.81269711, +0.74108052, +0.94202799,
+                       +0.11790840, +0.45316586, +0.06124194, +0.82058430, +0.75081849, +0.94535780,
+                       -0.25375497, +0.34222481, -0.00472301, +0.74003857, +0.61487955, +0.86550480,
+                       -0.23477679, +0.34515449, +0.01637596, +0.74365497, +0.62452525, +0.86549950};
+
+    double wi_grad_check[] = {-0.04264588, -0.01554555, -0.03181295, -0.01012502, -0.02110841, +0.00796517,
+                              +0.02034394, +0.02356272, +0.01869094, +0.01973352, +0.03446945, +0.00592688,
+                              -0.02382816, -0.01072955, -0.00267675, -0.01318462, +0.00054733, +0.00702775,
+                              -0.02760490, -0.08487224, -0.02311299, -0.07875377, -0.11316016, -0.03615509};
+
+    double wu_grad_check[] = {+0.03632787, +0.02715230, +0.01062525, +0.00892575, +0.01664936, -0.00250984,
+                              -0.01864217, -0.01733737, -0.00582790, -0.00920409, -0.01183222, -0.00222107,
+                              +0.01316092, +0.00946078, +0.00133530, +0.00743668, +0.00213212, -0.00179100,
+                              +0.02557347, +0.03541989, +0.00772383, +0.02940711, +0.02389065, +0.0124517};
+
+    double wr_grad_check[] = {-0.01041598, +0.00345089, +0.00921119, +0.00381854, -0.00276361, -0.00800987,
+                              +0.00684211, -0.00091481, -0.00587776, +0.00235688, +0.00611044, +0.01163567,
+                              -0.00513169, +0.00180021, +0.00335244, +0.00136408, -0.00014323, -0.00600464,
+                              -0.01480510, -0.00092086, +0.01130431, -0.01644023, -0.02170095, -0.04062329};
+
+    double check_up_grad[] = {+0.48058826, +0.54069245, +0.13667561, +0.38400191, +0.35677141, +0.12427084,
+                              +0.45646650, +0.57106030, +0.13630769, +0.43481576, +0.38776311, +0.16771854,
+                              +0.47375917, +0.49797082, +0.13775741, +0.32429212, +0.32719505, +0.09297007,
+                              +0.43777096, +0.62169272, +0.13541570, +0.51348776, +0.43199876, +0.22456039,
+                              +0.43995771, +0.60675037, +0.13567832, +0.49119174, +0.42036501, +0.21021718,
+                              +0.43016893, +0.63637161, +0.13516138, +0.53686970, +0.44570836, +0.24260066};
+
+    double check_reset_grad[] = {-0.22573137, +0.00850728, +0.17660162, -0.16386601, -0.25808012, -0.50331688,
+                                 -0.23692220, -0.00422012, +0.18385042, -0.22045365, -0.31345046, -0.59030676,
+                                 -0.20450531, +0.01547305, +0.16353773, -0.11952476, -0.21175016, -0.41683775,
+                                 -0.25851166, -0.01967195, +0.19749409, -0.29627436, -0.38922000, -0.71662235,
+                                 -0.25175691, -0.01601686, +0.19325995, -0.27675560, -0.36948425, -0.68223709,
+                                 -0.26449898, -0.02474073, +0.20129845, -0.32011148, -0.41287124, -0.75509369};
+
+    double check_input_grad[] = {-0.36018932, -0.65483344, -0.26400137, -0.59727877, -0.86820155, -0.21833292,
+                                 -0.41349605, -0.95949709, -0.32700250, -0.87920940, -1.28881669, -0.36934814,
+                                 -0.21169925, -0.32412082, -0.16103597, -0.29028437, -0.43350112, -0.09657308,
+                                 -0.13432479, -0.58535790, -0.13005032, -0.54306334, -0.79876238, -0.27465478,
+                                 -0.28591725, -0.97712284, -0.25488314, -0.90252972, -1.32828522, -0.43310648,
+                                 -0.18858892, -0.58639282, -0.16131029, -0.54136020, -0.79330409, -0.25235096};
     void test_gru1()
     {
         cout << "Test GRU layer case 1 (test step, inference)...\t";
@@ -79,19 +129,19 @@ namespace
         layer.Init(initializer, loadBuffer);
         
         auto input = LayerInputCont<RootLayer>()
-                     .Set<LayerInput>(FillMatrix<CheckElement>(1, 4, x_np))
+                     .Set<LayerInput>(FillMatrix<CheckElement>(1, 4, x_np_1))
                      .Set<Previous<LayerOutput>>(TrivalMatrix(Scalar<CheckElement, CheckDevice>{1}, 1, 6));
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
         
-        assert(Compare(res, FillMatrix<CheckElement>(1, 6, fres_0), 0.001f));
+        assert(Compare(res, FillMatrix<CheckElement>(1, 6, fres_1), 0.001f));
         cout << "done" << endl;
     }
     
     void test_gru2()
     {
-        cout << "Test GRU layer case 2 (test rnn, train)...\t";
+        cout << "Test GRU layer case 2 (test rnn, infer)...\t";
         using RootLayer = MakeInferLayer<RecurrentLayer, PActFuncIs<GruStep>>;
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
@@ -109,13 +159,103 @@ namespace
         layer.Init(initializer, loadBuffer);
         
         auto input = LayerInputCont<RootLayer>()
-                     .Set<LayerInput>(FillMatrixSequence<CheckElement>(3, 1, 4, x_np))
+                     .Set<LayerInput>(FillMatrixSequence<CheckElement>(3, 1, 4, x_np_1))
                      .Set<Previous<LayerOutput>>(TrivalMatrix(Scalar<CheckElement, CheckDevice>{1}, 1, 6));
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
         
-        assert(Compare(res, FillMatrixSequence<CheckElement>(3, 1, 6, fres_0), 0.001f));
+        assert(Compare(res, FillMatrixSequence<CheckElement>(3, 1, 6, fres_1), 0.001f));
+        cout << "done" << endl;
+    }
+    
+    void test_gru3()
+    {
+        cout << "Test GRU layer case 3 (test rnn, infer-2)...\t";
+        using RootLayer = MakeInferLayer<RecurrentLayer, PActFuncIs<GruStep>>;
+        static_assert(!RootLayer::IsUpdate);
+        static_assert(!RootLayer::IsFeedbackOutput);
+
+        RootLayer layer("root", 4, 6);
+
+        auto initializer = MakeInitializer<CheckElement>();
+        initializer.SetParam("root/kernel/W",  FillMatrix<CheckElement>(4, 6, weight_input));
+        initializer.SetParam("root/kernel/Wz", FillMatrix<CheckElement>(4, 6, weight_update));
+        initializer.SetParam("root/kernel/Wr", FillMatrix<CheckElement>(4, 6, weight_reset));
+        initializer.SetParam("root/kernel/U",  FillMatrix<CheckElement>(6, 6, trans_input));
+        initializer.SetParam("root/kernel/Uz", FillMatrix<CheckElement>(6, 6, trans_update));
+        initializer.SetParam("root/kernel/Ur", FillMatrix<CheckElement>(6, 6, trans_reset));
+        LoadBuffer<CheckElement, CheckDevice> loadBuffer;
+        layer.Init(initializer, loadBuffer);
+        
+        auto input = LayerInputCont<RootLayer>()
+                     .Set<LayerInput>(FillMatrixSequence<CheckElement>(3, 2, 4, x_np_2))
+                     .Set<Previous<LayerOutput>>(TrivalMatrix(Scalar<CheckElement, CheckDevice>{1}, 2, 6));
+
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        assert(Compare(res, FillMatrixSequence<CheckElement>(3, 2, 6, fres_2), 0.001f));
+
+        cout << "done" << endl;
+    }
+    
+    using InputMap = LayerIOMap<LayerKV<LayerInput, MatrixSequence<CheckElement, CheckDevice>>,
+                                LayerKV<Previous<LayerOutput>, TrivalMatrix<Scalar<CheckElement, CheckDevice>>>
+                               >;
+    void test_gru4()
+    {
+        cout << "Test GRU layer case 4 (test rnn, train)...\t";
+        using RootLayer = MakeTrainLayer<RecurrentLayer, InputMap, PActFuncIs<GruStep>, PUpdate>;
+        static_assert(RootLayer::IsUpdate);
+        static_assert(!RootLayer::IsFeedbackOutput);
+
+        RootLayer layer("root", 4, 6);
+
+        auto initializer = MakeInitializer<CheckElement>();
+        initializer.SetParam("root/kernel/W",  FillMatrix<CheckElement>(4, 6, weight_input));
+        initializer.SetParam("root/kernel/Wz", FillMatrix<CheckElement>(4, 6, weight_update));
+        initializer.SetParam("root/kernel/Wr", FillMatrix<CheckElement>(4, 6, weight_reset));
+        initializer.SetParam("root/kernel/U",  FillMatrix<CheckElement>(6, 6, trans_input));
+        initializer.SetParam("root/kernel/Uz", FillMatrix<CheckElement>(6, 6, trans_update));
+        initializer.SetParam("root/kernel/Ur", FillMatrix<CheckElement>(6, 6, trans_reset));
+        LoadBuffer<CheckElement, CheckDevice> loadBuffer;
+        layer.Init(initializer, loadBuffer);
+        
+        auto input = LayerInputCont<RootLayer>()
+                     .Set<LayerInput>(FillMatrixSequence<CheckElement>(3, 2, 4, x_np_2))
+                     .Set<Previous<LayerOutput>>(TrivalMatrix(Scalar<CheckElement, CheckDevice>{1}, 2, 6));
+
+        auto out = layer.FeedForward(input);
+        auto res = Evaluate(out.Get<LayerOutput>());
+        
+        assert(Compare(res, FillMatrixSequence<CheckElement>(3, 2, 6, fres_2), 0.001f));
+        
+        auto grad = LayerOutputCont<RootLayer>()
+                    .Set<LayerOutput>(res * -1);
+        layer.FeedBackward(grad);
+        
+        GradCollector<CheckElement, CheckDevice> grad_collector;
+        layer.GradCollect(grad_collector);
+        
+        const auto& w_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/W").Grad());
+        assert(Compare(w_grad, FillMatrix<CheckElement>(4, 6, wi_grad_check), 0.001f));
+        
+        const auto& wz_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/Wz").Grad());
+        assert(Compare(wz_grad, FillMatrix<CheckElement>(4, 6, wu_grad_check), 0.001f));
+        
+        const auto& wr_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/Wr").Grad());
+        assert(Compare(wr_grad, FillMatrix<CheckElement>(4, 6, wr_grad_check), 0.001f));
+
+        const auto& u_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/U").Grad());
+        assert(Compare(u_grad, FillMatrix<CheckElement>(6, 6, check_input_grad), 0.001f));
+        
+        const auto& uz_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/Uz").Grad());
+        assert(Compare(uz_grad, FillMatrix<CheckElement>(6, 6, check_up_grad), 0.001f));
+        
+        const auto& ur_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/Ur").Grad());
+        assert(Compare(ur_grad, FillMatrix<CheckElement>(6, 6, check_reset_grad), 0.001f));
+
+        LayerNeutralInvariant(layer);
         cout << "done" << endl;
     }
 }
@@ -126,5 +266,7 @@ namespace Test::Layer::Recurrent
     {
         test_gru1();
         test_gru2();
+        test_gru3();
+        test_gru4();
     }
 }
