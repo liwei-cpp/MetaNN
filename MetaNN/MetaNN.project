@@ -301,4 +301,6 @@
     </VirtualDirectory>
     <File Name="model/model.h"/>
   </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>
