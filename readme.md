@@ -1,24 +1,11 @@
-### 升级说明：
-MetaNN 框架将在后续引入一次较大的重构与升级。包括如下方面：
-
-#### 数据（已完成）
- * 将数据类别进一步细分，从两个维度：（标量、矩阵、三维数组）与（基础、批量列表、序列列表、批量序列）上划分出12个类别
- * 使用shared_ptr 的aliasing机制简化ContinuousMemory的实现
- * 删除矩阵等数据结构中求子矩阵的接口，在后期需要时引入相应的Operator
-
-#### 操作 (已基本完成，缺conv的重构，会先修改层的行为)
- * 使用更一般的结构重构已有的操作
-
-#### 层
- * 为层增加一个模板参数，表示输入容器中所包含数据的类型，层需要提供相应的接口，返回输出数据的类别
- * 复合层需要能够自动推导出每个子层输入与输出数据的类型
- * 层会在其内部对数据进行类别变换（如基础类别变换为序列列表），从而减轻操作代码的维护成本
-
-#### 模型
- * 增加对多种数据类别的支持，层中可以保存矩阵之外的其它参数，模型需要能够支持相应参数的读写
- * 获取梯度信息时，应该能够同时获取L1、L2等信息
-
-整个升级过程比较大，中间会出现原有的测试代码无法编译的情形。会在新的分支上进行升级，升级后合并到主分支上。
+# TODO 列表
+* 修订这个readme文件 （优先级较低）
+    * 我尝试对这个readme进行了简单的修改。但由于重构引入了很的的内容，因此目前这个文件还是有很多不好的地方。我会慢慢修改这个文件，使得其中的内容更有时效性。
+* 重构 Evaluator，使用图的方式来连接EvalUnits
+* 引入Reshape operator，改变数据的类别与结构
+* 考虑 training 相关的模块
+* 添加 SingleNonZeroVector （考虑替换 OneHotVector ?）
+* 考虑CNN的相关支持（相对较大的工作）
 
 # MetaNN
 MetaNN 是一个深度学习框架的骨架，旨在探索 C++ 模板元编程在深度学习中的应用。它不支持多机并发训练。目前来说，它只支持 CPU ，包含了一些简单的构造。但 MetaNN 具有足够的扩展性，能够相对容易地支持诸如 GPU 或 FPGA 这样的设备。就目前来说，它所包含的计算逻辑只是示例性的，其速度并不快，但其框架非常灵活，基于这套框架进行的程序优化可以在保证易用性的同时，极大地提升深度学习系统的性能。
@@ -26,15 +13,23 @@ MetaNN 是一个深度学习框架的骨架，旨在探索 C++ 模板元编程�
 本文会简述 MetaNN 的主体设计思想，核心组件以及优化的可能性。
 
 ## 代码组织与运行环境
-MetaNN 是一个 C\+\+ 模板库，与其它模板库类似，它的核心逻辑都包含在头文件中（以 .h 结尾）。除了这些头文件外，MetaNN 还包含了一个示例工程： GeneralTest ，它会调用 MetaNN 中包含的逻辑实现具体的计算。 GeneralTest 主要是为了测试而引入的，但读者也可以阅读这其中的代码来了解 MetaNN 的调用方式。
+MetaNN 是一个 C\+\+ 模板库，与其它模板库类似，它的核心逻辑都包含在头文件中（以 .h 结尾）。除了这些头文件外，MetaNN 还包含了若干测试工程：Tests/DataOpTest，Tests/LayerTest 与 Tests/OtherTests ，它们用于测试 MestNN 的内部逻辑，同时也是简单的示例，展示了 MetaNN 中的数据与操作，层，以及其它部分的使用方式。它们会调用 MetaNN 中包含的逻辑实现具体的计算。 读者可以阅读这其中的代码从使用者的角度了解 MetaNN 的工作原理。
 
 ### 运行环境
-MetaNN 的头文件以及 GeneralTest 均使用 CodeLite 进行开发。 GeneralTest 在 GCC 7 上编译并运行。 不建议使用较低版本的 GCC 编译本工程。对于该分支而言，我没有试过其它的编译器（另一个 book 分支支持 clang 等编译环境）。MetaNN 使用了 C\+\+ 17 中的特性。理论上只要完美支持 C\+\+17 的编译器，均可以编译并运行 GeneralTest ，但我并不能保证程序的每一行代码都完全符合 C\+\+ 17 这一标准，同时如果编译器存在 Bug ，则无法保证能够编译。读者可以选择自己的编译器进行试验。这里推荐的运行环境是 Ubuntu & GCC 7。
+MetaNN 库以及测试项目均使用 CodeLite 进行开发。 测试程序可以在如下的环境上编译并运行：
+* g++ 7.4.0
+* g++ 8.3.0
+* g++ 9.1.0
+* clang++ 7.0.1
+* clang++ 8.0.0
+不建议使用较低版本的编译器编译本工程。MetaNN 使用了 C++ 17 中的特性。我并不能保证程序的每一行代码都完全符合 C++ 17 这一标准；进一步，标准中未明确定义的部分可能导致不同编译器有不同的行为；编译器中的 Bug也可能阻止程序的顺利编译。读者可以选择自己的编译器进行试验。这里推荐的运行环境是 Ubuntu & g++。
 
-MetaNN 是自成体系的。除了对 C\+\+17 的依赖之外，作者有意没有依赖任何第三方库。这样不仅方便运行环境的搭建，也可以使程序的阅读者不会因对某个库的不熟悉而影响对程序的理解（当然，要想理解这个库，需要对 C\+\+17 以及元编程有一定的了解）。
+需要说明的一点是：由于要测试每种编译器的行为是否正确是一个比较麻烦的工作，因此我并不会在每次修改后都进行测试。而是会在积累若干修改后统一的进行测试。对于未来得及测试的情形，我会将没有测试的编译器标记一个问号。
+
+MetaNN 是自成体系的。除了对 C++17 的依赖之外，作者有意没有依赖任何第三方库。这样不仅方便运行环境的搭建，也可以使程序的阅读者不会因对某个库的不熟悉而影响对程序的理解（当然，要想理解这个库，需要对 C++17 以及元编程有一定的了解）。
 
 ### 代码组织
-整个框架核心逻辑被包含在 MetaNN 目录中。与 MetaNN 目录同级的是 GeneralTest 目录，其中包含了相应的测试程序。测试目录（GeneralTest）与 逻辑目录（MetaNN）的组织形式基本相同，因此这里仅以 MetaNN 目录为例说明代码的组织形式。
+整个框架核心逻辑被包含在 MetaNN 目录中。与 MetaNN 目录同级的是 Tests 目录，其中包含了相应的测试程序。这里仅以 MetaNN 目录为例说明代码的组织形式。
 
  * **_root**: 只包含了一个文件 meta_nn.h ，引用这个文件即可使用 MetaNN 所提供的全部功能
  * **data**: 存放数据的目录，其中包含了深度学习框架可能会使用到的各种数据类型
@@ -52,7 +47,6 @@ MetaNN 是自成体系的。除了对 C\+\+17 的依赖之外，作者有意没�
 ### 设计理念
 与很多深度学习框架不同， MetaNN 并没有引入诸如 Tensor 或 Blob 这样的通用构造。 MetaNN 在数据类型上禀承了如下的设计理念：
  * **概念清晰**：作者认为，像 Tensor 这样的构造其概念过于宽泛了——它可以用于表示矩阵或矩阵的集合，也可以表示三维或更高维的信息。表示的信息不同，其使用方式也会有所区别。 这种设计方式在使用之初具有一定的优势，但如果编写相对复杂的程序，则容易产生误用，同时使用单一或少量的概念来描述数据，无法涵盖很多特殊的情况。 MetaNN 采用了多种方式来表示数据，对所表示的数据进行分类，并支持天然的扩展。它其中并不包含诸如 Tensor 这样的数据类型，而是包含了像```Batch<Matrix<>>```这样的模板，用于表示批处理的结果。
- * **简化接口**：同样出于概念清晰的考虑， MetaNN 中的数据类型并不包含很多框架中所提供的诸如```reshape```这样的接口。因为这些接口并非与深度学习理论中的概念直接相关，仅仅是为了提升系统性能而引入的小技巧。这种技巧的存在同样会使得程序变得复杂难懂。 MetaNN 采用了其它的方式来实现效果类似的优化，比如引入内存池来减少内存的分配与释放。
  * **支持数据扩展与分类**： MetaNN 的数据类型支持若干维度的扩展。除了前文所述的可以引入新的数据类型外，还可以对已有数据类型（实际上是数据模板）所包含的元素类型（如```float```或者```double```或者其它的定点类型）进行扩展；对数据类型所支持的计算设备（如```CPU```或```GPU```）进行扩展。 MetaNN 中的数据类型按照其类别进行划分，目前包含了矩阵类别、矩阵列表类别与标量类别（注意并非类型），可以在此基础上扩展出新的数据类别。
 
 ### 基本用法
@@ -62,28 +56,23 @@ Matrix<int, DeviceTags::CPU> matrix(10, 20);
 ```
 从声明中不难看出，该对象中的数据元素类型为```int```，所支持的计算设备为```CPU```。类似地，还可以用如下的方式声明其它的矩阵类型对象：
 ```cpp
-// 列向量，包含100个元素，第37个元素为1,其余为0
-OneHotColVector<int, DeviceTags::CPU> m1(100, 37);
+// 向量，包含100个元素，第37个元素为1,其余为0
+OneHotVector<int, DeviceTags::CPU> m1(100, 37);
 
 // 一个 10*20 的矩阵，其中元素值均为100
-TrivalMatrix<int, DeviceTags::CPU> m2(10, 20, 100);
+TrivalMatrix(Scalar<CheckElement, CheckDevice>{100}, 10, 20);
 
 // 一个 10*20 的矩阵，其中元素值均为0
-ZeroMatrix<int, DeviceTags::CPU> m3(10, 20)
+ZeroData<CategoryTags::Matrix, int, DeviceTags::CPU> m3(10, 20)
 ```
 以上所声明的对象均为 Matrix 类别。也可以声明 BatchMatrix 类别的矩阵列表：
 ```cpp
 // 矩阵列表对象，包含了 7 个 10*20 的矩阵
 Batch<Matrix<float, DeviceTags::CPU>> bm(10, 20， 7);
 ```
-我们还可以声明如下类型的矩阵列表：
-```cpp
-// 矩阵列表对象，其中的每个元素都是一个 TrivalMatrix
-Batch<TrivalMatrix<int, DeviceTags::CPU>> ...
-```
 
 ### 类别划分
-上述声明的类型不同，可以应用于不同的场景。每种类型都采用了不同的方式存储其内部数据，并提供不同的访问接口。MetaNN 将这些类型划分成不同的类别，比如：```Matrix<>```，```OneHotColVector<>```与```ZeroMatrix<>```等都属于矩阵；而```Batch<Matrix<>>```则属于矩阵列表。可以用如下的方式获取特定数据类型所对应的类别：
+上述声明的类型不同，可以应用于不同的场景。每种类型都采用了不同的方式存储其内部数据，并提供不同的访问接口。MetaNN 将这些类型划分成不同的类别，比如：```Matrix<>```，```OneHotVector<>```与```ZeroData<CategoryTags::Matrix,...>```等都属于矩阵；而```Batch<Matrix<>>```则属于矩阵列表。可以用如下的方式获取特定数据类型所对应的类别：
 ```cpp
 IsMatrix<Matrix<int, DeviceTags::CPU>>;             // true
 IsMatrix<Batch<Matrix<int, DeviceTags::CPU>>>;      // false
@@ -99,23 +88,26 @@ DataCategory<Matrix<int, DeviceTags::CPU>>;
 DataCategory<Batch<Matrix<int, DeviceTags::CPU>>>;
 ```
 
-除了自身特有的接口外，具有相同类别的数据类型提供一组通用的接口。比如，矩阵类别的对象需要提供接口返回行数与列数，并提供求值接口以转换为```Matrix<>```类型的对象（我们会在后面讨论求值的过程）。
+除了自身特有的接口外，具有相同类别的数据类型提供一组通用的接口。比如，所有的数据类型都提供了```Shape()```接口来返回其形状。但```Shape()```的返回对象的类型则根据数据类型的不同而不同：矩阵类别的对象需要提供接口返回行数与列数，而矩阵列表对应的```Shape()```则需要返回其中包含的元素个数。此外，每个数据类型都要提供求值接口以转换为相应主体类型的对象（我们会在后面讨论求值的过程）。
 
 ### 引入新的类型
 我们可以很简单地为 MetaNN 引入新的类型：
 ```cpp
 template <typename TElem, typename TDevice>
-class MyMatrix;
+class MyMatrix
+{
+public:
+    using CategoryTag = CategoryTags::Matrix;
+}
 
 MyMatrix<float, DeviceTags::CPU> ...
 ```
-在此基础上，通过简单的模板特化，就可以将类型纳入到 MetaNN 的类型体系之中：
+注意上述定义的```CategoryTag```会将```MyMatrix```的类别设定为矩阵。这样，以下的调用将返回```true```：
 ```cpp
-template <typename TElem, typename TDevice>
-constexpr bool IsMatrix<MyMatrix<float, DeviceTags::CPU>> = true;
+IsMatrix<MyMatrix<int, DeviceTags::CPU>>;
 ```
-自定义的类型与 MetaNN 已经定义的类型地位相同。
 
+自定义的类型与 MetaNN 已经定义的类型地位相同。
 
 ### 动态类型
 除了上述类型外， MetaNN 还引入了一个特殊的类型模板： ```DynamicData<>```。它用于对不同的数据类别进行封装，掩盖其底层的具体类型信息，只暴露出该数据类型最核心的特性与接口。比如：
@@ -126,10 +118,10 @@ DynamicData<float, DeviceTags::CPU, CategoryTags::Matrix>
 ```cpp
 vector<DynamicData<float, DeviceTags::CPU, CategoryTags::Matrix>> vec;
 
-OneHotColVector<float, DeviceTags::CPU> m1(100, 37);
+OneHotVector<float, DeviceTags::CPU> m1(100, 37);
 vec.push_back(MakeDynamic(m1));
 
-ZeroMatrix<float, DeviceTags::CPU> m2(10, 20)
+ZeroData<CategoryTags::Matrix, float, DeviceTags::CPU> m2(10, 20)
 vec.push_back(MakeDynamic(m2));
 ```
 ```MakeDynamic```是 MetaNN 提供的一个函数，给定一个具体的数据类型，可以转换为相应的```Dynamic```版本。
@@ -143,7 +135,7 @@ MetaNN 的每个数据类型都提供了 ```operator ==``` 与 ```operator !=```
  * 如果 A 复制自 B，那么 A 与 B 相等
  * 如果 A 复制自 B，同时 C 与 D 是 A 与 B 求值的结果，那么 C 与 D 相等
 
-除此之外， MetaNN 并不对相等性进行任何保证。
+除此之外， 数据通常是不相等的（除非底层数据的判等操作成本很低，MetaNN才会考虑使用底层数据来判断是否相等）。
 
 ## 操作
 MetaNN 包含了多个操作符。每个操作符都可以接收一到多个数据对象，返回操作结果。
@@ -164,29 +156,29 @@ auto add = rm1 + rm2;
 ```
 ```add``` 就是由两个操作数所形成的表达式模板。其实际类型为：
 ```cpp
-BinaryOp<BinaryOpTags::Add,
+Operator<OpTags::Add,
          Matrix<int, DeviceTags::CPU>,
          Matrix<int, DeviceTags::CPU>>
 ```
 通常来说，我们在实际的程序设计过程中不需要关心 ```add``` 的实际类型（只需要像上例中那样使用 ```auto``` 让编译器自动推导，或者使用前文所提供的动态类型对其进行封装即可）。但在这里，还是有必要了解一下 ```add``` 对象对应的类型所包含的信息的。
 
-```add``` 对象的实际类型是 ```BinaryOp``` 模板实例化的结果。这表明这个类型是一个“二元操作符”。二元操作符的具体内容则由模板参数 ```BinaryOpTags::Add``` 给出。```BinaryOp``` 的第二个与第三个模板参数分别表示了两个操作数的类型。最后两个模板参数则表示了模板表达式所使用的元素与设备类型。
+```add``` 对象的实际类型是 ```Operator``` 模板实例化的结果。这表明这个类型是一个“操作”。操作的具体内容则由模板参数 ```OpTags::Add``` 给出。```Operator``` 的第二个与第三个模板参数分别表示了两个操作数的类型。
 
 模板表达式本身也可以视为一种数据，因此，我们可以这样写：
 ```cpp
 auto rm1 = Matrix<int, DeviceTags::CPU>(4, 5);
 auto rm2 = Matrix<int, DeviceTags::CPU>(4, 5);
 auto add = rm1 + rm2;
-auto rm3 = ZeroMatrix<int, DeviceTags::CPU>(4, 5);
+auto rm3 = ZeroData<CategoryTags::Matrix, DeviceTags::CPU>(4, 5);
 auto sub = add - rm3;
 ```
 此时， ```sub``` 所对应的类型为：
 ```cpp
-BinaryOp<BinaryOpTags::Substract,
-         BinaryOp<BinaryOpTags::Add,
+Operator<OpTags::Substract,
+         Operator<OpTags::Add,
                   Matrix<int, DeviceTags::CPU>,
                   Matrix<int, DeviceTags::CPU>>,
-         ZeroMatrix<int, DeviceTags::CPU>>
+         ZeroData<CategoryTags::Matrix, DeviceTags::CPU>>
 ```
 
 本质上，模板表达式形成了一种树的结构。而模板表达式的求值过程，也可以被视为一种树的遍历过程。这个过程可以被优化。我们将在后续讨论求值时讨论相关的优化方法。
@@ -194,36 +186,30 @@ BinaryOp<BinaryOpTags::Substract,
 ### 模板表达式的分类
 模板表达式也可以被视为数据， MetaNN 自动实现了模板表达式的分类。比如：
 ```cpp
-IsMatrix<BinaryOp<BinaryOpTags::Substract,
-                  BinaryOp<BinaryOpTags::Add,
+IsMatrix<Operator<OpTags::Substract,
+                  Operator<OpTags::Add,
                            Matrix<int, DeviceTags::CPU>,
                            Matrix<int, DeviceTags::CPU>>,
-                  ZeroMatrix<int, DeviceTags::CPU>>;    // true
+                  ZeroData<CategoryTags::Matrix, DeviceTags::CPU>>;    // true
 ```
 这是因为两个矩阵相加的结果还是矩阵，而矩阵与矩阵相减的结果还是矩阵。
 
 ### 各式各样的操作
-需要说明的是，并非所有的操作都像加减法这样“一目了然”——其操作数与操作结果的类别相一致。比如， MetaNN 中定义了 Collapse 操作，用于将矩阵列表中的对应元素相加，得到一个矩阵。此时，操作的输入输出类型就不相同了。 MetaNN 的操作各式各样，也可以相对容易地扩展，可以在扩展的同时指定操作数与操作结果的类别，以及一些其它的信息。
+需要说明的是，并非所有的操作都像加减法这样“一目了然”——其操作数与操作结果的类别相一致。比如， MetaNN 中定义了 Collapse 操作，可以将矩阵列表中的对应元素相加，得到一个矩阵（注意Collapse还能干其它的事）。此时，操作的输入输出类型就不相同了。 MetaNN 的操作各式各样，也可以相对容易地扩展，可以在扩展的同时指定操作数与操作结果的类别，以及一些其它的信息。
 
 ### 操作数的支持
 MetaNN 是富类型的，一个使用 MetaNN 的程序可能会在操作中使用多种类型。对于特定的操作，并非所有的操作数类型都是合法的。 MetaNN 引入了特定的元函数来描述某个操作可以接收的合法的操作数。同样以加法为例，相应的元函数为：
 ```cpp
-template <typename TP1, typename TP2>
-struct OperAdd_
-{
-// valid check
-private:
-    using rawM1 = RemConstRef<TP1>;
-    using rawM2 = RemConstRef<TP2>;
+template <typename TOpTag, typename TOperHead, typename... TOperands>
+constexpr bool IsValidOper = (IsInDataCategory<TOperHead>) &&
+                             (std::is_same_v<DataCategory<TOperHead>, DataCategory<TOperands>> && ...);
 
-public:
-    static constexpr bool valid = (IsMatrix<rawM1> && IsMatrix<rawM2>) ||
-                                  (IsMatrix<rawM1> && IsScalar<rawM2>) ||
-                                  (IsScalar<rawM1> && IsMatrix<rawM2>);
-    // ...
-}
+template <typename TP1, typename TP2,
+          typename = std::enable_if_t<IsValidOper<OpTags::Add, TP1, TP2> ||
+                                      ...>>
+auto operator+ (TP1&& p_m1, TP2&& p_m2);
 ```
-只有 ```OperAdd_<TP1, TP2>::valid``` 为真时，类型为 ```TP1``` 与 ```TP2``` 的两个操作数才能相加。从上述声明中不难看出，目前加法只支持矩阵与矩阵相加，矩阵与标量相加，以及标量与矩阵相加：
+只有 ```IsValidOper<OpTags::Add, TP1, TP2>``` 为真时，类型为 ```TP1``` 与 ```TP2``` 的两个操作数才能相加。事实上，这就限制了：只有属于相同类别的操作数才能相加。
 ```cpp
 float a, b;
 // 这不会触发 MetaNN 中的操作逻辑
@@ -235,7 +221,7 @@ Batch<Matrix<int, DeviceTags::CPU>> rm2(2, 3);
 auto rm3 = rm1 + rm2;
 ```
 
-当然，操作所支持的操作数组合也是可以扩展的。比如，我们可以为加法扩展出支持矩阵列表的版本。但要在修改 ```OperAdd_::valid``` 变量的同时为这种类型的加法行为给出明确的定义。
+当然，操作所支持的操作数组合也是可以扩展的。比如，我们可以为加法扩展出支持矩阵列表的版本。但要在特化 ```IsValidOper``` 模板的同时为这种类型的加法行为给出明确的定义。
 
 ## 基本层
 层是 MetaNN 中相对高级的组件。当前很多深度学习框架都抛弃了层的概念，转而将操作与层的概念合并起来。 MetaNN 认为区分层与操作，可以更好地描述不同层面上的抽象。本节讨论基本层。
@@ -251,6 +237,9 @@ auto rm3 = rm1 + rm2;
 
 层在设计与使用上有很多独特之处，可以说，它是 MetaNN 框架中极富特色的一个组成部分。 MetaNN 中的很多子模块的引入都与层相关。本节将讨论基本层及其涉及到的子模块，下一节将在此基础上讨论组合层的一些特色之处。
 
+### 输入映射 与 输入/输出端口集合
+内容待添加...
+
 ### Policy 与层的声明
 #### Policy 简述
 我们希望能对层的具体行为进行控制，进一步，希望在编译期就指定层的具体行为——从而尽量早地获取信息，提升系统优化的空间。 MetaNN 使用 Policy 机制来实现这一点。
@@ -259,96 +248,101 @@ Policy 是一种编译期构造，它指定了函数或方法在使用时的具�
 
 MetaNN 中所使用的 Policy 是被系统化地组织起来的。其中的每个 Policy 都包含了一个主体类别，次要类别，以及相关的缺省值。主体类别用于 Policy 的分类，次要类别用于 Policy 对象的互斥（我们很快就会讨论到 Policy 对象）：
 ```cpp
-struct FeedbackPolicy {
-    struct IsUpdateValue;
-    struct IsFeedbackOutputValue;
+struct GradPolicy
+{
+    using MajorClass = GradPolicy;
+
+    struct IsUpdateValueCate;
+    struct IsFeedbackOutputValueCate;
 
     static constexpr bool IsUpdate = false;
     static constexpr bool IsFeedbackOutput = false;
 };
 ```
-这段代码定义了两个 Policy ： ```IsUpdate``` 与 ```IsFeedbackOutput``` 。其主体类别为 ```FeedbackPolicy``` ——这表示了两个 Policy 与反向传播相关。它们所属的次要类别分别为 ```IsUpdateValue``` 与 ```IsFeedbackOutputValue``` （次要类别使用 Policy 的名称作为前缀，这一点是专门设计的；而次要类别名称中的 ```value``` 则表示了该类别所对应的 Policy 是数值 Policy）。它们的缺省值均为 ```false``` 。
+这段代码定义了两个 Policy ： ```IsUpdate``` 与 ```IsFeedbackOutput``` 。其主体类别为 ```GradPolicy``` ——这表示了两个 Policy 与反向传播相关。它们所属的次要类别分别为 ```IsUpdateValueCate``` 与 ```IsFeedbackOutputValueCate``` （次要类别使用 Policy 的名称作为前缀，这一点是专门设计的；而次要类别名称中的 ```ValueCate``` 则表示了该类别所对应的 Policy 是数值 Policy）。它们的缺省值均为 ```false``` 。
 
-MetaNN 不仅支持数值 Policy ，还支持类型与枚举 Policy （由于 Policy 是编译期的构造，因此支持类型与枚举就并不奇怪了）：
+MetaNN 不仅支持数值 Policy ，还支持类型 Policy （由于 Policy 是编译期的构造，因此支持类型就并不奇怪了）：
 ```cpp
-struct OperandPolicy {
-    struct ElementTypeType;
-    using ElementType = float;
-};
+struct ParamPolicy
+{
+    using MajorClass = ParamPolicy;
 
-struct SingleLayerPolicy {
-    struct ActionTypeEnum {
-        struct Sigmoid;
-        struct Tanh;
-    };
-    using ActionType = ActionTypeEnum::Sigmoid;
+    struct ParamTypeTypeCate;
+    using ParamType = NullParameter;
 
-    // ...
+    struct InitializerTypeCate;
+    using Initializer = NullParameter;
+
+    struct ElementTypeTypeCate;
+    using  ElementType = float;
+
+    struct DeviceTypeTypeCate;
+    using  DeviceType = DeviceTags::CPU;
 };
 ```
-```ElementType``` 是类型 Policy ，其次要类型为 ```ElementTypeType``` ，缺省“值” 为 ```float``` 。 ```ActionType``` 是枚举 Policy ，其次要类型为 ```ActionTypeEnum``` ，缺省值为 ```ActionTypeEnum::Sigmoid``` 。
+```ElementType``` 是类型 Policy ，其次要类型为 ```ElementTypeTypeCate``` ，缺省“值” 为 ```float``` 。
 
-事实上， MetaNN 中的 Policy 还能是其它形式的，比如我们甚至可以定义取值为类模板的 Policy 。但数值、类型与枚举 Policy 在 MetaNN 中使用的频率最高， MetaNN 也为这三种 Policy 专门提供了宏以建立 Policy 对象。
+事实上， MetaNN 中的 Policy 还能是其它形式的，比如我们甚至可以定义取值为类模板的 Policy 。但数值、类型与数值 Policy 在 MetaNN 中使用的频率最高， MetaNN 也为这两种 Policy 专门提供了宏以建立 Policy 对象。
 
 #### Policy 对象
 Policy 与 Policy 对象的关系很像类与其对象的关系。 Policy 对象可以被视做某个 Policy 实例化的结果。Policy 对象包含了相应 Policy 的主体与次要类别信息，但其取值可能不是 Policy 的缺省值：
 ```cpp
-ValuePolicyObj(PUpdate,   FeedbackPolicy, IsUpdate, true);
-ValuePolicyObj(PNoUpdate, FeedbackPolicy, IsUpdate, false);
+ValuePolicyObj(PUpdate,   GradPolicy, IsUpdate, true);
+ValuePolicyObj(PNoUpdate, GradPolicy, IsUpdate, false);
 ```
-上述代码定义了两个 Policy 对象：```PUpdate``` 与 ```PNoUpdate``` 。它们均对应于之前提及的 ```IsUpdate``` Policy。但其取值一个为 ```true``` ，一个为 ```false``` 。类似的，还可以定义取值为类型或枚举的 Policy 对象：
+上述代码定义了两个 Policy 对象：```PUpdate``` 与 ```PNoUpdate``` 。它们均对应于之前提及的 ```IsUpdate``` Policy。但其取值一个为 ```true``` ，一个为 ```false``` 。类似的，还可以定义取值为类型的 Policy 对象：
 ```cpp
-TypePolicyObj(PDoubleElement,  OperandPolicy, ElementType, double);
-EnumPolicyObj(PTanhAction, SingleLayerPolicy, ActionType, Tanh);
+TypePolicyObj(PNormVarScale,    VarScaleFillerPolicy, Distribute, Norm);
+TypePolicyObj(PUniformVarScale, VarScaleFillerPolicy, Distribute, Uniform);
 ```
 接下来，让我们看一下如何使用 Policy 对象来指定层的行为细节。
 
 #### 在层中使用 Policy 对象
 MetaNN 中的大部分层都被声明为模板。接收一个模板参数，该模板参数是一个“容器”，可以存放零到多个 Policy 对象：
 ```cpp
-template <typename TPolicies>
+template <typename TInputMap, typename TPolicies>
 class WeightLayer;
 
 // layer is an object with interfaces such as feed-back and feed-forward;
-WeightLayer<PolicyContainer<PRowVecInput, PUpdate, PFeedbackOutput>> layer;
+WeightLayer<TInputMap, PolicyContainer<PRowVecInput, PUpdate, PFeedbackOutput>> layer;
 ```
 上述程序使用 Policy 对象的列表作为模板参数，实例化了 ```WeightLayer``` 模板。可以利用 MetaNN 所提供的元函数使得定义更加清晰易懂：
 ```cpp
-using MyLayer = MakeLayer<WeightLayer,
-                          PRowVecInput, PUpdate, PFeedbackOutput>;
+using MyLayer = MakeInferLayer<WeightLayer,
+                               PRowVecInput, PUpdate, PFeedbackOutput>;
 MyLayer layer;
 ```
 
 Policy 对象的顺序并不重要。以下两个层的功能是相同的（虽然它们的 C\+\+ 类型并不相同）：
 ```cpp
-using MyLayer1 = MakeLayer<WeightLayer, PRowVecInput, PUpdate>;
-using MyLayer2 = MakeLayer<WeightLayer, PUpdate, PRowVecInput>;
+using MyLayer1 = MakeInferLayer<WeightLayer, PRowVecInput, PUpdate>;
+using MyLayer2 = MakeInferLayer<WeightLayer, PUpdate, PRowVecInput>;
 ```
 
 但并非所有的组合都是有效的，比如下面的声明就是非法的：
 ```cpp
-using MyLayer1 = MakeLayer<WeightLayer, PNoUpdate, PUpdate>;
+using MyLayer1 = MakeInferLayer<WeightLayer, PNoUpdate, PUpdate>;
 ```
 显然，这是因为一个层不能同时具有“更新内部参数”以及“不更新内部参数”两种状态。声明这样的层会导致编译器报错：在同一个层的声明中包含了多个属于相同次要类别的 Policy 对象。
 
 对于特定的层来说，并非所有的 Policy 对象都会对其行为产生影响。比如，```AddLayer``` 并不包含内部参数，因此设置 ```PUpdate``` 并不会导致相应的参数更新。此时，相应 Policy 对象设置与否不会对层的行为细节产生影响。也即，下面的两个声明具有相同的行为：
 ```cpp
-// MyLayer1 = AddLayer<PolicyContainer<PUpdate>>
-using MyLayer1 = MakeLayer<AddLayer, PUpdate>;
+// MyLayer1 = AddLayer<NullParameter, PolicyContainer<PUpdate>>
+using MyLayer1 = MakeInferLayer<AddLayer, PUpdate>;
 
-// MyLayer2 = AddLayer<PolicyContainer<>>
-using MyLayer2 = MakeLayer<AddLayer>;
+// MyLayer2 = AddLayer<NullParameter, PolicyContainer<>>
+using MyLayer2 = MakeInferLayer<AddLayer>;
 ```
 
 另一方面，如果某个层需要根据特定的 Policy 来决定其行为，但该 Policy 所对应的对象在层的实例化时并未指定，那么该层将使用该 Policy 所对应的缺省值来确定其行为细节。因此，下面两个声明具有相同的行为细节：
 ```cpp
-using MyLayer1 = MakeLayer<BiasLayer, PNoUpdate>;
-using MyLayer2 = MakeLayer<BiasLayer>;
+using MyLayer1 = MakeInferLayer<BiasLayer, PNoUpdate>;
+using MyLayer2 = MakeInferLayer<BiasLayer>;
 ```
 
 最后，让我们少许深入一下层的实现，看一下层是如何获取 Policy 所对应的值的：
 ```cpp
-template <typename TPolicies>
+template <typename TInputMap, typename TPolicies>
 class BiasLayer {
 public:
     static constexpr bool IsFeedbackOutput

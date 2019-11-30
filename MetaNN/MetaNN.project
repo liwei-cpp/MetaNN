@@ -93,7 +93,6 @@
   </Settings>
   <VirtualDirectory Name="_root">
     <File Name="meta_nn.h"/>
-    <File Name="meta_nn2.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data">
     <VirtualDirectory Name="batch">
