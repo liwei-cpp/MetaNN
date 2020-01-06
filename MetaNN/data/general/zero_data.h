@@ -4,40 +4,46 @@
 #include <MetaNN/data/facilities/tags.h>
 #include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/data/cardinal/matrix/matrix.h>
-#include <MetaNN/evaluate/facilities/eval_buffer.h>
-#include <MetaNN/evaluate/facilities/eval_group.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/evaluate/eval_buffer.h>
+#include <MetaNN/evaluate/eval_plan.h>
 
 namespace MetaNN
 {
     namespace NSZeroData
     {
         template <typename TCategory, typename TElement, typename TDevice>
-        class EvalUnit : public BaseEvalUnit<TDevice>
+        class EvalItem : public BaseEvalItem<TDevice>
         {
         public:
-            EvalUnit(EvalHandle<PrincipalDataType<TCategory, TElement, TDevice>> resBuf,
+            EvalItem(EvalHandle<PrincipalDataType<TCategory, TElement, TDevice>> resBuf,
                      Shape<TCategory> p_shape)
-                : m_resHandle(std::move(resBuf))
+                : BaseEvalItem<TDevice>(std::type_index(typeid(EvalItem)),
+                                        {}, resBuf.DataPtr())
+                , m_resHandle(std::move(resBuf))
                 , m_shape(std::move(p_shape))
-            {}
-
-            void Eval() override
             {
-                PrincipalDataType<TCategory, TElement, TDevice> res(m_shape);
+            }
+        
+            EvalHandle<PrincipalDataType<TCategory, TElement, TDevice>> m_resHandle;
+            const Shape<TCategory> m_shape;
+        };
+
+        template <typename TCategory, typename TElement, typename TDevice>
+        class EvalGroup : public TrivalEvalGroup<EvalItem<TCategory, TElement, TDevice>>
+        {
+            using EvalItemType = EvalItem<TCategory, TElement, TDevice>;
+        protected:
+            virtual void EvalInternalLogic(EvalItemType& evalItem) final override
+            {
+                PrincipalDataType<TCategory, TElement, TDevice> res(evalItem.m_shape);
                 auto lowLayer = LowerAccess(res);
                 auto mem = lowLayer.MutableRawMemory();
         
                 static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, 
                               "Memset not support for other device tag.");
-                memset(mem, 0, sizeof(TElement) * m_shape.Count());
-                m_resHandle.SetData(std::move(res));
+                memset(mem, 0, sizeof(TElement) * evalItem.m_shape.Count());
+                evalItem.m_resHandle.SetData(std::move(res));
             }
-
-        private:
-            EvalHandle<PrincipalDataType<TCategory, TElement, TDevice>> m_resHandle;
-            const Shape<TCategory> m_shape;
         };
     }
 
@@ -71,14 +77,18 @@ namespace MetaNN
 
         auto EvalRegister() const
         {
-            using TEvalUnit = NSZeroData::EvalUnit<CategoryTag, ElementType, DeviceType>;
-            using TEvalGroup = TrivalEvalGroup<TEvalUnit>;
+            using TEvalItem = NSZeroData::EvalItem<CategoryTag, ElementType, DeviceType>;
+            using TEvalGroup = NSZeroData::EvalGroup<CategoryTag, ElementType, DeviceType>;
+            using TItemDispatcher = TrivalEvalItemDispatcher<TEvalGroup>;
+
             if (!m_evalBuf.IsEvaluated())
             {
                 auto evalHandle = m_evalBuf.Handle();
-                decltype(auto) outPtr = evalHandle.DataPtr();
-                TEvalUnit unit(std::move(evalHandle), m_shape);
-                EvalPlan<DeviceType>::template Register<TEvalGroup>(std::move(unit), outPtr, {});
+                if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(evalHandle.DataPtr()))
+                {
+                    EvalPlan<DeviceType>::Inst().template Register<TItemDispatcher>(
+                        std::make_unique<TEvalItem>(std::move(evalHandle), m_shape));
+                }
             }
             return m_evalBuf.ConstHandle();
         }

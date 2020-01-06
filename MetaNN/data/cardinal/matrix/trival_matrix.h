@@ -1,52 +1,58 @@
 #pragma once
 
 #include <MetaNN/data/cardinal/matrix/matrix.h>
-#include <MetaNN/evaluate/facilities/eval_buffer.h>
-#include <MetaNN/evaluate/facilities/eval_handle.h>
-#include <MetaNN/evaluate/facilities/eval_group.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
+#include <MetaNN/evaluate/eval_buffer.h>
+#include <MetaNN/evaluate/eval_handle.h>
+#include <MetaNN/evaluate/eval_plan.h>
+#include <typeindex>
 
 namespace MetaNN
 {
 namespace NSTrivalMatrix
 {
-template <typename TElem, typename TDevice, typename TScalar>
-class EvalUnit : public BaseEvalUnit<TDevice>
-{
-public:
-    EvalUnit(EvalHandle<Matrix<TElem, TDevice>> resBuf,
-             Shape<CategoryTags::Matrix> p_shape,
-             TScalar p_scalar)
-        : m_resHandle(std::move(resBuf))
-        , m_shape(std::move(p_shape))
-        , m_scalar(std::move(p_scalar))
-    {}
-
-    void Eval() override final
+    template <typename TElem, typename TDevice, typename TScalar>
+    class EvalItem : public BaseEvalItem<TDevice>
     {
-        static_assert(std::is_same_v<TDevice, DeviceTags::CPU> &&
-                      std::is_same_v<typename TScalar::DeviceType, DeviceTags::CPU>,
-                      "Currently only CPU is supported.");
-
-        Matrix<TElem, TDevice> out(m_shape);
-        auto lowLayer = LowerAccess(out);
-        auto mem = lowLayer.MutableRawMemory();
+    public:
+        EvalItem(EvalHandle<Matrix<TElem, TDevice>> resBuf,
+                 Shape<CategoryTags::Matrix> p_shape,
+                 TScalar p_scalar)
+            : BaseEvalItem<TDevice>(std::type_index(typeid(EvalItem)),
+                                    {}, resBuf.DataPtr())
+            , m_resHandle(std::move(resBuf))
+            , m_shape(std::move(p_shape))
+            , m_scalar(std::move(p_scalar))
+        { }
         
-        const size_t elemCount = m_shape.Count();
-        const TElem val = static_cast<TElem>(m_scalar.Value());
-        for (size_t i = 0; i < elemCount; ++i)
+        EvalHandle<Matrix<TElem, TDevice>> m_resHandle;
+        Shape<CategoryTags::Matrix> m_shape;
+        TScalar  m_scalar;
+    };
+    
+    template <typename TElem, typename TDevice, typename TScalar>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TElem, TDevice, TScalar>>
+    {
+        using EvalItemType = EvalItem<TElem, TDevice, TScalar>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            mem[i] = val;
-        }
-        m_resHandle.SetData(std::move(out));
-    }
+            static_assert(std::is_same_v<TDevice, DeviceTags::CPU> &&
+                          std::is_same_v<typename TScalar::DeviceType, DeviceTags::CPU>,
+                          "Currently only CPU is supported.");
 
-private:
-    EvalHandle<Matrix<TElem, TDevice>> m_resHandle;
-    Shape<CategoryTags::Matrix> m_shape;
-    TScalar  m_scalar;
-};
+            Matrix<TElem, TDevice> out(evalItem.m_shape);
+            auto lowLayer = LowerAccess(out);
+            auto mem = lowLayer.MutableRawMemory();
+        
+            const size_t elemCount = evalItem.m_shape.Count();
+            const TElem val = static_cast<TElem>(evalItem.m_scalar.Value());
+            for (size_t i = 0; i < elemCount; ++i)
+            {
+                mem[i] = val;
+            }
+            evalItem.m_resHandle.SetData(std::move(out));
+        }
+    };
 }
 
 template<typename TScalar>
@@ -77,14 +83,18 @@ public:
 
     auto EvalRegister() const
     {
-        using TEvalUnit = NSTrivalMatrix::EvalUnit<ElementType, DeviceType, TScalar>;
-        using TEvalGroup = TrivalEvalGroup<TEvalUnit>;
+        using TEvalItem = NSTrivalMatrix::EvalItem<ElementType, DeviceType, TScalar>;
+        using TEvalGroup = NSTrivalMatrix::EvalGroup<ElementType, DeviceType, TScalar>;
+        using TItemDispatcher = TrivalEvalItemDispatcher<TEvalGroup>;
+        
         if (!m_evalBuf.IsEvaluated())
         {
             auto evalHandle = m_evalBuf.Handle();
-            const void* outputPtr = evalHandle.DataPtr();
-            TEvalUnit unit(std::move(evalHandle), m_shape, m_scalar);
-            EvalPlan<DeviceType>::template Register<TEvalGroup>(std::move(unit), outputPtr, {});
+            if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(evalHandle.DataPtr()))
+            {
+                EvalPlan<DeviceType>::Inst().template Register<TItemDispatcher>(
+                    std::make_unique<TEvalItem>(std::move(evalHandle), m_shape, m_scalar));
+            }
         }
         return m_evalBuf.ConstHandle();
     }

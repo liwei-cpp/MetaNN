@@ -112,7 +112,7 @@ private:
 
 // operator calculate sequence container
 template <typename...TCases>
-struct OperSeqContainer;
+struct OperCalAlgoChain;
 
 template <typename TOpTag>
 struct OperSeq_;

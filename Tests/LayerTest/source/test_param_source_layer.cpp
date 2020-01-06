@@ -193,7 +193,7 @@ namespace
 
         auto handle1 = gradCont.front().Weight().EvalRegister();
         auto handle2 = gradCont.front().Grad().EvalRegister();
-        EvalPlan<DeviceTags::CPU>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
         
         auto res1 = handle1.Data();
         auto resg = handle2.Data();

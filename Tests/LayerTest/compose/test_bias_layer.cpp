@@ -143,7 +143,7 @@ namespace
 
         auto handle1 = gradCont.front().Weight().EvalRegister();
         auto handle2 = gradCont.front().Grad().EvalRegister();
-        EvalPlan<DeviceTags::CPU>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
 
         auto w1 = handle1.Data();
         auto g1 = handle2.Data();
@@ -209,7 +209,7 @@ namespace
 
         auto handle1 = gradCont.front().Weight().EvalRegister();
         auto handle2 = gradCont.front().Grad().EvalRegister();
-        EvalPlan<DeviceTags::CPU>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
 
         auto w1 = handle1.Data();
         auto g1 = handle2.Data();
@@ -297,7 +297,7 @@ namespace
 
         auto handle1 = gradCont.front().Weight().EvalRegister();
         auto handle2 = gradCont.front().Grad().EvalRegister();
-        EvalPlan<DeviceTags::CPU>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
 
         auto w1 = handle1.Data();
         auto g1 = handle2.Data();

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <MetaNN/data/cardinal/cardinal_pack.h>
+#include <MetaNN/data/cardinal/_.h>
 #include <MetaNN/data/batch/_.h>
-#include <MetaNN/data/sequence/sequence_pack.h>
+#include <MetaNN/data/sequence/_.h>
 
 namespace MetaNN
 {
@@ -56,7 +56,7 @@ public:
     {
         return m_internal.EvalRegister();
     }
-
+    
     const TInternalData& Internal() const
     {
         return m_internal;
@@ -102,7 +102,7 @@ public:
         }
         return m_internal->EvalRegister();
     }
-
+    
     bool operator== (const DynamicData& val) const
     {
         if ((!m_internal) && (!val.m_internal))

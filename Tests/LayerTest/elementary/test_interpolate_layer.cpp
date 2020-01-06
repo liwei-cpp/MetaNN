@@ -177,7 +177,7 @@ namespace
             auto handle1 = out_grad.Get<InterpolateLayerWeight1>().EvalRegister();
             auto handle2 = out_grad.Get<InterpolateLayerWeight2>().EvalRegister();
             auto handle3 = out_grad.Get<InterpolateLayerLambda>().EvalRegister();
-            EvalPlan<DeviceTags::CPU>::Eval();
+            EvalPlan<CheckDevice>::Inst().Eval();
 
             auto r1 = handle1.Data();
             auto r2 = handle2.Data();

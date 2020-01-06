@@ -2,7 +2,7 @@
 
 #include <cassert>
 #include <type_traits>
-#include <MetaNN/evaluate/facilities/eval_buffer.h>
+#include <MetaNN/evaluate/eval_buffer.h>
 #include <MetaNN/operators/facilities/organizer.h>
 
 namespace MetaNN::OpTags
@@ -70,11 +70,15 @@ public:
     {
         if (!m_evalBuf.IsEvaluated())
         {
-            using TOperSeqCont = typename OperSeq_<TOpTag>::type;
+            auto evalHandle = m_evalBuf.Handle();
+            if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(evalHandle.DataPtr()))
+            {
+                using TOperSeqCont = typename OperSeq_<TOpTag>::type;
             
-            using THead = Sequential::Head<TOperSeqCont>;
-            using TTail = Sequential::Tail<TOperSeqCont>;
-            THead::template EvalRegister<TTail>(m_evalBuf, *this);
+                using THead = Sequential::Head<TOperSeqCont>;
+                using TTail = Sequential::Tail<TOperSeqCont>;
+                THead::template EvalRegister<TTail>(m_evalBuf, *this);
+            }
         }
         return m_evalBuf.ConstHandle();
     }

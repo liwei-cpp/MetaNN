@@ -1,8 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
 #include <cassert>
 #include <type_traits>
@@ -17,27 +16,34 @@ namespace MetaNN
 namespace OperSlice::NSCaseGen
 {
     template <typename TInputHandle, typename TOutputHandle>
-    class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
         template <typename TAuxParams>
-        EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& p_params)
-            : m_inputHandle(std::move(oriHandle))
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& p_params)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            , m_inputHandle(std::move(oriHandle))
             , m_id(p_params.m_elemID)
             , m_outputHandle(std::move(outputHandle))
         {}
-    
-        void Eval() override final
-        {
-            using InputDatType = typename TInputHandle::DataType;
-            const InputDatType& in = m_inputHandle.Data();
-            m_outputHandle.SetData(in[m_id]);
-        }
-    
-    private:
+
         const TInputHandle m_inputHandle;
         const size_t m_id;
         TOutputHandle m_outputHandle;
+    };
+
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
+        {
+            const auto& in = evalItem.m_inputHandle.Data();
+            evalItem.m_outputHandle.SetData(in[evalItem.m_id]);
+        }
     };
 }
 
@@ -118,7 +124,7 @@ namespace OperSlice::NSCaseGen
     template <>
     struct OperSeq_<OpTags::Slice>
     {
-        using type = OperSeqContainer<TailCalculator<OperSlice::NSCaseGen::EvalUnit>>;
+        using type = OperCalAlgoChain<TailCalculator<OperSlice::NSCaseGen::EvalItem, OperSlice::NSCaseGen::EvalGroup>>;
     };
 
     template <typename TOpTag, typename...TOperands>

@@ -1,8 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
 #include <MetaNN/operators/loss/facilities/organizer.h>
 #include <cassert>
@@ -19,58 +18,68 @@ namespace MetaNN
 {
 namespace OperNLLLoss::NSCaseGen
 {
-template <typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
-class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-public:
-    template <typename TAuxParams>
-    EvalUnit(TWeightHandle weightHandle, TInputHandle inputHandle, TOutputHandle outputHandle, const TAuxParams&)
-        : m_weightHandle(std::move(weightHandle))
-        , m_inputHandle(std::move(inputHandle))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& weight = m_weightHandle.Data();
-        const auto& in = m_inputHandle.Data();
-        assert(weight.Shape() == in.Shape());
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TWeightHandle weightHandle, TInputHandle inputHandle,
+                 TOutputHandle outputHandle, const TAuxParams&)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {weightHandle.DataPtr(), inputHandle.DataPtr()},
+                       outputHandle.DataPtr())
+            , m_weightHandle(std::move(weightHandle))
+            , m_inputHandle(std::move(inputHandle))
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        using ResType = typename TOutputHandle::DataType;
-        using ElementType = typename ResType::ElementType;
-        ResType out;
-        
-        const size_t inCount = in.Shape().Count();
-        
-        auto low_in = LowerAccess(in);
-        ElementType* mem_in = low_in.MutableRawMemory();
-
-        auto low_weight = LowerAccess(weight);
-        ElementType* mem_weight = low_weight.MutableRawMemory();
-                
-        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        ElementType res{};
-        for (size_t i = 0; i < inCount; ++i)
-        {
-            res -= mem_weight[i] * log(mem_in[i]);
-        }
-        
-        if constexpr (!IsCardinal<decltype(weight)>)
-        {
-            const size_t cardinalCount = in.Shape().Cardinal().Count();
-            assert(inCount % cardinalCount == 0);
-            res /= (inCount / cardinalCount);
-        }
-        out.SetValue(res);
-        m_outputHandle.SetData(std::move(out));
-    }
+        const TWeightHandle m_weightHandle;
+        const TInputHandle m_inputHandle;
+        TOutputHandle m_outputHandle;
+    };
     
-private:
-    const TWeightHandle m_weightHandle;
-    const TInputHandle m_inputHandle;
-    TOutputHandle m_outputHandle;
-};
+    template <typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TWeightHandle, TInputHandle, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TWeightHandle, TInputHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
+        {
+            const auto& weight = evalItem.m_weightHandle.Data();
+            const auto& in = evalItem.m_inputHandle.Data();
+            assert(weight.Shape() == in.Shape());
+
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out;
+
+            const size_t inCount = in.Shape().Count();
+
+            auto low_in = LowerAccess(in);
+            ElementType* mem_in = low_in.MutableRawMemory();
+
+            auto low_weight = LowerAccess(weight);
+            ElementType* mem_weight = low_weight.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            ElementType res{};
+            for (size_t i = 0; i < inCount; ++i)
+            {
+                res -= mem_weight[i] * log(mem_in[i]);
+            }
+        
+            if constexpr (!IsCardinal<decltype(weight)>)
+            {
+                const size_t cardinalCount = in.Shape().Cardinal().Count();
+                assert(inCount % cardinalCount == 0);
+                res /= (inCount / cardinalCount);
+            }
+            out.SetValue(res);
+            evalItem.m_outputHandle.SetData(std::move(out));
+        }
+    };
 }
 
 template <typename TWeight, typename TInput>
@@ -89,7 +98,7 @@ public:
 template <>
 struct OperSeq_<OpTags::NLLLoss>
 {
-    using type = OperSeqContainer<TailCalculator<OperNLLLoss::NSCaseGen::EvalUnit>>;
+    using type = OperCalAlgoChain<TailCalculator<OperNLLLoss::NSCaseGen::EvalItem, OperNLLLoss::NSCaseGen::EvalGroup>>;
 };
 
 template <typename TWeight, typename TInput,
@@ -105,66 +114,76 @@ namespace MetaNN
 {
 namespace OperNLLLossGrad::NSCaseGen
 {
-template <typename TGradHandle, typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
-class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-public:
-    template <typename TAuxParams>
-    EvalUnit(TGradHandle gradHandle, TWeightHandle weightHandle, TInputHandle inputHandle, TOutputHandle outputHandle, const TAuxParams&)
-        : m_gradHandle(std::move(gradHandle))
-        , m_weightHandle(std::move(weightHandle))
-        , m_inputHandle(std::move(inputHandle))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TGradHandle, typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& grad = m_gradHandle.Data();
-        const auto& weight = m_weightHandle.Data();
-        const auto& in = m_inputHandle.Data();
-        assert(weight.Shape() == in.Shape());
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TGradHandle gradHandle, TWeightHandle weightHandle, TInputHandle inputHandle,
+                 TOutputHandle outputHandle, const TAuxParams&)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {gradHandle.DataPtr(), weightHandle.DataPtr(), inputHandle.DataPtr()},
+                       outputHandle.DataPtr())
+            , m_gradHandle(std::move(gradHandle))
+            , m_weightHandle(std::move(weightHandle))
+            , m_inputHandle(std::move(inputHandle))
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        using ResType = typename TOutputHandle::DataType;
-        using ElementType = typename ResType::ElementType;
-        ResType out(weight.Shape());
+        const TGradHandle m_gradHandle;
+        const TWeightHandle m_weightHandle;
+        const TInputHandle m_inputHandle;
+        TOutputHandle m_outputHandle;
+    };
 
-        const size_t count = in.Shape().Count();
-        const size_t cardinalCount = in.Shape().CardinalShape().Count();
-        assert(count % cardinalCount == 0);
-        const size_t loopCount = count / cardinalCount;
-        
-        auto low_grad = LowerAccess(grad);
-        ElementType* mem_grad = low_grad.RawMemory();
-        auto low_in = LowerAccess(in);
-        ElementType* mem_in = low_in.RawMemory();
-        auto low_weight = LowerAccess(weight);
-        ElementType* mem_weight = low_weight.RawMemory();
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.MutableRawMemory();
-                
-        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        for (size_t loop = 0; loop < loopCount; ++loop)
+    template <typename TGradHandle, typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TWeightHandle, TInputHandle, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TGradHandle, TWeightHandle, TInputHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            ElementType ngv = -mem_grad[loop];
-            for (size_t i = 0; i < cardinalCount; ++i)
-            {
-                mem_out[i] = ngv * mem_weight[i] / mem_in[i];
-            }
-            mem_out += cardinalCount;
-            mem_weight += cardinalCount;
-            mem_in += cardinalCount;
-        }
+            const auto& grad = evalItem.m_gradHandle.Data();
+            const auto& weight = evalItem.m_weightHandle.Data();
+            const auto& in = evalItem.m_inputHandle.Data();
+            assert(weight.Shape() == in.Shape());
 
-        m_outputHandle.SetData(std::move(out));
-    }
-    
-private:
-    const TGradHandle m_gradHandle;
-    const TWeightHandle m_weightHandle;
-    const TInputHandle m_inputHandle;
-    TOutputHandle m_outputHandle;
-};
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out(weight.Shape());
+
+            const size_t count = in.Shape().Count();
+            const size_t cardinalCount = in.Shape().CardinalShape().Count();
+            assert(count % cardinalCount == 0);
+            const size_t loopCount = count / cardinalCount;
+
+            auto low_grad = LowerAccess(grad);
+            const ElementType* mem_grad = low_grad.RawMemory();
+            auto low_in = LowerAccess(in);
+            const ElementType* mem_in = low_in.RawMemory();
+            auto low_weight = LowerAccess(weight);
+            const ElementType* mem_weight = low_weight.RawMemory();
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            for (size_t loop = 0; loop < loopCount; ++loop)
+            {
+                ElementType ngv = -mem_grad[loop];
+                for (size_t i = 0; i < cardinalCount; ++i)
+                {
+                    mem_out[i] = ngv * mem_weight[i] / mem_in[i];
+                }
+                mem_out += cardinalCount;
+                mem_weight += cardinalCount;
+                mem_in += cardinalCount;
+            }
+
+            evalItem.m_outputHandle.SetData(std::move(out));
+        }
+    };
 }
 
 template <typename TGrad, typename TWeight, typename TInput>
@@ -184,7 +203,7 @@ public:
 template <>
 struct OperSeq_<OpTags::NLLLossGrad>
 {
-    using type = OperSeqContainer<TailCalculator<OperNLLLossGrad::NSCaseGen::EvalUnit>>;
+    using type = OperCalAlgoChain<TailCalculator<OperNLLLossGrad::NSCaseGen::EvalItem, OperNLLLossGrad::NSCaseGen::EvalGroup>>;
 };
 
 // interface

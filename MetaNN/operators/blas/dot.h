@@ -1,8 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
 #include <cassert>
@@ -17,78 +16,83 @@ namespace MetaNN
 {
 namespace OperDot::NSCaseGen
 {
-template <typename TInputHandle1,
-          typename TInputHandle2,
-          typename TOutputHandle>
-class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-public:
-    template <typename TAuxParams>
-    EvalUnit(TInputHandle1 operand1,
-             TInputHandle2 operand2,
-             TOutputHandle outputHandle,
-             const TAuxParams&)
-        : m_operand1(std::move(operand1))
-        , m_operand2(std::move(operand2))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& in1 = m_operand1.Data();
-        const auto& in2 = m_operand2.Data();
-
-        auto aimShape = in1.Shape();
-        aimShape.ColNum() = in2.Shape().ColNum();
-
-        using ResType = typename TOutputHandle::DataType;
-        using ElementType = typename ResType::ElementType;
-        ResType out(aimShape);
-
-        const size_t m = in1.Shape().RowNum();
-        const size_t k = in1.Shape().ColNum();
-        const size_t n = in2.Shape().ColNum();
-        assert(k == in2.Shape().RowNum());
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TInputHandle1 operand1, TInputHandle2 operand2, 
+                 TOutputHandle outputHandle, const TAuxParams&)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {operand1.DataPtr(), operand2.DataPtr()},
+                       outputHandle.DataPtr())
+            , m_operand1(std::move(operand1))
+            , m_operand2(std::move(operand2))
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        const size_t loopCount = in1.Shape().Count() / m / k;
-        assert(loopCount == in2.Shape().Count() / k / n);
-        
-        auto low_in1 = LowerAccess(in1);
-        ElementType* mem_in1 = low_in1.MutableRawMemory();
-        
-        auto low_in2 = LowerAccess(in2);
-        ElementType* mem_in2 = low_in2.MutableRawMemory();
+        const TInputHandle1 m_operand1;
+        const TInputHandle2 m_operand2;
+        TOutputHandle m_outputHandle;
+    };
 
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.MutableRawMemory();
-                
-        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        for (size_t loop = 0; loop < loopCount; ++loop)
+    template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            for (size_t i = 0; i < m; ++i)
+            const auto& in1 = evalItem.m_operand1.Data();
+            const auto& in2 = evalItem.m_operand2.Data();
+
+            auto aimShape = in1.Shape();
+            aimShape.ColNum() = in2.Shape().ColNum();
+
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out(aimShape);
+
+            const size_t m = in1.Shape().RowNum();
+            const size_t k = in1.Shape().ColNum();
+            const size_t n = in2.Shape().ColNum();
+            assert(k == in2.Shape().RowNum());
+
+            const size_t loopCount = in1.Shape().Count() / m / k;
+            assert(loopCount == in2.Shape().Count() / k / n);
+
+            auto low_in1 = LowerAccess(in1);
+            const ElementType* mem_in1 = low_in1.RawMemory();
+
+            auto low_in2 = LowerAccess(in2);
+            const ElementType* mem_in2 = low_in2.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            for (size_t loop = 0; loop < loopCount; ++loop)
             {
-                for (size_t j = 0; j < n; ++j)
+                for (size_t i = 0; i < m; ++i)
                 {
-                    mem_out[i * n + j] = 0;
-                    for (size_t l = 0; l < k; ++l)
+                    for (size_t j = 0; j < n; ++j)
                     {
-                        mem_out[i * n + j] += mem_in1[i * k + l] * mem_in2[l * n + j];
+                        mem_out[i * n + j] = 0;
+                        for (size_t l = 0; l < k; ++l)
+                        {
+                            mem_out[i * n + j] += mem_in1[i * k + l] * mem_in2[l * n + j];
+                        }
                     }
                 }
+                mem_out += m * n;
+                mem_in1 += m * k;
+                mem_in2 += k * n;
             }
-            mem_out += m * n;
-            mem_in1 += m * k;
-            mem_in2 += k * n;
+            evalItem.m_outputHandle.SetData(std::move(out));
         }
-        m_outputHandle.SetData(std::move(out));
-    }
-    
-private:
-    const TInputHandle1 m_operand1;
-    const TInputHandle2 m_operand2;
-    TOutputHandle m_outputHandle;
-};
+    };
 }
 
 template <typename TOperand1, typename TOperand2>
@@ -123,7 +127,7 @@ private:
 template <>
 struct OperSeq_<OpTags::Dot>
 {
-    using type = OperSeqContainer<TailCalculator<OperDot::NSCaseGen::EvalUnit>>;
+    using type = OperCalAlgoChain<TailCalculator<OperDot::NSCaseGen::EvalItem, OperDot::NSCaseGen::EvalGroup>>;
 };
 
 template <typename TP1, typename TP2,

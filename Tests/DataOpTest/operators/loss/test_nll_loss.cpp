@@ -168,7 +168,7 @@ namespace
 
             auto handle1 = res.EvalRegister();
             auto handle2 = res2.EvalRegister();
-            EvalPlan<DeviceTags::CPU>::Eval();
+            EvalPlan<DeviceTags::CPU>::Inst().Eval();
 
             auto cm1 = handle1.Data();
             auto cm2 = handle2.Data();

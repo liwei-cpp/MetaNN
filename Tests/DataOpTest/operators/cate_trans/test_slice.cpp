@@ -262,7 +262,7 @@ namespace Test::Operators::CateTrans
         test_slice_case1();
         test_slice_case2();
         test_slice_case3();
-        
+
         test_slice_case4();
         test_slice_case5();
         test_slice_case6();

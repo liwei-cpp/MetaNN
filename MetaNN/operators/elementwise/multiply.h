@@ -1,8 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <stdexcept>
 
@@ -16,58 +15,66 @@ namespace MetaNN
 {
 namespace OperatorMultiply::NSCaseGen
 {
-template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
-class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-public:
-    template <typename TAuxParams>
-    EvalUnit(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle, const TAuxParams&)
-        : m_inputHandle1(std::move(oriHandle1))
-        , m_inputHandle2(std::move(oriHandle2))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& in1 = m_inputHandle1.Data();
-        const auto& in2 = m_inputHandle2.Data();
-        assert(in1.Shape() == in2.Shape());
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle, const TAuxParams&)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {oriHandle1.DataPtr(), oriHandle2.DataPtr()}, outputHandle.DataPtr())
+            , m_inputHandle1(std::move(oriHandle1))
+            , m_inputHandle2(std::move(oriHandle2))
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        using ResType = typename TOutputHandle::DataType;
-        using ElementType = typename ResType::ElementType;
-        ResType out(in1.Shape());
+        const TInputHandle1 m_inputHandle1;
+        const TInputHandle2 m_inputHandle2;
+        TOutputHandle m_outputHandle;
+    };
 
-        const size_t count = in1.Shape().Count();
-        assert(count == out.Shape().Count());
-        
-        auto low_in1 = LowerAccess(in1);
-        ElementType* mem_in1 = low_in1.MutableRawMemory();
-        auto low_in2 = LowerAccess(in2);
-        ElementType* mem_in2 = low_in2.MutableRawMemory();
-
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.MutableRawMemory();
-                
-        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        for (size_t i = 0; i < count; ++i)
+    template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            mem_out[i] = mem_in1[i] * mem_in2[i];
+            const auto& in1 = evalItem.m_inputHandle1.Data();
+            const auto& in2 = evalItem.m_inputHandle2.Data();
+            assert(in1.Shape() == in2.Shape());
+
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out(in1.Shape());
+
+            const size_t count = in1.Shape().Count();
+            assert(count == out.Shape().Count());
+
+            auto low_in1 = LowerAccess(in1);
+            const ElementType* mem_in1 = low_in1.RawMemory();
+            auto low_in2 = LowerAccess(in2);
+            const ElementType* mem_in2 = low_in2.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                mem_out[i] = mem_in1[i] * mem_in2[i];
+            }
+            evalItem.m_outputHandle.SetData(std::move(out));
         }
-        m_outputHandle.SetData(std::move(out));
-    }
-    
-private:
-    const TInputHandle1 m_inputHandle1;
-    const TInputHandle2 m_inputHandle2;
-    TOutputHandle m_outputHandle;
-};
+    };
 }
 
 template <>
 struct OperSeq_<OpTags::Multiply>
 {
-    using type = OperSeqContainer<TailCalculator<OperatorMultiply::NSCaseGen::EvalUnit>>;
+    using type = OperCalAlgoChain<TailCalculator<OperatorMultiply::NSCaseGen::EvalItem, OperatorMultiply::NSCaseGen::EvalGroup>>;
 };
 
 // multiply with number
@@ -92,48 +99,56 @@ constexpr bool Valid()
 
 namespace NSCaseGen
 {
-template <typename TInputHandle, typename TOutputHandle>
-class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-public:
-    template <typename TAuxParams>
-    EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
-        : m_inputHandle(std::move(oriHandle))
-        , m_value(params.Value())
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& input = m_inputHandle.Data();
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            , m_inputHandle(std::move(oriHandle))
+            , m_value(params.Value())
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        using ResType = typename TOutputHandle::DataType;
-        using ElementType = typename ResType::ElementType;
-        ResType out(input.Shape());
+        const TInputHandle m_inputHandle;
+        double m_value;
+        TOutputHandle m_outputHandle;
+    };
 
-        const size_t count = input.Shape().Count();
-        assert(count == out.Shape().Count());
-        
-        auto low_in = LowerAccess(input);
-        ElementType* mem_in = low_in.MutableRawMemory();
-
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.MutableRawMemory();
-                
-        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        for (size_t i = 0; i < count; ++i)
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            mem_out[i] = mem_in[i] * m_value;
+            const auto& input = evalItem.m_inputHandle.Data();
+
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out(input.Shape());
+
+            const size_t count = input.Shape().Count();
+            assert(count == out.Shape().Count());
+
+            auto low_in = LowerAccess(input);
+            const ElementType* mem_in = low_in.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                mem_out[i] = mem_in[i] * evalItem.m_value;
+            }
+            evalItem.m_outputHandle.SetData(std::move(out));
         }
-        m_outputHandle.SetData(std::move(out));
-    }
-    
-private:
-    const TInputHandle m_inputHandle;
-    double m_value;
-    TOutputHandle m_outputHandle;
-};
+    };
 }}
 
 template <typename TOp1, typename TOp2>
@@ -150,7 +165,7 @@ struct OperAuxParams<OpTags::MultiplyWithNum, TCate> : public OperAuxValue<doubl
 template <>
 struct OperSeq_<OpTags::MultiplyWithNum>
 {
-    using type = OperSeqContainer<TailCalculator<OperMultiplyWithNum::NSCaseGen::EvalUnit>>;
+    using type = OperCalAlgoChain<TailCalculator<OperMultiplyWithNum::NSCaseGen::EvalItem, OperMultiplyWithNum::NSCaseGen::EvalGroup>>;
 };
 
 // interface

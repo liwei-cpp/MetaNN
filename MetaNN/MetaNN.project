@@ -115,26 +115,25 @@
     </VirtualDirectory>
     <File Name="data/data.h"/>
     <VirtualDirectory Name="cardinal">
+      <File Name="data/cardinal/_.h"/>
       <VirtualDirectory Name="scalar">
         <File Name="data/cardinal/scalar/scalar.h"/>
         <File Name="data/cardinal/scalar/_.h"/>
       </VirtualDirectory>
-      <File Name="data/cardinal/cardinal_pack.h"/>
       <VirtualDirectory Name="matrix">
-        <File Name="data/cardinal/matrix/trival_matrix.h"/>
         <File Name="data/cardinal/matrix/one_hot_vector.h"/>
         <File Name="data/cardinal/matrix/matrix.h"/>
         <File Name="data/cardinal/matrix/vector.h"/>
         <File Name="data/cardinal/matrix/_.h"/>
       </VirtualDirectory>
       <VirtualDirectory Name="3d_array">
-        <File Name="data/cardinal/3d_array/3d_array_pack.h"/>
+        <File Name="data/cardinal/3d_array/_.h"/>
         <File Name="data/cardinal/3d_array/3d_array.h"/>
       </VirtualDirectory>
     </VirtualDirectory>
     <VirtualDirectory Name="sequence">
+      <File Name="data/sequence/_.h"/>
       <File Name="data/sequence/sequence.h"/>
-      <File Name="data/sequence/sequence_pack.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="general">
       <File Name="data/general/zero_data.h"/>
@@ -146,17 +145,12 @@
     <File Name="data_copy/data_copy.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="evaluate">
-    <VirtualDirectory Name="cpu">
-      <File Name="evaluate/cpu/trival_eval_pool.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="facilities">
-      <File Name="evaluate/facilities/eval_buffer.h"/>
-      <File Name="evaluate/facilities/eval_group.h"/>
-      <File Name="evaluate/facilities/eval_handle.h"/>
-      <File Name="evaluate/facilities/eval_plan.h"/>
-      <File Name="evaluate/facilities/eval_pool.h"/>
-      <File Name="evaluate/facilities/eval_unit.h"/>
-    </VirtualDirectory>
+    <File Name="evaluate/eval_handle.h"/>
+    <File Name="evaluate/eval_buffer.h"/>
+    <File Name="evaluate/eval_dispatcher.h"/>
+    <File Name="evaluate/eval_group.h"/>
+    <File Name="evaluate/eval_item.h"/>
+    <File Name="evaluate/eval_plan.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="facilities">
     <VirtualDirectory Name="cont_metafuns">
@@ -266,7 +260,6 @@
       <File Name="operators/activations/softmax.h"/>
       <File Name="operators/activations/relu.h"/>
       <File Name="operators/activations/sigmoid.h"/>
-      <File Name="operators/activations/tags.h"/>
       <File Name="operators/activations/tanh.h"/>
       <File Name="operators/activations/_.h"/>
     </VirtualDirectory>

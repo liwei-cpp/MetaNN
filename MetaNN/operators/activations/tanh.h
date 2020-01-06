@@ -1,8 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <cassert>
 #include <type_traits>
@@ -17,52 +16,60 @@ namespace MetaNN
 {
 namespace OperTanh::NSCaseGen
 {
-template <typename TInputHandle, typename TOutputHandle>
-class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-public:
-    template <typename TAuxParams>
-    EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
-        : m_inputHandle(std::move(oriHandle))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& in = m_inputHandle.Data();
-
-        using ResType = typename TOutputHandle::DataType;
-        using ElementType = typename ResType::ElementType;
-        ResType out(in.Shape());
-
-        const size_t count = in.Shape().Count();
-        assert(count == out.Shape().Count());
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            , m_inputHandle(std::move(oriHandle))
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        auto low_in = LowerAccess(in);
-        ElementType* mem_in = low_in.MutableRawMemory();
+        const TInputHandle m_inputHandle;
+        TOutputHandle m_outputHandle;
+    };
 
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.MutableRawMemory();
-                
-        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        for (size_t i = 0; i < count; ++i)
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            mem_out[i] = (ElementType)(tanh(mem_in[i]));
+            const auto& in = evalItem.m_inputHandle.Data();
+
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out(in.Shape());
+
+            const size_t count = in.Shape().Count();
+            assert(count == out.Shape().Count());
+
+            auto low_in = LowerAccess(in);
+            const ElementType* mem_in = low_in.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+                
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                mem_out[i] = (ElementType)(tanh(mem_in[i]));
+            }
+            evalItem.m_outputHandle.SetData(std::move(out));
         }
-        m_outputHandle.SetData(std::move(out));
-    }
-    
-private:
-    const TInputHandle m_inputHandle;
-    TOutputHandle m_outputHandle;
-};
+    };
 }
 
 template <>
 struct OperSeq_<OpTags::Tanh>
 {
-    using type = OperSeqContainer<TailCalculator<OperTanh::NSCaseGen::EvalUnit>>;
+    using type = OperCalAlgoChain<TailCalculator<OperTanh::NSCaseGen::EvalItem, OperTanh::NSCaseGen::EvalGroup>>;
 };
 
 template <typename TP,
@@ -79,58 +86,67 @@ namespace MetaNN
 {
 namespace OperTanhGrad::NSCaseGen
 {
-template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
-class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-public:
-    template <typename TAuxParams>
-    EvalUnit(TGradHandle gradHandle, TInputHandle inputHandle, TOutputHandle outputHandle, const TAuxParams&)
-        : m_gradHandle(std::move(gradHandle))
-        , m_inputHandle(std::move(inputHandle))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& grad = m_gradHandle.Data();
-        const auto& in = m_inputHandle.Data();
-        assert(grad.Shape() == in.Shape());
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {gradHandle.DataPtr(), oriHandle.DataPtr()},
+                       outputHandle.DataPtr())
+            , m_gradHandle(std::move(gradHandle))
+            , m_inputHandle(std::move(oriHandle))
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        using ResType = typename TOutputHandle::DataType;
-        using ElementType = typename ResType::ElementType;
-        ResType out(in.Shape());
+        const TGradHandle m_gradHandle;
+        const TInputHandle m_inputHandle;
+        TOutputHandle m_outputHandle;
+    };
 
-        const size_t count = in.Shape().Count();
-        assert(count == out.Shape().Count());
-        
-        auto low_grad = LowerAccess(grad);
-        ElementType* mem_grad = low_grad.MutableRawMemory();
-        auto low_in = LowerAccess(in);
-        ElementType* mem_in = low_in.MutableRawMemory();
-
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.MutableRawMemory();
-                
-        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        for (size_t i = 0; i < count; ++i)
+    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            mem_out[i] = mem_grad[i] * (1 - mem_in[i] * mem_in[i]);
+            const auto& grad = evalItem.m_gradHandle.Data();
+            const auto& in = evalItem.m_inputHandle.Data();
+            assert(grad.Shape() == in.Shape());
+
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out(in.Shape());
+
+            const size_t count = in.Shape().Count();
+            assert(count == out.Shape().Count());
+
+            auto low_grad = LowerAccess(grad);
+            const ElementType* mem_grad = low_grad.RawMemory();
+            auto low_in = LowerAccess(in);
+            const ElementType* mem_in = low_in.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+        
+            for (size_t i = 0; i < count; ++i)
+            {
+                mem_out[i] = mem_grad[i] * (1 - mem_in[i] * mem_in[i]);
+            }
+            evalItem.m_outputHandle.SetData(std::move(out));
         }
-        m_outputHandle.SetData(std::move(out));
-    }
-    
-private:
-    const TGradHandle m_gradHandle;
-    const TInputHandle m_inputHandle;
-    TOutputHandle m_outputHandle;
-};
+    };
 }
 
 template <>
 struct OperSeq_<OpTags::TanhGrad>
 {
-    using type = OperSeqContainer<TailCalculator<OperTanhGrad::NSCaseGen::EvalUnit>>;
+    using type = OperCalAlgoChain<TailCalculator<OperTanhGrad::NSCaseGen::EvalItem, OperTanhGrad::NSCaseGen::EvalGroup>>;
 };
 
 template <typename TGrad, typename TInput,

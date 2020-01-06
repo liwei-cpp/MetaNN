@@ -1,8 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/tail_calculator.h>
 #include <cassert>
 #include <cmath>
@@ -21,68 +20,75 @@ namespace MetaNN
 {
 namespace OperSoftmax::NSCaseGen
 {
-template <typename TInputHandle, typename TOutputHandle>
-class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-    using ResType = typename TOutputHandle::DataType;
-    using ElementType = typename ResType::ElementType;
-
-public:
-    template <typename TAuxParams>
-    EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
-        : m_inputHandle(std::move(oriHandle))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& in = m_inputHandle.Data();
-        ResType out(in.Shape());
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            , m_inputHandle(std::move(oriHandle))
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        const size_t count = in.Shape().Count();
-        assert(count == out.Shape().Count());
-        const size_t matrixSize = in.Shape().RowNum() * in.Shape().ColNum();
-        assert(count % matrixSize == 0);
-        const size_t loopCount = count / matrixSize;
-        
-        auto low_in = LowerAccess(in);
-        ElementType* mem_in = low_in.MutableRawMemory();
+        const TInputHandle m_inputHandle;
+        TOutputHandle m_outputHandle;
+    };
 
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.MutableRawMemory();
-                
-        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        for (size_t i = 0; i < loopCount; ++i)
-        {
-            EvalMatrix(mem_out, mem_in, matrixSize);
-            mem_out += matrixSize;
-            mem_in += matrixSize;
-        }
-        m_outputHandle.SetData(std::move(out));
-    }
-    
-private:
-    void EvalMatrix(ElementType* out, ElementType* in, const size_t len)
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
-        ElementType maxElem = *std::max_element(in, in + len);
-        ElementType sum{};
-
-        for (size_t i = 0; i < len; ++i)
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            out[i] = exp(in[i] - maxElem);
-            sum += out[i];
-        }
+            const auto& in = evalItem.m_inputHandle.Data();
+            ResType out(in.Shape());
 
-        for (size_t i = 0; i < len; ++i)
-        {
-            out[i] /= sum;
+            const size_t count = in.Shape().Count();
+            assert(count == out.Shape().Count());
+            const size_t matrixSize = in.Shape().RowNum() * in.Shape().ColNum();
+            assert(count % matrixSize == 0);
+            const size_t loopCount = count / matrixSize;
+
+            auto low_in = LowerAccess(in);
+            const ElementType* mem_in = low_in.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            for (size_t i = 0; i < loopCount; ++i)
+            {
+                EvalMatrix(mem_out, mem_in, matrixSize);
+                mem_out += matrixSize;
+                mem_in += matrixSize;
+            }
+            evalItem.m_outputHandle.SetData(std::move(out));
         }
-    }
-private:
-    const TInputHandle m_inputHandle;
-    TOutputHandle m_outputHandle;
-};
+    private:
+        void EvalMatrix(ElementType* out, const ElementType* in, const size_t len)
+        {
+            ElementType maxElem = *std::max_element(in, in + len);
+            ElementType sum{};
+
+            for (size_t i = 0; i < len; ++i)
+            {
+                out[i] = exp(in[i] - maxElem);
+                sum += out[i];
+            }
+
+            for (size_t i = 0; i < len; ++i)
+            {
+                out[i] /= sum;
+            }
+        }
+    };
 }
 
 template <typename TOperand>
@@ -93,7 +99,7 @@ constexpr bool IsValidOper<OpTags::Softmax, TOperand> =
 template <>
 struct OperSeq_<OpTags::Softmax>
 {
-    using type = OperSeqContainer<TailCalculator<OperSoftmax::NSCaseGen::EvalUnit>>;
+    using type = OperCalAlgoChain<TailCalculator<OperSoftmax::NSCaseGen::EvalItem, OperSoftmax::NSCaseGen::EvalGroup>>;
 };
 
 template <typename TP,
@@ -117,115 +123,137 @@ template <typename T1, typename T2, typename T3>
 constexpr bool Valid<Operator<OpTags::NLLLossGrad, T1, T2, T3>,
                      T3> = true;
 
-template <typename TGradHandle, typename TSoftmaxHandle, typename TOutputHandle>
-class EuOneHotWeight : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-    using ResType = typename TOutputHandle::DataType;
-    using ElementType = typename ResType::ElementType;
-public:
-    EuOneHotWeight(TGradHandle gradHandle, TSoftmaxHandle softmaxHandle,
-                   TOutputHandle outputHandle, size_t hotPos)
-        : m_gradHandle(std::move(gradHandle))
-        , m_softmaxHandle(std::move(softmaxHandle))
-        , m_outputHandle(std::move(outputHandle))
-        , m_hotPos(hotPos)
-    {}
-        
-    void Eval() override
+    template <typename TGradHandle, typename TSoftmaxHandle, typename TOutputHandle>
+    class EiOneHotWeight : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& grad = m_gradHandle.Data().Value();
-        const auto& softmaxRes = m_softmaxHandle.Data();
-        assert(softmaxRes.Shape().RowNum() == 1);
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        EiOneHotWeight(TGradHandle gradHandle, TSoftmaxHandle softmaxHandle,
+                       TOutputHandle outputHandle, size_t hotPos)
+            : BaseType(std::type_index(typeid(EiOneHotWeight)),
+                       {gradHandle.DataPtr(), softmaxHandle.DataPtr()},
+                       outputHandle.DataPtr())
+            , m_gradHandle(std::move(gradHandle))
+            , m_softmaxHandle(std::move(softmaxHandle))
+            , m_outputHandle(std::move(outputHandle))
+            , m_hotPos(hotPos)
+        {}
         
-        size_t colNum = softmaxRes.Shape().ColNum();
-        assert(m_hotPos < colNum);
-        
-        ResType res(1, colNum);
+        TGradHandle    m_gradHandle;
+        TSoftmaxHandle m_softmaxHandle;
+        TOutputHandle  m_outputHandle;
+        size_t m_hotPos;
+    };
 
-        auto mem_res = LowerAccess(res);
-        ElementType* r = mem_res.MutableRawMemory();
-
-        for (size_t i = 0; i < colNum; ++i)
-        {
-            r[i] = softmaxRes(0, i) * grad;
-        }
-        r[m_hotPos] -= grad;
-        m_outputHandle.SetData(std::move(res));
-    }
-
-private:
-    TGradHandle    m_gradHandle;
-    TSoftmaxHandle m_softmaxHandle;
-    TOutputHandle  m_outputHandle;
-    size_t m_hotPos;
-};
-
-template <typename TGradHandle, typename TWeightHandle, 
-          typename TSoftmaxHandle, typename TOutputHandle>
-class EuGenWeight : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-    using ResType = typename TOutputHandle::DataType;
-    using ElementType = typename ResType::ElementType;
-public:
-    EuGenWeight(TGradHandle gradHandle, TWeightHandle weightHandle,
-                TSoftmaxHandle softmaxHandle, TOutputHandle outputHandle)
-        : m_gradHandle(std::move(gradHandle))
-        , m_weightHandle(std::move(weightHandle))
-        , m_softmaxHandle(std::move(softmaxHandle))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-
-    void Eval() override
+    template <typename TGradHandle, typename TSoftmaxHandle, typename TOutputHandle>
+    class EgOneHotWeight : public TrivalEvalGroup<EiOneHotWeight<TGradHandle, TSoftmaxHandle, TOutputHandle>>
     {
-        const auto& grad = m_gradHandle.Data();
-        const size_t loopCount = grad.Shape().Count();
-        
-        const auto& weight = m_weightHandle.Data();
-        const auto& softmaxRes = m_softmaxHandle.Data();
-        assert(weight.Shape() == softmaxRes.Shape());
-        
-        const size_t cardinalCount = weight.Shape().CardinalShape().Count();
-        assert(weight.Shape().Count() % cardinalCount == 0);
-        assert(loopCount == weight.Shape().Count() / cardinalCount);
-        
-        ResType out(weight.Shape());
-
-        auto low_grad = LowerAccess(grad);
-        ElementType* mem_grad = low_grad.RawMemory();
-        auto low_weight = LowerAccess(weight);
-        ElementType* mem_weight = low_weight.RawMemory();
-        auto low_softmaxRes = LowerAccess(softmaxRes);
-        ElementType* mem_softmaxRes = low_softmaxRes.RawMemory();
-        
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.RawMemory();
-        
-        for (size_t curLoop = 0; curLoop < loopCount; ++curLoop)
+        using EvalItemType = EiOneHotWeight<TGradHandle, TSoftmaxHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            ElementType sum{};
-            ElementType curGrad = *mem_grad;
-            for (size_t i = 0; i < cardinalCount; ++i)
-            {
-                sum += mem_weight[i];
-            }
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
 
-            for (size_t i = 0; i < cardinalCount; ++i)
+            const auto& grad = evalItem.m_gradHandle.Data().Value();
+            const auto& softmaxRes = evalItem.m_softmaxHandle.Data();
+            assert(softmaxRes.Shape().RowNum() == 1);
+
+            size_t colNum = softmaxRes.Shape().ColNum();
+            assert(evalItem.m_hotPos < colNum);
+
+            ResType res(1, colNum);
+
+            auto mem_res = LowerAccess(res);
+            ElementType* r = mem_res.MutableRawMemory();
+
+            for (size_t i = 0; i < colNum; ++i)
             {
-                mem_out[i] = (mem_softmaxRes[i] * sum - mem_weight[i]) * curGrad;
+                r[i] = softmaxRes(0, i) * grad;
             }
-            mem_out += cardinalCount;
-            mem_weight += cardinalCount;
-            mem_softmaxRes += cardinalCount;
-            ++mem_grad;
+            r[evalItem.m_hotPos] -= grad;
+            evalItem.m_outputHandle.SetData(std::move(res));
         }
-        m_outputHandle.SetData(std::move(out));
-    }
-private:
-    TGradHandle    m_gradHandle;
-    TWeightHandle  m_weightHandle;
-    TSoftmaxHandle m_softmaxHandle;
-    TOutputHandle  m_outputHandle;
-};
+    };
+
+    template <typename TGradHandle, typename TWeightHandle, 
+              typename TSoftmaxHandle, typename TOutputHandle>
+    class EiGenWeight : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    {
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        EiGenWeight(TGradHandle gradHandle, TWeightHandle weightHandle,
+                    TSoftmaxHandle softmaxHandle, TOutputHandle outputHandle)
+            : BaseType(std::type_index(typeid(EiGenWeight)),
+                       {gradHandle.DataPtr(), weightHandle.DataPtr(), softmaxHandle.DataPtr()},
+                       outputHandle.DataPtr())
+            , m_gradHandle(std::move(gradHandle))
+            , m_weightHandle(std::move(weightHandle))
+            , m_softmaxHandle(std::move(softmaxHandle))
+            , m_outputHandle(std::move(outputHandle))
+        {}
+        
+        TGradHandle    m_gradHandle;
+        TWeightHandle  m_weightHandle;
+        TSoftmaxHandle m_softmaxHandle;
+        TOutputHandle  m_outputHandle;
+    };
+
+    template <typename TGradHandle, typename TWeightHandle, 
+              typename TSoftmaxHandle, typename TOutputHandle>
+    class EgGenWeight : public TrivalEvalGroup<EiGenWeight<TGradHandle, TWeightHandle, TSoftmaxHandle, TOutputHandle>>
+    {
+        using EvalItemType = EiGenWeight<TGradHandle, TWeightHandle, TSoftmaxHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
+        {
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            
+            const auto& grad = evalItem.m_gradHandle.Data();
+            const size_t loopCount = grad.Shape().Count();
+
+            const auto& weight = evalItem.m_weightHandle.Data();
+            const auto& softmaxRes = evalItem.m_softmaxHandle.Data();
+            assert(weight.Shape() == softmaxRes.Shape());
+
+            const size_t cardinalCount = weight.Shape().CardinalShape().Count();
+            assert(weight.Shape().Count() % cardinalCount == 0);
+            assert(loopCount == weight.Shape().Count() / cardinalCount);
+
+            ResType out(weight.Shape());
+
+            auto low_grad = LowerAccess(grad);
+            const ElementType* mem_grad = low_grad.RawMemory();
+            auto low_weight = LowerAccess(weight);
+            const ElementType* mem_weight = low_weight.RawMemory();
+            auto low_softmaxRes = LowerAccess(softmaxRes);
+            const ElementType* mem_softmaxRes = low_softmaxRes.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            for (size_t curLoop = 0; curLoop < loopCount; ++curLoop)
+            {
+                ElementType sum{};
+                ElementType curGrad = *mem_grad;
+                for (size_t i = 0; i < cardinalCount; ++i)
+                {
+                    sum += mem_weight[i];
+                }
+
+                for (size_t i = 0; i < cardinalCount; ++i)
+                {
+                    mem_out[i] = (mem_softmaxRes[i] * sum - mem_weight[i]) * curGrad;
+                }
+                mem_out += cardinalCount;
+                mem_weight += cardinalCount;
+                mem_softmaxRes += cardinalCount;
+                ++mem_grad;
+            }
+            evalItem.m_outputHandle.SetData(std::move(out));
+        }
+    };
 
 struct Calculator
 {
@@ -262,31 +290,34 @@ struct Calculator
             const auto operWeight = oper0.template Operand<1>();
             if constexpr (std::is_same_v<RemConstRef<decltype(operWeight)>, OneHotVector<TElement, TDevice>>)
             {
-                using EvalUnit = EuOneHotWeight<RemConstRef<decltype(gradHandle)>,
+                using EvalItem = EiOneHotWeight<RemConstRef<decltype(gradHandle)>,
                                                 RemConstRef<decltype(softmaxHandle)>,
                                                 RemConstRef<decltype(outHandle)>>;
-                using GroupType = TrivalEvalGroup<EvalUnit>;
-
-                auto dataPtr = outHandle.DataPtr();
-                auto depVec = {gradHandle.DataPtr(), softmaxHandle.DataPtr()};
-                EvalUnit unit(std::move(gradHandle), std::move(softmaxHandle), std::move(outHandle), operWeight.HotPos());
-                EvalPlan<TDevice>::template Register<GroupType>(std::move(unit), dataPtr, std::move(depVec));
+                using EvalGroup = EgOneHotWeight<RemConstRef<decltype(gradHandle)>,
+                                                 RemConstRef<decltype(softmaxHandle)>,
+                                                 RemConstRef<decltype(outHandle)>>;
+                using EvalDispatcher = TrivalEvalItemDispatcher<EvalGroup>;
+                
+                auto item = std::make_unique<EvalItem>(std::move(gradHandle), std::move(softmaxHandle), std::move(outHandle), operWeight.HotPos());
+                EvalPlan<TDevice>::Inst().template Register<EvalDispatcher>(std::move(item));
             }
             // TODO: add specialization for batch one hot vector and one hot vector sequence
             else
             {
                 auto weightHandle = operWeight.EvalRegister();
-                using EvalUnit = EuGenWeight<RemConstRef<decltype(gradHandle)>,
+                using EvalItem = EiGenWeight<RemConstRef<decltype(gradHandle)>,
                                              RemConstRef<decltype(weightHandle)>,
                                              RemConstRef<decltype(softmaxHandle)>,
                                              RemConstRef<decltype(outHandle)>>;
-                using GroupType = TrivalEvalGroup<EvalUnit>;
-
-                auto dataPtr = outHandle.DataPtr();
-                auto depVec = {gradHandle.DataPtr(), weightHandle.DataPtr(), softmaxHandle.DataPtr()};
-                EvalUnit unit(std::move(gradHandle), std::move(weightHandle),
-                              std::move(softmaxHandle), std::move(outHandle));
-                EvalPlan<TDevice>::template Register<GroupType>(std::move(unit), dataPtr, std::move(depVec));
+                using EvalGroup = EgGenWeight<RemConstRef<decltype(gradHandle)>,
+                                              RemConstRef<decltype(weightHandle)>,
+                                              RemConstRef<decltype(softmaxHandle)>,
+                                              RemConstRef<decltype(outHandle)>>;
+                using EvalDispatcher = TrivalEvalItemDispatcher<EvalGroup>;
+                
+                auto item = std::make_unique<EvalItem>(std::move(gradHandle), std::move(weightHandle),
+                                                       std::move(softmaxHandle), std::move(outHandle));
+                EvalPlan<TDevice>::Inst().template Register<EvalDispatcher>(std::move(item));
             }
         }
     }
@@ -295,78 +326,87 @@ struct Calculator
 
 namespace OperSoftmaxGrad::NSCaseGen
 {
-template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
-class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-    using ResType = typename TOutputHandle::DataType;
-    using ElementType = typename ResType::ElementType;
-public:
-    template <typename TAuxParams>
-    EvalUnit(TGradHandle gradHandle, TInputHandle inputHandle, TOutputHandle outputHandle, const TAuxParams&)
-        : m_gradHandle(std::move(gradHandle))
-        , m_inputHandle(std::move(inputHandle))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& grad = m_gradHandle.Data();
-        const auto& in = m_inputHandle.Data();
-        assert(grad.Shape() == in.Shape());
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {gradHandle.DataPtr(), oriHandle.DataPtr()}, outputHandle.DataPtr())
+            , m_gradHandle(std::move(gradHandle))
+            , m_inputHandle(std::move(oriHandle))
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        ResType out(in.Shape());
+        const TGradHandle m_gradHandle;
+        const TInputHandle m_inputHandle;
+        TOutputHandle m_outputHandle;
+    };
 
-        const size_t count = in.Shape().Count();
-        assert(count == out.Shape().Count());
-        const size_t matrixSize = in.Shape().RowNum() * in.Shape().ColNum();
-        assert(count % matrixSize == 0);
-        const size_t loopCount = count / matrixSize;
-        
-        auto low_grad = LowerAccess(grad);
-        ElementType* mem_grad = low_grad.MutableRawMemory();
-        auto low_in = LowerAccess(in);
-        ElementType* mem_in = low_in.MutableRawMemory();
-
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.MutableRawMemory();
-                
-        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        for (size_t i = 0; i < loopCount; ++i)
-        {
-            EvalSingleLoop(mem_out, mem_grad, mem_in, matrixSize);
-            mem_out += matrixSize;
-            mem_in += matrixSize;
-            mem_grad += matrixSize;
-        }
-        m_outputHandle.SetData(std::move(out));
-    }
-
-private:
-    void EvalSingleLoop(ElementType* out, ElementType* grad, ElementType* in, const size_t len)
+    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle>>
     {
-        ElementType sum{};
-        for (size_t i = 0; i < len; ++i)
+        using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle>;
+        using ResType = typename TOutputHandle::DataType;
+        using ElementType = typename ResType::ElementType;
+
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            sum += grad[i] * in[i];
+            const auto& grad = evalItem.m_gradHandle.Data();
+            const auto& in = evalItem.m_inputHandle.Data();
+            assert(grad.Shape() == in.Shape());
+
+            ResType out(in.Shape());
+
+            const size_t count = in.Shape().Count();
+            assert(count == out.Shape().Count());
+            const size_t matrixSize = in.Shape().RowNum() * in.Shape().ColNum();
+            assert(count % matrixSize == 0);
+            const size_t loopCount = count / matrixSize;
+
+            auto low_grad = LowerAccess(grad);
+            const ElementType* mem_grad = low_grad.RawMemory();
+            auto low_in = LowerAccess(in);
+            const ElementType* mem_in = low_in.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            for (size_t i = 0; i < loopCount; ++i)
+            {
+                EvalSingleLoop(mem_out, mem_grad, mem_in, matrixSize);
+                mem_out += matrixSize;
+                mem_in += matrixSize;
+                mem_grad += matrixSize;
+            }
+            evalItem.m_outputHandle.SetData(std::move(out));
         }
-        for (size_t i = 0; i < len; ++i)
+    private:
+        void EvalSingleLoop(ElementType* out, const ElementType* grad, const ElementType* in, const size_t len)
         {
-            out[i] = in[i] * (grad[i] - sum);
+            ElementType sum{};
+            for (size_t i = 0; i < len; ++i)
+            {
+                sum += grad[i] * in[i];
+            }
+            for (size_t i = 0; i < len; ++i)
+            {
+                out[i] = in[i] * (grad[i] - sum);
+            }
         }
-    }
-private:
-    const TGradHandle m_gradHandle;
-    const TInputHandle m_inputHandle;
-    TOutputHandle m_outputHandle;
-};
+    };
 }
 
 template <>
 struct OperSeq_<OpTags::SoftmaxGrad>
 {
-    using type = OperSeqContainer<OperSoftmaxGrad::NSCaseNLLLossGrad::Calculator,
-                                  TailCalculator<OperSoftmaxGrad::NSCaseGen::EvalUnit>>;
+    using type = OperCalAlgoChain<OperSoftmaxGrad::NSCaseNLLLossGrad::Calculator,
+                                  TailCalculator<OperSoftmaxGrad::NSCaseGen::EvalItem, OperSoftmaxGrad::NSCaseGen::EvalGroup>>;
 };
 
 template <typename TOperandGrad, typename TOperandInput>

@@ -1,8 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <cassert>
 #include <type_traits>
@@ -16,63 +15,71 @@ namespace MetaNN
 {
 namespace OperTranspose::NSCaseGen
 {
-template <typename TInputHandle, typename TOutputHandle>
-class EvalUnit : public BaseEvalUnit<DeviceTypeFromHandle<TOutputHandle>>
-{
-public:
-    template <typename TAuxParams>
-    EvalUnit(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
-        : m_inputHandle(std::move(oriHandle))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& in = m_inputHandle.Data();
-        auto aimShape = in.Shape();
-        std::swap(aimShape.RowNum(), aimShape.ColNum());
-
-        using ResType = typename TOutputHandle::DataType;
-        using ElementType = typename ResType::ElementType;
-        ResType out(aimShape);
-
-        const size_t count = in.Shape().Count();
-        assert(count == out.Shape().Count());
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            , m_inputHandle(std::move(oriHandle))
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        auto low_in = LowerAccess(in);
-        ElementType* mem_in = low_in.MutableRawMemory();
+        const TInputHandle m_inputHandle;
+        TOutputHandle m_outputHandle;
+    };
 
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.MutableRawMemory();
-                
-        static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        const size_t oriColSize = in.Shape().ColNum();
-        const size_t oriRowSize = in.Shape().RowNum();
-        const size_t matrixSize = oriRowSize * oriColSize;
-
-        assert(count % matrixSize == 0);
-        const size_t loopCount = count / matrixSize;
-
-        for (size_t loop = 0; loop < loopCount; ++loop)
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            for (size_t i = 0; i < oriRowSize; ++i)
+            const auto& in = evalItem.m_inputHandle.Data();
+            auto aimShape = in.Shape();
+            std::swap(aimShape.RowNum(), aimShape.ColNum());
+
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out(aimShape);
+
+            const size_t count = in.Shape().Count();
+            assert(count == out.Shape().Count());
+
+            auto low_in = LowerAccess(in);
+            const ElementType* mem_in = low_in.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            const size_t oriColSize = in.Shape().ColNum();
+            const size_t oriRowSize = in.Shape().RowNum();
+            const size_t matrixSize = oriRowSize * oriColSize;
+
+            assert(count % matrixSize == 0);
+            const size_t loopCount = count / matrixSize;
+
+            for (size_t loop = 0; loop < loopCount; ++loop)
             {
-                for (size_t j = 0; j < oriColSize; ++j)
+                for (size_t i = 0; i < oriRowSize; ++i)
                 {
-                    mem_out[j * oriRowSize + i] = mem_in[i * oriColSize + j];
+                    for (size_t j = 0; j < oriColSize; ++j)
+                    {
+                        mem_out[j * oriRowSize + i] = mem_in[i * oriColSize + j];
+                    }
                 }
+                mem_out += matrixSize;
+                mem_in += matrixSize;
             }
-            mem_out += matrixSize;
-            mem_in += matrixSize;
+            evalItem.m_outputHandle.SetData(std::move(out));
         }
-        m_outputHandle.SetData(std::move(out));
-    }
-    
-private:
-    const TInputHandle m_inputHandle;
-    TOutputHandle m_outputHandle;
-};
+    };
 }
 
 template <typename TOperand>
@@ -105,7 +112,7 @@ private:
 template <>
 struct OperSeq_<OpTags::Transpose>
 {
-    using type = OperSeqContainer<TailCalculator<OperTranspose::NSCaseGen::EvalUnit>>;
+    using type = OperCalAlgoChain<TailCalculator<OperTranspose::NSCaseGen::EvalItem, OperTranspose::NSCaseGen::EvalGroup>>;
 };
 
 template <typename TP,

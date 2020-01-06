@@ -4,10 +4,8 @@
 #include <MetaNN/data/facilities/tags.h>
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/facilities/traits.h>
-#include <MetaNN/evaluate/facilities/eval_buffer.h>
-#include <MetaNN/evaluate/facilities/eval_group.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/evaluate/eval_buffer.h>
+#include <MetaNN/evaluate/eval_plan.h>
 #include <memory>
 
 namespace MetaNN
@@ -82,58 +80,66 @@ struct Helper_<CategoryTags::Sequence<TOriCate>, CategoryTags::Batch>
     }
 };
 
-template <typename TInputHandle, typename TElement, typename TDevice, typename TCategory>
-class EvalUnit : public BaseEvalUnit<TDevice>
-{
-    using PrincipleType = PrincipalDataType<TCategory, TElement, TDevice>;
-    using TOutputHandle = EvalHandle<PrincipleType>;
-
-public:
-    EvalUnit(std::vector<TInputHandle> p_input, TOutputHandle p_output, MetaNN::Shape<TCategory> p_outputShape)
-        : m_inputs(std::move(p_input))
-        , m_output(std::move(p_output))
-        , m_outputShape(std::move(p_outputShape))
-    {}
-    
-    void Eval()
+    template <typename TInputHandle, typename TElement, typename TDevice, typename TCategory>
+    class EvalItem : public BaseEvalItem<TDevice>
     {
-        using ResType = typename TOutputHandle::DataType;
-        ResType res(m_outputShape);
-        using TElem = typename ResType::ElementType;
-        
-        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>,
-                      "Currently only CPU is supported");
+    public:
+        using PrincipleType = PrincipalDataType<TCategory, TElement, TDevice>;
+        using TOutputHandle = EvalHandle<PrincipleType>;
+        EvalItem(std::vector<TInputHandle> p_input, TOutputHandle p_output,
+                 MetaNN::Shape<TCategory> p_outputShape,
+                 std::vector<const void*> p_dependencies)
+            : BaseEvalItem<TDevice>(std::type_index(typeid(EvalItem)),
+                                    std::move(p_dependencies), p_output.DataPtr())
+            , m_inputs(std::move(p_input))
+            , m_output(std::move(p_output))
+            , m_outputShape(std::move(p_outputShape))
+        {}
 
-        auto lowerRes = LowerAccess(res);
-        TElem* resMem = lowerRes.MutableRawMemory();
-        
-        size_t startPoint = 0;
-        for (size_t i = 0; i < m_inputs.size(); ++i)
-        {
-            const auto& curItem = m_inputs[i].Data();
-            if constexpr (IsScalar<decltype(curItem)>)
-            {
-                *resMem = curItem.Value();
-            }
-            else
-            {
-                auto lowerItem = LowerAccess(curItem);
-                const TElem* itemMem = lowerItem.RawMemory();
-                memcpy(resMem, itemMem, sizeof(TElem) * curItem.Shape().Count());                
-            }
-            startPoint += curItem.Shape().Count();
-            resMem += curItem.Shape().Count();
-        }
-        
-        assert(startPoint == res.Shape().Count());
-        m_output.SetData(std::move(res));
-    }
+        std::vector<TInputHandle> m_inputs;
+        TOutputHandle m_output;
+        MetaNN::Shape<TCategory> m_outputShape;
+    };
     
-private:
-    std::vector<TInputHandle> m_inputs;
-    TOutputHandle m_output;
-    MetaNN::Shape<TCategory> m_outputShape;
-};
+    template <typename TInputHandle, typename TElement, typename TDevice, typename TCategory>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TElement, TDevice, TCategory>>
+    {
+        using EvalItemType = EvalItem<TInputHandle, TElement, TDevice, TCategory>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
+        {
+            using ResType = typename EvalItemType::TOutputHandle::DataType;
+            ResType res(evalItem.m_outputShape);
+            using TElem = typename ResType::ElementType;
+        
+            static_assert(std::is_same_v<TDevice, DeviceTags::CPU>,
+                          "Currently only CPU is supported");
+
+            auto lowerRes = LowerAccess(res);
+            TElem* resMem = lowerRes.MutableRawMemory();
+        
+            size_t startPoint = 0;
+            for (size_t i = 0; i < evalItem.m_inputs.size(); ++i)
+            {
+                const auto& curItem = evalItem.m_inputs[i].Data();
+                if constexpr (IsScalar<decltype(curItem)>)
+                {
+                    *resMem = curItem.Value();
+                }
+                else
+                {
+                    auto lowerItem = LowerAccess(curItem);
+                    const TElem* itemMem = lowerItem.RawMemory();
+                    memcpy(resMem, itemMem, sizeof(TElem) * curItem.Shape().Count());                
+                }
+                startPoint += curItem.Shape().Count();
+                resMem += curItem.Shape().Count();
+            }
+        
+            assert(startPoint == res.Shape().Count());
+            evalItem.m_output.SetData(std::move(res));
+        }
+    };
 }
 
 template <typename TData, template<typename> class CateWrapper>
@@ -248,27 +254,29 @@ public:
 
     auto EvalRegister() const
     {
+        using TOpEvalHandle = std::decay_t<decltype(std::declval<TData>().EvalRegister())>;
+        using TEvalItem = NSDynamicArray::EvalItem<TOpEvalHandle, ElementType, DeviceType, CategoryTag>;
+        using TEvalGroup = NSDynamicArray::EvalGroup<TOpEvalHandle, ElementType, DeviceType, CategoryTag>;
+        using TItemDispatcher = TrivalEvalItemDispatcher<TEvalGroup>;
+
         if (!m_evalBuf.IsEvaluated())
         {
-            using TOpEvalHandle = std::decay_t<decltype(std::declval<TData>().EvalRegister())>;
-            std::vector<TOpEvalHandle> handleBuf;
-            std::vector<const void*> depVec;
-            handleBuf.reserve(m_buffer->size());
-            depVec.reserve(m_buffer->size());
-            for (size_t i = 0; i < m_buffer->size(); ++i)
-            {
-                handleBuf.push_back((*m_buffer)[i].EvalRegister());
-                depVec.push_back(handleBuf.back().DataPtr());
-            }
-
             auto outHandle = m_evalBuf.Handle();
-            
-            using EvalUnit = NSDynamicArray::EvalUnit<TOpEvalHandle, ElementType, DeviceType, CategoryTag>;
-            using GroupType = TrivalEvalGroup<EvalUnit>;
-            
-            const void* dataPtr = outHandle.DataPtr();
-            EvalUnit unit(std::move(handleBuf), std::move(outHandle), m_shape);
-            EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, std::move(depVec));
+            if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(outHandle.DataPtr()))
+            {
+                std::vector<TOpEvalHandle> handleBuf;
+                std::vector<const void*> depVec;
+                handleBuf.reserve(m_buffer->size());
+                depVec.reserve(m_buffer->size());
+                for (size_t i = 0; i < m_buffer->size(); ++i)
+                {
+                    handleBuf.push_back((*m_buffer)[i].EvalRegister());
+                    depVec.push_back(handleBuf.back().DataPtr());
+                }
+                EvalPlan<DeviceType>::Inst().template Register<TItemDispatcher>(
+                        std::make_unique<TEvalItem>(std::move(handleBuf), std::move(outHandle),
+                                                    m_shape, std::move(depVec)));
+            }
         }
         return m_evalBuf.ConstHandle();
     }

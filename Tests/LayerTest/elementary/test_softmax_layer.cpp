@@ -32,7 +32,7 @@ namespace
 
         auto handle1 = out.Get<LayerOutput>().EvalRegister();
         auto handle2 = check.EvalRegister();
-        EvalPlan<CheckDevice>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
 
         auto res = handle1.Data();
         auto c = handle2.Data();
@@ -79,7 +79,7 @@ namespace
 
             auto handle1 = out.Get<LayerOutput>().EvalRegister();
             auto handle2 = check.EvalRegister();
-            EvalPlan<CheckDevice>::Eval();
+            EvalPlan<CheckDevice>::Inst().Eval();
 
             auto res = handle1.Data();
             auto c = handle2.Data();
@@ -99,7 +99,7 @@ namespace
 
             auto handle1 = out_grad.Get<LayerInput>().EvalRegister();
             auto handle2 = check.EvalRegister();
-            EvalPlan<CheckDevice>::Eval();
+            EvalPlan<CheckDevice>::Inst().Eval();
 
             auto fb = handle1.Data();
             auto c = handle2.Data();
@@ -138,7 +138,7 @@ namespace
 
         auto handle1 = out.Get<LayerOutput>().EvalRegister();
         auto handle2 = check.EvalRegister();
-        EvalPlan<CheckDevice>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
 
         auto res = handle1.Data();
         auto c = handle2.Data();

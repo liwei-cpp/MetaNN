@@ -5,13 +5,15 @@
 
 namespace MetaNN
 {
-    template <template<typename...> class EvalUnitCont, template<typename> class EvalGroupCont = TrivalEvalGroup>
+    template <template<typename...> class EvalItem,
+              template<typename...> class EvalGroup,
+              template<typename> class EvalDispatcher = TrivalEvalItemDispatcher>
     struct TailCalculator
     {
         template <typename TCaseTail, typename TEvalRes, typename TOp>
         static void EvalRegister(TEvalRes& evalRes, const TOp& oper)
         {
-            static_assert(std::is_same_v<TCaseTail, OperSeqContainer<>>,
+            static_assert(std::is_same_v<TCaseTail, OperCalAlgoChain<>>,
                           "General case is not the last one");
 
             const auto& operands = oper.OperandTuple();
@@ -37,14 +39,15 @@ namespace MetaNN
         {
             using DeviceType = DeviceTypeFromHandle<TResHandle>;
         
-            using UnitType = EvalUnitCont<RemConstRef<decltype(std::get<Index>(operHandles))>..., 
-                                          RemConstRef<TResHandle>>;
-            using GroupType = EvalGroupCont<UnitType>;
-        
-            std::vector<const void*> depVec{(std::get<Index>(operHandles).DataPtr())...};
-            const void* dataPtr = resHandle.DataPtr();
-            UnitType unit(std::move(std::get<Index>(operHandles))... , std::move(resHandle), auxParams);
-            EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, {depVec});
+            using ItemType = EvalItem<RemConstRef<decltype(std::get<Index>(operHandles))>..., 
+                                      RemConstRef<TResHandle>>;
+            using GroupType = EvalGroup<RemConstRef<decltype(std::get<Index>(operHandles))>..., 
+                                      RemConstRef<TResHandle>>;
+            using DispatcherType = EvalDispatcher<GroupType>;
+
+            auto item = std::make_unique<ItemType>(std::move(std::get<Index>(operHandles))... ,
+                                                   std::move(resHandle), auxParams);
+            EvalPlan<DeviceType>::Inst().template Register<DispatcherType>(std::move(item));
         }
     };
 }

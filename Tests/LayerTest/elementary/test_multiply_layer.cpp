@@ -84,7 +84,7 @@ namespace
         auto handle1 = out.Get<LayerOutput>().EvalRegister();
         auto handle2 = out_grad.Get<LeftOperand>().EvalRegister();
         auto handle3 = out_grad.Get<RightOperand>().EvalRegister();
-        EvalPlan<CheckDevice>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
 
         auto res = handle1.Data();
         assert(fabs(res(0, 0) - 0.02f) < 0.001);
@@ -157,7 +157,7 @@ namespace
 
             auto handle1 = out_grad.Get<LeftOperand>().EvalRegister();
             auto handle2 = out_grad.Get<RightOperand>().EvalRegister();
-            EvalPlan<CheckDevice>::Eval();
+            EvalPlan<CheckDevice>::Inst().Eval();
 
             auto g1 = handle1.Data();
             auto g2 = handle2.Data();
@@ -213,7 +213,7 @@ namespace
 
         auto handle1 = out_grad.Get<LeftOperand>().EvalRegister();
         static_assert(std::is_same_v<RemConstRef<decltype(out_grad.Get<RightOperand>())>, NullParameter>);
-        EvalPlan<DeviceTags::CPU>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
 
         auto fb1 = handle1.Data();
         assert(fb1.Shape().RowNum() == 2);
@@ -264,7 +264,7 @@ namespace
 
         auto handle1 = out_grad.Get<RightOperand>().EvalRegister();
         static_assert(std::is_same_v<RemConstRef<decltype(out_grad.Get<LeftOperand>())>, NullParameter>);
-        EvalPlan<DeviceTags::CPU>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
 
         auto fb1 = handle1.Data();
         assert(fb1.Shape().RowNum() == 2);

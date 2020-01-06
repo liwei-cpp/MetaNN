@@ -2,7 +2,7 @@
 
 #include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
+#include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <cassert>
 #include <cstring>
@@ -56,56 +56,65 @@ bool ShapeMatch(const TOriShape& ori, const Shape<CategoryTags::ThreeDArray>& ai
             (ori.PageNum() == aim.PageNum()));
 };
 
-template <typename TInputHandle, typename TShape, typename TOutputHandle, typename TDevice>
-class EvalUnit : public BaseEvalUnit<TDevice>
-{
-public:
-    EvalUnit(TInputHandle oriHandle, TShape shape, TOutputHandle outputHandle)
-        : m_inputHandle(std::move(oriHandle))
-        , m_shape(std::move(shape))
-        , m_outputHandle(std::move(outputHandle))
-    {}
-    
-    void Eval() override final
+    template <typename TInputHandle, typename TShape, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
-        const auto& in = m_inputHandle.Data();
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+    public:
+        EvalItem(TInputHandle oriHandle, TShape shape, TOutputHandle outputHandle)
+            : BaseType(std::type_index(typeid(EvalItem)),
+                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            , m_inputHandle(std::move(oriHandle))
+            , m_shape(std::move(shape))
+            , m_outputHandle(std::move(outputHandle))
+        {}
         
-        using ResType = typename TOutputHandle::DataType;
-        using ElementType = typename ResType::ElementType;
-        ResType out(m_shape);
+        const TInputHandle m_inputHandle;
+        const TShape m_shape;
+        TOutputHandle m_outputHandle;
+    };
 
-        const size_t inCount = in.Shape().Count();
-        auto low_in = LowerAccess(in);
-        ElementType* mem_in = low_in.MutableRawMemory();
-        
-        const size_t outCount = out.Shape().Count();
-        auto low_out = LowerAccess(out);
-        ElementType* mem_out = low_out.MutableRawMemory();
-        
-        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, "Currently only CPU is supported");
-        
-        assert(inCount % outCount == 0);
-
-        // copy the first bucket for initialization, accumulate the other parts.
-        const size_t loopCount = inCount / outCount;
-        memcpy(mem_out, mem_in, sizeof(ElementType) * outCount);
-        mem_in += outCount;
-        for (size_t i = 1; i < loopCount; ++i)
+    template <typename TInputHandle, typename TShape, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TShape, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TInputHandle, TShape, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            for (size_t j = 0; j < outCount; ++j)
-            {
-                mem_out[j] += mem_in[j];
-            }
+            const auto& in = evalItem.m_inputHandle.Data();
+
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out(evalItem.m_shape);
+
+            const size_t inCount = in.Shape().Count();
+            auto low_in = LowerAccess(in);
+            const ElementType* mem_in = low_in.RawMemory();
+
+            const size_t outCount = out.Shape().Count();
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<typename EvalItemType::DeviceType, DeviceTags::CPU>,
+                          "Currently only CPU is supported");
+
+            assert(inCount % outCount == 0);
+
+            // copy the first bucket for initialization, accumulate the other parts.
+            const size_t loopCount = inCount / outCount;
+            memcpy(mem_out, mem_in, sizeof(ElementType) * outCount);
             mem_in += outCount;
+            for (size_t i = 1; i < loopCount; ++i)
+            {
+                for (size_t j = 0; j < outCount; ++j)
+                {
+                    mem_out[j] += mem_in[j];
+                }
+                mem_in += outCount;
+            }
+            evalItem.m_outputHandle.SetData(std::move(out));
         }
-        m_outputHandle.SetData(std::move(out));
-    }
-    
-private:
-    const TInputHandle m_inputHandle;
-    const TShape m_shape;
-    TOutputHandle m_outputHandle;
-};
+    };
 
 struct Calculator
 {
@@ -117,13 +126,12 @@ struct Calculator
         auto handle = oriData.EvalRegister();
         auto outHandle = evalRes.Handle();
         
-        using UnitType = EvalUnit<decltype(handle), TShape, decltype(outHandle), DeviceType>;
-        using GroupType = TrivalEvalGroup<UnitType>;
+        using ItemType = EvalItem<decltype(handle), TShape, decltype(outHandle)>;
+        using GroupType = EvalGroup<decltype(handle), TShape, decltype(outHandle)>;
+        using DispatcherType = TrivalEvalItemDispatcher<GroupType>;
 
-        const void* dataPtr = outHandle.DataPtr();
-        const void* depVec = handle.DataPtr();
-        UnitType unit(std::move(handle), shape, std::move(outHandle));
-        EvalPlan<DeviceType>::template Register<GroupType>(std::move(unit), dataPtr, {depVec});
+        auto item = std::make_unique<ItemType>(std::move(handle), shape, std::move(outHandle));
+        EvalPlan<DeviceType>::Inst().template Register<DispatcherType>(std::move(item));
     }
 };
 }
@@ -161,7 +169,11 @@ public:
     {
         if (!m_evalBuf.IsEvaluated())
         {
-            OperCollapse::Calculator::EvalRegister(m_evalBuf, m_oriData, m_shape);
+            auto evalHandle = m_evalBuf.Handle();
+            if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(evalHandle.DataPtr()))
+            {
+                OperCollapse::Calculator::EvalRegister(m_evalBuf, m_oriData, m_shape);
+            }
         }
         return m_evalBuf.ConstHandle();
     }

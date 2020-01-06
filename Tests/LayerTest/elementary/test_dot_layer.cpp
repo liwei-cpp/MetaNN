@@ -75,7 +75,7 @@ namespace
         auto handle1 = out.Get<LayerOutput>().EvalRegister();
         auto handle2 = out_grad.Get<LeftOperand>().EvalRegister();
         auto handle3 = out_grad.Get<RightOperand>().EvalRegister();
-        EvalPlan<CheckDevice>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
 
         auto res = handle1.Data();
         assert(res.Shape().RowNum() == 2);
@@ -158,7 +158,7 @@ namespace
 
             auto handle1 = out_grad.Get<LeftOperand>().EvalRegister();
             auto handle2 = out_grad.Get<RightOperand>().EvalRegister();
-            EvalPlan<CheckDevice>::Eval();
+            EvalPlan<CheckDevice>::Inst().Eval();
 
             auto g1 = handle1.Data();
             auto g2 = handle2.Data();

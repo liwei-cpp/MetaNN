@@ -47,7 +47,7 @@ namespace
         auto evalRes1 = rm1.EvalRegister();
         auto evalRes2 = rm2.EvalRegister();
 
-        EvalPlan<CheckDevice>::Eval();
+        EvalPlan<CheckDevice>::Inst().Eval();
         for (size_t j = 0; j < 100; ++j)
         {
             if (j == 37)

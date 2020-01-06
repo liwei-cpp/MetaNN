@@ -1,47 +1,51 @@
 #pragma once
 #include <cstring>
 #include <MetaNN/data/cardinal/matrix/matrix.h>
-#include <MetaNN/evaluate/facilities/eval_buffer.h>
-#include <MetaNN/evaluate/facilities/eval_group.h>
-#include <MetaNN/evaluate/facilities/eval_handle.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
-#include <MetaNN/evaluate/facilities/eval_unit.h>
+#include <MetaNN/evaluate/eval_buffer.h>
+#include <MetaNN/evaluate/eval_handle.h>
+#include <MetaNN/evaluate/eval_plan.h>
 
 namespace MetaNN
 {
 namespace NSOneHotVector
 {
-template <typename TElem, typename TDevice>
-class EvalUnit : public BaseEvalUnit<TDevice>
-{
-public:
-    EvalUnit(EvalHandle<Matrix<TElem, TDevice>> resBuf,
-             size_t colNum, size_t val)
-        : m_resHandle(std::move(resBuf))
-        , m_colNum(colNum)
-        , m_val(val)
+    template <typename TElem, typename TDevice>
+    class EvalItem : public BaseEvalItem<TDevice>
     {
-        assert(m_val < m_colNum);
-    }
-    
-    void Eval() override final
-    {
-        Matrix<TElem, TDevice> out(1, m_colNum);
+    public:
+        EvalItem(EvalHandle<Matrix<TElem, TDevice>> resBuf,
+                 size_t colNum, size_t val)
+            : BaseEvalItem<TDevice>(std::type_index(typeid(EvalItem)),
+                                    {}, resBuf.DataPtr())
+            , m_resHandle(std::move(resBuf))
+            , m_colNum(colNum)
+            , m_val(val)
+        {}
         
-        static_assert(std::is_same_v<TDevice, DeviceTags::CPU>,
-                      "Currently only CPU is supported.");
-        auto lowLayer = LowerAccess(out);
-        auto mem = lowLayer.MutableRawMemory();
-        memset(mem, 0, sizeof(TElem) * m_colNum);
-        mem[m_val] = 1;
-        m_resHandle.SetData(std::move(out));
-    }
-
-private:
-    EvalHandle<Matrix<TElem, TDevice>> m_resHandle;
-    size_t m_colNum;
-    size_t m_val;
-};
+    public:
+        EvalHandle<Matrix<TElem, TDevice>> m_resHandle;
+        size_t m_colNum;
+        size_t m_val;
+    };
+    
+    template <typename TElem, typename TDevice>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TElem, TDevice>>
+    {
+        using EvalItemType = EvalItem<TElem, TDevice>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
+        {
+            Matrix<TElem, TDevice> out(1, evalItem.m_colNum);
+        
+            static_assert(std::is_same_v<TDevice, DeviceTags::CPU>,
+                          "Currently only CPU is supported.");
+            auto lowLayer = LowerAccess(out);
+            auto mem = lowLayer.MutableRawMemory();
+            memset(mem, 0, sizeof(TElem) * evalItem.m_colNum);
+            mem[evalItem.m_val] = 1;
+            evalItem.m_resHandle.SetData(std::move(out));
+        }
+    };
 }
 
 template <typename TElem, typename TDevice>
@@ -84,14 +88,18 @@ public:
     
     auto EvalRegister() const
     {
-        using TEvalUnit = NSOneHotVector::EvalUnit<ElementType, DeviceType>;
-        using TEvalGroup = TrivalEvalGroup<TEvalUnit>;
+        using TEvalItem = NSOneHotVector::EvalItem<ElementType, DeviceType>;
+        using TEvalGroup = NSOneHotVector::EvalGroup<ElementType, DeviceType>;
+        using TItemDispatcher = TrivalEvalItemDispatcher<TEvalGroup>;
+        
         if (!m_evalBuf.IsEvaluated())
         {
             auto evalHandle = m_evalBuf.Handle();
-            decltype(auto) outputPtr = evalHandle.DataPtr();
-            TEvalUnit unit(std::move(evalHandle), m_shape.ColNum(), m_hotPos);
-            EvalPlan<DeviceType>::template Register<TEvalGroup>(std::move(unit), outputPtr, {});
+            if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(evalHandle.DataPtr()))
+            {
+                EvalPlan<DeviceType>::Inst().template Register<TItemDispatcher>(
+                    std::make_unique<TEvalItem>(std::move(evalHandle), m_shape.ColNum(), m_hotPos));
+            }
         }
         return m_evalBuf.ConstHandle();
     }

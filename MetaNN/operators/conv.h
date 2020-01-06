@@ -1,10 +1,10 @@
 #pragma once
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/evaluate/facilities/eval_plan.h>
+#include <MetaNN/evaluate/eval_plan.h>
 #include <cassert>
 #include <type_traits>
 #include <utility>
-
+/*
 namespace MetaNN::ConvParams
 {
     struct RowNum;
@@ -218,12 +218,6 @@ struct Calculator
 };
 }
 
-template <>
-struct OperSeq_<ConvRelated::Conv2D>
-{
-    using type = OperSeqContainer<NSOperConv::NSCaseGen::Calculator>;
-};
-
 namespace NSOperConv
 {    
     inline size_t CalculatePadSize(size_t inSize,
@@ -324,4 +318,4 @@ auto SameConv(TInput&& p_input, TKernel&& p_kernel,
     return NSOperConv::SameEval(std::forward<TInput>(p_input), std::forward<TKernel>(p_kernel),
                                 std::forward<TStrideValueCont>(p_strides));
 }
-}
+}*/
