@@ -3,21 +3,24 @@
   <Project Name="MetaNN" Path="MetaNN/MetaNN.project" Active="No"/>
   <Project Name="DataOpTest" Path="Tests/DataOpTest/DataOpTest.project" Active="No"/>
   <Project Name="LayerTest" Path="Tests/LayerTest/LayerTest.project" Active="No"/>
-  <Project Name="OtherTests" Path="Tests/OtherTests/OtherTests.project" Active="Yes"/>
+  <Project Name="OtherTests" Path="Tests/OtherTests/OtherTests.project" Active="No"/>
+  <Project Name="DataOpTest2" Path="Tests/DataOpTest2/DataOpTest2.project" Active="Yes"/>
   <BuildMatrix>
-    <WorkspaceConfiguration Name="Debug" Selected="yes">
+    <WorkspaceConfiguration Name="Debug" Selected="no">
       <Environment/>
       <Project Name="MetaNN" ConfigName="Debug"/>
       <Project Name="LayerTest" ConfigName="Debug"/>
       <Project Name="OtherTests" ConfigName="Debug"/>
       <Project Name="DataOpTest" ConfigName="Debug"/>
+      <Project Name="DataOpTest2" ConfigName="Debug"/>
     </WorkspaceConfiguration>
-    <WorkspaceConfiguration Name="Release" Selected="no">
+    <WorkspaceConfiguration Name="Release" Selected="yes">
       <Environment/>
       <Project Name="MetaNN" ConfigName="Release"/>
       <Project Name="LayerTest" ConfigName="Release"/>
       <Project Name="OtherTests" ConfigName="Release"/>
       <Project Name="DataOpTest" ConfigName="Release"/>
+      <Project Name="DataOpTest2" ConfigName="Release"/>
     </WorkspaceConfiguration>
   </BuildMatrix>
 </CodeLite_Workspace>

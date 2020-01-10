@@ -1,406 +1,126 @@
 #pragma once
 #include <MetaNN/data/facilities/tags.h>
-#include <algorithm>
-#include <cstddef>
-#include <numeric>
-#include <type_traits>
-#include <utility>
-#include <vector>
+#include <cassert>
+#include <array>
 #include <stdexcept>
 
 namespace MetaNN
 {
-namespace NSShape
-{
-template <typename T>
-constexpr bool IsCardinalTag = std::is_same_v<T, CategoryTags::Scalar> ||
-                               std::is_same_v<T, CategoryTags::Matrix> ||
-                               std::is_same_v<T, CategoryTags::ThreeDArray>;
-}
-
-template <typename T>
-class Shape;
-
-template <>
-class Shape<CategoryTags::Scalar>
-{
-public:
-    explicit Shape() = default;
-    constexpr size_t Count() const noexcept
+    namespace DimConst
     {
-        return 1;
+        constexpr size_t Keep = 0;
+        constexpr size_t Extend = (size_t)-1;
     }
     
-    const auto& CardinalShape() const noexcept
+    namespace NSShape
     {
-        return *this;
-    }
-    
-    constexpr size_t Index2Count() const noexcept
-    {
-        return 0;
-    }
-    
-    bool operator== (const Shape&) const noexcept
-    {
-        return true;
-    }
-};
-
-template <>
-class Shape<CategoryTags::Matrix>
-{
-public:
-    explicit Shape()
-        : Shape(0, 0) {}
-    
-    explicit Shape(size_t p_rowNum, size_t p_colNum)
-        : m_rowNum(p_rowNum)
-        , m_colNum(p_colNum)
-    {}
-    
-public:
-    size_t RowNum() const noexcept { return m_rowNum; }
-    size_t ColNum() const noexcept { return m_colNum; }
-    
-    size_t& RowNum() noexcept { return m_rowNum; }
-    size_t& ColNum() noexcept { return m_colNum; }
-    
-    size_t Count() const noexcept
-    {
-        return m_rowNum * m_colNum;
-    }
-    
-    const auto& CardinalShape() const noexcept
-    {
-        return *this;
-    }
-    
-    size_t Index2Count(size_t rowID, size_t colID) const
-    {
-        if ((rowID >= m_rowNum) || (colID >= m_colNum))
+        template <size_t uDimNum, typename TCurIndexType, typename... TRemainIndexType>
+        size_t IndexToOffset(const std::array<size_t, uDimNum>& dims, size_t& gap, TCurIndexType curIdx, TRemainIndexType... remIdx)
         {
-            throw std::runtime_error("Invalid index for Shape<CategoryTags::Matrix>");
+            constexpr size_t indexPos = uDimNum - sizeof...(TRemainIndexType) - 1;
+            if (dims[indexPos] == DimConst::Extend)
+                throw std::runtime_error("Invalid dimension value.");
+            if (static_cast<size_t>(curIdx) >= dims[indexPos])
+                throw std::runtime_error("Invalid dimension index.");
+
+            if constexpr (sizeof...(TRemainIndexType) == 0)
+            {
+                gap = 1;
+                return static_cast<size_t>(curIdx);
+            }
+            else
+            {
+                size_t curGap = 0;
+                size_t res = IndexToOffset(dims, curGap, remIdx...);
+                gap = curGap * dims[indexPos + 1];
+                res += static_cast<size_t>(curIdx) * gap;
+                return res;
+            }
         }
-        return rowID * m_colNum + colID;
     }
-    
-    bool operator== (const Shape& val) const noexcept
-    {
-        return (RowNum() == val.RowNum()) && (ColNum() == val.ColNum());
-    }
-    
-private:
-    size_t m_rowNum;
-    size_t m_colNum;
-};
 
-template <>
-class Shape<CategoryTags::ThreeDArray> : public Shape<CategoryTags::Matrix>
-{
-public:
-    explicit Shape()
-        : Shape(0, 0, 0) {}
+    template <size_t uDimNum>
+    class Shape
+    {
+        static_assert(uDimNum > 0);
+    public:
+        constexpr static size_t DimNum = uDimNum;
+
+        explicit Shape() = default;
         
-    explicit Shape(size_t p_pageNum, size_t p_rowNum, size_t p_colNum)
-        : Shape<CategoryTags::Matrix>(p_rowNum, p_colNum)
-        , m_pageNum(p_pageNum)
-    {}
-    
-public:
-    size_t PageNum() const noexcept { return m_pageNum; }
-    
-    size_t Count() const noexcept
-    {
-        return m_pageNum * Shape<CategoryTags::Matrix>::Count();
-    }
-    
-    const auto& CardinalShape() const noexcept
-    {
-        return *this;
-    }
-    
-    size_t Index2Count(size_t pageID, size_t rowID, size_t colID) const
-    {
-        if (pageID >= m_pageNum)
+        explicit Shape(std::array<size_t, uDimNum> dims)
+            : m_dims(std::move(dims)) {}
+        
+        bool operator == (const Shape& val) const
         {
-            throw std::runtime_error("Invalid index for Shape<CategoryTags::ThreeDArray>");
+            return m_dims == val.m_dims;
         }
         
-        const auto& baseShape = static_cast<const Shape<CategoryTags::Matrix>&>(*this);
-        return pageID * baseShape.Count() + baseShape.Index2Count(rowID, colID);
-    }
-    
-    bool operator== (const Shape& val) const noexcept
-    {
-        return (PageNum() == val.PageNum()) &&
-               Shape<CategoryTags::Matrix>::operator==(val);
-    }
-    
-private:
-    size_t m_pageNum;
-};
-
-template <typename TSubCate>
-class Shape<CategoryTags::Batch<TSubCate>> : public Shape<TSubCate>
-{
-    static_assert(NSShape::IsCardinalTag<TSubCate>);
-    
-public:
-    explicit Shape()
-        : Shape(0) {}
-
-    template <typename...TParams>
-    explicit Shape(size_t p_batchNum, TParams&&... params)
-        : Shape<TSubCate>(std::forward<TParams>(params)...)
-        , m_batchNum(p_batchNum)
-    {}
-    
-public:
-    size_t BatchNum() const noexcept { return m_batchNum; }
-    
-    size_t& BatchNum() noexcept { return m_batchNum; }
-    
-    size_t Count() const noexcept
-    {
-        return BatchNum() * Shape<TSubCate>::Count();
-    }
-    
-    const auto& CardinalShape() const noexcept
-    {
-        return Shape<TSubCate>::CardinalShape();
-    }
-    
-    template <typename... TIndexParams>
-    size_t Index2Count(size_t batchID, TIndexParams... indexParams) const
-    {
-        if (batchID >= m_batchNum)
+        template <size_t vDimNum>
+        bool operator == (const Shape<vDimNum>&) const
         {
-            throw std::runtime_error("Invalid index for Shape<CategoryTags::Batch>");
+            return false;
         }
         
-        const auto& baseShape = static_cast<const Shape<TSubCate>&>(*this);
-        return batchID * baseShape.Count() + baseShape.Index2Count(indexParams...);
-    }
-    
-    bool operator== (const Shape& val) const noexcept
-    {
-        return (BatchNum() == val.BatchNum()) &&
-               (Shape<TSubCate>::operator==(val));
-    }
-    
-    const Shape<TSubCate>& Cardinal() const noexcept
-    {
-        return static_cast<const Shape<TSubCate>&>(*this);
-    }
-
-private:
-    size_t m_batchNum;
-};
-
-template <typename TSubCate>
-class Shape<CategoryTags::Sequence<TSubCate>> : public Shape<TSubCate>
-{
-    static_assert(NSShape::IsCardinalTag<TSubCate>);
-    
-public:
-    explicit Shape()
-        : Shape(0) {}
-
-    template <typename...TParams>
-    explicit Shape(size_t p_seqLen, TParams&&... params)
-        : Shape<TSubCate>(std::forward<TParams>(params)...)
-        , m_seqLen(p_seqLen)
-    {}
-    
-public:
-    size_t Length() const noexcept { return m_seqLen; }
-    
-    size_t& Length() noexcept { return m_seqLen; }
-    
-    size_t Count() const noexcept
-    {
-        return Length() * Shape<TSubCate>::Count();
-    }
-    
-    const auto& CardinalShape() const noexcept
-    {
-        return Shape<TSubCate>::CardinalShape();
-    }
-    
-    template <typename... TIndexParams>
-    size_t Index2Count(size_t seqID, TIndexParams... indexParams) const
-    {
-        if (seqID >= m_seqLen)
+        size_t Count() const
         {
-            throw std::runtime_error("Invalid index for Shape<CategoryTags::Sequence>");
+            size_t res = 1;
+            for (size_t i = 0; i < uDimNum; ++i)
+            {
+                if (m_dims[i] == DimConst::Extend)
+                    return DimConst::Extend;
+                if (m_dims[i] == DimConst::Keep)
+                    return DimConst::Keep;
+                res *= m_dims[i];
+            }
+            return res;
         }
         
-        const auto& baseShape = static_cast<const Shape<TSubCate>&>(*this);
-        return seqID * baseShape.Count() + baseShape.Index2Count(indexParams...);
-    }
-    
-    bool operator== (const Shape& val) const noexcept
-    {
-        return (Length() == val.Length()) && 
-               (Shape<TSubCate>::operator==(val));
-    }
-    
-    const Shape<TSubCate>& Cardinal() const noexcept
-    {
-        return static_cast<const Shape<TSubCate>&>(*this);
-    }
-    
-private:
-    size_t m_seqLen;
-};
-
-template <typename TSubCate>
-class Shape<CategoryTags::BatchSequence<TSubCate>> : public Shape<TSubCate>
-{
-    static_assert(NSShape::IsCardinalTag<TSubCate>);
-    
-public:
-    explicit Shape()
-        : Shape(std::vector<size_t>{}) {}
-
-    template <typename TSeq = std::vector<size_t>, typename...TParams>
-    explicit Shape(const TSeq& seq, TParams&&... params)
-        : Shape<TSubCate>(std::forward<TParams>(params)...)
-    {
-        m_seqLenCont.reserve(seq.size());
-        for (auto v : seq)
-            m_seqLenCont.push_back(v);
-    }
-    
-public:
-    const auto& SeqLenContainer() const noexcept
-    {
-        return m_seqLenCont;
-    }
-    
-    auto& SeqLenContainer() noexcept
-    {
-        return m_seqLenCont;
-    }
-    
-    size_t Count() const noexcept
-    {
-        return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.end(), 0) *
-               Shape<TSubCate>::Count();
-    }
-    
-    const auto& CardinalShape() const noexcept
-    {
-        return Shape<TSubCate>::CardinalShape();
-    }
-    
-    template <typename... TIndexParams>
-    size_t Index2Count(size_t batchID, size_t seqID, TIndexParams... indexParams) const
-    {
-        if (batchID >= m_seqLenCont.size())
+        template <typename... TIntTypes>
+        size_t IndexToOffset(TIntTypes... indexes) const
         {
-            throw std::runtime_error("Invalid batch index for Shape<CategoryTags::BatchSequence>");
+            static_assert(sizeof...(TIntTypes) == uDimNum);
+            size_t gap = 0;
+            return NSShape::IndexToOffset(m_dims, gap, indexes...);
         }
         
-        if (seqID >= m_seqLenCont[batchID])
+        size_t operator[] (size_t idx) const
         {
-            throw std::runtime_error("Invalid sequence index for Shape<CategoryTags::BatchSequence>");
+            assert(idx < DimNum);
+            return m_dims[idx];
         }
-        
-        size_t res = std::accumulate(m_seqLenCont.begin(), m_seqLenCont.begin() + batchID, seqID);
-        
-        const auto& baseShape = static_cast<const Shape<TSubCate>&>(*this);
-        return res * baseShape.Count() + baseShape.Index2Count(indexParams...);
-    }
+    private:
+        std::array<size_t, uDimNum> m_dims = std::array<size_t, uDimNum>();
+    };
     
-    bool operator== (const Shape& val) const
+    template <>
+    class Shape<0>
     {
-        return (m_seqLenCont == val.m_seqLenCont) &&
-               (Shape<TSubCate>::operator==(val));
-    }
-    
-    const Shape<TSubCate>& Cardinal() const noexcept
-    {
-        return static_cast<const Shape<TSubCate>&>(*this);
-    }
-    
-private:
-    std::vector<size_t> m_seqLenCont;
-};
+    public:
+        constexpr static size_t DimNum = 0;
 
-template <>
-class Shape<CategoryTags::BatchSequence<CategoryTags::Scalar>>
-{
-public:
-    template <typename TSeq = std::vector<size_t>>
-    explicit Shape(const TSeq& seq, Shape<CategoryTags::Scalar>)
-        : Shape(seq) {}
-    
-    template <typename TSeq = std::vector<size_t>>
-    explicit Shape(const TSeq& seq = TSeq{})
-    {
-        m_seqLenCont.reserve(seq.size());
-        for (auto v : seq)
-            m_seqLenCont.push_back(v);
-    }
-    
-public:
-    const auto& SeqLenContainer() const noexcept
-    {
-        return m_seqLenCont;
-    }
-    
-    auto& SeqLenContainer() noexcept
-    {
-        return m_seqLenCont;
-    }
-    
-    size_t Count() const noexcept
-    {
-        return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.end(), 0);
-    }
-    
-    const auto& CardinalShape() const noexcept
-    {
-        const static Shape<CategoryTags::Scalar> inst{};
-        return inst;
-    }
-    
-    template <typename... TIndexParams>
-    size_t Index2Count(size_t batchID, size_t seqID, TIndexParams... indexParams) const
-    {
-        if (batchID >= m_seqLenCont.size())
+        explicit Shape() = default;
+        
+        bool operator == (const Shape& val) const
         {
-            throw std::runtime_error("Invalid batch index for Shape<CategoryTags::BatchSequence>");
+            return true;
         }
         
-        if (seqID >= m_seqLenCont[batchID])
+        template <size_t vDimNum>
+        bool operator == (const Shape<vDimNum>&) const
         {
-            throw std::runtime_error("Invalid sequence index for Shape<CategoryTags::BatchSequence>");
+            return false;
         }
         
-        return std::accumulate(m_seqLenCont.begin(), m_seqLenCont.begin() + batchID, seqID);
-    }
+        size_t Count() const
+        {
+            return 1;
+        }
+    };
     
-    bool operator== (const Shape& val) const
+    template <size_t v1, size_t v2>
+    bool operator != (const Shape<v1> val1, const Shape<v2> val2)
     {
-        return (m_seqLenCont == val.m_seqLenCont);
+        return !(val1 == val2);
     }
-    
-    const Shape<CategoryTags::Scalar>& Cardinal() const noexcept
-    {
-        static Shape<CategoryTags::Scalar> inst;
-        return inst;
-    }
-    
-private:
-    std::vector<size_t> m_seqLenCont;
-};
-
-template <typename TCate>
-bool operator != (const Shape<TCate> val1, const Shape<TCate> val2)
-{
-    return !(val1 == val2);
-}
 }
