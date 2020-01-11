@@ -90,7 +90,7 @@ namespace MetaNN
             return m_dims[idx];
         }
     private:
-        std::array<size_t, uDimNum> m_dims = std::array<size_t, uDimNum>();
+        std::array<size_t, uDimNum> m_dims{};
     };
     
     template <>

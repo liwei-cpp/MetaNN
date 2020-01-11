@@ -11,6 +11,9 @@ namespace
     {
         cout << "Test shape case 1 (equality)...\t";
         Shape<3> sh;
+        assert(sh[0] == 0);
+        assert(sh[1] == 0);
+        assert(sh[2] == 0);
         Shape<3> sh2;
         assert(sh == sh2);
 
