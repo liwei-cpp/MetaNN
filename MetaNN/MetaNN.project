@@ -96,6 +96,7 @@
     <File Name="meta_nn2.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data">
+    <File Name="data/tensor.h"/>
     <File Name="data/_.h"/>
     <File Name="data/scalar.h"/>
     <VirtualDirectory Name="batch">
@@ -120,7 +121,6 @@
     <VirtualDirectory Name="cardinal">
       <File Name="data/cardinal/_.h"/>
       <VirtualDirectory Name="matrix">
-        <File Name="data/cardinal/matrix/matrix.h"/>
         <File Name="data/cardinal/matrix/one_hot_vector.h"/>
         <File Name="data/cardinal/matrix/vector.h"/>
         <File Name="data/cardinal/matrix/_.h"/>

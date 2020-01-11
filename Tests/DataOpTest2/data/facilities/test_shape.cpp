@@ -32,7 +32,7 @@ namespace
         static_assert(sh.DimNum == 3);
         assert(sh.Count() == 0);
 
-        Shape<3> sh2({7, 2, 3});
+        Shape<3> sh2(7, 2, 3);
         static_assert(sh2.DimNum == 3);
         assert(sh2.Count() == 42);
         
@@ -45,7 +45,7 @@ namespace
     void test_shape3()
     {
         cout << "Test shape case 3 (index to offset)...\t";
-        Shape<3> sh({7, 2, 3});
+        Shape<3> sh(7, 2, 3);
         
         size_t id = 0;
         for (size_t i = 0; i < 7; ++i)
@@ -65,7 +65,7 @@ namespace
     void test_shape4()
     {
         cout << "Test shape case 4 (index access)...\t";
-        Shape<3> sh({7, 2, 3});
+        Shape<3> sh(7, 2, 3);
         assert(sh[0] == 7);
         assert(sh[1] == 2);
         assert(sh[2] == 3);

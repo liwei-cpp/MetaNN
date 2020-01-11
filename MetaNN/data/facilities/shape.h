@@ -37,6 +37,19 @@ namespace MetaNN
                 return res;
             }
         }
+
+        template <size_t ID, typename TShape>
+        void FillShape(TShape& pShape)
+        {
+            return;
+        }
+
+        template <size_t ID, typename TShape, typename TCurParam, typename... TShapeParameter>
+        void FillShape(TShape& pShape, TCurParam curParam, TShapeParameter... shapes)
+        {
+            pShape[ID] = static_cast<size_t>(curParam);
+            FillShape<ID + 1>(pShape, shapes...);
+        }
     }
 
     template <size_t uDimNum>
@@ -48,8 +61,12 @@ namespace MetaNN
 
         explicit Shape() = default;
         
-        explicit Shape(std::array<size_t, uDimNum> dims)
-            : m_dims(std::move(dims)) {}
+        template <typename TFirstParam, typename... TShapeParameter>
+        explicit Shape(TFirstParam firstParam, TShapeParameter... shapes)
+        {
+            static_assert(sizeof...(TShapeParameter) + 1 == uDimNum);
+            NSShape::FillShape<0>(m_dims, firstParam, shapes...);
+        }
         
         bool operator == (const Shape& val) const
         {
@@ -85,6 +102,12 @@ namespace MetaNN
         }
         
         size_t operator[] (size_t idx) const
+        {
+            assert(idx < DimNum);
+            return m_dims[idx];
+        }
+        
+        size_t& operator[] (size_t idx)
         {
             assert(idx < DimNum);
             return m_dims[idx];

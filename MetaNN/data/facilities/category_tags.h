@@ -60,5 +60,8 @@ namespace MetaNN
     constexpr bool IsTensorWithDim = std::is_same_v<DataCategory<T>, CategoryTags::Tensor<uDim>>;
     
     template <typename T>
+    constexpr bool IsMatrix = IsTensorWithDim<T, 2>;
+    
+    template <typename T>
     constexpr bool IsScalar = std::is_same_v<DataCategory<T>, CategoryTags::Tensor<0>>;
 }
