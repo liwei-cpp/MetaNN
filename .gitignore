@@ -1,8 +1,8 @@
 /.codelite
 /Tests/DataOpTest/DataOpTest.mk
 /Tests/DataOpTest/DataOpTest.txt
-/Tests/DataOpTest2/DataOpTest.mk
-/Tests/DataOpTest2/DataOpTest.txt
+/Tests/DataOpTest2/DataOpTest2.mk
+/Tests/DataOpTest2/DataOpTest2.txt
 /Tests/LayerTest/LayerTest.mk
 /Tests/LayerTest/LayerTest.txt
 /Tests/OtherTests/OtherTests.mk
