@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/data/facilities/category_tags.h>
 #include <MetaNN/data/facilities/traits.h>
 
 namespace MetaNN

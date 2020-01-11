@@ -6,6 +6,7 @@
     <File Name="main.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data">
+    <File Name="data/test_scalar.cpp"/>
     <File Name="data/_.h"/>
     <VirtualDirectory Name="facilities">
       <File Name="data/facilities/_.h"/>

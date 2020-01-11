@@ -1,7 +1,7 @@
 #pragma once
 
 #include <MetaNN/policies/policy_macro_begin.h>
-#include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/data/facilities/category_tags.h>
 namespace MetaNN
 {
 struct GradPolicy

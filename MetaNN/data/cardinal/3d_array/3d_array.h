@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <MetaNN/data/facilities/continuous_memory.h>
 #include <MetaNN/data/facilities/shape.h>
-#include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/data/facilities/category_tags.h>
 #include <MetaNN/data/facilities/lower_access.h>
 #include <MetaNN/facilities/traits.h>
 namespace MetaNN

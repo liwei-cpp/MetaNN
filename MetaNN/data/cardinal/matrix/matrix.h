@@ -4,7 +4,7 @@
 #include <MetaNN/data/facilities/lower_access.h>
 #include <MetaNN/data/facilities/shape.h>
 #include <MetaNN/data/facilities/traits.h>
-#include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/data/facilities/category_tags.h>
 #include <MetaNN/evaluate/eval_handle.h>
 
 namespace MetaNN

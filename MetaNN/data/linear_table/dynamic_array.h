@@ -1,7 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/shape.h>
-#include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/data/facilities/category_tags.h>
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/facilities/traits.h>
 #include <MetaNN/evaluate/eval_buffer.h>

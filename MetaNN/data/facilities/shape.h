@@ -1,5 +1,5 @@
 #pragma once
-#include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/data/facilities/category_tags.h>
 #include <cassert>
 #include <array>
 #include <stdexcept>

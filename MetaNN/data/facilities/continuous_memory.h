@@ -2,6 +2,8 @@
 
 #include <MetaNN/data/facilities/allocators.h>
 #include <MetaNN/facilities/traits.h>
+#include <cassert>
+
 namespace MetaNN
 {
 template <typename TElem, typename TDevice>
@@ -13,11 +15,14 @@ class ContinuousMemory
 public:
     explicit ContinuousMemory(size_t p_size)
         : m_mem(Allocator<TDevice>::template Allocate<ElementType>(p_size))
+        , m_size(p_size)
     {}
 
     ContinuousMemory Shift(size_t pos) const
     {
-        return ContinuousMemory(m_mem, pos);
+        assert(pos < m_size);
+        return ContinuousMemory(std::shared_ptr<ElementType>(m_mem, m_mem.get() + pos),
+                                m_size - pos);
     }
     
     auto RawMemory() const
@@ -28,6 +33,11 @@ public:
     bool IsShared() const
     {
         return m_mem.use_count() == 1;
+    }
+    
+    size_t Size() const
+    {
+        return m_size;
     }
     
     bool operator== (const ContinuousMemory& val) const noexcept
@@ -41,11 +51,13 @@ public:
     }
 
 private:
-    ContinuousMemory(const std::shared_ptr<ElementType>& owner, size_t p_shift)
-        : m_mem(owner, owner.get() + p_shift)
+    ContinuousMemory(std::shared_ptr<ElementType> ptr, size_t p_size)
+        : m_mem(std::move(ptr))
+        , m_size(p_size)
     {}
     
 private:
     std::shared_ptr<ElementType> m_mem;
+    size_t m_size;
 };
 }

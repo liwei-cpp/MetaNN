@@ -1,3 +1,3 @@
 #pragma once
 
-#include <MetaNN/data/facilities/shape.h>
+#include <MetaNN/data/_.h>

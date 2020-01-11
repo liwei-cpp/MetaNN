@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MetaNN/data/facilities/tags.h>
+#include <MetaNN/data/facilities/device_tags.h>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
