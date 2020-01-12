@@ -15,12 +15,10 @@
     <VirtualDirectory Name="batch">
       <File Name="data/batch/_.h"/>
       <File Name="data/batch/test_dynamic_batch.cpp"/>
-      <File Name="data/batch/test_static_batch.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="batch_sequence">
       <File Name="data/batch_sequence/_.h"/>
       <File Name="data/batch_sequence/test_dynamic_batch_sequence.cpp"/>
-      <File Name="data/batch_sequence/test_static_batch_sequence.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="cardinal">
       <File Name="../../MetaNN/data/cardinal/matrix/trival_matrix.h"/>

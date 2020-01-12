@@ -114,7 +114,6 @@
       <File Name="data/facilities/shape.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="linear_table">
-      <File Name="data/linear_table/static_array.h"/>
       <File Name="data/linear_table/dynamic_array.h"/>
       <File Name="data/linear_table/_.h"/>
     </VirtualDirectory>

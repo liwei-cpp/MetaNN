@@ -120,6 +120,15 @@ namespace MetaNN
                 }
                 return AimType(m_mem.Shift(pos), aimShape);
             }
+            else
+            {
+                using AimType = Scalar<ElementType, DeviceType>;
+                if (id >= m_shape[0])
+                {
+                    throw std::runtime_error("ID out of bound.");
+                }
+                return AimType(m_mem.Shift(id));
+            }
         }
         
         auto EvalRegister() const
