@@ -22,12 +22,15 @@ namespace MetaNN
 
         friend struct LowerAccessImpl<Scalar>;
 
-    public:
+    public:        
         explicit Scalar(ElementType elem = ElementType())
             : m_mem(1)
         {
             SetValue(elem);
         }
+        
+        explicit Scalar(MetaNN::Shape<0>)
+            : Scalar() {}
 
         explicit Scalar(ContinuousMemory<ElementType, DeviceType> p_mem)
             : m_mem(std::move(p_mem))

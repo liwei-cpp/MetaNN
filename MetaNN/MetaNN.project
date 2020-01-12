@@ -125,6 +125,7 @@
       <File Name="data/general/_.h"/>
     </VirtualDirectory>
     <File Name="data/trival_tensor.h"/>
+    <File Name="data/zero_tensor.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data_copy">
     <File Name="data_copy/data_copy.h"/>
