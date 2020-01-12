@@ -27,14 +27,11 @@
       <File Name="data/cardinal/_.h"/>
       <VirtualDirectory Name="3d_array">
         <File Name="data/cardinal/3d_array/_.h"/>
-        <File Name="data/cardinal/3d_array/test_3d_array.cpp"/>
       </VirtualDirectory>
       <VirtualDirectory Name="matrix">
         <File Name="data/cardinal/matrix/_.h"/>
-        <File Name="data/cardinal/matrix/test_matrix.cpp"/>
         <File Name="data/cardinal/matrix/test_one_hot_vector.cpp"/>
         <File Name="data/cardinal/matrix/test_trival_matrix.cpp"/>
-        <File Name="data/cardinal/matrix/test_vector.cpp"/>
       </VirtualDirectory>
       <VirtualDirectory Name="scalar">
         <File Name="data/cardinal/scalar/_.h"/>

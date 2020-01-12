@@ -6,9 +6,37 @@ using namespace MetaNN;
 
 namespace
 {
-    void test_tensor_case1()
+    void test_vector_case1()
     {
-        cout << "Test tensor case 1 (matrix)...\t";
+        cout << "Test vector case 1...\t";
+        static_assert(IsVector<Vector<CheckElement, CheckDevice>>);
+        static_assert(IsVector<Vector<CheckElement, CheckDevice>&>);
+        static_assert(IsVector<Vector<CheckElement, CheckDevice>&&>);
+        static_assert(IsVector<const Vector<CheckElement, CheckDevice>&>);
+        static_assert(IsVector<const Vector<CheckElement, CheckDevice>&&>);
+
+        Vector<CheckElement, CheckDevice> rm;
+        assert(rm.Shape()[0] == 0);
+
+        rm = Vector<CheckElement, CheckDevice>(20);
+        assert(rm.Shape()[0] == 20);
+
+        int c = 0;
+        for (size_t j=0; j<20; ++j)
+        {
+            rm.SetValue(j, (float)(c++));
+        }
+
+        const Vector<CheckElement, CheckDevice> rm2 = rm;
+        c = 0;
+        for (size_t j=0; j<20; ++j)
+            assert(rm2(j) == c++);
+        cout << "done" << endl;
+    }
+    
+    void test_matrix_case1()
+    {
+        cout << "Test matrix case 1...\t";
         static_assert(IsMatrix<Matrix<CheckElement, CheckDevice>>);
         static_assert(IsMatrix<Matrix<CheckElement, CheckDevice>&>);
         static_assert(IsMatrix<Matrix<CheckElement, CheckDevice>&&>);
@@ -42,9 +70,9 @@ namespace
         cout << "done" << endl;
     }
 
-    void test_tensor_case2()
+    void test_matrix_case2()
     {
-        cout << "Test tensor case 2 (matrix)...\t";
+        cout << "Test matrix case 2...\t";
         Matrix<CheckElement, CheckDevice> rm1(10, 20);
         int c = 0;
         for (size_t i = 0; i < 10; ++i)
@@ -65,13 +93,75 @@ namespace
         }
         cout << "done" << endl;
     }
+    
+    void test_3d_array_case1()
+    {
+        cout << "Test 3d array case 1...\t";
+        static_assert(IsThreeDArray<ThreeDArray<CheckElement, CheckDevice>>, "Test Error");
+        static_assert(IsThreeDArray<ThreeDArray<CheckElement, CheckDevice>&>, "Test Error");
+        static_assert(IsThreeDArray<ThreeDArray<CheckElement, CheckDevice>&&>, "Test Error");
+        static_assert(IsThreeDArray<const ThreeDArray<CheckElement, CheckDevice>&>, "Test Error");
+        static_assert(IsThreeDArray<const ThreeDArray<CheckElement, CheckDevice>&&>, "Test Error");
+
+        ThreeDArray<CheckElement, CheckDevice> rm;
+        assert(rm.Shape()[0] == 0);
+        assert(rm.Shape()[1] == 0);
+        assert(rm.Shape()[2] == 0);
+
+        rm = ThreeDArray<CheckElement, CheckDevice>(5, 10, 20);
+        assert(rm.Shape()[0] == 5);
+        assert(rm.Shape()[1] == 10);
+        assert(rm.Shape()[2] == 20);
+
+        int c = 0;
+        for (size_t p = 0; p < 5; ++p)
+        {
+            for (size_t i=0; i<10; ++i)
+            {
+                for (size_t j=0; j<20; ++j)
+                {
+                    rm.SetValue(p, i, j, (float)(c++));
+                }
+            }
+        }
+
+        const ThreeDArray<CheckElement, CheckDevice> rm2 = rm;
+        c = 0;
+        for (size_t p = 0; p < 5; ++p)
+        {
+            for (size_t i=0; i<10; ++i)
+            {
+                for (size_t j=0; j<20; ++j)
+                    assert(rm2(p, i, j) == c++);
+            }
+        }
+
+        auto evalHandle = rm.EvalRegister();
+        auto cm = evalHandle.Data();
+
+        for (size_t p = 0; p < cm.Shape()[0]; ++p)
+        {
+            for (size_t i=0; i < cm.Shape()[1]; ++i)
+            {
+                for (size_t j = 0; j < cm.Shape()[2]; ++j)
+                {
+                    assert(cm(p, i, j) == rm(p, i, j));
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Data
 {
     void test_tensor()
     {
-        test_tensor_case1();
-        test_tensor_case2();
+        test_vector_case1();
+        
+        test_matrix_case1();
+        test_matrix_case2();
+        
+        test_3d_array_case1();
     }
 }
