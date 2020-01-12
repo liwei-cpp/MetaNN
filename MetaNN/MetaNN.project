@@ -99,11 +99,6 @@
     <File Name="data/tensor.h"/>
     <File Name="data/_.h"/>
     <File Name="data/scalar.h"/>
-    <VirtualDirectory Name="batch">
-      <File Name="data/batch/batch.h"/>
-      <File Name="data/batch/batch_sequence.h"/>
-      <File Name="data/batch/_.h"/>
-    </VirtualDirectory>
     <VirtualDirectory Name="facilities">
       <File Name="data/facilities/device_tags.h"/>
       <File Name="data/facilities/category_tags.h"/>
@@ -123,10 +118,6 @@
         <File Name="data/cardinal/matrix/one_hot_vector.h"/>
         <File Name="data/cardinal/matrix/_.h"/>
       </VirtualDirectory>
-    </VirtualDirectory>
-    <VirtualDirectory Name="sequence">
-      <File Name="data/sequence/_.h"/>
-      <File Name="data/sequence/sequence.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="general">
       <File Name="data/general/zero_data.h"/>
