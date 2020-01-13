@@ -22,20 +22,13 @@ namespace MetaNN
 
     template <size_t uDim>
     constexpr bool IsValidCategoryTag<CategoryTags::Tensor<uDim>> = true;
-    
-    template <typename TElem, typename TDevice> class Scalar;
+
     template <typename TElem, typename TDevice, size_t uDim> class Tensor;
 
     template <typename TElem, typename TDevice, size_t uDim>
     struct PrincipalDataType_
     {
         using type = Tensor<TElem, TDevice, uDim>;
-    };
-
-    template <typename TElem, typename TDevice>
-    struct PrincipalDataType_<TElem, TDevice, 0>
-    {
-        using type = Scalar<TElem, TDevice>;
     };
 
     template <typename TCategory, typename TElem, typename TDevice>
@@ -58,7 +51,4 @@ namespace MetaNN
     
     template <typename T, size_t uDim>
     constexpr bool IsTensorWithDim = std::is_same_v<DataCategory<T>, CategoryTags::Tensor<uDim>>;
-    
-    template <typename T>
-    constexpr bool IsScalar = std::is_same_v<DataCategory<T>, CategoryTags::Tensor<0>>;
 }

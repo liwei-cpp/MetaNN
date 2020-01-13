@@ -203,8 +203,8 @@ namespace
         Tensor<int, CheckDevice, 3> data(10, 13, 35);
         assert(data.AvailableForWrite());
         assert(data.Shape()[0] == 10);
-        assert(data.Shape()[0] == 13);
-        assert(data.Shape()[0] == 35);
+        assert(data.Shape()[1] == 13);
+        assert(data.Shape()[2] == 35);
         for (size_t i = 0; i < 10; ++i)
         {
             for (size_t j = 0; j < 13; ++j)

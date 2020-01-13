@@ -105,8 +105,8 @@ namespace MetaNN
             {
                 using AimType = Tensor<ElementType, DeviceType, uDim - 1>;
                 MetaNN::Shape<uDim - 1> aimShape;
-                size_t count = 0;
-                for (size_t i = 1; i< uDim; ++i)
+                size_t count = 1;
+                for (size_t i = 1; i < uDim; ++i)
                 {
                     const size_t curDim = m_shape[i];
                     aimShape[i - 1] = curDim;
@@ -122,7 +122,7 @@ namespace MetaNN
             }
             else
             {
-                using AimType = Scalar<ElementType, DeviceType>;
+                using AimType = Tensor<ElementType, DeviceType, 0>;
                 if (id >= m_shape[0])
                 {
                     throw std::runtime_error("ID out of bound.");
@@ -137,6 +137,70 @@ namespace MetaNN
         }
     private:
         MetaNN::Shape<uDim> m_shape;
+        ContinuousMemory<ElementType, DeviceType> m_mem;
+    };
+
+    template <typename TElem, typename TDevice>
+    class Tensor<TElem, TDevice, 0>
+    {
+        static_assert(std::is_same<RemConstRef<TElem>, TElem>::value);
+
+    public:
+        using CategoryTag = CategoryTags::Tensor<0>;
+        using ElementType = TElem;
+        using DeviceType = TDevice;
+
+        friend struct LowerAccessImpl<Tensor>;
+
+    public:        
+        explicit Tensor(ElementType elem = ElementType())
+            : m_mem(1)
+        {
+            SetValue(elem);
+        }
+        
+        explicit Tensor(MetaNN::Shape<0>)
+            : Tensor() {}
+
+        explicit Tensor(ContinuousMemory<ElementType, DeviceType> p_mem)
+            : m_mem(std::move(p_mem))
+        {
+            assert(m_mem.Size() >= 1);
+        }
+
+        const auto& Shape() const noexcept
+        {
+            const static MetaNN::Shape<0> shape;
+            return shape;
+        }
+
+        bool AvailableForWrite() const
+        {
+            return m_mem.IsShared();
+        }
+
+        void SetValue(ElementType val)
+        {
+            assert(AvailableForWrite());
+            (m_mem.RawMemory())[0] = val;
+        }
+
+        auto Value() const noexcept
+        {
+            return (m_mem.RawMemory())[0];
+        }
+    
+        bool operator== (const Tensor& val) const noexcept
+        {
+            return (Value() == val.Value());
+        }
+
+        auto EvalRegister() const
+        {
+            return MakeConstEvalHandle(*this);
+        }
+
+    private:
         ContinuousMemory<ElementType, DeviceType> m_mem;
     };
 
@@ -160,7 +224,71 @@ namespace MetaNN
     private:
         Tensor<TElement, TDevice, uDIm> m_data;
     };
+
+    template <typename TElem>
+    class Tensor<TElem, DeviceTags::CPU, 0>
+    {
+        static_assert(std::is_same<RemConstRef<TElem>, TElem>::value);
+
+    public:
+        using CategoryTag = CategoryTags::Tensor<0>;
+        using ElementType = TElem;
+        using DeviceType = DeviceTags::CPU;
+
+    public:        
+        explicit Tensor(ElementType elem = ElementType())
+            : m_val(elem) {}
+        
+        explicit Tensor(MetaNN::Shape<0>)
+            : Tensor() {}
+
+        explicit Tensor(ContinuousMemory<ElementType, DeviceType> p_mem)
+            : m_val(*(p_mem.RawMemory()))
+        {
+            assert(p_mem.Size() >= 1);
+        }
+
+        const auto& Shape() const noexcept
+        {
+            const static MetaNN::Shape<0> shape;
+            return shape;
+        }
+
+        bool AvailableForWrite() const
+        {
+            return true;
+        }
+
+        void SetValue(ElementType val)
+        {
+            m_val = val;
+        }
+
+        auto Value() const noexcept
+        {
+            return m_val;
+        }
     
+        bool operator== (const Tensor& val) const noexcept
+        {
+            return (m_val == val.m_val);
+        }
+
+        auto EvalRegister() const
+        {
+            return MakeConstEvalHandle(*this);
+        }
+
+    private:
+        ElementType m_val;
+    };
+
+    template <typename TElem, typename TDevice>
+    using Scalar = Tensor<TElem, TDevice, 0>;
+
+    template <typename T>
+    constexpr bool IsScalar = IsTensorWithDim<T, 0>;
+
     template <typename TElem, typename TDevice>
     using Vector = Tensor<TElem, TDevice, 1>;
     

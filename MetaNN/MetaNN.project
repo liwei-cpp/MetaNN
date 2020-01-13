@@ -98,7 +98,6 @@
   <VirtualDirectory Name="data">
     <File Name="data/tensor.h"/>
     <File Name="data/_.h"/>
-    <File Name="data/scalar.h"/>
     <VirtualDirectory Name="facilities">
       <File Name="data/facilities/device_tags.h"/>
       <File Name="data/facilities/category_tags.h"/>

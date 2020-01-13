@@ -70,7 +70,6 @@
         <IncludePath Value="."/>
         <IncludePath Value=".."/>
         <IncludePath Value="../.."/>
-        <Preprocessor Value="NDEBUG"/>
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>

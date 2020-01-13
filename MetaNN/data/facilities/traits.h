@@ -23,8 +23,8 @@ namespace MetaNN
     constexpr bool IsIterator = IsIterator_<T>::value;
 
     template <typename T1, typename T2,
-              typename = std::enable_if_t<IsValidCategoryTag<T1>>,
-              typename = std::enable_if_t<IsValidCategoryTag<T2>>,
+              typename = std::enable_if_t<IsValidCategoryTag<typename T1::CategoryTag>>,
+              typename = std::enable_if_t<IsValidCategoryTag<typename T2::CategoryTag>>,
               typename = std::enable_if_t<!std::is_same_v<T1, T2>>
             >
     bool operator== (const T1&, const T2&)
@@ -33,8 +33,8 @@ namespace MetaNN
     }
 
     template <typename T1, typename T2,
-              typename = std::enable_if_t<IsValidCategoryTag<T1>>,
-              typename = std::enable_if_t<IsValidCategoryTag<T2>>
+              typename = std::enable_if_t<IsValidCategoryTag<typename T1::CategoryTag>>,
+              typename = std::enable_if_t<IsValidCategoryTag<typename T1::CategoryTag>>
              >
     bool operator!= (const T1& val1, const T2& val2)
     {
