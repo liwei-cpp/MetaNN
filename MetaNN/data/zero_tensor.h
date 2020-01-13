@@ -40,12 +40,22 @@ namespace MetaNN
             {
                 using CategoryTag = CategoryTags::Tensor<uDim>;
                 PrincipalDataType<CategoryTag, TElem, TDevice> res(evalItem.m_shape);
-                auto lowLayer = LowerAccess(res);
-                auto mem = lowLayer.MutableRawMemory();
-        
                 static_assert(std::is_same_v<TDevice, DeviceTags::CPU>, 
-                              "Memset not support for other device tag.");
-                memset(mem, 0, sizeof(TElem) * evalItem.m_shape.Count());
+                              "Only CPU is supported now.");
+
+                if constexpr (uDim == 0)
+                {
+                    res.SetValue(0);
+                }
+                else
+                {
+                    auto lowLayer = LowerAccess(res);
+                    auto mem = lowLayer.MutableRawMemory();
+
+                    const unsigned bufLen = static_cast<unsigned>(sizeof(TElem) * evalItem.m_shape.Count());
+                    assert(bufLen == sizeof(TElem) * evalItem.m_shape.Count());
+                    memset(mem, 0, bufLen);
+                }
                 evalItem.m_resHandle.SetData(std::move(res));
             }
         };

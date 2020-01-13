@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <cmath>
 #include <iostream>
@@ -10,15 +10,15 @@ namespace
     void test_trival_matrix_case1()
     {
         cout << "Test trival matrix case 1...\t";
-        static_assert(IsMatrix<TrivalMatrix<Scalar<CheckElement, CheckDevice>>>, "Test Error");
-        static_assert(IsMatrix<TrivalMatrix<Scalar<CheckElement, CheckDevice>> &>, "Test Error");
-        static_assert(IsMatrix<TrivalMatrix<Scalar<CheckElement, CheckDevice>> &&>, "Test Error");
-        static_assert(IsMatrix<const TrivalMatrix<Scalar<CheckElement, CheckDevice>> &>, "Test Error");
-        static_assert(IsMatrix<const TrivalMatrix<Scalar<CheckElement, CheckDevice>> &&>, "Test Error");
+        static_assert(IsMatrix<TrivalTensor<Scalar<CheckElement, CheckDevice>, 2>>);
+        static_assert(IsMatrix<TrivalTensor<Scalar<CheckElement, CheckDevice>, 2> &>);
+        static_assert(IsMatrix<TrivalTensor<Scalar<CheckElement, CheckDevice>, 2> &&>);
+        static_assert(IsMatrix<const TrivalTensor<Scalar<CheckElement, CheckDevice>, 2> &>);
+        static_assert(IsMatrix<const TrivalTensor<Scalar<CheckElement, CheckDevice>, 2> &&>);
 
-        auto rm = TrivalMatrix(Scalar<CheckElement, CheckDevice>{100}, 10, 20);
-        assert(rm.Shape().RowNum() == 10);
-        assert(rm.Shape().ColNum() == 20);
+        auto rm = TrivalTensor(Scalar<CheckElement, CheckDevice>{100}, 10, 20);
+        assert(rm.Shape()[0] == 10);
+        assert(rm.Shape()[1] == 20);
 
         const auto& evalHandle = rm.EvalRegister();
         EvalPlan<CheckDevice>::Inst().Eval();
@@ -40,8 +40,8 @@ namespace
         const Scalar<CheckElement, CheckDevice> sca1(14);
         const Scalar<CheckElement, CheckDevice> sca2(35);
         const Scalar<CheckElement, CheckDevice>& sca3(sca2);
-        auto rm1 = TrivalMatrix(sca1, 100, 10);
-        auto rm2 = TrivalMatrix(sca3, 10, 20);
+        auto rm1 = TrivalTensor(sca1, 100, 10);
+        auto rm2 = TrivalTensor(sca3, 10, 20);
 
         const auto& evalRes1 = rm1.EvalRegister();
         const auto& evalRes2 = rm2.EvalRegister();
@@ -67,9 +67,9 @@ namespace
     }
 }
 
-namespace Test::Data::Cardinal::Matrix
+namespace Test::Data
 {
-    void test_trival_matrix()
+    void test_trival_tensor()
     {
         test_trival_matrix_case1();
         test_trival_matrix_case2();

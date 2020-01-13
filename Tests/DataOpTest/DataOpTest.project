@@ -21,7 +21,6 @@
       <File Name="data/batch_sequence/test_dynamic_batch_sequence.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="cardinal">
-      <File Name="../../MetaNN/data/cardinal/matrix/trival_matrix.h"/>
       <File Name="data/cardinal/_.h"/>
       <VirtualDirectory Name="3d_array">
         <File Name="data/cardinal/3d_array/_.h"/>
@@ -29,11 +28,9 @@
       <VirtualDirectory Name="matrix">
         <File Name="data/cardinal/matrix/_.h"/>
         <File Name="data/cardinal/matrix/test_one_hot_vector.cpp"/>
-        <File Name="data/cardinal/matrix/test_trival_matrix.cpp"/>
       </VirtualDirectory>
       <VirtualDirectory Name="scalar">
         <File Name="data/cardinal/scalar/_.h"/>
-        <File Name="data/cardinal/scalar/test_scalar.cpp"/>
       </VirtualDirectory>
     </VirtualDirectory>
     <VirtualDirectory Name="general">

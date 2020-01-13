@@ -1,6 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/traits.h>
+#include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_buffer.h>
 #include <MetaNN/evaluate/eval_plan.h>
 #include <type_traits>
@@ -9,47 +10,48 @@ namespace MetaNN
 {
     namespace NSTrivalTensor
     {
-        template <typename TScalar, size_t uDim>
-        class EvalItem : public BaseEvalItem<typename TScalar::DeviceType>
+        template <typename TScalarHandle, typename TOutputHandle, size_t uDim>
+        class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
         {
         public:
-            using ElementType = typename TScalar::ElementType;
-            using DeviceType = typename TScalar::DeviceType;
+            using DeviceType = DeviceTypeFromHandle<TOutputHandle>;
 
-            EvalItem(EvalHandle<Tensor<ElementType, DeviceType, uDim>> resBuf,
-                     Shape<uDim> p_shape, TScalar p_scalar)
+            EvalItem(TScalarHandle p_scalar, TOutputHandle resBuf,
+                     Shape<uDim> p_shape)
                 : BaseEvalItem<DeviceType>(std::type_index(typeid(EvalItem)),
-                                           {}, resBuf.DataPtr())
+                                           { p_scalar.DataPtr() }, resBuf.DataPtr())
                 , m_resHandle(std::move(resBuf))
                 , m_shape(std::move(p_shape))
-                , m_scalar(std::move(p_scalar))
+                , m_scalarHandle(std::move(p_scalar))
             { }
         
-            EvalHandle<Tensor<ElementType, DeviceType, uDim>> m_resHandle;
+            TOutputHandle m_resHandle;
             Shape<uDim> m_shape;
-            TScalar  m_scalar;
+            TScalarHandle m_scalarHandle;
         };
     
-        template <typename TScalar, size_t uDim>
-        class EvalGroup : public TrivalEvalGroup<EvalItem<TScalar, uDim>>
+        template <typename TScalarHandle, typename TOutputHandle, size_t uDim>
+        class EvalGroup : public TrivalEvalGroup<EvalItem<TScalarHandle, TOutputHandle, uDim>>
         {
-            using EvalItemType = EvalItem<TScalar, uDim>;
+            using EvalItemType = EvalItem<TScalarHandle, TOutputHandle, uDim>;
 
         protected:
             virtual void EvalInternalLogic(EvalItemType& evalItem) final override
             {
-                using ElementType = typename TScalar::ElementType;
-                using DeviceType = typename TScalar::DeviceType;
+                const auto& in = evalItem.m_scalarHandle.Data();
 
-                static_assert(std::is_same_v<DeviceType, DeviceTags::CPU>,
+                using ResType = typename TOutputHandle::DataType;
+                using ElementType = typename ResType::ElementType;
+
+                static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>,
                               "Currently only CPU is supported.");
 
-                Tensor<ElementType, DeviceType, uDim> out(evalItem.m_shape);
+                ResType out(evalItem.m_shape);
                 auto lowLayer = LowerAccess(out);
                 auto mem = lowLayer.MutableRawMemory();
 
                 const size_t elemCount = evalItem.m_shape.Count();
-                const ElementType val = static_cast<ElementType>(evalItem.m_scalar.Value());
+                const ElementType val = static_cast<ElementType>(in.Value());
                 for (size_t i = 0; i < elemCount; ++i)
                 {
                     mem[i] = val;
@@ -88,23 +90,26 @@ namespace MetaNN
 
         auto EvalRegister() const
         {
-            using TEvalItem = NSTrivalTensor::EvalItem<TScalar, uDim>;
-            using TEvalGroup = NSTrivalTensor::EvalGroup<TScalar, uDim>;
-            using TItemDispatcher = TrivalEvalItemDispatcher<TEvalGroup>;
-
             if (!m_evalBuf.IsEvaluated())
             {
-                auto evalHandle = m_evalBuf.Handle();
-                if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(evalHandle.DataPtr()))
+                auto outHandle = m_evalBuf.Handle();
+        
+                if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(outHandle.DataPtr()))
                 {
-                    EvalPlan<DeviceType>::Inst().template Register<TItemDispatcher>(
-                        std::make_unique<TEvalItem>(std::move(evalHandle), m_shape, m_scalar));
+                    auto handle = m_scalar.EvalRegister();
+
+                    using ItemType = NSTrivalTensor::EvalItem<decltype(handle), decltype(outHandle), uDim>;
+                    using GroupType = NSTrivalTensor::EvalGroup<decltype(handle), decltype(outHandle), uDim>;
+                    using DispatcherType = TrivalEvalItemDispatcher<GroupType>;
+
+                    auto item = std::make_unique<ItemType>(std::move(handle), std::move(outHandle), m_shape);
+                    EvalPlan<DeviceType>::Inst().template Register<DispatcherType>(std::move(item));
                 }
             }
             return m_evalBuf.ConstHandle();
         }
 
-        const auto& ElementValue() const
+        const auto& Scalar() const
         {
             return m_scalar;
         }
