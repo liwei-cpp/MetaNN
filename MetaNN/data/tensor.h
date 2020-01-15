@@ -225,64 +225,6 @@ namespace MetaNN
         Tensor<TElement, TDevice, uDIm> m_data;
     };
 
-    template <typename TElem>
-    class Tensor<TElem, DeviceTags::CPU, 0>
-    {
-        static_assert(std::is_same<RemConstRef<TElem>, TElem>::value);
-
-    public:
-        using CategoryTag = CategoryTags::Tensor<0>;
-        using ElementType = TElem;
-        using DeviceType = DeviceTags::CPU;
-
-    public:        
-        explicit Tensor(ElementType elem = ElementType())
-            : m_val(elem) {}
-        
-        explicit Tensor(MetaNN::Shape<0>)
-            : Tensor() {}
-
-        explicit Tensor(ContinuousMemory<ElementType, DeviceType> p_mem)
-            : m_val(*(p_mem.RawMemory()))
-        {
-            assert(p_mem.Size() >= 1);
-        }
-
-        const auto& Shape() const noexcept
-        {
-            const static MetaNN::Shape<0> shape;
-            return shape;
-        }
-
-        bool AvailableForWrite() const
-        {
-            return true;
-        }
-
-        void SetValue(ElementType val)
-        {
-            m_val = val;
-        }
-
-        auto Value() const noexcept
-        {
-            return m_val;
-        }
-    
-        bool operator== (const Tensor& val) const noexcept
-        {
-            return (m_val == val.m_val);
-        }
-
-        auto EvalRegister() const
-        {
-            return MakeConstEvalHandle(*this);
-        }
-
-    private:
-        ElementType m_val;
-    };
-
     template <typename TElem, typename TDevice>
     using Scalar = Tensor<TElem, TDevice, 0>;
 
