@@ -20,19 +20,6 @@
       <File Name="data/batch_sequence/_.h"/>
       <File Name="data/batch_sequence/test_dynamic_batch_sequence.cpp"/>
     </VirtualDirectory>
-    <VirtualDirectory Name="cardinal">
-      <File Name="data/cardinal/_.h"/>
-      <VirtualDirectory Name="3d_array">
-        <File Name="data/cardinal/3d_array/_.h"/>
-      </VirtualDirectory>
-      <VirtualDirectory Name="matrix">
-        <File Name="data/cardinal/matrix/_.h"/>
-        <File Name="data/cardinal/matrix/test_one_hot_vector.cpp"/>
-      </VirtualDirectory>
-      <VirtualDirectory Name="scalar">
-        <File Name="data/cardinal/scalar/_.h"/>
-      </VirtualDirectory>
-    </VirtualDirectory>
     <VirtualDirectory Name="general">
       <File Name="data/general/_.h"/>
       <File Name="data/general/test_dynamic.cpp"/>

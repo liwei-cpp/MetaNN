@@ -112,15 +112,7 @@
       <File Name="data/linear_table/dynamic_array.h"/>
       <File Name="data/linear_table/_.h"/>
     </VirtualDirectory>
-    <VirtualDirectory Name="cardinal">
-      <File Name="data/cardinal/_.h"/>
-      <VirtualDirectory Name="matrix">
-        <File Name="data/cardinal/matrix/one_hot_vector.h"/>
-        <File Name="data/cardinal/matrix/_.h"/>
-      </VirtualDirectory>
-    </VirtualDirectory>
     <VirtualDirectory Name="general">
-      <File Name="data/general/zero_data.h"/>
       <File Name="data/general/dynamic.h"/>
       <File Name="data/general/_.h"/>
     </VirtualDirectory>

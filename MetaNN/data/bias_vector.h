@@ -4,6 +4,7 @@
 #include <MetaNN/evaluate/eval_buffer.h>
 #include <MetaNN/evaluate/eval_plan.h>
 #include <cassert>
+#include <cstring>
 #include <type_traits>
 
 namespace MetaNN
@@ -50,7 +51,7 @@ namespace MetaNN
                 auto mem = lowLayer.MutableRawMemory();
                 
                 memset(mem, 0, sizeof(ElementType) * evalItem.m_vecLen);
-                mem[evalItem.m_val] = evalItem.m_inputHandle.Data().Value();
+                mem[evalItem.m_pos] = evalItem.m_inputHandle.Data().Value();
                 evalItem.m_resHandle.SetData(std::move(out));
             }
         };
@@ -104,6 +105,11 @@ namespace MetaNN
                 }
             }
             return m_evalBuf.ConstHandle();
+        }
+        
+        size_t HotPos() const
+        {
+            return m_pos;
         }
 
         const auto& Scalar() const
