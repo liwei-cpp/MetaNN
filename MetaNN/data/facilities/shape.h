@@ -112,6 +112,26 @@ namespace MetaNN
             assert(idx < DimNum);
             return m_dims[idx];
         }
+        
+        decltype(auto) begin()
+        {
+            return m_dims.begin();
+        }
+        
+        decltype(auto) begin() const
+        {
+            return m_dims.begin();
+        }
+        
+        decltype(auto) end()
+        {
+            return m_dims.end();
+        }
+        
+        decltype(auto) end() const
+        {
+            return m_dims.end();
+        }
     private:
         std::array<size_t, uDimNum> m_dims{};
     };

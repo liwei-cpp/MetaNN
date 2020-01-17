@@ -12,23 +12,9 @@
   </VirtualDirectory>
   <VirtualDirectory Name="data">
     <File Name="data/_.h"/>
-    <VirtualDirectory Name="batch">
-      <File Name="data/batch/_.h"/>
-      <File Name="data/batch/test_dynamic_batch.cpp"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="batch_sequence">
-      <File Name="data/batch_sequence/_.h"/>
-      <File Name="data/batch_sequence/test_dynamic_batch_sequence.cpp"/>
-    </VirtualDirectory>
     <VirtualDirectory Name="general">
       <File Name="data/general/_.h"/>
       <File Name="data/general/test_dynamic.cpp"/>
-      <File Name="data/general/test_zero_data.cpp"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="sequence">
-      <File Name="data/sequence/_.h"/>
-      <File Name="data/sequence/test_dynamic_sequence.cpp"/>
-      <File Name="data/sequence/test_static_sequence.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="operators">
