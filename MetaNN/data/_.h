@@ -6,4 +6,5 @@
 #include <MetaNN/data/trival_tensor.h>
 #include <MetaNN/data/zero_tensor.h>
 
+#include <MetaNN/data/dynamic.h>
 #include <MetaNN/data/scalable_tensor.h>

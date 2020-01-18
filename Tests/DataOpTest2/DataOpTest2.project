@@ -6,6 +6,7 @@
     <File Name="main.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data">
+    <File Name="data/test_dynamic.cpp"/>
     <File Name="data/test_scalable_tensor.cpp"/>
     <File Name="data/test_bias_vector.cpp"/>
     <File Name="data/test_zero_tensor.cpp"/>

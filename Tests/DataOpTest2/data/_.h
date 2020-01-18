@@ -9,7 +9,8 @@ namespace Test::Data
     void test_bias_vector();
     void test_trival_tensor();
     void test_zero_tensor();
-    
+
+    void test_dynamic();
     void test_scalable_tensor();
 
     inline void test()
@@ -22,7 +23,8 @@ namespace Test::Data
         test_bias_vector();
         test_trival_tensor();
         test_zero_tensor();
-        
+
+        test_dynamic();
         test_scalable_tensor();
     }
 }

@@ -14,7 +14,6 @@
     <File Name="data/_.h"/>
     <VirtualDirectory Name="general">
       <File Name="data/general/_.h"/>
-      <File Name="data/general/test_dynamic.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="operators">
