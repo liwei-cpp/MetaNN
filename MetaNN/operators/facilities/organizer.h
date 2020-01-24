@@ -7,113 +7,167 @@
 
 namespace MetaNN
 {
-// operator validation check
-template <typename TOpTag, typename TOperHead, typename... TOperands>
-constexpr bool IsValidOper = (IsInDataCategory<TOperHead>) &&
-                             (std::is_same_v<DataCategory<TOperHead>, DataCategory<TOperands>> && ...);
-// data category calculation
-template <typename THeadCate, typename...TRemainCate>
-struct PickCommonCategory_
-{
-    static_assert((std::is_same_v<THeadCate, TRemainCate> && ...), "Data category mismatch.");
-    using type = THeadCate;
-};
+    // operator validation check
+    template <typename TOpTag, typename... TOperands>
+    constexpr bool IsValidOper = ((IsValidCategoryTag<TOperands>) && ...);
 
-template <typename TOpTag, typename... TOperands>
-struct OperCategory_ : PickCommonCategory_<TOperands...>
-{};
+    // data category calculation
+    template <typename... TCategories>
+    struct PickCommonCategory_;
 
-template <typename TOpTag, typename... TOperands>
-using OperCateCal = typename OperCategory_<TOpTag, DataCategory<TOperands>...>::type;
-
-// ElementType
-template <typename TOpTag, typename...TOperands>
-struct OperElementType_
-{
-    static_assert(DependencyFalse<TOpTag>, "Operand container is empty");
-};
-
-template <typename TOpTag, typename TOp1, typename...TOperands>
-struct OperElementType_<TOpTag, TOp1, TOperands...>
-{
-    using type = typename TOp1::ElementType;
-};
-
-// DeviceType
-template <typename TOpTag, typename...TOperands>
-struct OperDeviceType_
-{
-    static_assert(DependencyFalse<TOpTag>, "Operand container is empty");
-};
-
-template <typename TOpTag, typename TOp1, typename...TOperands>
-struct OperDeviceType_<TOpTag, TOp1, TOperands...>
-{
-    using type = typename TOp1::DeviceType;
-};
-
-// operator auxiliary parameters
-template <typename TOpTag, typename TCate>
-class OperAuxParams
-{
-public:
-    bool operator == (const OperAuxParams&) const
+    template <typename THeadCate>
+    struct PickCommonCategory_<THeadCate>
     {
-        return true;
-    }
-};
-
-template <typename TValue>
-struct OperAuxValue
-{
-public:
-    OperAuxValue(TValue val)
-        : m_value(val)
-        , m_instID(InstanceID::Get())
-    {}
+        using type = THeadCate;
+    };
     
-    const auto& Value() const
+    template <typename TFirstCate, typename TSecondCate, typename... TRemainCates>
+    struct PickCommonCategory_<TFirstCate, TSecondCate, TRemainCates...>
     {
-        return m_value;
-    }
-    
-    bool operator== (const OperAuxValue& val) const
+        using TCompRes = std::conditional_t<(TFirstCate::DimNum > TSecondCate::DimNum),
+                                            TFirstCate, TSecondCate>;
+        using type = typename PickCommonCategory_<TCompRes, TRemainCates...>::type;
+    };
+
+    template <typename TOpTag, typename... TOperands>
+    struct OperCategory_ : PickCommonCategory_<TOperands...>
+    {};
+
+    template <typename TOpTag, typename... TOperands>
+    using OperCateCal = typename OperCategory_<TOpTag, DataCategory<TOperands>...>::type;
+
+    // ElementType
+    template <typename TOpTag, typename...TOperands>
+    struct OperElementType_
     {
-        return m_instID == val.m_instID;
-    }
+        static_assert(DependencyFalse<TOpTag>, "Operand container is empty");
+    };
 
-private:
-    TValue m_value;
-    size_t m_instID;
-};
-
-// Shape
-template <typename TOpTag, typename TCate>
-class OperShapeInfo
-{
-public:
-    template <typename THead, typename...TRemain>
-    OperShapeInfo(const OperAuxParams<TOpTag, TCate>&, const THead& head, const TRemain&... rem)
-        : m_shape(head.Shape())
+    template <typename TOpTag, typename TOp1, typename...TOperands>
+    struct OperElementType_<TOpTag, TOp1, TOperands...>
     {
-        static_assert((std::is_same_v<decltype(head.Shape()), decltype(rem.Shape())> && ...));
-        assert(((m_shape == rem.Shape()) && ...));
-    }
-    
-    const auto& Shape() const
+        using type = typename TOp1::ElementType;
+    };
+
+    // DeviceType
+    template <typename TOpTag, typename...TOperands>
+    struct OperDeviceType_
     {
-        return m_shape;
+        static_assert(DependencyFalse<TOpTag>, "Operand container is empty");
+    };
+
+    template <typename TOpTag, typename TOp1, typename...TOperands>
+    struct OperDeviceType_<TOpTag, TOp1, TOperands...>
+    {
+        using type = typename TOp1::DeviceType;
+    };
+
+    // operator auxiliary parameters
+    template <typename TOpTag, typename TCate>
+    class OperAuxParams
+    {
+    public:
+        bool operator == (const OperAuxParams&) const
+        {
+            return true;
+        }
+    };
+
+    template <typename TValue>
+    struct OperAuxValue
+    {
+    public:
+        OperAuxValue(TValue val)
+            : m_value(val)
+            , m_instID(InstanceID::Get())
+        {}
+
+        const auto& Value() const
+        {
+            return m_value;
+        }
+
+        bool operator== (const OperAuxValue& val) const
+        {
+            return m_instID == val.m_instID;
+        }
+
+    private:
+        TValue m_value;
+        size_t m_instID;
+    };
+
+    namespace NSOperShapeInfo
+    {
+        template <typename TShape1, typename TShape2>
+        bool IsBroadcastMatch(const TShape1& shape1, const TShape2& shape2)
+        {
+            if constexpr ((TShape1::DimNum == 0) || (TShape2::DimNum == 0))
+            {
+                return true;
+            }
+            else if constexpr(TShape1::DimNum > TShape2::DimNum)
+            {
+                return IsBroadcastMatch(shape2, shape1);
+            }
+            else
+            {
+                auto it1 = shape1.rbegin();
+                auto it2 = shape2.rbegin();
+                while (it1 != shape1.rend())
+                {
+                    if (*it1 != *it2) return false;
+                    ++it1;
+                    ++it2;
+                }
+                return true;
+            }
+        }
+
+        template <typename TShape>
+        auto CommonShape(const TShape& shape)
+        {
+            return shape;
+        }
+        
+        template <typename TShape1, typename TShape2, typename... TShapes>
+        auto CommonShape(const TShape1& shape1, const TShape2& shape2, const TShapes&... shapes)
+        {
+            assert(IsBroadcastMatch(shape1, shape2));
+            if constexpr (TShape1::DimNum > TShape2::DimNum)
+            {
+                return CommonShape(shape1, shapes...);
+            }
+            else
+            {
+                return CommonShape(shape2, shapes...);
+            }
+        }
     }
-    
-private:
-    MetaNN::Shape<TCate> m_shape;
-};
 
+    // Shape
+    template <typename TOpTag, typename TCate>
+    class OperShapeInfo
+    {
+    public:
+        template <typename... TOperands>
+        OperShapeInfo(const OperAuxParams<TOpTag, TCate>&, const TOperands&... operands)
+            : m_shape(NSOperShapeInfo::CommonShape((operands.Shape())...))
+        {}
 
-// operator calculate sequence container
-template <typename...TCases>
-struct OperCalAlgoChain;
+        const auto& Shape() const
+        {
+            return m_shape;
+        }
 
-template <typename TOpTag>
-struct OperSeq_;
+    private:
+        MetaNN::Shape<TCate::DimNum> m_shape;
+    };
+
+    // operator calculate sequence container
+    template <typename...TCases>
+    struct OperCalAlgoChain;
+
+    template <typename TOpTag>
+    struct OperSeq_;
 }

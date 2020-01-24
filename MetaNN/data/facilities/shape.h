@@ -132,6 +132,26 @@ namespace MetaNN
         {
             return m_dims.end();
         }
+        
+        decltype(auto) rbegin()
+        {
+            return m_dims.rbegin();
+        }
+        
+        decltype(auto) rbegin() const
+        {
+            return m_dims.rbegin();
+        }
+        
+        decltype(auto) rend()
+        {
+            return m_dims.rend();
+        }
+        
+        decltype(auto) rend() const
+        {
+            return m_dims.rend();
+        }
     private:
         std::array<size_t, uDimNum> m_dims{};
     };
