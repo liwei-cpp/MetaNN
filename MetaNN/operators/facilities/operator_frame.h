@@ -3,6 +3,7 @@
 #include <cassert>
 #include <type_traits>
 #include <MetaNN/evaluate/eval_buffer.h>
+#include <MetaNN/facilities/cont_metafuns/sequential.h>
 #include <MetaNN/operators/facilities/organizer.h>
 
 namespace MetaNN::OpTags

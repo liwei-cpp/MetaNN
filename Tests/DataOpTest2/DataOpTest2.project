@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="DataOpTest2" Version="10.0.0" InternalType="Console">
+  <VirtualDirectory Name="operators">
+    <VirtualDirectory Name="activation">
+      <File Name="operators/activation/test_relu.cpp"/>
+      <File Name="operators/activation/_.h"/>
+    </VirtualDirectory>
+    <File Name="operators/_.h"/>
+  </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="_root">

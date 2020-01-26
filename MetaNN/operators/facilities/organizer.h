@@ -9,7 +9,7 @@ namespace MetaNN
 {
     // operator validation check
     template <typename TOpTag, typename... TOperands>
-    constexpr bool IsValidOper = ((IsValidCategoryTag<TOperands>) && ...);
+    constexpr bool IsValidOper = ((IsValidCategoryTag<DataCategory<TOperands>>) && ...);
 
     // data category calculation
     template <typename... TCategories>
