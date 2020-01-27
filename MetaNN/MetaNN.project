@@ -225,6 +225,7 @@
       <File Name="operators/elementwise/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="mutating">
+      <File Name="operators/mutating/permute.h"/>
       <File Name="operators/mutating/transpose.h"/>
       <File Name="operators/mutating/_.h"/>
     </VirtualDirectory>

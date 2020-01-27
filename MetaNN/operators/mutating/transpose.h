@@ -9,6 +9,7 @@
 namespace MetaNN::OpTags
 {
     struct Transpose;
+    struct Permute;
 }
 
 namespace MetaNN

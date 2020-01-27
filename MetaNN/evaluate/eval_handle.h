@@ -194,9 +194,12 @@ private:
     std::shared_ptr<TBaseData> m_data;
 };
 
-template<typename THandle>
+template <typename THandle>
 using DeviceTypeFromHandle = typename RemConstRef<decltype(std::declval<THandle>().Data())>::DeviceType;
 
-template<typename THandle>
+template <typename THandle>
 using ElementTypeFromHandle = typename RemConstRef<decltype(std::declval<THandle>().Data())>::ElementType;
+
+template <typename THandle>
+using CategoryTagFromHandle = typename RemConstRef<decltype(std::declval<THandle>().Data())>::CategoryTag;
 }
