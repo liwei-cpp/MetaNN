@@ -1,3 +1,3 @@
 #pragma once
 
-#include <MetaNN/operators/mutating/transpose.h>
+#include <MetaNN/operators/mutating/permute.h>

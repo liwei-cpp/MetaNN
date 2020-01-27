@@ -8,6 +8,10 @@
       <File Name="operators/activation/_.h"/>
     </VirtualDirectory>
     <File Name="operators/_.h"/>
+    <VirtualDirectory Name="mutating">
+      <File Name="operators/mutating/_.h"/>
+      <File Name="operators/mutating/test_permute.cpp"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>

@@ -149,7 +149,7 @@ namespace MetaNN
 
     template <typename TP>
     constexpr bool IsValidOper<OpTags::Permute, TP> = (IsValidCategoryTag<DataCategory<TP>>) &&
-                                                      (DataCategory<TP>::template DimNum > 1);
+                                                      (DataCategory<TP>::DimNum > 1);
 
     template <typename TCate>
     class OperAuxParams<OpTags::Permute, TCate>
@@ -160,7 +160,7 @@ namespace MetaNN
             : m_dims(dims) {}
 
         const std::array<size_t, DimNum>& Dims() const { return m_dims; }
-        bool operator == (const OperAuxParams& param) const final
+        bool operator== (const OperAuxParams& param) const
         {
             return m_dims == param.m_dims;
         }
@@ -200,6 +200,17 @@ namespace MetaNN
         template <size_t uDim>
         bool ValidDims(std::array<size_t, uDim> dims)
         {
+            bool isPlainDim = true;
+            for (size_t i = 0; i < uDim; ++i)
+            {
+                if (dims[i] != i)
+                {
+                    isPlainDim = false;
+                    break;
+                }
+            }
+            if (isPlainDim) return false;
+            
             std::sort(dims.begin(), dims.end());
             for (size_t i = 0; i < uDim; ++i)
             {
@@ -209,11 +220,10 @@ namespace MetaNN
         }
     }
 
-    template <typename TP, size_t uDim,
+    template <typename TP,
               typename = std::enable_if_t<IsValidOper<OpTags::Permute, TP>>>
-    auto Permute(TP&& oper, std::array<size_t, uDim> dims)
+    auto Permute(TP&& oper, std::array<size_t, DataCategory<TP>::DimNum> dims)
     {
-        static_assert(DataCategory<TP>::DimNum == uDim);
         assert(OperPermute::ValidDims(dims));
         
         using rawOp = RemConstRef<TP>;
