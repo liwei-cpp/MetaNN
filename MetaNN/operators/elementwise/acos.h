@@ -100,12 +100,7 @@ namespace OperAcosGrad::NSCaseGen
             , m_gradHandle(std::move(gradHandle))
             , m_inputHandle(std::move(oriHandle))
             , m_outputHandle(std::move(outputHandle))
-        {
-            static_assert(CategoryTagFromHandle<TInputHandle>::DimNum >=
-                          CategoryTagFromHandle<TGradHandle>::DimNum);
-            static_assert(CategoryTagFromHandle<TInputHandle>::DimNum ==
-                          CategoryTagFromHandle<TOutputHandle>::DimNum);
-        }
+        {}
         
         const TGradHandle m_gradHandle;
         const TInputHandle m_inputHandle;

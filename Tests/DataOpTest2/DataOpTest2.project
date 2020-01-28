@@ -2,6 +2,8 @@
 <CodeLite_Project Name="DataOpTest2" Version="10.0.0" InternalType="Console">
   <VirtualDirectory Name="operators">
     <VirtualDirectory Name="elementwise">
+      <File Name="operators/elementwise/test_negative.cpp"/>
+      <File Name="operators/elementwise/test_asin.cpp"/>
       <File Name="operators/elementwise/test_sign.cpp"/>
       <File Name="operators/elementwise/test_acos.cpp"/>
       <File Name="operators/elementwise/test_abs.cpp"/>

@@ -116,14 +116,15 @@ namespace OperAsinGrad::NSCaseGen
         {
             const auto& grad = evalItem.m_gradHandle.Data();
             const auto& in = evalItem.m_inputHandle.Data();
-            assert(grad.Shape() == in.Shape());
 
             using ResType = typename TOutputHandle::DataType;
             using ElementType = typename ResType::ElementType;
             ResType out(in.Shape());
 
             const size_t count = in.Shape().Count();
+            const size_t grad_count = grad.Shape().Count();
             assert(count == out.Shape().Count());
+            assert(count % grad_count == 0);
 
             auto low_grad = LowerAccess(grad);
             const ElementType* mem_grad = low_grad.RawMemory();
@@ -137,7 +138,7 @@ namespace OperAsinGrad::NSCaseGen
 
             for (size_t i = 0; i < count; ++i)
             {
-                mem_out[i] = mem_grad[i] / std::sqrt(1 - mem_in[i] * mem_in[i]);
+                mem_out[i] = mem_grad[i % grad_count] / std::sqrt(1 - mem_in[i] * mem_in[i]);
             }
             evalItem.m_outputHandle.SetData(std::move(out));
         }
@@ -154,6 +155,8 @@ template <typename TGrad, typename TInput,
           typename = std::enable_if_t<IsValidOper<OpTags::AsinGrad, TGrad, TInput>>>
 auto AsinGrad(TGrad&& p_grad, TInput&& p_input)
 {
+    static_assert(DataCategory<TInput>::DimNum >= DataCategory<TGrad>::DimNum);
+    
     using rawGrad = RemConstRef<TGrad>;
     using rawInput = RemConstRef<TInput>;
     using ResType = Operator<OpTags::AsinGrad, rawGrad, rawInput>;
