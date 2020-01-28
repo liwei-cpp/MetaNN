@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="DataOpTest2" Version="10.0.0" InternalType="Console">
   <VirtualDirectory Name="operators">
+    <VirtualDirectory Name="elementwise">
+      <File Name="operators/elementwise/test_sign.cpp"/>
+      <File Name="operators/elementwise/test_acos.cpp"/>
+      <File Name="operators/elementwise/test_abs.cpp"/>
+      <File Name="operators/elementwise/_.h"/>
+    </VirtualDirectory>
     <VirtualDirectory Name="activation">
       <File Name="operators/activation/test_tanh.cpp"/>
       <File Name="operators/activation/test_sigmoid.cpp"/>
