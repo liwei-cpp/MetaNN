@@ -23,17 +23,19 @@ namespace MetaNN
             using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
             
             template <typename TAuxParams>
-            EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& param)
+            EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape, const TAuxParams& param)
                 : BaseType(std::type_index(typeid(EvalItem)),
                            {oriHandle.DataPtr()}, outputHandle.DataPtr())
                 , m_inputHandle(std::move(oriHandle))
                 , m_outputHandle(std::move(outputHandle))
                 , m_dims(param.Dims())
+                , m_outShape(std::move(shape))
             {}
         
             const TInputHandle m_inputHandle;
             TOutputHandle m_outputHandle;
             std::array<size_t, CategoryTag::DimNum> m_dims;
+            Shape<CategoryTag::DimNum> m_outShape;
         };
         
         template <typename TInputHandle, typename TOutputHandle>
@@ -50,18 +52,12 @@ namespace MetaNN
                 
                 const auto& dims = evalItem.m_dims;
                 
-                Shape<uDim> aimShape;
-                for (size_t i = 0; i < uDim; ++i)
-                {
-                    aimShape[i] = oriShape[dims[i]];
-                }
-
                 using ResType = typename TOutputHandle::DataType;
                 using ElementType = typename ResType::ElementType;
-                ResType out(aimShape);
+                ResType out(evalItem.m_outShape);
 
                 const size_t count = oriShape.Count();
-                assert(count == aimShape.Count());
+                assert(count == evalItem.m_outShape.Count());
                 
                 if (count == 0)
                 {
@@ -70,7 +66,7 @@ namespace MetaNN
                 }
 
                 std::array<size_t, uDim> aimGaps;
-                auto rit1 = aimShape.rbegin();
+                auto rit1 = evalItem.m_outShape.rbegin();
                 auto rit2 = aimGaps.rbegin();
                 *rit2 = 1;
                 while (true)

@@ -20,9 +20,10 @@ namespace OperReLU::NSCaseGen
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
-        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams&)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
@@ -92,10 +93,11 @@ namespace OperReLUGrad::NSCaseGen
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
         EvalItem(TGradHandle gradHandle, TInputHandle oriHandle,
-                 TOutputHandle outputHandle, const TAuxParams&)
+                 TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams&)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {gradHandle.DataPtr(), oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_gradHandle(std::move(gradHandle))
@@ -117,14 +119,15 @@ namespace OperReLUGrad::NSCaseGen
         {
             const auto& grad = evalItem.m_gradHandle.Data();
             const auto& in = evalItem.m_inputHandle.Data();
-            assert(grad.Shape() == in.Shape());
 
             using ResType = typename TOutputHandle::DataType;
             using ElementType = typename ResType::ElementType;
             ResType out(in.Shape());
 
             const size_t count = in.Shape().Count();
+            const size_t grad_count = grad.Shape().Count();
             assert(count == out.Shape().Count());
+            assert(count % grad_count == 0);
 
             auto low_grad = LowerAccess(grad);
             const ElementType* mem_grad = low_grad.RawMemory();
@@ -139,7 +142,7 @@ namespace OperReLUGrad::NSCaseGen
             ElementType zero{};
             for (size_t i = 0; i < count; ++i)
             {
-                mem_out[i] = (mem_in[i] > zero) ? mem_grad[i] : zero;
+                mem_out[i] = (mem_in[i] > zero) ? mem_grad[i % grad_count] : zero;
             }
             evalItem.m_outputHandle.SetData(std::move(out));
         }
@@ -156,6 +159,8 @@ template <typename TGrad, typename TInput,
           typename = std::enable_if_t<IsValidOper<OpTags::ReLUGrad, TGrad, TInput>>>
 auto ReLUGrad(TGrad&& p_grad, TInput&& p_input)
 {
+    static_assert(DataCategory<TInput>::DimNum >= DataCategory<TGrad>::DimNum);
+
     using ResType = Operator<OpTags::ReLUGrad, RemConstRef<TGrad>, RemConstRef<TInput>>;
     return ResType(std::forward<TGrad>(p_grad), std::forward<TInput>(p_input));
 }

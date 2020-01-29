@@ -8,6 +8,9 @@
       <File Name="operators/elementwise/test_acos.cpp"/>
       <File Name="operators/elementwise/test_abs.cpp"/>
       <File Name="operators/elementwise/_.h"/>
+      <File Name="operators/elementwise/test_add.cpp"/>
+      <File Name="operators/elementwise/test_substract.cpp"/>
+      <File Name="operators/elementwise/test_multiply.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="activation">
       <File Name="operators/activation/test_tanh.cpp"/>

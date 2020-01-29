@@ -22,7 +22,7 @@ namespace MetaNN
             constexpr IndexSeq* dummyParam = nullptr;
         
             auto operandHandles = GetOperandHandles(operands, dummyParam);
-            DoEvalRegister(std::move(operandHandles), evalRes.Handle(), oper.AuxParams(), dummyParam);
+            DoEvalRegister(std::move(operandHandles), evalRes.Handle(), oper.Shape(), oper.AuxParams(), dummyParam);
         }
     private:
         template <typename TOpTuple, template<int...> class IndCont, int... Index>
@@ -32,10 +32,10 @@ namespace MetaNN
             return ResType{std::get<Index>(opers).EvalRegister()...};
         }
     
-        template <typename TOperHandleTuple, typename TResHandle, typename TAuxParams,
+        template <typename TOperHandleTuple, typename TResHandle, typename TShape, typename TAuxParams,
                   template<int...> class IndCont, int... Index>
         static auto DoEvalRegister(TOperHandleTuple operHandles, TResHandle resHandle, 
-                                   const TAuxParams& auxParams, const IndCont<Index...>*)
+                                   const TShape& shape, const TAuxParams& auxParams, const IndCont<Index...>*)
         {
             using DeviceType = DeviceTypeFromHandle<TResHandle>;
         
@@ -46,7 +46,7 @@ namespace MetaNN
             using DispatcherType = EvalDispatcher<GroupType>;
 
             auto item = std::make_unique<ItemType>(std::move(std::get<Index>(operHandles))... ,
-                                                   std::move(resHandle), auxParams);
+                                                   std::move(resHandle), shape, auxParams);
             EvalPlan<DeviceType>::Inst().template Register<DispatcherType>(std::move(item));
         }
     };

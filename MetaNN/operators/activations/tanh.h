@@ -20,9 +20,10 @@ namespace OperTanh::NSCaseGen
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
-        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams&)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
@@ -90,9 +91,10 @@ namespace OperTanhGrad::NSCaseGen
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
-        EvalItem(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams&)
+        EvalItem(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams&)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {gradHandle.DataPtr(), oriHandle.DataPtr()},
                        outputHandle.DataPtr())
@@ -115,14 +117,15 @@ namespace OperTanhGrad::NSCaseGen
         {
             const auto& grad = evalItem.m_gradHandle.Data();
             const auto& in = evalItem.m_inputHandle.Data();
-            assert(grad.Shape() == in.Shape());
 
             using ResType = typename TOutputHandle::DataType;
             using ElementType = typename ResType::ElementType;
             ResType out(in.Shape());
 
             const size_t count = in.Shape().Count();
+            const size_t grad_count = grad.Shape().Count();
             assert(count == out.Shape().Count());
+            assert(count % grad_count == 0);
 
             auto low_grad = LowerAccess(grad);
             const ElementType* mem_grad = low_grad.RawMemory();
@@ -136,7 +139,7 @@ namespace OperTanhGrad::NSCaseGen
         
             for (size_t i = 0; i < count; ++i)
             {
-                mem_out[i] = mem_grad[i] * (1 - mem_in[i] * mem_in[i]);
+                mem_out[i] = mem_grad[i % grad_count] * (1 - mem_in[i] * mem_in[i]);
             }
             evalItem.m_outputHandle.SetData(std::move(out));
         }
@@ -153,11 +156,8 @@ template <typename TGrad, typename TInput,
           typename = std::enable_if_t<IsValidOper<OpTags::TanhGrad, TGrad, TInput>>>
 auto TanhGrad (TGrad&& p_grad, TInput&& p_input)
 {
-    if (p_grad.Shape() != p_input.Shape())
-    {
-        throw std::runtime_error("TanhGrad error: operands' shape mismatch.");
-    }
-    
+    static_assert(DataCategory<TInput>::DimNum >= DataCategory<TGrad>::DimNum);
+
     using rawOp1 = RemConstRef<TGrad>;
     using rawOp2 = RemConstRef<TInput>;
     using ResType = Operator<OpTags::TanhGrad, rawOp1, rawOp2>;
