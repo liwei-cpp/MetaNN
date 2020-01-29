@@ -19,10 +19,11 @@ namespace OperInterpolate::NSCaseGen
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
         EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TInputHandle3 oriHandle3,
-             TOutputHandle outputHandle, const TAuxParams&)
+                 TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape, const TAuxParams&)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle1.DataPtr(), oriHandle2.DataPtr(), oriHandle3.DataPtr()},
                        outputHandle.DataPtr())
@@ -30,12 +31,14 @@ namespace OperInterpolate::NSCaseGen
             , m_inputHandle2(std::move(oriHandle2))
             , m_inputHandle3(std::move(oriHandle3))
             , m_outputHandle(std::move(outputHandle))
+            , m_outputShape(std::move(shape))
         {}
         
         const TInputHandle1 m_inputHandle1;
         const TInputHandle2 m_inputHandle2;
         const TInputHandle3 m_inputHandle3;
         TOutputHandle m_outputHandle;
+        Shape<CategoryTag::DimNum> m_outputShape;
     };
     
     template <typename TInputHandle1, typename TInputHandle2, typename TInputHandle3,
@@ -49,15 +52,18 @@ namespace OperInterpolate::NSCaseGen
             const auto& in1 = evalItem.m_inputHandle1.Data();
             const auto& in2 = evalItem.m_inputHandle2.Data();
             const auto& in3 = evalItem.m_inputHandle3.Data();
-            assert(in1.Shape() == in2.Shape());
-            assert(in1.Shape() == in3.Shape());
 
             using ResType = typename TOutputHandle::DataType;
             using ElementType = typename ResType::ElementType;
-            ResType out(in1.Shape());
+            ResType out(evalItem.m_outputShape);
 
-            const size_t count = in1.Shape().Count();
-            assert(count == out.Shape().Count());
+            const size_t count1 = in1.Shape().Count();
+            const size_t count2 = in2.Shape().Count();
+            const size_t count3 = in3.Shape().Count();
+            const size_t outCount = evalItem.m_outputShape.Count();
+            assert(outCount % count1 == 0);
+            assert(outCount % count2 == 0);
+            assert(outCount % count3 == 0);
 
             auto low_in1 = LowerAccess(in1);
             const ElementType* mem_in1 = low_in1.RawMemory();
@@ -71,9 +77,9 @@ namespace OperInterpolate::NSCaseGen
 
             static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
 
-            for (size_t i = 0; i < count; ++i)
+            for (size_t i = 0; i < outCount; ++i)
             {
-                mem_out[i] = mem_in1[i] * mem_in3[i] + mem_in2[i] * (1 - mem_in3[i]);
+                mem_out[i] = mem_in1[i % count1] * mem_in3[i % count3] + mem_in2[i % count2] * (1 - mem_in3[i % count3]);
             }
             evalItem.m_outputHandle.SetData(std::move(out));
         }
@@ -90,10 +96,6 @@ template <typename TP1, typename TP2, typename TP3,
           typename = std::enable_if_t<IsValidOper<OpTags::Interpolate, TP1, TP2, TP3>>>
 auto Interpolate(TP1&& p_m1, TP2&& p_m2, TP3&& p_m3)
 {
-    if ((p_m1.Shape() != p_m2.Shape()) || (p_m1.Shape() != p_m3.Shape()))
-    {
-        throw std::runtime_error("Interpolate error: operands' shape mismatch.");
-    }
     using ResType = Operator<OpTags::Interpolate,
                              RemConstRef<TP1>, RemConstRef<TP2>, RemConstRef<TP3>>;
     return ResType(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2), std::forward<TP3>(p_m3));

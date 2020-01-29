@@ -21,19 +21,23 @@ namespace OperDivide::NSCaseGen
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
-        EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle, const TAuxParams&)
+        EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle,
+                 Shape<CategoryTag::DimNum> shape, const TAuxParams&)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle1.DataPtr(), oriHandle2.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle1(std::move(oriHandle1))
             , m_inputHandle2(std::move(oriHandle2))
             , m_outputHandle(std::move(outputHandle))
+            , m_outputShape(std::move(shape))
         {}
         
         const TInputHandle1 m_inputHandle1;
         const TInputHandle2 m_inputHandle2;
         TOutputHandle m_outputHandle;
+        Shape<CategoryTag::DimNum> m_outputShape;
     };
 
     template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
@@ -45,14 +49,16 @@ namespace OperDivide::NSCaseGen
         {
             const auto& in1 = evalItem.m_inputHandle1.Data();
             const auto& in2 = evalItem.m_inputHandle2.Data();
-            assert(in1.Shape() == in2.Shape());
 
             using ResType = typename TOutputHandle::DataType;
             using ElementType = typename ResType::ElementType;
             ResType out(in1.Shape());
 
-            const size_t count = in1.Shape().Count();
-            assert(count == out.Shape().Count());
+            const size_t count1 = in1.Shape().Count();
+            const size_t count2 = in2.Shape().Count();
+            const size_t outCount = evalItem.m_outputShape.Count();
+            assert(outCount % count1 == 0);
+            assert(outCount % count2 == 0);
 
             auto low_in1 = LowerAccess(in1);
             const ElementType* mem_in1 = low_in1.RawMemory();
@@ -64,9 +70,9 @@ namespace OperDivide::NSCaseGen
 
             static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
 
-            for (size_t i = 0; i < count; ++i)
+            for (size_t i = 0; i < outCount; ++i)
             {
-                mem_out[i] = mem_in1[i] / mem_in2[i];
+                mem_out[i] = mem_in1[i % count1] / mem_in2[i % count2];
             }
             evalItem.m_outputHandle.SetData(std::move(out));
         }
@@ -86,9 +92,10 @@ namespace OperDivideByNum::NSCaseGen
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
-        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams& params)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
@@ -136,7 +143,9 @@ namespace OperDivideByNum::NSCaseGen
 
 template <typename TOper, typename TNumber>
 constexpr bool IsValidOper<OpTags::DivideByNum, TOper, TNumber>
-    = (IsInDataCategory<TOper>) && (std::is_constructible_v<typename RemConstRef<TOper>::ElementType, TNumber>);
+    = (IsValidCategoryTag<DataCategory<TOper>>) && 
+      (!IsValidCategoryTag<DataCategory<TNumber>>) &&
+      (std::is_constructible_v<typename RemConstRef<TOper>::ElementType, TNumber>);
 
 template <typename TCate>
 struct OperAuxParams<OpTags::DivideByNum, TCate> : public OperAuxValue<double>
@@ -160,11 +169,6 @@ auto operator/ (TP1&& p_m1, TP2&& p_m2)
 {
     if constexpr (IsValidOper<OpTags::Divide, TP1, TP2>)
     {
-        if (p_m1.Shape() != p_m2.Shape())
-        {
-            throw std::runtime_error("Divide error: operands' shape mismatch.");
-        }
-    
         using rawOp1 = RemConstRef<TP1>;
         using rawOp2 = RemConstRef<TP2>;
         using ResType = Operator<OpTags::Divide, rawOp1, rawOp2>;
