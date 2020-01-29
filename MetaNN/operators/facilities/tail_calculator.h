@@ -22,7 +22,7 @@ namespace MetaNN
             constexpr IndexSeq* dummyParam = nullptr;
         
             auto operandHandles = GetOperandHandles(operands, dummyParam);
-            DoEvalRegister(std::move(operandHandles), evalRes.Handle(), oper.Shape(), oper.AuxParams(), dummyParam);
+            DoEvalRegister<typename TOp::Policies>(std::move(operandHandles), evalRes.Handle(), oper.Shape(), oper.AuxParams(), dummyParam);
         }
     private:
         template <typename TOpTuple, template<int...> class IndCont, int... Index>
@@ -32,7 +32,8 @@ namespace MetaNN
             return ResType{std::get<Index>(opers).EvalRegister()...};
         }
     
-        template <typename TOperHandleTuple, typename TResHandle, typename TShape, typename TAuxParams,
+        template <typename TPolicies, typename TOperHandleTuple, typename TResHandle,
+                  typename TShape, typename TAuxParams,
                   template<int...> class IndCont, int... Index>
         static auto DoEvalRegister(TOperHandleTuple operHandles, TResHandle resHandle, 
                                    const TShape& shape, const TAuxParams& auxParams, const IndCont<Index...>*)
@@ -42,7 +43,7 @@ namespace MetaNN
             using ItemType = EvalItem<RemConstRef<decltype(std::get<Index>(operHandles))>..., 
                                       RemConstRef<TResHandle>>;
             using GroupType = EvalGroup<RemConstRef<decltype(std::get<Index>(operHandles))>..., 
-                                      RemConstRef<TResHandle>>;
+                                      RemConstRef<TResHandle>, TPolicies>;
             using DispatcherType = EvalDispatcher<GroupType>;
 
             auto item = std::make_unique<ItemType>(std::move(std::get<Index>(operHandles))... ,

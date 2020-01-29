@@ -42,7 +42,7 @@ namespace OperInterpolate::NSCaseGen
     };
     
     template <typename TInputHandle1, typename TInputHandle2, typename TInputHandle3,
-              typename TOutputHandle>
+              typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TInputHandle3, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TInputHandle3, TOutputHandle>;
@@ -97,7 +97,7 @@ template <typename TP1, typename TP2, typename TP3,
 auto Interpolate(TP1&& p_m1, TP2&& p_m2, TP3&& p_m3)
 {
     using ResType = Operator<OpTags::Interpolate,
-                             RemConstRef<TP1>, RemConstRef<TP2>, RemConstRef<TP3>>;
+                             OperandContainer<RemConstRef<TP1>, RemConstRef<TP2>, RemConstRef<TP3>>>;
     return ResType(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2), std::forward<TP3>(p_m3));
 }
 }

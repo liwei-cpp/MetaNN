@@ -37,7 +37,7 @@ namespace OperatorMultiply::NSCaseGen
         Shape<CategoryTag::DimNum> m_outputShape;
     };
 
-    template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
+    template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>;
@@ -124,7 +124,7 @@ namespace NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
@@ -184,7 +184,7 @@ auto operator* (TP1&& p_m1, TP2&& p_m2)
     {
         using rawOp1 = RemConstRef<TP1>;
         using rawOp2 = RemConstRef<TP2>;
-        using ResType = Operator<OpTags::Multiply, rawOp1, rawOp2>;
+        using ResType = Operator<OpTags::Multiply, OperandContainer<rawOp1, rawOp2>>;
         return ResType(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2));
     }
     else if constexpr (IsValidOper<OpTags::MultiplyWithNum, TP1, TP2>)
@@ -192,14 +192,14 @@ auto operator* (TP1&& p_m1, TP2&& p_m2)
         if constexpr (!IsValidCategoryTag<DataCategory<TP1>> && IsValidCategoryTag<DataCategory<TP2>>)
         {
             using rawOp = RemConstRef<TP2>;
-            using ResType = Operator<OpTags::MultiplyWithNum, rawOp>;
+            using ResType = Operator<OpTags::MultiplyWithNum, OperandContainer<rawOp>>;
             OperAuxParams<OpTags::MultiplyWithNum, OperCateCal<OpTags::MultiplyWithNum, rawOp>> params(p_m1);
             return ResType(std::move(params), std::forward<TP2>(p_m2));
         }
         else if constexpr (IsValidCategoryTag<DataCategory<TP1>> && !IsValidCategoryTag<DataCategory<TP2>>)
         {
             using rawOp = RemConstRef<TP1>;
-            using ResType = Operator<OpTags::MultiplyWithNum, rawOp>;
+            using ResType = Operator<OpTags::MultiplyWithNum, OperandContainer<rawOp>>;
             OperAuxParams<OpTags::MultiplyWithNum, OperCateCal<OpTags::MultiplyWithNum, rawOp>> params(p_m2);
             return ResType(std::move(params), std::forward<TP1>(p_m1));
         }

@@ -3,6 +3,8 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
+#include <MetaNN/operators/facilities/policies.h>
+#include <MetaNN/policies/policy_selector.h>
 #include <cassert>
 #include <type_traits>
 
@@ -23,22 +25,20 @@ namespace MetaNN
             using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
             
             template <typename TAuxParams>
-            EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape, const TAuxParams& param)
+            EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape, const TAuxParams&)
                 : BaseType(std::type_index(typeid(EvalItem)),
                            {oriHandle.DataPtr()}, outputHandle.DataPtr())
                 , m_inputHandle(std::move(oriHandle))
                 , m_outputHandle(std::move(outputHandle))
-                , m_dims(param.Dims())
                 , m_outShape(std::move(shape))
             {}
         
             const TInputHandle m_inputHandle;
             TOutputHandle m_outputHandle;
-            std::array<size_t, CategoryTag::DimNum> m_dims;
             Shape<CategoryTag::DimNum> m_outShape;
         };
         
-        template <typename TInputHandle, typename TOutputHandle>
+        template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
         class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
         {
             using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
@@ -50,7 +50,7 @@ namespace MetaNN
                 const auto& in = evalItem.m_inputHandle.Data();
                 const auto& oriShape = in.Shape();
                 
-                const auto& dims = evalItem.m_dims;
+                constexpr auto dims = PolicySelect<DimPolicy, TPolicies>::DimArray;
                 
                 using ResType = typename TOutputHandle::DataType;
                 using ElementType = typename ResType::ElementType;
@@ -147,38 +147,21 @@ namespace MetaNN
     constexpr bool IsValidOper<OpTags::Permute, TP> = (IsValidCategoryTag<DataCategory<TP>>) &&
                                                       (DataCategory<TP>::DimNum > 1);
 
-    template <typename TCate>
-    class OperAuxParams<OpTags::Permute, TCate>
-    {
-        constexpr static size_t DimNum = TCate::DimNum;
-    public:
-        OperAuxParams(std::array<size_t, DimNum> dims)
-            : m_dims(dims) {}
-
-        const std::array<size_t, DimNum>& Dims() const { return m_dims; }
-        bool operator== (const OperAuxParams& param) const
-        {
-            return m_dims == param.m_dims;
-        }
-    private:
-        std::array<size_t, DimNum> m_dims;
-    };
-    
-    template <typename TCate>
-    class OperShapeInfo<OpTags::Permute, TCate>
+    template <typename TCate, typename TPolicies>
+    class OperShapeInfo<OpTags::Permute, TCate, TPolicies>
     {
         constexpr static size_t uDim = TCate::DimNum;
     public:
         template <typename TOperand>
-        OperShapeInfo(const OperAuxParams<OpTags::Permute, TCate>& params,
+        OperShapeInfo(const OperAuxParams<OpTags::Permute, TCate>&,
                       const TOperand& operand)
         {
+            constexpr auto dims = PolicySelect<DimPolicy, TPolicies>::DimArray;
             auto prevShape = operand.Shape();
-            const std::array<size_t, uDim>& dimInfo = params.Dims();
             
             for (size_t i = 0; i < uDim; ++i)
             {
-                m_shape[i] = prevShape[dimInfo[i]];
+                m_shape[i] = prevShape[dims[i]];
             }
         }
     
@@ -194,20 +177,25 @@ namespace MetaNN
     namespace OperPermute
     {
         template <size_t uDim>
-        bool ValidDims(std::array<size_t, uDim> dims)
+        constexpr bool ValidDims(std::array<size_t, uDim> dims)
         {
-            bool isPlainDim = true;
+            std::array<bool, uDim> checkBuf{};
             for (size_t i = 0; i < uDim; ++i)
             {
-                if (dims[i] != i)
-                {
-                    isPlainDim = false;
-                    break;
-                }
+                if (dims[i] >= uDim) return false;
+                checkBuf[i] = true;
             }
-            if (isPlainDim) return false;
             
-            std::sort(dims.begin(), dims.end());
+            for (size_t i = 0; i < uDim; ++i)
+            {
+                if (!checkBuf[i]) return false;
+            }
+            return true;
+        }
+        
+        template <size_t uDim>
+        constexpr bool TrivalDims(std::array<size_t, uDim> dims)
+        {
             for (size_t i = 0; i < uDim; ++i)
             {
                 if (dims[i] != i) return false;
@@ -216,15 +204,22 @@ namespace MetaNN
         }
     }
 
-    template <typename TP,
+    template <typename TDimPolicy, typename TP,
               typename = std::enable_if_t<IsValidOper<OpTags::Permute, TP>>>
-    auto Permute(TP&& oper, std::array<size_t, DataCategory<TP>::DimNum> dims)
+    auto Permute(TP&& oper)
     {
-        assert(OperPermute::ValidDims(dims));
-        
-        using rawOp = RemConstRef<TP>;
-        using ResType = Operator<OpTags::Permute, rawOp>;
-        return ResType(OperAuxParams<OpTags::Permute, OperCateCal<OpTags::Permute, rawOp>>(std::move(dims)),
-                       std::forward<TP>(oper));
+        constexpr auto dims = PolicySelect<DimPolicy, TDimPolicy>::DimArray;
+        static_assert(OperPermute::ValidDims(dims));
+        if constexpr (OperPermute::TrivalDims(dims))
+        {
+            return std::forward<TP>(oper);
+        }
+        else
+        {
+            using rawOp = RemConstRef<TP>;
+            using DimPolicy = PickPolicyOjbect<TDimPolicy, DimPolicy, DimPolicy>;
+            using ResType = Operator<OpTags::Permute, OperandContainer<rawOp>, PolicyContainer<DimPolicy>>;
+            return ResType(std::forward<TP>(oper));
+        }
     }
 }

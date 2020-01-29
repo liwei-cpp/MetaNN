@@ -33,7 +33,7 @@ namespace OperSign::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
@@ -83,7 +83,7 @@ template <typename TP,
 auto Sign(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
-    using ResType = Operator<OpTags::Sign, rawM>;
+    using ResType = Operator<OpTags::Sign, OperandContainer<rawM>>;
     return ResType(std::forward<TP>(p_m));
 
 }

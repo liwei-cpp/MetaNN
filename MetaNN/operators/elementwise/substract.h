@@ -37,7 +37,7 @@ namespace OperSubstract::NSCaseGen
         Shape<CategoryTag::DimNum> m_outShape;
     };
 
-    template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
+    template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>;
@@ -120,7 +120,7 @@ namespace NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
@@ -181,13 +181,13 @@ auto operator- (TP1&& p_m1, TP2&& p_m2)
     {
         using rawOp1 = RemConstRef<TP1>;
         using rawOp2 = RemConstRef<TP2>;
-        using ResType = Operator<OpTags::Substract, rawOp1, rawOp2>;
+        using ResType = Operator<OpTags::Substract, OperandContainer<rawOp1, rawOp2>>;
         return ResType(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2));        
     }
     else if constexpr (IsValidOper<OpTags::SubstractFromNum, TP1, TP2>)
     {
         using rawOp = RemConstRef<TP2>;
-        using ResType = Operator<OpTags::SubstractFromNum, rawOp>;
+        using ResType = Operator<OpTags::SubstractFromNum, OperandContainer<rawOp>>;
         OperAuxParams<OpTags::SubstractFromNum, OperCateCal<OpTags::SubstractFromNum, rawOp>> params(p_m1);
         return ResType(std::move(params), std::forward<TP2>(p_m2));
     }

@@ -34,7 +34,7 @@ namespace OperTanh::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
@@ -78,7 +78,7 @@ template <typename TP,
 auto Tanh(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
-    using ResType = Operator<OpTags::Tanh, rawM>;
+    using ResType = Operator<OpTags::Tanh, OperandContainer<rawM>>;
     return ResType(std::forward<TP>(p_m));
 }
 }
@@ -108,7 +108,7 @@ namespace OperTanhGrad::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle>;
@@ -160,7 +160,7 @@ auto TanhGrad (TGrad&& p_grad, TInput&& p_input)
 
     using rawOp1 = RemConstRef<TGrad>;
     using rawOp2 = RemConstRef<TInput>;
-    using ResType = Operator<OpTags::TanhGrad, rawOp1, rawOp2>;
+    using ResType = Operator<OpTags::TanhGrad, OperandContainer<rawOp1, rawOp2>>;
     return ResType(std::forward<TGrad>(p_grad), std::forward<TInput>(p_input));
 }
 }

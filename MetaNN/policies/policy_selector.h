@@ -56,4 +56,26 @@ struct Selector_
 
 template <typename TMajorClass, typename TPolicyContainer>
 using PolicySelect = typename NSPolicySelect::Selector_<TMajorClass, TPolicyContainer>::type;
+
+template <typename TPolicyContainer, typename TMajorClass, typename TMinorClass>
+struct PickPolicyOjbect_;
+
+template <typename TMajorClass, typename TMinorClass, typename... TPolicies>
+struct PickPolicyOjbect_<PolicyContainer<TPolicies...>, TMajorClass, TMinorClass>
+{
+    using type = TMajorClass;
+};
+
+template <typename TMajorClass, typename TMinorClass, typename TCurPolicy, typename... TPolicies>
+struct PickPolicyOjbect_<PolicyContainer<TCurPolicy, TPolicies...>, TMajorClass, TMinorClass>
+{
+    constexpr static bool IsThePolicy = std::is_same_v<typename TCurPolicy::MajorClass, TMajorClass> &&
+                                        std::is_same_v<typename TCurPolicy::MinorClass, TMinorClass>;
+    using type = std::conditional_t<IsThePolicy,
+                                    TCurPolicy,
+                                    PickPolicyOjbect_<PolicyContainer<TPolicies...>, TMajorClass, TMinorClass>>;
+};
+
+template <typename TPolicyContainer, typename TMajorClass, typename TMinorClass>
+using PickPolicyOjbect = typename PickPolicyOjbect_<TPolicyContainer, TMajorClass, TMinorClass>::type;
 }

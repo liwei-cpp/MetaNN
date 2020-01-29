@@ -33,7 +33,7 @@ namespace OperAbs::NSCaseGen
         TOutputHandle m_outputHandle;
     };
     
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
@@ -79,7 +79,7 @@ template <typename TP,
 auto Abs(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
-    using ResType = Operator<OpTags::Abs, rawM>;
+    using ResType = Operator<OpTags::Abs, OperandContainer<rawM>>;
     return ResType(std::forward<TP>(p_m));
 }
 }

@@ -34,7 +34,7 @@ namespace OperReLU::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
@@ -79,7 +79,7 @@ template <typename TP,
 auto ReLU(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
-    using ResType = Operator<OpTags::ReLU, rawM>;
+    using ResType = Operator<OpTags::ReLU, OperandContainer<rawM>>;
     return ResType(std::forward<TP>(p_m));
 }
 }
@@ -110,7 +110,7 @@ namespace OperReLUGrad::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle>;
@@ -161,7 +161,7 @@ auto ReLUGrad(TGrad&& p_grad, TInput&& p_input)
 {
     static_assert(DataCategory<TInput>::DimNum >= DataCategory<TGrad>::DimNum);
 
-    using ResType = Operator<OpTags::ReLUGrad, RemConstRef<TGrad>, RemConstRef<TInput>>;
+    using ResType = Operator<OpTags::ReLUGrad, OperandContainer<RemConstRef<TGrad>, RemConstRef<TInput>>>;
     return ResType(std::forward<TGrad>(p_grad), std::forward<TInput>(p_input));
 }
 }

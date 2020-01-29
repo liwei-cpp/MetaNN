@@ -7,6 +7,8 @@
 
 namespace MetaNN
 {
+    template <typename... TOperands> struct OperandContainer;
+
     // operator validation check
     template <typename TOpTag, typename... TOperands>
     constexpr bool IsValidOper = ((IsValidCategoryTag<DataCategory<TOperands>>) && ...);
@@ -146,7 +148,7 @@ namespace MetaNN
     }
 
     // Shape
-    template <typename TOpTag, typename TCate>
+    template <typename TOpTag, typename TCate, typename TPolicies>
     class OperShapeInfo
     {
     public:

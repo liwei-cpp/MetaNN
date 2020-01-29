@@ -35,7 +35,7 @@ namespace OperAsin::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
@@ -79,7 +79,7 @@ template <typename TP,
 auto Asin(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
-    using ResType = Operator<OpTags::Asin, rawM>;
+    using ResType = Operator<OpTags::Asin, OperandContainer<rawM>>;
     return ResType(std::forward<TP>(p_m));
 }
 }
@@ -109,7 +109,7 @@ namespace OperAsinGrad::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle>;
@@ -161,7 +161,7 @@ auto AsinGrad(TGrad&& p_grad, TInput&& p_input)
     
     using rawGrad = RemConstRef<TGrad>;
     using rawInput = RemConstRef<TInput>;
-    using ResType = Operator<OpTags::AsinGrad, rawGrad, rawInput>;
+    using ResType = Operator<OpTags::AsinGrad, OperandContainer<rawGrad, rawInput>>;
     return ResType(std::forward<TGrad>(p_grad), std::forward<TInput>(p_input));
 }
 }

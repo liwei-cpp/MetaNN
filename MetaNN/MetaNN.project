@@ -190,6 +190,7 @@
   </VirtualDirectory>
   <VirtualDirectory Name="operators">
     <VirtualDirectory Name="facilities">
+      <File Name="operators/facilities/policies.h"/>
       <File Name="operators/facilities/organizer.h"/>
       <File Name="operators/facilities/tags.h"/>
       <File Name="operators/facilities/operator_frame.h"/>
