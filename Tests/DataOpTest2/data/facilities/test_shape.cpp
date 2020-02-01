@@ -71,6 +71,55 @@ namespace
         assert(sh[2] == 3);
         cout << "done" << endl;
     }
+    
+    void test_shape5()
+    {
+        cout << "Test shape case 5 (OffsetToIndex)...\t";
+        Shape<3> sh(7, 2, 3);
+        
+        size_t input = 0;
+        for (size_t i = 0; i < 7; ++i)
+        {
+            for (size_t j = 0; j < 2; ++j)
+            {
+                for (size_t k = 0; k < 3; ++k)
+                {
+                    auto res = sh.OffsetToIndex(input);
+                    assert(res[0] == i);
+                    assert(res[1] == j);
+                    assert(res[2] == k);
+                    ++input;
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_shape6()
+    {
+        cout << "Test shape case 6 (Shift Index with non-negative offset)...\t";
+        Shape<3> sh(7, 2, 3);
+        size_t totalCount = sh.Count();
+        
+        for (size_t i = 0; i < 7; ++i)
+        {
+            for (size_t j = 0; j < 2; ++j)
+            {
+                for (size_t k = 0; k < 3; ++k)
+                {
+                    size_t curPos = sh.IndexToOffset(i, j, k);
+                    size_t checkBuf = totalCount - curPos;
+                    for (size_t c = 0; c < checkBuf; ++c)
+                    {
+                        std::array<size_t, 3> idx{i, j, k};
+                        sh.ShiftIndex(idx, c);
+                        assert(sh.IndexToOffset(idx) == curPos + c);
+                    }
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Data::Facilities
@@ -81,5 +130,7 @@ namespace Test::Data::Facilities
         test_shape2();
         test_shape3();
         test_shape4();
+        test_shape5();
+        test_shape6();
     }
 }

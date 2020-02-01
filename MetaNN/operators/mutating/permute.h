@@ -94,28 +94,14 @@ namespace MetaNN
                 std::array<size_t, uDim> aimPos;
                 for (size_t i = 1; i < count; ++i)
                 {
-                    IncOriPos(oriShape, oriPos);
+                    oriShape.ShiftIndex(oriPos);
                     CalAimPos(oriPos, dims, aimPos);
-                    size_t index = Pos2Idx(aimPos, aimGaps);
+                    size_t index = evalItem.m_outShape.IndexToOffset(aimPos);
                     mem_out[index] = mem_in[i];
                 }
                 evalItem.m_outputHandle.SetData(std::move(out));
             }
         private:
-            void IncOriPos(const Shape<uDim>& oriShape, std::array<size_t, uDim>& oriPos) const
-            {
-                auto sit = oriShape.rbegin();
-                auto pit = oriPos.rbegin();
-                ++(*pit);
-                while (*pit == *sit)
-                {
-                    *pit = 0;
-                    ++pit;
-                    ++(*pit);
-                    ++sit;
-                }
-            }
-            
             void CalAimPos(const std::array<size_t, uDim>& oriPos, const std::array<size_t, uDim>& dims,
                            std::array<size_t, uDim>& aimPos) const
             {
@@ -123,16 +109,6 @@ namespace MetaNN
                 {
                     aimPos[i] = oriPos[dims[i]];
                 }
-            }
-            
-            size_t Pos2Idx(const std::array<size_t, uDim>& aimPos, const std::array<size_t, uDim>& aimGaps) const
-            {
-                size_t res = 0;
-                for (size_t i = 0; i < uDim; ++i)
-                {
-                    res += aimPos[i] * aimGaps[i];
-                }
-                return res;
             }
         };
     }

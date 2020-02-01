@@ -1,5 +1,6 @@
 #pragma once
 #include <MetaNN/data/facilities/category_tags.h>
+#include <MetaNN/facilities/cont_metafuns/helpers.h>
 #include <cassert>
 #include <array>
 #include <stdexcept>
@@ -37,6 +38,15 @@ namespace MetaNN
                 return res;
             }
         }
+        
+        template <size_t uDimNum, int...N>
+        size_t IndexToOffset(const std::array<size_t, uDimNum>& dims,
+                             const std::array<size_t, uDimNum>& indexes,
+                             Helper::IndexSequence<N...>*)
+        {
+            size_t gap = 0;
+            return IndexToOffset(dims, gap, std::get<N>(indexes)...);
+        }
 
         template <size_t ID, typename TShape>
         void FillShape(TShape& pShape)
@@ -50,6 +60,7 @@ namespace MetaNN
             pShape[ID] = static_cast<size_t>(curParam);
             FillShape<ID + 1>(pShape, shapes...);
         }
+        
     }
 
     template <size_t uDimNum>
@@ -93,14 +104,60 @@ namespace MetaNN
             return res;
         }
         
-        template <typename... TIntTypes>
+        template <typename... TIntTypes,
+                  typename = std::enable_if_t<(std::is_convertible_v<TIntTypes, size_t> && ...)>>
         size_t IndexToOffset(TIntTypes... indexes) const
         {
             static_assert(sizeof...(TIntTypes) == uDimNum);
             size_t gap = 0;
             return NSShape::IndexToOffset(m_dims, gap, indexes...);
         }
+
+        size_t IndexToOffset(const std::array<size_t, DimNum>& indexes) const
+        {
+            using TSeq = Helper::MakeIndexSequence<DimNum>;
+            return NSShape::IndexToOffset(m_dims, indexes, (TSeq*)nullptr);
+        }
         
+        std::array<size_t, DimNum> OffsetToIndex(size_t offset) const
+        {
+            std::array<size_t, DimNum> res;
+            for (int i = (int)DimNum - 1; i >= 0; --i)
+            {
+                res[i] = offset % m_dims[i];
+                offset = (offset - res[i]) / m_dims[i];
+            }
+            if (offset != 0)
+            {
+                throw std::runtime_error("Offset out of bound!");
+            }
+            return res;
+        }
+        
+        void ShiftIndex(std::array<size_t, DimNum>& indexes, int carry = 1) const
+        {
+            if (carry == 0) return;
+            if (carry > 0)
+            {
+                size_t uCarry = (size_t)carry;
+                for (int i = (int)DimNum - 1; i >= 0; --i)
+                {
+                    indexes[i] += uCarry;
+                    uCarry = indexes[i] / m_dims[i];
+                    indexes[i] %= m_dims[i];
+                    if (uCarry == 0) return;
+                }
+                if (uCarry)
+                {
+                    throw std::runtime_error("Overflow");
+                }
+            }
+            else
+            {
+                throw std::runtime_error("Not implemented yet.");
+            }
+        }
+
         size_t operator[] (size_t idx) const
         {
             assert(idx < DimNum);
