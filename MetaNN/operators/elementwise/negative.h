@@ -15,7 +15,7 @@ namespace MetaNN
 {
 namespace OperNegative::NSCaseGen
 {
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -34,9 +34,9 @@ namespace OperNegative::NSCaseGen
     };
 
     template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
     {
-        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicies>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {

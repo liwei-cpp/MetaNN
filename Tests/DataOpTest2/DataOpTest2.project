@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="DataOpTest2" Version="10.0.0" InternalType="Console">
   <VirtualDirectory Name="operators">
+    <VirtualDirectory Name="math">
+      <File Name="operators/math/test_reduce_sum.cpp"/>
+      <File Name="operators/math/_.h"/>
+    </VirtualDirectory>
     <VirtualDirectory Name="elementwise">
       <File Name="operators/elementwise/test_interpolate.cpp"/>
       <File Name="operators/elementwise/test_divide.cpp"/>

@@ -25,7 +25,7 @@ namespace MetaNN
                       "TOperands is not an available types");
     public:
         using Policies = TPolicies;
-        using CategoryTag = OperCateCal<TOpTag, TOperands...>;
+        using CategoryTag = OperCateCal<TOpTag, TPolicies, TOperands...>;
         using ElementType = typename OperElementType_<TOpTag, TOperands...>::type;
         using DeviceType = typename OperDeviceType_<TOpTag, TOperands...>::type;
 

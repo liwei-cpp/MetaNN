@@ -17,7 +17,7 @@ namespace MetaNN
 {
     namespace OperPermute::NSCaseGen
     {
-        template <typename TInputHandle, typename TOutputHandle>
+        template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
         class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
         {
             using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -39,9 +39,9 @@ namespace MetaNN
         };
         
         template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
-        class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+        class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
         {
-            using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+            using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicies>;
             constexpr static size_t uDim = EvalItemType::CategoryTag::DimNum;
 
         protected:
@@ -193,8 +193,8 @@ namespace MetaNN
         else
         {
             using rawOp = RemConstRef<TP>;
-            using DimPolicy = PickPolicyOjbect<TDimPolicy, DimPolicy, DimPolicy>;
-            using ResType = Operator<OpTags::Permute, OperandContainer<rawOp>, PolicyContainer<DimPolicy>>;
+            using PDim = PickPolicyOjbect<TDimPolicy, DimPolicy, DimPolicy::DimArrayValueCate>;
+            using ResType = Operator<OpTags::Permute, OperandContainer<rawOp>, PolicyContainer<PDim>>;
             return ResType(std::forward<TP>(oper));
         }
     }

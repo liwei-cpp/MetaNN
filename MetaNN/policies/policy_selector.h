@@ -78,4 +78,25 @@ struct PickPolicyOjbect_<PolicyContainer<TCurPolicy, TPolicies...>, TMajorClass,
 
 template <typename TPolicyContainer, typename TMajorClass, typename TMinorClass>
 using PickPolicyOjbect = typename PickPolicyOjbect_<TPolicyContainer, TMajorClass, TMinorClass>::type;
+
+template <typename TPolicyContainer, typename TMajorClass, typename TMinorClass>
+struct HasNonTrivalPolicy_;
+
+template <typename TMajorClass, typename TMinorClass, typename... TPolicies>
+struct HasNonTrivalPolicy_<PolicyContainer<TPolicies...>, TMajorClass, TMinorClass>
+{
+    constexpr static bool value = false;
+};
+
+template <typename TMajorClass, typename TMinorClass, typename TCurPolicy, typename... TPolicies>
+struct HasNonTrivalPolicy_<PolicyContainer<TCurPolicy, TPolicies...>, TMajorClass, TMinorClass>
+{
+    constexpr static bool IsThePolicy = std::is_same_v<typename TCurPolicy::MajorClass, TMajorClass> &&
+                                        std::is_same_v<typename TCurPolicy::MinorClass, TMinorClass>;
+    constexpr static bool value = OrValue<IsThePolicy,
+                                          HasNonTrivalPolicy_<PolicyContainer<TPolicies...>, TMajorClass, TMinorClass>>;
+};
+
+template <typename TPolicyContainer, typename TMajorClass, typename TMinorClass>
+constexpr static bool HasNonTrivalPolicy = HasNonTrivalPolicy_<TPolicyContainer, TMajorClass, TMinorClass>::value;
 }

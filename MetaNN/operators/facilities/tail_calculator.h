@@ -41,7 +41,7 @@ namespace MetaNN
             using DeviceType = DeviceTypeFromHandle<TResHandle>;
         
             using ItemType = EvalItem<RemConstRef<decltype(std::get<Index>(operHandles))>..., 
-                                      RemConstRef<TResHandle>>;
+                                      RemConstRef<TResHandle>, TPolicies>;
             using GroupType = EvalGroup<RemConstRef<decltype(std::get<Index>(operHandles))>..., 
                                       RemConstRef<TResHandle>, TPolicies>;
             using DispatcherType = EvalDispatcher<GroupType>;

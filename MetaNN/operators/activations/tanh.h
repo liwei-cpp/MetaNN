@@ -16,7 +16,7 @@ namespace MetaNN
 {
 namespace OperTanh::NSCaseGen
 {
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -35,9 +35,9 @@ namespace OperTanh::NSCaseGen
     };
 
     template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
     {
-        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicies>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
@@ -87,7 +87,7 @@ namespace MetaNN
 {
 namespace OperTanhGrad::NSCaseGen
 {
-    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -109,9 +109,9 @@ namespace OperTanhGrad::NSCaseGen
     };
 
     template <typename TGradHandle, typename TInputHandle, typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle>>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle, TPolicies>>
     {
-        using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle>;
+        using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle, TPolicies>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {

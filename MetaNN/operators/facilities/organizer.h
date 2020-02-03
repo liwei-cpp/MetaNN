@@ -31,12 +31,12 @@ namespace MetaNN
         using type = typename PickCommonCategory_<TCompRes, TRemainCates...>::type;
     };
 
-    template <typename TOpTag, typename... TOperands>
+    template <typename TOpTag, typename TPolicy, typename... TOperands>
     struct OperCategory_ : PickCommonCategory_<TOperands...>
     {};
 
-    template <typename TOpTag, typename... TOperands>
-    using OperCateCal = typename OperCategory_<TOpTag, DataCategory<TOperands>...>::type;
+    template <typename TOpTag, typename TPolicy, typename... TOperands>
+    using OperCateCal = typename OperCategory_<TOpTag, TPolicy, DataCategory<TOperands>...>::type;
 
     // ElementType
     template <typename TOpTag, typename...TOperands>

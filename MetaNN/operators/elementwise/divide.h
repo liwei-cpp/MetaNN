@@ -17,7 +17,7 @@ namespace MetaNN
 // General Divide
 namespace OperDivide::NSCaseGen
 {
-    template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
+    template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle, typename TPolicies>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -41,9 +41,9 @@ namespace OperDivide::NSCaseGen
     };
 
     template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TOutputHandle, TPolicies>>
     {
-        using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>;
+        using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TOutputHandle, TPolicies>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
@@ -88,7 +88,7 @@ struct OperSeq_<OpTags::Divide>
 /// Divide by number
 namespace OperDivideByNum::NSCaseGen
 {
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -109,9 +109,9 @@ namespace OperDivideByNum::NSCaseGen
     };
 
     template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
     {
-        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicies>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
@@ -178,7 +178,7 @@ auto operator/ (TP1&& p_m1, TP2&& p_m2)
     {
         using rawOp = RemConstRef<TP1>;
         using ResType = Operator<OpTags::DivideByNum, OperandContainer<rawOp>>;
-        OperAuxParams<OpTags::DivideByNum, OperCateCal<OpTags::DivideByNum, rawOp>> params(p_m2);
+        OperAuxParams<OpTags::DivideByNum, OperCateCal<OpTags::DivideByNum, PolicyContainer<>, rawOp>> params(p_m2);
         return ResType(std::move(params), std::forward<TP1>(p_m1));
     }
     else
