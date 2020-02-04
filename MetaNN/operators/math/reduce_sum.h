@@ -37,13 +37,28 @@ namespace MetaNN
         {
             using type = DimBitArrayIs<(I < uTrueBound)...>;
         };
-        
+
         template <typename TPolicy, size_t uDimNum>
         struct ResDimToBit_
         {
             constexpr static size_t ResDimNum = PolicySelect<DimPolicy, TPolicy>::ResDimNum;
             static_assert(ResDimNum <= uDimNum);
             using type = typename ResDimToBitHelper_<uDimNum - ResDimNum, std::make_index_sequence<uDimNum>>::type;
+        };
+
+        template <typename TIndexes>
+        struct DefaultToBitHelper_;
+        
+        template <size_t... I>
+        struct DefaultToBitHelper_<std::index_sequence<I...>>
+        {
+            using type = DimBitArrayIs<(I >= 0)...>;
+        };
+
+        template <size_t uDimNum>
+        struct DefaultToBit_
+        {
+            using type = typename DefaultToBitHelper_<std::make_index_sequence<uDimNum>>::type;
         };
 
         template <size_t uDimNum>
@@ -104,6 +119,7 @@ namespace MetaNN
         class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
         {
             using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicies>;
+            constexpr static size_t OriDim = CategoryTagFromHandle<TInputHandle>::DimNum;
 
         protected:
             virtual void EvalInternalLogic(EvalItemType& evalItem) final override
@@ -112,7 +128,7 @@ namespace MetaNN
                 const auto& oriShape = in.Shape();
                 
                 constexpr auto dimBits = PolicySelect<DimPolicy, TPolicies>::DimBitArray;
-                constexpr size_t OriDim = dimBits.size();
+                static_assert(OriDim == dimBits.size());
                 constexpr size_t AimDim = CategoryTagFromHandle<TOutputHandle>::DimNum;
                 
                 using ResType = typename TOutputHandle::DataType;
@@ -132,7 +148,21 @@ namespace MetaNN
                 ElementType* mem_out = low_out.MutableRawMemory();
                 
                 static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
-                if constexpr (AimDim)
+                if constexpr (AimDim == 0)
+                {
+                    mem_out[0] = std::accumulate(mem_in, mem_in + count, ElementType{});
+                }
+                else if constexpr (IsRegular(dimBits))
+                {
+                    const size_t new_count = evalItem.m_outShape.Count();
+                    assert(count % new_count == 0);
+                    std::copy(mem_in, mem_in + new_count, mem_out);
+                    for (size_t i = new_count; i < count; i += new_count)
+                    {
+                        std::transform(mem_in + i, mem_in + i + new_count, mem_out, mem_out, std::plus<ElementType>());
+                    }
+                }
+                else
                 {
                     std::fill(mem_out, mem_out + evalItem.m_outShape.Count(), ElementType{});
                     mem_out[0] = mem_in[0];
@@ -163,11 +193,22 @@ namespace MetaNN
                         mem_out[evalItem.m_outShape.IndexToOffset(aimPos)] += mem_in[i];
                     }
                 }
-                else
-                {
-                    mem_out[0] = std::accumulate(mem_in, mem_in + count, ElementType{});
-                }
                 evalItem.m_outputHandle.SetData(std::move(out));
+            }
+        private:
+            constexpr static bool IsRegular(std::array<bool, OriDim> dimBits)
+            {
+                size_t i = 0;
+                for (; i < OriDim; ++i)
+                {
+                    if (dimBits[i] == 0) break;
+                }
+
+                for (; i < OriDim; ++i)
+                {
+                    if (dimBits[i] == 1) return false;
+                }
+                return true;
             }
         };
     }
@@ -238,18 +279,19 @@ namespace MetaNN
     constexpr bool IsValidOper<OpTags::ReduceSum, TP> = (IsValidCategoryTag<DataCategory<TP>>) &&
                                                         (DataCategory<TP>::DimNum > 0);
     
-    template <typename TPolicy, typename TP,
+    template <typename TPolicy = PolicyContainer<>, typename TP,
               typename = std::enable_if_t<IsValidOper<OpTags::ReduceSum, TP>>>
     auto ReduceSum(TP&& oper)
     {
         constexpr bool HasDimArray = HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::DimArrayValueCate>;
         constexpr bool HasResDimNum = HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::ResDimNumValueCate>;
 
-        static_assert((int)HasDimArray + (int)HasResDimNum == 1, "DimArray or ResDimValue should be set");
+        static_assert((int)HasDimArray + (int)HasResDimNum <= 1, "only one of DimArray or ResDimValue could be set");
         
         using TDimBits = typename CompileTimeSwitch<std::integer_sequence<bool, HasDimArray, HasResDimNum>,
                                                     std::tuple<OperReduceSum::DimArrToBit_<TPolicy, DataCategory<TP>::DimNum>,
-                                                               OperReduceSum::ResDimToBit_<TPolicy, DataCategory<TP>::DimNum>>>::type;
+                                                               OperReduceSum::ResDimToBit_<TPolicy, DataCategory<TP>::DimNum>,
+                                                               OperReduceSum::DefaultToBit_<DataCategory<TP>::DimNum>>>::type;
 
         static constexpr bool KeepDim = PolicySelect<DimPolicy, TPolicy>::IsKeepDim;
         constexpr auto DimBits = TDimBits::DimBitArray;

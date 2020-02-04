@@ -107,6 +107,21 @@ namespace
 
         cout << "done" << endl;
     }
+
+    void test_reduce_sum_case5()
+    {
+        cout << "Test reduce sum case 5 (Reduce sum all)\t";
+        auto ori = GenTensor<int>(0, 1, 2, 3, 5);
+
+        auto op = ReduceSum(ori);
+        static_assert(IsScalar<decltype(op)>);
+
+        auto res = Evaluate(op);
+        static_assert(IsScalar<decltype(res)>);
+        assert(res.Value() == 435);
+
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Operators::Math
@@ -117,5 +132,6 @@ namespace Test::Operators::Math
         test_reduce_sum_case2();
         test_reduce_sum_case3();
         test_reduce_sum_case4();
+        test_reduce_sum_case5();
     }
 }
