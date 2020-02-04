@@ -142,12 +142,22 @@ namespace MetaNN
                     for (size_t i = 1; i < count; ++i)
                     {
                         oriShape.ShiftIndex(oriPos);
-                        size_t p = 0;
-                        for (size_t j = 0; j < OriDim; ++j)
+                        if constexpr (PolicySelect<DimPolicy, TPolicies>::IsKeepDim)
                         {
-                            if (!dimBits[j])
+                            for (size_t j = 0; j < OriDim; ++j)
                             {
-                                aimPos[p++] = oriPos[j];
+                                aimPos[j] = dimBits[j] ? 0 : oriPos[j];
+                            }
+                        }
+                        else
+                        {
+                            size_t p = 0;
+                            for (size_t j = 0; j < OriDim; ++j)
+                            {
+                                if (!dimBits[j])
+                                {
+                                    aimPos[p++] = oriPos[j];
+                                }
                             }
                         }
                         mem_out[evalItem.m_outShape.IndexToOffset(aimPos)] += mem_in[i];
@@ -181,16 +191,25 @@ namespace MetaNN
             {
                 constexpr auto dimBits = PolicySelect<DimPolicy, TPolicies>::DimBitArray;
                 auto prevShape = operand.Shape();
-
-                size_t p = 0;
-                for (size_t i = 0; i < dimBits.size(); ++i)
+                if constexpr (PolicySelect<DimPolicy, TPolicies>::IsKeepDim)
                 {
-                    if (!dimBits[i])
+                    for (size_t i = 0; i < dimBits.size(); ++i)
                     {
-                        m_shape[p++] = prevShape[i];
+                        m_shape[i] = dimBits[i] ? 1 : prevShape[i];
                     }
                 }
-                assert(p == uDim);
+                else
+                {
+                    size_t p = 0;
+                    for (size_t i = 0; i < dimBits.size(); ++i)
+                    {
+                        if (!dimBits[i])
+                        {
+                            m_shape[p++] = prevShape[i];
+                        }
+                    }
+                    assert(p == uDim);
+                }
             }
         }
     
@@ -208,7 +227,9 @@ namespace MetaNN
     {
         constexpr static size_t OriDim = TOperand::DimNum;
         constexpr static auto DimBits = PolicySelect<DimPolicy, TPolicy>::DimBitArray;
-        constexpr static size_t AccuBits = OperReduceSum::AccuDimBits(DimBits);
+        constexpr static size_t AccuBits = 
+            PolicySelect<DimPolicy, TPolicy>::IsKeepDim ?
+            0 : OperReduceSum::AccuDimBits(DimBits);
         static_assert(OriDim >= AccuBits);
         using type = CategoryTags::Tensor<OriDim - AccuBits>;
     };
@@ -229,6 +250,8 @@ namespace MetaNN
         using TDimBits = typename CompileTimeSwitch<std::integer_sequence<bool, HasDimArray, HasResDimNum>,
                                                     std::tuple<OperReduceSum::DimArrToBit_<TPolicy, DataCategory<TP>::DimNum>,
                                                                OperReduceSum::ResDimToBit_<TPolicy, DataCategory<TP>::DimNum>>>::type;
+
+        static constexpr bool KeepDim = PolicySelect<DimPolicy, TPolicy>::IsKeepDim;
         constexpr auto DimBits = TDimBits::DimBitArray;
         if constexpr (OperReduceSum::IsTrivalDimBits(DimBits))
         {
@@ -238,7 +261,7 @@ namespace MetaNN
         {
             using rawOp = RemConstRef<TP>;
             using ResType = Operator<OpTags::ReduceSum, OperandContainer<rawOp>,
-                                     PolicyContainer<TDimBits>>;
+                                     PolicyContainer<TDimBits, PKeepDimValueIs<KeepDim>>>;
             return ResType(std::forward<TP>(oper));
         }
     }

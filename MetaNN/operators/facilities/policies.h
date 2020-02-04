@@ -16,9 +16,10 @@ namespace MetaNN
         struct ResDimNumValueCate;
         static constexpr size_t ResDimNum = 0;
     };
-    ValuePolicyObj(PKeepDim,          DimPolicy, IsKeepDim, true);
-    ValuePolicyObj(PNoKeepDIm,        DimPolicy, IsKeepDim, false);
-    ValuePolicyTemplate(PResDimNumIs, DimPolicy, ResDimNum);
+    ValuePolicyObj(PKeepDim,             DimPolicy, IsKeepDim, true);
+    ValuePolicyObj(PNoKeepDIm,           DimPolicy, IsKeepDim, false);
+    ValuePolicyTemplate(PKeepDimValueIs, DimPolicy, IsKeepDim);
+    ValuePolicyTemplate(PResDimNumIs,    DimPolicy, ResDimNum);
 
     template <size_t... uDims>
     struct DimArrayIs : virtual public DimPolicy
