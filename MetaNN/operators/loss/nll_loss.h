@@ -18,77 +18,75 @@ namespace MetaNN
 {
 namespace OperNLLLoss::NSCaseGen
 {
-    template <typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
+    template <typename TTruthHandle, typename TPredHandle, typename TOutputHandle, typename TPolicies>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
+
         template <typename TAuxParams>
-        EvalItem(TWeightHandle weightHandle, TInputHandle inputHandle,
-                 TOutputHandle outputHandle, const TAuxParams&)
+        EvalItem(TTruthHandle truthHandle, TPredHandle predHandle,
+                 TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams&)
             : BaseType(std::type_index(typeid(EvalItem)),
-                       {weightHandle.DataPtr(), inputHandle.DataPtr()},
+                       {truthHandle.DataPtr(), predHandle.DataPtr()},
                        outputHandle.DataPtr())
-            , m_weightHandle(std::move(weightHandle))
-            , m_inputHandle(std::move(inputHandle))
+            , m_truthHandle(std::move(truthHandle))
+            , m_predHandle(std::move(predHandle))
             , m_outputHandle(std::move(outputHandle))
         {}
         
-        const TWeightHandle m_weightHandle;
-        const TInputHandle m_inputHandle;
+        const TTruthHandle m_truthHandle;
+        const TPredHandle m_predHandle;
         TOutputHandle m_outputHandle;
     };
     
-    template <typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TWeightHandle, TInputHandle, TOutputHandle>>
+    template <typename TTruthHandle, typename TPredHandle, typename TOutputHandle, typename TPolicies>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TTruthHandle, TPredHandle, TOutputHandle, TPolicies>>
     {
-        using EvalItemType = EvalItem<TWeightHandle, TInputHandle, TOutputHandle>;
+        using EvalItemType = EvalItem<TTruthHandle, TPredHandle, TOutputHandle, TPolicies>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
-            const auto& weight = evalItem.m_weightHandle.Data();
-            const auto& in = evalItem.m_inputHandle.Data();
-            assert(weight.Shape() == in.Shape());
+            const auto& truth = evalItem.m_truthHandle.Data();
+            const auto& pred = evalItem.m_predHandle.Data();
+            
+            const size_t count = truth.Shape().Count();
+            assert(count == pred.Shape().Count());
 
             using ResType = typename TOutputHandle::DataType;
             using ElementType = typename ResType::ElementType;
             ResType out;
 
-            const size_t inCount = in.Shape().Count();
+            auto low_pred = LowerAccess(pred);
+            ElementType* mem_pred = low_pred.MutableRawMemory();
 
-            auto low_in = LowerAccess(in);
-            ElementType* mem_in = low_in.MutableRawMemory();
-
-            auto low_weight = LowerAccess(weight);
-            ElementType* mem_weight = low_weight.MutableRawMemory();
+            auto low_truth = LowerAccess(truth);
+            ElementType* mem_truth = low_truth.MutableRawMemory();
 
             static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
 
             ElementType res{};
-            for (size_t i = 0; i < inCount; ++i)
+            ElementType sum_truth{};
+            for (size_t i = 0; i < count; ++i)
             {
-                res -= mem_weight[i] * log(mem_in[i]);
+                res -= mem_truth[i] * log(mem_pred[i]);
+                sum_truth += mem_truth[i];
             }
-        
-            if constexpr (!IsCardinal<decltype(weight)>)
-            {
-                const size_t cardinalCount = in.Shape().Cardinal().Count();
-                assert(inCount % cardinalCount == 0);
-                res /= (inCount / cardinalCount);
-            }
-            out.SetValue(res);
+
+            out.SetValue(res / sum_truth);
             evalItem.m_outputHandle.SetData(std::move(out));
         }
     };
 }
 
-template <typename TWeight, typename TInput>
-struct OperCategory_<OpTags::NLLLoss, TWeight, TInput>
+template <typename TPolicies, typename TTruth, typename TPred>
+struct OperCategory_<OpTags::NLLLoss, TPolicies, TTruth, TPred>
     : public GenLossOperCategory_
 {};
 
-template <>
-class OperShapeInfo<OpTags::NLLLoss, CategoryTags::Scalar>
+template <typename TPolicies>
+class OperShapeInfo<OpTags::NLLLoss, CategoryTags::Tensor<0>, TPolicies>
     : public GenLossOperShapeInfo
 {
 public:
@@ -101,12 +99,13 @@ struct OperSeq_<OpTags::NLLLoss>
     using type = OperCalAlgoChain<TailCalculator<OperNLLLoss::NSCaseGen::EvalItem, OperNLLLoss::NSCaseGen::EvalGroup>>;
 };
 
-template <typename TWeight, typename TInput,
-          typename = std::enable_if_t<IsValidOper<OpTags::NLLLoss, TWeight, TInput>>>
-auto NLLLoss(TWeight&& p_weight, TInput&& p_input)
+template <typename TTruth, typename TPred,
+          typename = std::enable_if_t<IsValidOper<OpTags::NLLLoss, TTruth, TPred>>>
+auto NLLLoss(TTruth&& p_truth, TPred&& p_pred)
 {
-    using ResType = Operator<OpTags::NLLLoss, RemConstRef<TWeight>, RemConstRef<TInput>>;
-    return ResType(std::forward<TWeight>(p_weight), std::forward<TInput>(p_input));
+    static_assert(std::is_same_v<DataCategory<TTruth>, DataCategory<TPred>>);
+    using ResType = Operator<OpTags::NLLLoss, OperandContainer<RemConstRef<TTruth>, RemConstRef<TPred>>>;
+    return ResType(std::forward<TTruth>(p_truth), std::forward<TPred>(p_pred));
 }
 }
 
@@ -114,71 +113,69 @@ namespace MetaNN
 {
 namespace OperNLLLossGrad::NSCaseGen
 {
-    template <typename TGradHandle, typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
+    template <typename TGradHandle, typename TTruthHandle, typename TPredHandle, typename TOutputHandle, typename TPolicies>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
+
         template <typename TAuxParams>
-        EvalItem(TGradHandle gradHandle, TWeightHandle weightHandle, TInputHandle inputHandle,
-                 TOutputHandle outputHandle, const TAuxParams&)
+        EvalItem(TGradHandle gradHandle, TTruthHandle truthHandle, TPredHandle predHandle,
+                 TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams&)
             : BaseType(std::type_index(typeid(EvalItem)),
-                       {gradHandle.DataPtr(), weightHandle.DataPtr(), inputHandle.DataPtr()},
+                       {gradHandle.DataPtr(), truthHandle.DataPtr(), predHandle.DataPtr()},
                        outputHandle.DataPtr())
             , m_gradHandle(std::move(gradHandle))
-            , m_weightHandle(std::move(weightHandle))
-            , m_inputHandle(std::move(inputHandle))
+            , m_truthHandle(std::move(truthHandle))
+            , m_predHandle(std::move(predHandle))
             , m_outputHandle(std::move(outputHandle))
         {}
         
         const TGradHandle m_gradHandle;
-        const TWeightHandle m_weightHandle;
-        const TInputHandle m_inputHandle;
+        const TTruthHandle m_truthHandle;
+        const TPredHandle m_predHandle;
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TGradHandle, typename TWeightHandle, typename TInputHandle, typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TWeightHandle, TInputHandle, TOutputHandle>>
+    template <typename TGradHandle, typename TTruthHandle, typename TPredHandle, typename TOutputHandle, typename TPolicies>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TTruthHandle, TPredHandle, TOutputHandle, TPolicies>>
     {
-        using EvalItemType = EvalItem<TGradHandle, TWeightHandle, TInputHandle, TOutputHandle>;
+        using EvalItemType = EvalItem<TGradHandle, TTruthHandle, TPredHandle, TOutputHandle, TPolicies>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
             const auto& grad = evalItem.m_gradHandle.Data();
-            const auto& weight = evalItem.m_weightHandle.Data();
-            const auto& in = evalItem.m_inputHandle.Data();
-            assert(weight.Shape() == in.Shape());
+            const auto& truth = evalItem.m_truthHandle.Data();
+            const auto& pred = evalItem.m_predHandle.Data();
+            assert(truth.Shape() == pred.Shape());
 
             using ResType = typename TOutputHandle::DataType;
             using ElementType = typename ResType::ElementType;
-            ResType out(weight.Shape());
+            ResType out(truth.Shape());
 
-            const size_t count = in.Shape().Count();
-            const size_t cardinalCount = in.Shape().CardinalShape().Count();
-            assert(count % cardinalCount == 0);
-            const size_t loopCount = count / cardinalCount;
+            const size_t count = truth.Shape().Count();
 
-            auto low_grad = LowerAccess(grad);
-            const ElementType* mem_grad = low_grad.RawMemory();
-            auto low_in = LowerAccess(in);
-            const ElementType* mem_in = low_in.RawMemory();
-            auto low_weight = LowerAccess(weight);
-            const ElementType* mem_weight = low_weight.RawMemory();
+            const ElementType neg_grad = -grad.Value();
+            auto low_pred = LowerAccess(pred);
+            const ElementType* mem_pred = low_pred.RawMemory();
+            auto low_truth = LowerAccess(truth);
+            const ElementType* mem_truth = low_truth.RawMemory();
             auto low_out = LowerAccess(out);
             ElementType* mem_out = low_out.MutableRawMemory();
 
             static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
 
-            for (size_t loop = 0; loop < loopCount; ++loop)
+            ElementType sum_truth{};
+            for (size_t i = 0; i < count; ++i)
             {
-                ElementType ngv = -mem_grad[loop];
-                for (size_t i = 0; i < cardinalCount; ++i)
-                {
-                    mem_out[i] = ngv * mem_weight[i] / mem_in[i];
-                }
-                mem_out += cardinalCount;
-                mem_weight += cardinalCount;
-                mem_in += cardinalCount;
+                sum_truth += mem_truth[i];
+            }
+
+            const ElementType scal = neg_grad / sum_truth;
+            for (size_t i = 0; i < count; ++i)
+            {
+                mem_out[i] = scal * mem_truth[i] / mem_pred[i];
             }
 
             evalItem.m_outputHandle.SetData(std::move(out));
@@ -186,19 +183,10 @@ namespace OperNLLLossGrad::NSCaseGen
     };
 }
 
-template <typename TGrad, typename TWeight, typename TInput>
-struct OperCategory_<OpTags::NLLLossGrad, TGrad, TWeight, TInput>
+template <typename TPolicies, typename TGrad, typename TWeight, typename TInput>
+struct OperCategory_<OpTags::NLLLossGrad, TPolicies, TGrad, TWeight, TInput>
     : public PickCommonCategory_<TWeight, TInput>
 {};
-
-template <typename TCate>
-class OperShapeInfo<OpTags::NLLLossGrad, TCate>
-    : public GenLossBPOperShapeInfo<TCate>
-{
-    using TBase = GenLossBPOperShapeInfo<TCate>;
-public:
-    using TBase::TBase;
-};
 
 template <>
 struct OperSeq_<OpTags::NLLLossGrad>
@@ -207,11 +195,14 @@ struct OperSeq_<OpTags::NLLLossGrad>
 };
 
 // interface
-template <typename TGrad, typename TWeight, typename TInput,
-          typename = std::enable_if_t<IsValidLossBP<OpTags::NLLLossGrad, TGrad, TWeight, TInput>>>
-auto NLLLossGrad(TGrad&& p_grad, TWeight&& p_weight, TInput&& p_input)
+template <typename TGrad, typename TTruth, typename TPred,
+          typename = std::enable_if_t<IsValidOper<OpTags::NLLLossGrad, TGrad, TTruth, TPred>>>
+auto NLLLossGrad(TGrad&& p_grad, TTruth&& p_truth, TPred&& p_pred)
 {
-    using ResType = Operator<OpTags::NLLLossGrad, RemConstRef<TGrad>, RemConstRef<TWeight>, RemConstRef<TInput>>;
-    return ResType(std::forward<TGrad>(p_grad), std::forward<TWeight>(p_weight), std::forward<TInput>(p_input));
+    static_assert(IsScalar<TGrad>);
+    static_assert(std::is_same_v<DataCategory<TPred>, DataCategory<TTruth>>);
+
+    using ResType = Operator<OpTags::NLLLossGrad, OperandContainer<RemConstRef<TGrad>, RemConstRef<TTruth>, RemConstRef<TPred>>>;
+    return ResType(std::forward<TGrad>(p_grad), std::forward<TTruth>(p_truth), std::forward<TPred>(p_pred));
 }
 }
