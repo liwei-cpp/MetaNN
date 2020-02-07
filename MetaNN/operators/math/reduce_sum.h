@@ -30,20 +30,20 @@ namespace MetaNN
         };
 
         template <size_t uTrueBound, typename TIndexes>
-        struct ResDimToBitHelper_;
+        struct ModDimToBitHelper_;
         
         template <size_t uTrueBound, size_t... I>
-        struct ResDimToBitHelper_<uTrueBound, std::index_sequence<I...>>
+        struct ModDimToBitHelper_<uTrueBound, std::index_sequence<I...>>
         {
             using type = DimBitArrayIs<(I < uTrueBound)...>;
         };
 
         template <typename TPolicy, size_t uDimNum>
-        struct ResDimToBit_
+        struct ModDimToBit_
         {
-            constexpr static size_t ResDimNum = PolicySelect<DimPolicy, TPolicy>::ResDimNum;
-            static_assert(ResDimNum <= uDimNum);
-            using type = typename ResDimToBitHelper_<uDimNum - ResDimNum, std::make_index_sequence<uDimNum>>::type;
+            constexpr static size_t ModDimNum = PolicySelect<DimPolicy, TPolicy>::ModifyDimNum;
+            static_assert(ModDimNum <= uDimNum);
+            using type = typename ModDimToBitHelper_<ModDimNum, std::make_index_sequence<uDimNum>>::type;
         };
 
         template <typename TIndexes>
@@ -284,13 +284,13 @@ namespace MetaNN
     auto ReduceSum(TP&& oper)
     {
         constexpr bool HasDimArray = HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::DimArrayValueCate>;
-        constexpr bool HasResDimNum = HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::ResDimNumValueCate>;
+        constexpr bool HasModDimNum = HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::ModifyDimNumValueCate>;
 
-        static_assert((int)HasDimArray + (int)HasResDimNum <= 1, "only one of DimArray or ResDimValue could be set");
+        static_assert((int)HasDimArray + (int)HasModDimNum <= 1, "only one of DimArray or ResDimValue could be set");
         
-        using TDimBits = typename CompileTimeSwitch<std::integer_sequence<bool, HasDimArray, HasResDimNum>,
+        using TDimBits = typename CompileTimeSwitch<std::integer_sequence<bool, HasDimArray, HasModDimNum>,
                                                     std::tuple<OperReduceSum::DimArrToBit_<TPolicy, DataCategory<TP>::DimNum>,
-                                                               OperReduceSum::ResDimToBit_<TPolicy, DataCategory<TP>::DimNum>,
+                                                               OperReduceSum::ModDimToBit_<TPolicy, DataCategory<TP>::DimNum>,
                                                                OperReduceSum::DefaultToBit_<DataCategory<TP>::DimNum>>>::type;
 
         static constexpr bool KeepDim = PolicySelect<DimPolicy, TPolicy>::IsKeepDim;

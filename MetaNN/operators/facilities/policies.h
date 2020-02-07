@@ -13,13 +13,13 @@ namespace MetaNN
         struct DimArrayValueCate;
         struct DimBitArrayValueCate;
         
-        struct ResDimNumValueCate;
-        static constexpr size_t ResDimNum = 0;
+        struct ModifyDimNumValueCate;
+        static constexpr size_t ModifyDimNum = 0;
     };
     ValuePolicyObj(PKeepDim,             DimPolicy, IsKeepDim, true);
     ValuePolicyObj(PNoKeepDIm,           DimPolicy, IsKeepDim, false);
     ValuePolicyTemplate(PKeepDimValueIs, DimPolicy, IsKeepDim);
-    ValuePolicyTemplate(PResDimNumIs,    DimPolicy, ResDimNum);
+    ValuePolicyTemplate(PModifyDimNumIs, DimPolicy, ModifyDimNum);
 
     template <size_t... uDims>
     struct DimArrayIs : virtual public DimPolicy
