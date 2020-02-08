@@ -18,7 +18,7 @@ namespace MetaNN
 {
 namespace OperNLLLoss::NSCaseGen
 {
-    template <typename TTruthHandle, typename TPredHandle, typename TOutputHandle, typename TPolicies>
+    template <typename TTruthHandle, typename TPredHandle, typename TOutputHandle>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -41,10 +41,10 @@ namespace OperNLLLoss::NSCaseGen
         TOutputHandle m_outputHandle;
     };
     
-    template <typename TTruthHandle, typename TPredHandle, typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TTruthHandle, TPredHandle, TOutputHandle, TPolicies>>
+    template <typename TTruthHandle, typename TPredHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TTruthHandle, TPredHandle, TOutputHandle>>
     {
-        using EvalItemType = EvalItem<TTruthHandle, TPredHandle, TOutputHandle, TPolicies>;
+        using EvalItemType = EvalItem<TTruthHandle, TPredHandle, TOutputHandle>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
@@ -113,7 +113,7 @@ namespace MetaNN
 {
 namespace OperNLLLossGrad::NSCaseGen
 {
-    template <typename TGradHandle, typename TTruthHandle, typename TPredHandle, typename TOutputHandle, typename TPolicies>
+    template <typename TGradHandle, typename TTruthHandle, typename TPredHandle, typename TOutputHandle>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -138,10 +138,10 @@ namespace OperNLLLossGrad::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TGradHandle, typename TTruthHandle, typename TPredHandle, typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TTruthHandle, TPredHandle, TOutputHandle, TPolicies>>
+    template <typename TGradHandle, typename TTruthHandle, typename TPredHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TTruthHandle, TPredHandle, TOutputHandle>>
     {
-        using EvalItemType = EvalItem<TGradHandle, TTruthHandle, TPredHandle, TOutputHandle, TPolicies>;
+        using EvalItemType = EvalItem<TGradHandle, TTruthHandle, TPredHandle, TOutputHandle>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {

@@ -15,7 +15,7 @@ namespace MetaNN
 {
 namespace OperSign::NSCaseGen
 {
-    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
+    template <typename TInputHandle, typename TOutputHandle>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -33,10 +33,10 @@ namespace OperSign::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
-        using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicies>;
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {

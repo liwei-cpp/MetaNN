@@ -216,7 +216,10 @@ namespace MetaNN
     template <>
     struct OperSeq_<OpTags::ReduceSum>
     {
-        using type = OperCalAlgoChain<TailCalculator<OperReduceSum::NSCaseGen::EvalItem, OperReduceSum::NSCaseGen::EvalGroup>>;
+        using type = OperCalAlgoChain<TailCalculator<OperReduceSum::NSCaseGen::EvalItem,
+                                                     OperReduceSum::NSCaseGen::EvalGroup,
+                                                     TrivalEvalItemDispatcher,
+                                                     PolicyContainer<PPassPolicy>>>;
     };
 
     template <typename TCate, typename TPolicies>

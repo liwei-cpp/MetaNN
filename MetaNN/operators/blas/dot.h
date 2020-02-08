@@ -148,7 +148,10 @@ namespace OperDot::NSCaseGen
     template <>
     struct OperSeq_<OpTags::Dot>
     {
-        using type = OperCalAlgoChain<TailCalculator<OperDot::NSCaseGen::EvalItem, OperDot::NSCaseGen::EvalGroup>>;
+        using type = OperCalAlgoChain<TailCalculator<OperDot::NSCaseGen::EvalItem,
+                                                     OperDot::NSCaseGen::EvalGroup,
+                                                     TrivalEvalItemDispatcher,
+                                                     PolicyContainer<PPassPolicy>>>;
     };
 
     template <typename TPolicy = PolicyContainer<>,

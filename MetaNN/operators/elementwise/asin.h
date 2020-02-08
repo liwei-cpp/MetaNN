@@ -17,7 +17,7 @@ namespace MetaNN
 {
 namespace OperAsin::NSCaseGen
 {
-    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
+    template <typename TInputHandle, typename TOutputHandle>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -35,10 +35,10 @@ namespace OperAsin::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
-        using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicies>;
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
@@ -88,7 +88,7 @@ namespace MetaNN
 {
 namespace OperAsinGrad::NSCaseGen
 {
-    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle, typename TPolicies>
+    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -109,10 +109,10 @@ namespace OperAsinGrad::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle, TPolicies>>
+    template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle>>
     {
-        using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle, TPolicies>;
+        using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {

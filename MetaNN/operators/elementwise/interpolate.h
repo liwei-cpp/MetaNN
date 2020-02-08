@@ -15,7 +15,7 @@ namespace MetaNN
 namespace OperInterpolate::NSCaseGen
 {
     template <typename TInputHandle1, typename TInputHandle2, typename TInputHandle3,
-              typename TOutputHandle, typename TPolicies>
+              typename TOutputHandle>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -42,10 +42,10 @@ namespace OperInterpolate::NSCaseGen
     };
     
     template <typename TInputHandle1, typename TInputHandle2, typename TInputHandle3,
-              typename TOutputHandle, typename TPolicies>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TInputHandle3, TOutputHandle, TPolicies>>
+              typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TInputHandle3, TOutputHandle>>
     {
-        using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TInputHandle3, TOutputHandle, TPolicies>;
+        using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TInputHandle3, TOutputHandle>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {

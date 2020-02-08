@@ -116,7 +116,10 @@ namespace MetaNN
     template <>
     struct OperSeq_<OpTags::Permute>
     {
-        using type = OperCalAlgoChain<TailCalculator<OperPermute::NSCaseGen::EvalItem, OperPermute::NSCaseGen::EvalGroup>>;
+        using type = OperCalAlgoChain<TailCalculator<OperPermute::NSCaseGen::EvalItem,
+                                                     OperPermute::NSCaseGen::EvalGroup,
+                                                     TrivalEvalItemDispatcher,
+                                                     PolicyContainer<PPassPolicy>>>;
     };
 
     template <typename TP>

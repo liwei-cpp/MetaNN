@@ -15,7 +15,7 @@ namespace MetaNN
 {
 namespace OperSlice::NSCaseGen
 {
-    template <typename TInputHandle, typename TOutputHandle, typename TPolicy>
+    template <typename TInputHandle, typename TOutputHandle>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
@@ -36,10 +36,10 @@ namespace OperSlice::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TInputHandle, typename TOutputHandle, typename TPolicy>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicy>>
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
-        using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicy>;
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
