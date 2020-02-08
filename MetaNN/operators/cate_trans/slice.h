@@ -15,13 +15,15 @@ namespace MetaNN
 {
 namespace OperSlice::NSCaseGen
 {
-    template <typename TInputHandle, typename TOutputHandle>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicy>
     class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
     {
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
+
         template <typename TAuxParams>
-        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& p_params)
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams& p_params)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
@@ -34,10 +36,10 @@ namespace OperSlice::NSCaseGen
         TOutputHandle m_outputHandle;
     };
 
-    template <typename TInputHandle, typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    template <typename TInputHandle, typename TOutputHandle, typename TPolicy>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicy>>
     {
-        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicy>;
     protected:
         virtual void EvalInternalLogic(EvalItemType& evalItem) final override
         {
@@ -47,28 +49,10 @@ namespace OperSlice::NSCaseGen
     };
 }
 
-    template <typename TOperand>
-    constexpr bool IsValidOper<OpTags::Slice, TOperand> =
-        IsBatchScalar<TOperand> || IsBatchMatrix<TOperand> || IsBatchThreeDArray<TOperand> ||
-        IsScalarSequence<TOperand> || IsMatrixSequence<TOperand> || IsThreeDArraySequence<TOperand> ||
-        IsBatchScalarSequence<TOperand> || IsBatchMatrixSequence<TOperand> || IsBatchThreeDArraySequence<TOperand>;
-        
-    template <typename TPrimaryCate>
-    struct OperCategory_<OpTags::Slice, CategoryTags::Batch<TPrimaryCate>>
+    template <typename TPolicy, typename TOperand>
+    struct OperCategory_<OpTags::Slice, TPolicy, TOperand>
     {
-        using type = TPrimaryCate;
-    };
-    
-    template <typename TPrimaryCate>
-    struct OperCategory_<OpTags::Slice, CategoryTags::Sequence<TPrimaryCate>>
-    {
-        using type = TPrimaryCate;
-    };
-    
-    template <typename TPrimaryCate>
-    struct OperCategory_<OpTags::Slice, CategoryTags::BatchSequence<TPrimaryCate>>
-    {
-        using type = CategoryTags::Sequence<TPrimaryCate>;
+        using type = CategoryTags::Tensor<TOperand::DimNum - 1>;
     };
     
     template <typename TCate>
@@ -85,14 +69,22 @@ namespace OperSlice::NSCaseGen
         }
     };
     
-    template <typename TCate>
-    class OperShapeInfo<OpTags::Slice, TCate>
+    template <typename TCate, typename TPolicies>
+    class OperShapeInfo<OpTags::Slice, TCate, TPolicies>
     {
     public:
         template <typename TOperand>
         OperShapeInfo(const OperAuxParams<OpTags::Slice, TCate>&, const TOperand& operand)
-            : m_shape(operand.Shape().Cardinal())
-        { }
+        {
+            static_assert(TCate::DimNum + 1 == DataCategory<TOperand>::DimNum);
+            if constexpr (TCate::DimNum != 0)
+            {
+                for (size_t i = 0; i < TCate::DimNum; ++i)
+                {
+                    m_shape[i] = operand.Shape()[i + 1];
+                }
+            }
+        }
     
         const auto& Shape() const
         {
@@ -100,25 +92,7 @@ namespace OperSlice::NSCaseGen
         }
     
     private:
-        MetaNN::Shape<TCate> m_shape;
-    };
-    
-    template <typename TCate>
-    class OperShapeInfo<OpTags::Slice, CategoryTags::Sequence<TCate>>
-    {
-    public:
-        template <typename TOperand>
-        OperShapeInfo(const OperAuxParams<OpTags::Slice, CategoryTags::Sequence<TCate>>& param, const TOperand& operand)
-            : m_shape(operand.Shape().SeqLenContainer()[param.m_elemID], operand.Shape().Cardinal())
-        { }
-    
-        const auto& Shape() const
-        {
-            return m_shape;
-        }
-    
-    private:
-        MetaNN::Shape<CategoryTags::Sequence<TCate>> m_shape;
+        MetaNN::Shape<TCate::DimNum> m_shape;
     };
     
     template <>
@@ -126,18 +100,4 @@ namespace OperSlice::NSCaseGen
     {
         using type = OperCalAlgoChain<TailCalculator<OperSlice::NSCaseGen::EvalItem, OperSlice::NSCaseGen::EvalGroup>>;
     };
-
-    template <typename TOpTag, typename...TOperands>
-    auto Operator<TOpTag, TOperands...>::operator[](size_t p_index) const -> Operator<OpTags::Slice, Operator>
-    {
-        if constexpr (IsValidOper<OpTags::Slice, Operator>)
-        {
-            using ResType = Operator<OpTags::Slice, Operator>;
-            return ResType(OperAuxParams<OpTags::Slice, typename ResType::CategoryTag>(p_index), (const Operator&)*this);
-        }
-        else
-        {
-            static_assert(DependencyFalse<Operator>, "Operator not support slice.");
-        }
-    }
 }

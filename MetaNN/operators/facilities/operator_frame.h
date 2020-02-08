@@ -14,6 +14,9 @@ namespace MetaNN::OpTags
 
 namespace MetaNN
 {
+    template <typename TOperand>
+    constexpr bool IsValidOper<OpTags::Slice, TOperand> = (DataCategory<TOperand>::DimNum > 0);
+
     template <typename TOpTag, typename TOperands, typename TPolicies = PolicyContainer<>>
     class Operator;
     
@@ -70,7 +73,18 @@ namespace MetaNN
                    (m_operands == val.m_operands);
         }
 
-        Operator<OpTags::Slice, Operator> operator[](size_t index) const;
+        auto operator[](size_t index) const
+        {
+            if constexpr (IsValidOper<OpTags::Slice, Operator>)
+            {
+                using ResType = Operator<OpTags::Slice, OperandContainer<Operator>>;
+                return ResType(OperAuxParams<OpTags::Slice, typename ResType::CategoryTag>(index), (const Operator&)*this);
+            }
+            else
+            {
+                static_assert(DependencyFalse<Operator>, "Operator not support slice.");
+            }
+        }
 
         auto EvalRegister() const
         {
