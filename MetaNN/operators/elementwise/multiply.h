@@ -3,6 +3,7 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/operator_frame.h>
+#include <MetaNN/policies/policy_container.h>
 #include <stdexcept>
 
 namespace MetaNN::OpTags
@@ -21,8 +22,7 @@ namespace OperatorMultiply::NSCaseGen
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
-        template <typename TAuxParams>
-        EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> outputShape, const TAuxParams&)
+        EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> outputShape)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle1.DataPtr(), oriHandle2.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle1(std::move(oriHandle1))
@@ -79,7 +79,9 @@ namespace OperatorMultiply::NSCaseGen
 template <>
 struct OperSeq_<OpTags::Multiply>
 {
-    using type = OperCalAlgoChain<TailCalculator<OperatorMultiply::NSCaseGen::EvalItem, OperatorMultiply::NSCaseGen::EvalGroup>>;
+    using type = OperCalAlgoChain<TailCalculator<OperatorMultiply::NSCaseGen::EvalItem,
+                                                 OperatorMultiply::NSCaseGen::EvalGroup,
+                                                 PolicyContainer<PPassShape>>>;
 };
 
 // multiply with number
@@ -111,7 +113,7 @@ namespace NSCaseGen
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
-        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams& params)
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
@@ -171,7 +173,9 @@ struct OperAuxParams<OpTags::MultiplyWithNum, TCate> : public OperAuxValue<doubl
 template <>
 struct OperSeq_<OpTags::MultiplyWithNum>
 {
-    using type = OperCalAlgoChain<TailCalculator<OperMultiplyWithNum::NSCaseGen::EvalItem, OperMultiplyWithNum::NSCaseGen::EvalGroup>>;
+    using type = OperCalAlgoChain<TailCalculator<OperMultiplyWithNum::NSCaseGen::EvalItem,
+                                                 OperMultiplyWithNum::NSCaseGen::EvalGroup,
+                                                 PolicyContainer<PPassAuxParam>>>;
 };
 
 // interface

@@ -21,8 +21,7 @@ namespace OperAdd::NSCaseGen
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
-        template <typename TAuxParams>
-        EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> outputShape, const TAuxParams&)
+        EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> outputShape)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle1.DataPtr(), oriHandle2.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle1(std::move(oriHandle1))
@@ -84,7 +83,9 @@ namespace OperAdd::NSCaseGen
 template <>
 struct OperSeq_<OpTags::Add>
 {
-    using type = OperCalAlgoChain<TailCalculator<OperAdd::NSCaseGen::EvalItem, OperAdd::NSCaseGen::EvalGroup>>;
+    using type = OperCalAlgoChain<TailCalculator<OperAdd::NSCaseGen::EvalItem,
+                                                 OperAdd::NSCaseGen::EvalGroup,
+                                                 PolicyContainer<PPassShape>>>;
 };
 
 // add with number
@@ -116,7 +117,7 @@ namespace NSCaseGen
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
-        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams& params)
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
@@ -177,7 +178,9 @@ struct OperAuxParams<OpTags::AddWithNum, TCate> : public OperAuxValue<double>
 template <>
 struct OperSeq_<OpTags::AddWithNum>
 {
-    using type = OperCalAlgoChain<TailCalculator<OperAddWithNum::NSCaseGen::EvalItem, OperAddWithNum::NSCaseGen::EvalGroup>>;
+    using type = OperCalAlgoChain<TailCalculator<OperAddWithNum::NSCaseGen::EvalItem,
+                                                 OperAddWithNum::NSCaseGen::EvalGroup,
+                                                 PolicyContainer<PPassAuxParam>>>;
 };
 
 // interface

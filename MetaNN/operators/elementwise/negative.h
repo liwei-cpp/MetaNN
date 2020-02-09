@@ -21,8 +21,7 @@ namespace OperNegative::NSCaseGen
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
-        template <typename TAuxParams>
-        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams&)
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))

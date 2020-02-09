@@ -23,9 +23,8 @@ namespace OperDivide::NSCaseGen
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
-        template <typename TAuxParams>
         EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle,
-                 Shape<CategoryTag::DimNum> shape, const TAuxParams&)
+                 Shape<CategoryTag::DimNum> shape)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle1.DataPtr(), oriHandle2.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle1(std::move(oriHandle1))
@@ -82,7 +81,9 @@ namespace OperDivide::NSCaseGen
 template <>
 struct OperSeq_<OpTags::Divide>
 {
-    using type = OperCalAlgoChain<TailCalculator<OperDivide::NSCaseGen::EvalItem, OperDivide::NSCaseGen::EvalGroup>>;
+    using type = OperCalAlgoChain<TailCalculator<OperDivide::NSCaseGen::EvalItem,
+                                                 OperDivide::NSCaseGen::EvalGroup,
+                                                 PolicyContainer<PPassShape>>>;
 };
 
 /// Divide by number
@@ -95,7 +96,7 @@ namespace OperDivideByNum::NSCaseGen
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
-        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams& params)
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
@@ -158,7 +159,9 @@ struct OperAuxParams<OpTags::DivideByNum, TCate> : public OperAuxValue<double>
 template <>
 struct OperSeq_<OpTags::DivideByNum>
 {
-    using type = OperCalAlgoChain<TailCalculator<OperDivideByNum::NSCaseGen::EvalItem, OperDivideByNum::NSCaseGen::EvalGroup>>;
+    using type = OperCalAlgoChain<TailCalculator<OperDivideByNum::NSCaseGen::EvalItem,
+                                                 OperDivideByNum::NSCaseGen::EvalGroup,
+                                                 PolicyContainer<PPassAuxParam>>>;
 };
 
 /// Interface

@@ -23,7 +23,7 @@ namespace OperSlice::NSCaseGen
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
         template <typename TAuxParams>
-        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams& p_params)
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& p_params)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
@@ -98,6 +98,8 @@ namespace OperSlice::NSCaseGen
     template <>
     struct OperSeq_<OpTags::Slice>
     {
-        using type = OperCalAlgoChain<TailCalculator<OperSlice::NSCaseGen::EvalItem, OperSlice::NSCaseGen::EvalGroup>>;
+        using type = OperCalAlgoChain<TailCalculator<OperSlice::NSCaseGen::EvalItem,
+                                                     OperSlice::NSCaseGen::EvalGroup,
+                                                     PolicyContainer<PPassAuxParam>>>;
     };
 }

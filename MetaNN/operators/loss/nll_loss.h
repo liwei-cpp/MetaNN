@@ -25,9 +25,7 @@ namespace OperNLLLoss::NSCaseGen
     public:
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
-        template <typename TAuxParams>
-        EvalItem(TTruthHandle truthHandle, TPredHandle predHandle,
-                 TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams&)
+        EvalItem(TTruthHandle truthHandle, TPredHandle predHandle, TOutputHandle outputHandle)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {truthHandle.DataPtr(), predHandle.DataPtr()},
                        outputHandle.DataPtr())
@@ -120,9 +118,8 @@ namespace OperNLLLossGrad::NSCaseGen
     public:
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
-        template <typename TAuxParams>
         EvalItem(TGradHandle gradHandle, TTruthHandle truthHandle, TPredHandle predHandle,
-                 TOutputHandle outputHandle, const Shape<CategoryTag::DimNum>&, const TAuxParams&)
+                 TOutputHandle outputHandle)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {gradHandle.DataPtr(), truthHandle.DataPtr(), predHandle.DataPtr()},
                        outputHandle.DataPtr())

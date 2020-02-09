@@ -21,9 +21,8 @@ namespace OperInterpolate::NSCaseGen
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
-        template <typename TAuxParams>
         EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TInputHandle3 oriHandle3,
-                 TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape, const TAuxParams&)
+                 TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {oriHandle1.DataPtr(), oriHandle2.DataPtr(), oriHandle3.DataPtr()},
                        outputHandle.DataPtr())
@@ -89,7 +88,9 @@ namespace OperInterpolate::NSCaseGen
 template <>
 struct OperSeq_<OpTags::Interpolate>
 {
-    using type = OperCalAlgoChain<TailCalculator<OperInterpolate::NSCaseGen::EvalItem, OperInterpolate::NSCaseGen::EvalGroup>>;
+    using type = OperCalAlgoChain<TailCalculator<OperInterpolate::NSCaseGen::EvalItem,
+                                                 OperInterpolate::NSCaseGen::EvalGroup,
+                                                 PolicyContainer<PPassShape>>>;
 };
 
 template <typename TP1, typename TP2, typename TP3,

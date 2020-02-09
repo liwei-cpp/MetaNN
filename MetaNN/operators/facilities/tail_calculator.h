@@ -12,11 +12,32 @@ namespace MetaNN
 
         struct IsPassPolicyValueCate;
         static constexpr bool IsPassPolicy = false;
+        
+        struct IsPassShapeValueCate;
+        static constexpr bool IsPassShape = false;
+        
+        struct IsPassAuxParamValueCate;
+        static constexpr bool IsPassAuxParam = false;
+        
+        struct DispatcherTempCate;
+        template <typename TGroup>
+        using Dispatcher = TrivalEvalItemDispatcher<TGroup>;
     };
 #include <MetaNN/policies/policy_macro_begin.h>
-    ValuePolicyObj(PPassPolicy,   TailCalculatorPolicy, IsPassPolicy, true);
-    ValuePolicyObj(PNoPassPolicy, TailCalculatorPolicy, IsPassPolicy, false);
+    ValuePolicyObj(PPassPolicy,     TailCalculatorPolicy, IsPassPolicy,    true);
+    ValuePolicyObj(PNoPassPolicy,   TailCalculatorPolicy, IsPassPolicy,    false);
+    ValuePolicyObj(PPassShape,      TailCalculatorPolicy, IsPassShape,     true);
+    ValuePolicyObj(PNoPassShape,    TailCalculatorPolicy, IsPassShape,     false);
+    ValuePolicyObj(PPassAuxParam,   TailCalculatorPolicy, IsPassAuxParam,  true);
+    ValuePolicyObj(PNoPassAuxParam, TailCalculatorPolicy, IsPassAuxParam,  false);
 #include <MetaNN/policies/policy_macro_end.h>
+    template <template<typename> class T>
+    struct PDispatcherIs : virtual public TailCalculatorPolicy
+    {
+        using MinorClass = TailCalculatorPolicy::DispatcherTempCate;
+        template <typename TGroup>
+        using Dispatcher = T<TGroup>;
+    };
 
     namespace NSTailCalculator
     {
@@ -36,11 +57,35 @@ namespace MetaNN
             using ItemType = EvalItem<TOtherParams...>;
             using GroupType = EvalGroup<TOtherParams...>;
         };
+        
+        template <bool passShape, bool passAuxParam, typename TItemType, typename TShape, typename TAuxParam,
+                  typename... TOtherParams>
+        auto CreateEvalItem(TShape&& p_shape, TAuxParam&& p_auxParam, TOtherParams&&... others)
+        {
+            if constexpr (passShape && passAuxParam)
+            {
+                return std::make_unique<TItemType>(std::forward<TOtherParams>(others)...,
+                                                   std::forward<TShape>(p_shape), std::forward<TAuxParam>(p_auxParam));
+            }
+            else if constexpr (passShape)
+            {
+                return std::make_unique<TItemType>(std::forward<TOtherParams>(others)...,
+                                                   std::forward<TShape>(p_shape));
+            }
+            else if constexpr (passAuxParam)
+            {
+                return std::make_unique<TItemType>(std::forward<TOtherParams>(others)...,
+                                                   std::forward<TAuxParam>(p_auxParam));
+            }
+            else
+            {
+                return std::make_unique<TItemType>(std::forward<TOtherParams>(others)...);
+            }
+        }
     }
 
     template <template<typename...> class EvalItem,
               template<typename...> class EvalGroup,
-              template<typename> class EvalDispatcher = TrivalEvalItemDispatcher,
               typename TPolicy = PolicyContainer<>>
     struct TailCalculator
     {
@@ -80,12 +125,16 @@ namespace MetaNN
             using GroupType = typename PickEvalTypes_<IsPassPolicy, EvalItem, EvalGroup, TPolicies,
                                                       RemConstRef<decltype(std::get<Index>(operHandles))>...,
                                                       RemConstRef<TResHandle>>::GroupType;
-            auto item = std::make_unique<ItemType>(std::move(std::get<Index>(operHandles))... ,
-                                                   std::move(resHandle), shape, auxParams);
+            auto item = CreateEvalItem<PolicySelect<TailCalculatorPolicy, TPolicy>::IsPassShape,
+                                       PolicySelect<TailCalculatorPolicy, TPolicy>::IsPassAuxParam,
+                                       ItemType>(shape, auxParams,
+                                                 std::move(std::get<Index>(operHandles))...,
+                                                 std::move(resHandle));
 
             using DeviceType = DeviceTypeFromHandle<TResHandle>;
-            using DispatcherType = EvalDispatcher<GroupType>;
-            EvalPlan<DeviceType>::Inst().template Register<DispatcherType>(std::move(item));
+
+            using TDispatcher = typename PolicySelect<TailCalculatorPolicy, TPolicy>::template Dispatcher<GroupType>;
+            EvalPlan<DeviceType>::Inst().template Register<TDispatcher>(std::move(item));
         }
     };
 }

@@ -23,9 +23,8 @@ namespace MetaNN
             using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         public:
             using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
-            
-            template <typename TAuxParams>
-            EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape, const TAuxParams&)
+
+            EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape)
                 : BaseType(std::type_index(typeid(EvalItem)),
                            {oriHandle.DataPtr()}, outputHandle.DataPtr())
                 , m_inputHandle(std::move(oriHandle))
@@ -118,8 +117,7 @@ namespace MetaNN
     {
         using type = OperCalAlgoChain<TailCalculator<OperPermute::NSCaseGen::EvalItem,
                                                      OperPermute::NSCaseGen::EvalGroup,
-                                                     TrivalEvalItemDispatcher,
-                                                     PolicyContainer<PPassPolicy>>>;
+                                                     PolicyContainer<PPassPolicy, PPassShape>>>;
     };
 
     template <typename TP>

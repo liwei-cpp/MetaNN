@@ -25,9 +25,8 @@ namespace OperDot::NSCaseGen
     public:
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
-        template <typename TAuxParams>
         EvalItem(TInputHandle1 operand1, TInputHandle2 operand2, 
-                 TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape, const TAuxParams&)
+                 TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape)
             : BaseType(std::type_index(typeid(EvalItem)),
                        {operand1.DataPtr(), operand2.DataPtr()},
                        outputHandle.DataPtr())
@@ -150,8 +149,7 @@ namespace OperDot::NSCaseGen
     {
         using type = OperCalAlgoChain<TailCalculator<OperDot::NSCaseGen::EvalItem,
                                                      OperDot::NSCaseGen::EvalGroup,
-                                                     TrivalEvalItemDispatcher,
-                                                     PolicyContainer<PPassPolicy>>>;
+                                                     PolicyContainer<PPassPolicy, PPassShape>>>;
     };
 
     template <typename TPolicy = PolicyContainer<>,
