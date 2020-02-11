@@ -157,11 +157,7 @@ namespace OperDot::NSCaseGen
               typename = std::enable_if_t<IsValidOper<OpTags::Dot, TP1, TP2>>>
     auto Dot(TP1&& p_m1, TP2&& p_m2)
     {
-        constexpr size_t modDimNum = 
-            HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::ModifyDimNumValueCate> ?
-            PolicySelect<DimPolicy, TPolicy>::ModifyDimNum :
-            1;
-        static_assert(modDimNum > 0);
+        constexpr size_t modDimNum = PolicySelect<DimPolicy, TPolicy>::ModifyDimNum;
         static_assert(DataCategory<TP1>::DimNum >= modDimNum);
         static_assert(DataCategory<TP2>::DimNum >= modDimNum);
         

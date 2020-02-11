@@ -32,6 +32,9 @@ namespace MetaNN
         using ElementType = typename OperElementType_<TOpTag, TOperands...>::type;
         using DeviceType = typename OperDeviceType_<TOpTag, TOperands...>::type;
 
+        template <size_t Id>
+        using OperandType = Sequential::At<OperandContainer<TOperands...>, Id>;
+
     public:
         explicit Operator(TOperands... p_operands)
             : Operator(OperAuxParams<TOpTag, CategoryTag>{},

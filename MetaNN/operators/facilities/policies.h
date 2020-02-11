@@ -14,7 +14,7 @@ namespace MetaNN
         struct DimBitArrayValueCate;
         
         struct ModifyDimNumValueCate;
-        static constexpr size_t ModifyDimNum = 0;
+        static constexpr size_t ModifyDimNum = 1;
     };
     ValuePolicyObj(PKeepDim,             DimPolicy, IsKeepDim, true);
     ValuePolicyObj(PNoKeepDIm,           DimPolicy, IsKeepDim, false);

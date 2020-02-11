@@ -31,6 +31,7 @@
       <File Name="operators/elementwise/test_multiply.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="activation">
+      <File Name="operators/activation/test_softmax.cpp"/>
       <File Name="operators/activation/test_tanh.cpp"/>
       <File Name="operators/activation/test_sigmoid.cpp"/>
       <File Name="operators/activation/test_relu.cpp"/>
