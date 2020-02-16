@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="LayerTest2" Version="10.0.0" InternalType="Console">
   <VirtualDirectory Name="elementary">
+    <File Name="elementary/test_tanh_layer.cpp"/>
+    <File Name="elementary/test_sigmoid_layer.cpp"/>
+    <File Name="elementary/test_relu_layer.cpp"/>
     <File Name="elementary/test_abs_layer.cpp"/>
     <File Name="elementary/_.h"/>
   </VirtualDirectory>
