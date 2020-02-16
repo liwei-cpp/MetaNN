@@ -2,7 +2,7 @@
 
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
-#include <MetaNN/operators/facilities/tail_calculator.h>
+#include <MetaNN/operators/facilities/_.h>
 #include <cassert>
 #include <cmath>
 #include <type_traits>

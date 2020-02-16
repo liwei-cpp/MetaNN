@@ -1,12 +1,8 @@
 #pragma once
 
 #include <MetaNN/data/_.h>
+#include <MetaNN/operators/_.h>
 
-#include <MetaNN/operators/tensor/_.h>
-#include <MetaNN/operators/activations/_.h>
-#include <MetaNN/operators/blas/_.h>
-#include <MetaNN/operators/cate_trans/slice.h>
-#include <MetaNN/operators/elementwise/_.h>
-#include <MetaNN/operators/loss/_.h>
-#include <MetaNN/operators/math/_.h>
-#include <MetaNN/operators/mutating/_.h>
+#include <MetaNN/facilities/_.h>
+#include <MetaNN/layers/facilities/_.h>
+#include <MetaNN/layers/elementary/abs_layer.h>

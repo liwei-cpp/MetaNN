@@ -167,6 +167,7 @@
       <File Name="layers/elementary/dot_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
+      <File Name="layers/facilities/_.h"/>
       <File Name="layers/facilities/interface_fun.h"/>
       <File Name="layers/facilities/policies.h"/>
       <File Name="layers/facilities/traits.h"/>
@@ -190,7 +191,9 @@
     <File Name="layers/_.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="operators">
+    <File Name="operators/_.h"/>
     <VirtualDirectory Name="tensor">
+      <File Name="operators/tensor/slice.h"/>
       <File Name="operators/tensor/_.h"/>
       <File Name="operators/tensor/tile.h"/>
     </VirtualDirectory>
@@ -199,6 +202,7 @@
       <File Name="operators/math/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
+      <File Name="operators/facilities/_.h"/>
       <File Name="operators/facilities/policies.h"/>
       <File Name="operators/facilities/organizer.h"/>
       <File Name="operators/facilities/tags.h"/>
@@ -207,19 +211,12 @@
       <File Name="operators/facilities/instance_id.h"/>
     </VirtualDirectory>
     <File Name="operators/conv.h"/>
-    <File Name="operators/operators.h"/>
     <VirtualDirectory Name="loss">
       <VirtualDirectory Name="facilities">
         <File Name="operators/loss/facilities/organizer.h"/>
       </VirtualDirectory>
       <File Name="operators/loss/nll_loss.h"/>
       <File Name="operators/loss/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="cate_trans">
-      <File Name="operators/cate_trans/duplicate.h"/>
-      <File Name="operators/cate_trans/collapse.h"/>
-      <File Name="operators/cate_trans/_.h"/>
-      <File Name="operators/cate_trans/slice.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="elementwise">
       <File Name="operators/elementwise/asin.h"/>

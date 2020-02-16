@@ -24,7 +24,7 @@ void ParamGradCollect(std::string_view name, const TWeight& weight, TGradStack& 
     }
     else
     {
-        DynamicBatch<RemConstRef<typename TGradStack::value_type>> dBatch(weight.Shape());
+        ScalableTensor<RemConstRef<typename TGradStack::value_type>> dBatch(weight.Shape());
         while (!gradStack.empty())
         {
             auto g = gradStack.top();
@@ -50,7 +50,7 @@ auto PickItemFromCont(TCont&& cont)
     }
     else
     {
-        if constexpr (IsOutOfDataCategory<TAim>)
+        if constexpr (!IsValidCategoryTag<TAim>)
         {
             return TAim(itemOri);
         }
@@ -116,7 +116,7 @@ using LayerOutputItemTypes = typename NSLayerIOMapTrasfer::LayerIOMapForwardTran
 
 template <typename TStoreType, bool store>
 using LayerInternalBuf = std::conditional_t<store, std::stack<TStoreType>, NullParameter>;
-
+/*
 namespace NSShapePromote
 {
     template <typename T>
@@ -226,7 +226,7 @@ auto ShapePromote(const TDataHead& head, const TData&... data)
         return NSShapePromote::ShapePromote_(head.Shape(), data...);
     }
 }
-
+*/
 namespace NSShapeChecker
 {
     template <typename TShape, bool bTrigger>
@@ -304,7 +304,7 @@ namespace NSShapeChecker
 }
 
 template <typename TData, bool bTrigger>
-using ShapeChecker = typename NSShapeChecker::DataToShape_<TData, bTrigger && (IsInDataCategory<TData>)>::type;
+using ShapeChecker = typename NSShapeChecker::DataToShape_<TData, bTrigger && (IsValidCategoryTag<TData>)>::type;
 
 template <typename T>
 void PopoutFromStackHelper(std::stack<T>& stack)

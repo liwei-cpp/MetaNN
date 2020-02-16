@@ -2,7 +2,7 @@
 
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
-#include <MetaNN/operators/facilities/operator_frame.h>
+#include <MetaNN/operators/facilities/_.h>
 #include <stdexcept>
 
 namespace MetaNN::OpTags

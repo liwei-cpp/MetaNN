@@ -1,5 +1,5 @@
 #include <data_gen.h>
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <cmath>
 #include <iostream>
@@ -23,16 +23,16 @@ namespace
     void test_tanh_case2()
     {
         cout << "Test tanh case 2 (matrix)\t";
-        auto ori = GenMatrix<CheckElement>(10, 7, -1, 0.01);
+        auto ori = GenTensor<CheckElement>(-1, 0.01, 10, 7);
         auto op = Tanh(ori);
         static_assert(IsMatrix<decltype(op)>);
-        assert(op.Shape().RowNum() == 10);
-        assert(op.Shape().ColNum() == 7);
+        assert(op.Shape()[0] == 10);
+        assert(op.Shape()[1] == 7);
         
         auto res = Evaluate(op);
         static_assert(IsMatrix<decltype(res)>);
-        assert(res.Shape().RowNum() == 10);
-        assert(res.Shape().ColNum() == 7);
+        assert(res.Shape()[0] == 10);
+        assert(res.Shape()[1] == 7);
         
         for (size_t i = 0; i < 10; ++i)
         {
@@ -48,18 +48,18 @@ namespace
     void test_tanh_case3()
     {
         cout << "Test tanh case 3 (3d-array)\t";
-        auto ori = GenThreeDArray<CheckElement>(2, 10, 7, -1, 0.01);
+        auto ori = GenTensor<CheckElement>(-1, 0.01, 2, 10, 7);
         auto op = Tanh(ori);
         static_assert(IsThreeDArray<decltype(op)>);
-        assert(op.Shape().PageNum() == 2);
-        assert(op.Shape().RowNum() == 10);
-        assert(op.Shape().ColNum() == 7);
+        assert(op.Shape()[0] == 2);
+        assert(op.Shape()[1] == 10);
+        assert(op.Shape()[2] == 7);
         
         auto res = Evaluate(op);
         static_assert(IsThreeDArray<decltype(res)>);
-        assert(res.Shape().PageNum() == 2);
-        assert(res.Shape().RowNum() == 10);
-        assert(res.Shape().ColNum() == 7);
+        assert(res.Shape()[0] == 2);
+        assert(res.Shape()[1] == 10);
+        assert(res.Shape()[2] == 7);
         
         for (size_t p = 0; p < 2; ++p)
         {
@@ -78,14 +78,14 @@ namespace
     void test_tanh_case4()
     {
         cout << "Test tanh case 4 (batch scalar)\t";
-        auto ori = GenBatchScalar<CheckElement>(10, -1, 0.1);
+        auto ori = GenTensor<CheckElement>(-1, 0.1, 10);
         auto op = Tanh(ori);
-        static_assert(IsBatchScalar<decltype(op)>);
-        assert(op.Shape().BatchNum() == 10);
+        static_assert(IsTensorWithDim<decltype(op), 1>);
+        assert(op.Shape()[0] == 10);
         
         auto res = Evaluate(op);
-        static_assert(IsBatchScalar<decltype(res)>);
-        assert(res.Shape().BatchNum() == 10);
+        static_assert(IsTensorWithDim<decltype(res), 1>);
+        assert(res.Shape()[0] == 10);
         
         for (size_t i = 0; i < 10; ++i)
         {
@@ -97,51 +97,21 @@ namespace
     
     void test_tanh_case5()
     {
-        cout << "Test tanh case 5 (batch matrix)\t";
-        auto ori = GenBatchMatrix<CheckElement>(2, 10, 7, -0.9, 0.01);
+        cout << "Test tanh case 5 (batch 3d-array)\t";
+        auto ori = GenTensor<CheckElement>(0, 1, 2, 3, 10, 7);
         auto op = Tanh(ori);
-        static_assert(IsBatchMatrix<decltype(op)>);
-        assert(op.Shape().BatchNum() == 2);
-        assert(op.Shape().RowNum() == 10);
-        assert(op.Shape().ColNum() == 7);
+        static_assert(IsTensorWithDim<decltype(op), 4>);
+        assert(op.Shape()[0] == 2);
+        assert(op.Shape()[1] == 3);
+        assert(op.Shape()[2] == 10);
+        assert(op.Shape()[3] == 7);
         
         auto res = Evaluate(op);
-        static_assert(IsBatchMatrix<decltype(res)>);
-        assert(res.Shape().BatchNum() == 2);
-        assert(res.Shape().RowNum() == 10);
-        assert(res.Shape().ColNum() == 7);
-        
-        for (size_t p = 0; p < 2; ++p)
-        {
-            for (size_t i = 0; i < 10; ++i)
-            {
-                for (size_t k = 0; k < 7; ++k)
-                {
-                    auto value = std::tanh(ori[p](i, k));
-                    assert(fabs(res[p](i, k) - value) < 0.001f);
-                }
-            }
-        }
-        cout << "done" << endl;
-    }
-    
-    void test_tanh_case6()
-    {
-        cout << "Test tanh case 6 (batch 3d-array)\t";
-        auto ori = GenBatchThreeDArray<CheckElement>(2, 3, 10, 7);
-        auto op = Tanh(ori);
-        static_assert(IsBatchThreeDArray<decltype(op)>);
-        assert(op.Shape().BatchNum() == 2);
-        assert(op.Shape().PageNum() == 3);
-        assert(op.Shape().RowNum() == 10);
-        assert(op.Shape().ColNum() == 7);
-        
-        auto res = Evaluate(op);
-        static_assert(IsBatchThreeDArray<decltype(res)>);
-        assert(res.Shape().BatchNum() == 2);
-        assert(res.Shape().PageNum() == 3);
-        assert(res.Shape().RowNum() == 10);
-        assert(res.Shape().ColNum() == 7);
+        static_assert(IsTensorWithDim<decltype(res), 4>);
+        assert(res.Shape()[0] == 2);
+        assert(res.Shape()[1] == 3);
+        assert(res.Shape()[2] == 10);
+        assert(res.Shape()[3] == 7);
         
         for (size_t b = 0; b < 2; ++b)
         {
@@ -170,7 +140,6 @@ namespace Test::Operators::Activation
         test_tanh_case3();
         test_tanh_case4();
         test_tanh_case5();
-        test_tanh_case6();
     }
 }
 
@@ -194,17 +163,17 @@ namespace
     void test_tanh_grad_case2()
     {
         cout << "Test tanh grad case 2 (matrix)\t";
-        auto grad = GenMatrix<CheckElement>(10, 7, -100, 3);
-        auto inpu = GenMatrix<CheckElement>(10, 7, 1, 1.5);
+        auto grad = GenTensor<CheckElement>(-100, 3, 10, 7);
+        auto inpu = GenTensor<CheckElement>(1, 1.5, 10, 7);
         auto op = TanhGrad(grad, inpu);
         static_assert(IsMatrix<decltype(op)>);
-        assert(op.Shape().RowNum() == 10);
-        assert(op.Shape().ColNum() == 7);
+        assert(op.Shape()[0] == 10);
+        assert(op.Shape()[1] == 7);
         
         auto res = Evaluate(op);
         static_assert(IsMatrix<decltype(res)>);
-        assert(res.Shape().RowNum() == 10);
-        assert(res.Shape().ColNum() == 7);
+        assert(res.Shape()[0] == 10);
+        assert(res.Shape()[1] == 7);
         
         for (size_t i = 0; i < 10; ++i)
         {

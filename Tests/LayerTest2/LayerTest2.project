@@ -1,71 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CodeLite_Project Name="DataOpTest2" Version="10.0.0" InternalType="Console">
-  <VirtualDirectory Name="operators">
-    <VirtualDirectory Name="tensor">
-      <File Name="operators/tensor/test_tile.cpp"/>
-      <File Name="operators/tensor/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="cate_trans">
-      <File Name="operators/cate_trans/test_slice.cpp"/>
-      <File Name="operators/cate_trans/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="blas">
-      <File Name="operators/blas/test_dot.cpp"/>
-      <File Name="operators/blas/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="loss">
-      <File Name="operators/loss/test_nll_loss.cpp"/>
-      <File Name="operators/loss/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="math">
-      <File Name="operators/math/test_reduce_sum.cpp"/>
-      <File Name="operators/math/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="elementwise">
-      <File Name="operators/elementwise/test_interpolate.cpp"/>
-      <File Name="operators/elementwise/test_divide.cpp"/>
-      <File Name="operators/elementwise/test_negative.cpp"/>
-      <File Name="operators/elementwise/test_asin.cpp"/>
-      <File Name="operators/elementwise/test_sign.cpp"/>
-      <File Name="operators/elementwise/test_acos.cpp"/>
-      <File Name="operators/elementwise/test_abs.cpp"/>
-      <File Name="operators/elementwise/_.h"/>
-      <File Name="operators/elementwise/test_add.cpp"/>
-      <File Name="operators/elementwise/test_substract.cpp"/>
-      <File Name="operators/elementwise/test_multiply.cpp"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="activation">
-      <File Name="operators/activation/test_softmax.cpp"/>
-      <File Name="operators/activation/test_tanh.cpp"/>
-      <File Name="operators/activation/test_sigmoid.cpp"/>
-      <File Name="operators/activation/test_relu.cpp"/>
-      <File Name="operators/activation/_.h"/>
-    </VirtualDirectory>
-    <File Name="operators/_.h"/>
-    <VirtualDirectory Name="mutating">
-      <File Name="operators/mutating/_.h"/>
-      <File Name="operators/mutating/test_permute.cpp"/>
-    </VirtualDirectory>
+<CodeLite_Project Name="LayerTest2" Version="10.0.0" InternalType="Console">
+  <VirtualDirectory Name="elementary">
+    <File Name="elementary/test_abs_layer.cpp"/>
+    <File Name="elementary/_.h"/>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
-  <VirtualDirectory Name="_root">
-    <File Name="main.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="data">
-    <File Name="data/test_dynamic.cpp"/>
-    <File Name="data/test_scalable_tensor.cpp"/>
-    <File Name="data/test_bias_vector.cpp"/>
-    <File Name="data/test_zero_tensor.cpp"/>
-    <File Name="data/test_trival_tensor.cpp"/>
-    <File Name="data/test_tensor.cpp"/>
-    <File Name="data/test_scalar.cpp"/>
-    <File Name="data/_.h"/>
-    <VirtualDirectory Name="facilities">
-      <File Name="data/facilities/_.h"/>
-      <File Name="data/facilities/test_shape.cpp"/>
-    </VirtualDirectory>
-  </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -79,8 +19,9 @@
     <Configuration Name="Debug" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g;-O0;-Wall;-std=c++17" C_Options="-g;-O0;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
         <IncludePath Value="."/>
-        <IncludePath Value="../"/>
+        <IncludePath Value=".."/>
         <IncludePath Value="../.."/>
+        <Preprocessor Value="METANN_CHECKSHAPE"/>
       </Compiler>
       <Linker Options="" Required="yes"/>
       <ResourceCompiler Options="" Required="no"/>
@@ -89,7 +30,7 @@
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="yes">
         <DebuggerSearchPaths/>
         <PostConnectCommands/>
         <StartupCommands/>
@@ -119,7 +60,6 @@
     </Configuration>
     <Configuration Name="Release" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Executable" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-O2;-Wall;-std=c++17" C_Options="-O2;-Wall" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
-        <IncludePath Value="."/>
         <IncludePath Value=".."/>
         <IncludePath Value="../.."/>
       </Compiler>
@@ -130,7 +70,7 @@
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="yes">
         <DebuggerSearchPaths/>
         <PostConnectCommands/>
         <StartupCommands/>
@@ -159,4 +99,9 @@
       </Completion>
     </Configuration>
   </Settings>
+  <VirtualDirectory Name="_root">
+    <File Name="main.cpp"/>
+  </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>

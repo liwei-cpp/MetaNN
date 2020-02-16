@@ -1,5 +1,5 @@
 #include <data_gen.h>
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <cmath>
 #include <iostream>
@@ -11,16 +11,16 @@ namespace
     void test_relu_case1()
     {
         cout << "Test ReLU case 1\t";
-        auto ori = GenMatrix<CheckElement>(10, 7, -10, 1);
+        auto ori = GenTensor<CheckElement>(-10, 1, 10, 7);
         auto op = ReLU(ori);
         static_assert(IsMatrix<decltype(op)>);
-        assert(op.Shape().RowNum() == 10);
-        assert(op.Shape().ColNum() == 7);
+        assert(op.Shape()[0] == 10);
+        assert(op.Shape()[1] == 7);
         
         auto res = Evaluate(op);
         static_assert(IsMatrix<decltype(res)>);
-        assert(res.Shape().RowNum() == 10);
-        assert(res.Shape().ColNum() == 7);
+        assert(res.Shape()[0] == 10);
+        assert(res.Shape()[1] == 7);
         
         for (size_t i = 0; i < 10; ++i)
         {
@@ -53,17 +53,17 @@ namespace
     void test_relu_grad_case1()
     {
         cout << "Test ReLU grad case 1\t";
-        auto input = GenMatrix<CheckElement>(10, 7, -10, 1);
-        auto grad = GenMatrix<CheckElement>(10, 7, 0, 0.1);
+        auto input = GenTensor<CheckElement>(-10, 1, 10, 7);
+        auto grad = GenTensor<CheckElement>(0, 0.1, 10, 7);
         auto op = ReLUGrad(grad, input);
         static_assert(IsMatrix<decltype(op)>);
-        assert(op.Shape().RowNum() == 10);
-        assert(op.Shape().ColNum() == 7);
+        assert(op.Shape()[0] == 10);
+        assert(op.Shape()[1] == 7);
         
         auto res = Evaluate(op);
         static_assert(IsMatrix<decltype(res)>);
-        assert(res.Shape().RowNum() == 10);
-        assert(res.Shape().ColNum() == 7);
+        assert(res.Shape()[0] == 10);
+        assert(res.Shape()[1] == 7);
         
         for (size_t i = 0; i < 10; ++i)
         {

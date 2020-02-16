@@ -1,7 +1,5 @@
 #pragma once
-#include <MetaNN/operators/facilities/operator_frame.h>
-#include <MetaNN/operators/facilities/tail_calculator.h>
-#include <MetaNN/operators/facilities/policies.h>
+#include <MetaNN/operators/facilities/_.h>
 #include <MetaNN/policies/change_policy.h>
 #include <MetaNN/policies/policy_selector.h>
 #include <MetaNN/facilities/cont_metafuns/value_sequential.h>

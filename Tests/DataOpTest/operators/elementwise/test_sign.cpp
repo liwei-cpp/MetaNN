@@ -1,5 +1,5 @@
 #include <data_gen.h>
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <cmath>
 #include <iostream>
@@ -37,16 +37,16 @@ namespace
     void test_sign_case2()
     {
         cout << "Test sign case 2 (matrix)\t";
-        auto ori = GenMatrix<CheckElement>(10, 7, -100, 3);
+        auto ori = GenTensor<CheckElement>(-100, 3, 10, 7);
         auto op = Sign(ori);
         static_assert(IsMatrix<decltype(op)>);
-        assert(op.Shape().RowNum() == 10);
-        assert(op.Shape().ColNum() == 7);
+        assert(op.Shape()[0] == 10);
+        assert(op.Shape()[1] == 7);
         
         auto res = Evaluate(op);
         static_assert(IsMatrix<decltype(res)>);
-        assert(res.Shape().RowNum() == 10);
-        assert(res.Shape().ColNum() == 7);
+        assert(res.Shape()[0] == 10);
+        assert(res.Shape()[1] == 7);
         
         for (size_t i = 0; i < 10; ++i)
         {
@@ -72,18 +72,18 @@ namespace
     void test_sign_case3()
     {
         cout << "Test sign case 3 (3d-array)\t";
-        auto ori = GenThreeDArray<CheckElement>(5, 10, 7, -100, 3);
+        auto ori = GenTensor<CheckElement>(-100, 3, 5, 10, 7);
         auto op = Sign(ori);
         static_assert(IsThreeDArray<decltype(op)>);
-        assert(op.Shape().PageNum() == 5);
-        assert(op.Shape().RowNum() == 10);
-        assert(op.Shape().ColNum() == 7);
+        assert(op.Shape()[0] == 5);
+        assert(op.Shape()[1] == 10);
+        assert(op.Shape()[2] == 7);
         
         auto res = Evaluate(op);
         static_assert(IsThreeDArray<decltype(res)>);
-        assert(res.Shape().PageNum() == 5);
-        assert(res.Shape().RowNum() == 10);
-        assert(res.Shape().ColNum() == 7);
+        assert(res.Shape()[0] == 5);
+        assert(res.Shape()[1] == 10);
+        assert(res.Shape()[2] == 7);
         
         for (size_t p = 0; p < 5; ++p)
         {

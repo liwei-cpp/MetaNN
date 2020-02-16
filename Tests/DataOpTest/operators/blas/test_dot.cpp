@@ -1,5 +1,5 @@
 #include <data_gen.h>
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <cmath>
 #include <iostream>
@@ -11,17 +11,17 @@ namespace
     void test_dot_case1()
     {
         cout << "Test dot case 1 (matrix)\t";
-        auto in1 = GenMatrix<CheckElement>(5, 3);
-        auto in2 = GenMatrix<CheckElement>(3, 8, -10, 0.1);
+        auto in1 = GenTensor<CheckElement>(0, 1, 5, 3);
+        auto in2 = GenTensor<CheckElement>(-10, 0.1, 3, 8);
         auto op = Dot(in1, in2);
         static_assert(IsMatrix<decltype(op)>);
-        assert(op.Shape().RowNum() == 5);
-        assert(op.Shape().ColNum() == 8);
+        assert(op.Shape()[0] == 5);
+        assert(op.Shape()[1] == 8);
         
         auto res = Evaluate(op);
         static_assert(IsMatrix<decltype(res)>);
-        assert(res.Shape().RowNum() == 5);
-        assert(res.Shape().ColNum() == 8);
+        assert(res.Shape()[0] == 5);
+        assert(res.Shape()[1] == 8);
         
         for (size_t i = 0; i < 5; ++i)
         {
@@ -37,133 +37,77 @@ namespace
         }
         cout << "done" << endl;
     }
-    
+
     void test_dot_case2()
     {
-        cout << "Test dot case 2 (batch matrix)\t";
-        auto in1 = GenBatchMatrix<CheckElement>(7, 5, 3);
-        auto in2 = GenBatchMatrix<CheckElement>(7, 3, 8, -10, 0.1);
+        cout << "Test dot case 2 (vector)\t";
+        auto in1 = GenTensor<CheckElement>(0, 1, 5);
+        auto in2 = GenTensor<CheckElement>(-10, 0.1, 5);
         auto op = Dot(in1, in2);
-        static_assert(IsBatchMatrix<decltype(op)>);
-        assert(op.Shape().BatchNum() == 7);
-        assert(op.Shape().RowNum() == 5);
-        assert(op.Shape().ColNum() == 8);
-        
+        static_assert(IsScalar<decltype(op)>);
+
         auto res = Evaluate(op);
-        static_assert(IsBatchMatrix<decltype(res)>);
-        assert(res.Shape().BatchNum() == 7);
-        assert(res.Shape().RowNum() == 5);
-        assert(res.Shape().ColNum() == 8);
-        
-        for (size_t b = 0; b < 7; ++b)
+        static_assert(IsScalar<decltype(res)>);
+
+        CheckElement value = 0;
+        for (size_t i = 0; i < 5; ++i)
         {
-            for (size_t i = 0; i < 5; ++i)
-            {
-                for (size_t j = 0; j < 8; ++j)
-                {
-                    CheckElement value = 0;
-                    for (size_t k = 0; k < 3; ++k)
-                    {
-                        value += in1[b](i, k) * in2[b](k, j);
-                    }
-                    assert(fabs(value - res[b](i, j)) < 0.001f);
-                }
-            }
+            value += in1(i) * in2(i);
         }
+        assert(fabs(value - res.Value()) < 0.001f);
         cout << "done" << endl;
     }
     
     void test_dot_case3()
     {
-        cout << "Test dot case 3 (matrix sequence)\t";
-        auto in1 = GenMatrixSequence<CheckElement>(7, 5, 3);
-        auto in2 = GenMatrixSequence<CheckElement>(7, 3, 8, -10, 0.1);
-        auto op = Dot(in1, in2);
-        static_assert(IsMatrixSequence<decltype(op)>);
-        assert(op.Shape().Length() == 7);
-        assert(op.Shape().RowNum() == 5);
-        assert(op.Shape().ColNum() == 8);
-        
+        cout << "Test dot case 3 (2 dim dot)\t";
+        auto in1 = GenTensor<size_t>(0, 1, 5, 4, 3);
+        auto in2 = GenTensor<size_t>(0, 1, 4, 3, 2);
+        auto op = Dot<PolicyContainer<PModifyDimNumIs<2>>>(in1, in2);
+        static_assert(IsMatrix<decltype(op)>);
+        assert(op.Shape()[0] == 5);
+        assert(op.Shape()[1] == 2);
+
         auto res = Evaluate(op);
-        static_assert(IsMatrixSequence<decltype(res)>);
-        assert(res.Shape().Length() == 7);
-        assert(res.Shape().RowNum() == 5);
-        assert(res.Shape().ColNum() == 8);
+        static_assert(IsMatrix<decltype(res)>);
+        assert(res.Shape()[0] == 5);
+        assert(res.Shape()[1] == 2);
+
+        assert(res(0, 0) == 1012);
+        assert(res(0, 1) == 1078);
         
-        for (size_t b = 0; b < 7; ++b)
-        {
-            for (size_t i = 0; i < 5; ++i)
-            {
-                for (size_t j = 0; j < 8; ++j)
-                {
-                    CheckElement value = 0;
-                    for (size_t k = 0; k < 3; ++k)
-                    {
-                        value += in1[b](i, k) * in2[b](k, j);
-                    }
-                    assert(fabs(value - res[b](i, j)) < 0.001f);
-                }
-            }
-        }
+        assert(res(1, 0) == 2596);
+        assert(res(1, 1) == 2806);
+        
+        assert(res(2, 0) == 4180);
+        assert(res(2, 1) == 4534);
+        
+        assert(res(3, 0) == 5764);
+        assert(res(3, 1) == 6262);
+        
+        assert(res(4, 0) == 7348);
+        assert(res(4, 1) == 7990);
         cout << "done" << endl;
     }
     
     void test_dot_case4()
     {
-        cout << "Test dot case 4 (batch matrix sequence)\t";
-        auto in1 = GenBatchMatrixSequence<CheckElement>(std::vector{3, 7, 2}, 5, 3);
-        auto in2 = GenBatchMatrixSequence<CheckElement>(std::vector{3, 7, 2}, 3, 8, -10, 0.1);
-        auto op = Dot(in1, in2);
-        static_assert(IsBatchMatrixSequence<decltype(op)>);
-        assert(op.Shape().SeqLenContainer().size() == 3);
-        assert(op.Shape().SeqLenContainer()[0] == 3);
-        assert(op.Shape().SeqLenContainer()[1] == 7);
-        assert(op.Shape().SeqLenContainer()[2] == 2);
-        assert(op.Shape().RowNum() == 5);
-        assert(op.Shape().ColNum() == 8);
-        
+        cout << "Test dot case 4 (2 dim dot with diff input dim)\t";
+        auto in1 = GenTensor<size_t>(0, 1, 5, 4, 3);
+        auto in2 = GenTensor<size_t>(0, 1, 4, 3);
+        auto op = Dot<PolicyContainer<PModifyDimNumIs<2>>>(in1, in2);
+        static_assert(IsVector<decltype(op)>);
+        assert(op.Shape()[0] == 5);
+
         auto res = Evaluate(op);
-        static_assert(IsBatchMatrixSequence<decltype(res)>);
-        assert(res.Shape().SeqLenContainer().size() == 3);
-        assert(res.Shape().SeqLenContainer()[0] == 3);
-        assert(res.Shape().SeqLenContainer()[1] == 7);
-        assert(res.Shape().SeqLenContainer()[2] == 2);
-        assert(res.Shape().RowNum() == 5);
-        assert(res.Shape().ColNum() == 8);
-        
-        for (size_t i = 0; i < 5; ++i)
-        {
-            for (size_t j = 0; j < 8; ++j)
-            {        
-                for (size_t b = 0; b < 3; ++b)
-                {
-                    CheckElement value = 0;
-                    for (size_t k = 0; k < 3; ++k)
-                    {
-                        value += in1[0][b](i, k) * in2[0][b](k, j);
-                    }
-                    assert(fabs(value - res[0][b](i, j)) < 0.001f);
-                }
-                for (size_t b = 0; b < 7; ++b)
-                {
-                    CheckElement value = 0;
-                    for (size_t k = 0; k < 3; ++k)
-                    {
-                        value += in1[1][b](i, k) * in2[1][b](k, j);
-                    }
-                    assert(fabs(value - res[1][b](i, j)) < 0.001f);
-                }
-                for (size_t b = 0; b < 2; ++b)
-                {
-                    CheckElement value = 0;
-                    for (size_t k = 0; k < 3; ++k)
-                    {
-                        value += in1[2][b](i, k) * in2[2][b](k, j);
-                    }
-                    assert(fabs(value - res[2][b](i, j)) < 0.001f);
-                }
-            }
-        }
+        static_assert(IsVector<decltype(res)>);
+        assert(res.Shape()[0] == 5);
+
+        assert(res(0) == 506);
+        assert(res(1) == 1298);
+        assert(res(2) == 2090);
+        assert(res(3) == 2882);
+        assert(res(4) == 3674);
         cout << "done" << endl;
     }
 }

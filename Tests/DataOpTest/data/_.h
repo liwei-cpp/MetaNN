@@ -1,19 +1,30 @@
 #pragma once
 
-#include <data/cardinal/_.h>
-#include <data/batch/_.h>
-#include <data/general/_.h>
-#include <data/sequence/_.h>
-#include <data/batch_sequence/_.h>
+#include <data/facilities/_.h>
 
 namespace Test::Data
 {
+    void test_scalar();     void test_tensor();
+
+    void test_bias_vector();
+    void test_trival_tensor();
+    void test_zero_tensor();
+
+    void test_dynamic();
+    void test_scalable_tensor();
+
     inline void test()
     {
-        Cardinal::test();
-        Batch::test();
-        General::test();
-        Sequence::test();
-        BatchSequence::test();
+        Facilities::test();
+
+        test_scalar();
+        test_tensor();
+
+        test_bias_vector();
+        test_trival_tensor();
+        test_zero_tensor();
+
+        test_dynamic();
+        test_scalable_tensor();
     }
 }

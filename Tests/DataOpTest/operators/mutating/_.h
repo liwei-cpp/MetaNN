@@ -2,10 +2,10 @@
 
 namespace Test::Operators::Mutating
 {
-    void test_transpose();
+    void test_permute();
 
     void test()
     {
-        test_transpose();
+        test_permute();
     }
 }

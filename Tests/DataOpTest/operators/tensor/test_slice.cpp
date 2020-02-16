@@ -45,7 +45,7 @@ namespace
     }
 }
 
-namespace Test::Operators::CateTrans
+namespace Test::Operators::Tensor
 {
     void test_slice()
     {

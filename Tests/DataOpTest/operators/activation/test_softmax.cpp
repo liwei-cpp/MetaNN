@@ -1,5 +1,5 @@
 #include <data_gen.h>
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <cmath>
 #include <iostream>
@@ -11,7 +11,7 @@ namespace
     void test_softmax_case1()
     {
         cout << "Test softmax case 1 ...\t";
-        auto input = GenMatrix<float>(1, 20, 0, 0.001f);
+        auto input = GenTensor<float>(0, 0.001f, 1, 20);
         auto op = Softmax(input);
         auto res = Evaluate(op);
 
@@ -33,7 +33,7 @@ namespace
     {
         cout << "Test softmax case 2 ...\t";
         {
-            auto rm1 = GenMatrix<float>(1, 20, 0, 0.001f);
+            auto rm1 = GenTensor<float>(0, 0.001f, 1, 20);
             auto res = Softmax(rm1);
             auto res2 = Softmax(rm1);
 
@@ -44,7 +44,7 @@ namespace
             assert(cm1 == cm2);
         }
         {
-            auto rm1 = GenMatrix<float>(1, 20, 0, 0.001f);
+            auto rm1 = GenTensor<float>(0, 0.001f, 1, 20);
             auto res = Softmax(rm1);
             auto res2 = res;
 
@@ -64,8 +64,31 @@ namespace
     void test_softmax_case3()
     {
         cout << "Test softmax case 3 ...\t";
-        auto rm1 = GenBatchMatrix<float>(7, 1, 20, 0, 0.001f);
+        auto rm1 = GenTensor<float>(0, 0.001f, 7, 2, 10);
         auto t = Softmax(rm1);
+        auto t_r = Evaluate(t);
+
+        for (size_t b = 0; b < 14; ++b)
+        {
+            float sum = 0;
+            for (size_t i = 0; i < 10; ++i)
+            {
+                sum += exp(rm1(b / 2, b % 2, i));
+            }
+
+            for (size_t i = 0; i < 10; ++i)
+            {
+                assert(fabs(t_r(b / 2, b % 2, i) - exp(rm1(b / 2, b % 2, i)) / sum) < 0.0001);
+            }
+        }
+        cout << "done" << endl;
+    }
+    
+    void test_softmax_case4()
+    {
+        cout << "Test softmax case 4 (softmax with mutiple dim) ...\t";
+        auto rm1 = GenTensor<float>(0, 0.001f, 7, 2, 10);
+        auto t = Softmax<PolicyContainer<PModifyDimNumIs<2>>>(rm1);
         auto t_r = Evaluate(t);
 
         for (size_t b = 0; b < 7; ++b)
@@ -73,12 +96,12 @@ namespace
             float sum = 0;
             for (size_t i = 0; i < 20; ++i)
             {
-                sum += exp(rm1[b](0, i));
+                sum += exp(rm1(b, i / 10, i % 10));
             }
 
             for (size_t i = 0; i < 20; ++i)
             {
-                assert(fabs(t_r[b](0, i) - exp(rm1[b](0, i)) / sum) < 0.0001);
+                assert(fabs(t_r(b, i / 10, i % 10) - exp(rm1(b, i / 10, i % 10)) / sum) < 0.0001);
             }
         }
         cout << "done" << endl;
@@ -92,6 +115,7 @@ namespace Test::Operators::Activation
         test_softmax_case1();
         test_softmax_case2();
         test_softmax_case3();
+        test_softmax_case4();
     }
 }
 
@@ -113,16 +137,16 @@ namespace
         auto op = SoftmaxGrad(grad, input);
         auto res = Evaluate(op);
         
-        assert(fabs(res(0, 0) + 0.0266) < 0.001f);
-        assert(fabs(res(0, 1) - 0.0086) < 0.001f);
-        assert(fabs(res(0, 2) - 0.0180) < 0.001f);
+        assert(fabs(res(0) + 0.0266) < 0.001f);
+        assert(fabs(res(1) - 0.0086) < 0.001f);
+        assert(fabs(res(2) - 0.0180) < 0.001f);
         cout << "done" << endl;
     }
-    
+
     void test_softmax_grad_case2()
     {
         cout << "Test softmax grad case 2 ...\t";
-        BatchMatrix<CheckElement, CheckDevice> input(2, 1, 3);
+        Tensor<CheckElement, CheckDevice, 3> input(2, 1, 3);
         input.SetValue(0, 0, 0, 0.5484);
         input.SetValue(0, 0, 1, 0.3292);
         input.SetValue(0, 0, 2, 0.1224);
@@ -131,7 +155,7 @@ namespace
         input.SetValue(1, 0, 1, 0.0655);
         input.SetValue(1, 0, 2, 0.5430);
         
-        BatchMatrix<CheckElement, CheckDevice> grad(2, 1, 3);
+        Tensor<CheckElement, CheckDevice, 3> grad(2, 1, 3);
         grad.SetValue(0, 0, 0, 0.5911);
         grad.SetValue(0, 0, 1, 0.6659);
         grad.SetValue(0, 0, 2, 0.7868);
@@ -140,7 +164,7 @@ namespace
         grad.SetValue(1, 0, 1, 1.7164);
         grad.SetValue(1, 0, 2, 0.2763);
         
-        auto op = SoftmaxGrad(grad, input);
+        auto op = SoftmaxGrad<PolicyContainer<PModifyDimNumIs<2>>>(grad, input);
         auto res = Evaluate(op);
         
         assert(fabs(res[0](0, 0) + 0.0266) < 0.001f);
@@ -152,36 +176,14 @@ namespace
         assert(fabs(res[1](0, 2) + 0.2398) < 0.001f);
         cout << "done" << endl;
     }
-    
+
     void test_softmax_grad_case3()
     {
-        cout << "Test softmax grad case 3 (NLL with one hot weight vector) ...\t";
-
-        auto softmaxRes = GenMatrix<CheckElement>(1, 20, 0, 0.001f);
-        auto grad = Scalar<CheckElement, CheckDevice>(0.7f);
-        auto weight = OneHotVector<CheckElement, CheckDevice>(20, 3);
-        auto nllLossBP = NLLLossGrad(grad, weight, softmaxRes);
-        auto softmaxBP = SoftmaxGrad(nllLossBP, softmaxRes);
-        auto check = Evaluate(softmaxBP);
-        for (size_t i = 0; i < 20; ++i)
-        {
-            CheckElement compare = softmaxRes(0, i);
-            if (i == 3)
-            {
-                compare -= 1;
-            }
-            assert(fabs(check(0, i) - compare * 0.7f) <= 0.0001);
-        }
-        cout << "done" << endl;
-    }
-    
-    void test_softmax_grad_case4()
-    {
-        cout << "Test softmax grad case 4 (NLL with general weight vector) ...\t";
+        cout << "Test softmax grad case 3 (NLL with general weight vector) ...\t";
         
-        auto softmaxRes = GenMatrix<CheckElement>(1, 20, 0, 0.001f);
+        auto softmaxRes = GenTensor<CheckElement>(0, 0.001f, 1, 20);
         auto grad = Scalar<CheckElement, CheckDevice>(0.7f);
-        auto weight = GenMatrix<CheckElement>(1, 20, 1, 0.1f);
+        auto weight = GenTensor<CheckElement>(1, 0.1f, 1, 20);
         auto nllLossBP = NLLLossGrad(grad, weight, softmaxRes);
         auto softmaxBP = SoftmaxGrad(nllLossBP, softmaxRes);
         
@@ -201,13 +203,13 @@ namespace
         cout << "done" << endl;
     }
     
-    void test_softmax_grad_case5()
+    void test_softmax_grad_case4()
     {
-        cout << "Test softmax grad case 5 (NLL with general weight vector, bacth mode) ...\t";
+        cout << "Test softmax grad case 4 (NLL with general weight vector, bacth mode) ...\t";
         
-        auto softmaxRes = GenBatchMatrix<CheckElement>(5, 1, 20, 0, 0.001f);
-        auto grad = GenBatchScalar<CheckElement>(5, 0.7f, -0.31f);
-        auto weight = GenBatchMatrix<CheckElement>(5, 1, 20, 1, 0.1f);
+        auto softmaxRes = GenTensor<CheckElement>(0, 0.001f, 5, 1, 20);
+        auto grad = Scalar<CheckElement, CheckDevice>(0.7f);
+        auto weight = GenTensor<CheckElement>(1, 0.1f, 5, 1, 20);
         auto nllLossBP = NLLLossGrad(grad, weight, softmaxRes);
         auto softmaxBP = SoftmaxGrad(nllLossBP, softmaxRes);
         
@@ -218,13 +220,13 @@ namespace
             float sum = 0;
             for (size_t i = 0; i < 20; ++i)
             {
-                sum += weight[b](0, i);
+                sum += weight(b, 0, i);
             }
 
             for (size_t i = 0; i < 20; ++i)
             {
-                CheckElement compare = softmaxRes[b](0, i) * sum - weight[b](0, i);
-                assert(fabs(check[b](0, i) - compare * grad[b].Value()) <= 0.0001);
+                CheckElement compare = softmaxRes(b, 0, i) * sum - weight(b, 0, i);
+                assert(fabs(check(b, 0, i) - compare * 0.7f) <= 0.0001);
             }
         }
         cout << "done" << endl;
@@ -239,6 +241,5 @@ namespace Test::Operators::Activation
         test_softmax_grad_case2();
         test_softmax_grad_case3();
         test_softmax_grad_case4();
-        test_softmax_grad_case5();
     }
 }

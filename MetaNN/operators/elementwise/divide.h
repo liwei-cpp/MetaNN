@@ -2,8 +2,7 @@
 
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
-#include <MetaNN/operators/facilities/instance_id.h>
-#include <MetaNN/operators/facilities/tail_calculator.h>
+#include <MetaNN/operators/facilities/_.h>
 #include <stdexcept>
 
 namespace MetaNN::OpTags
