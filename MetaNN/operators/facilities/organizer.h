@@ -99,33 +99,33 @@ namespace MetaNN
         size_t m_instID;
     };
 
+    template <typename TShape1, typename TShape2>
+    bool IsBroadcastMatch(const TShape1& shape1, const TShape2& shape2)
+    {
+        if constexpr ((TShape1::DimNum == 0) || (TShape2::DimNum == 0))
+        {
+            return true;
+        }
+        else if constexpr(TShape1::DimNum > TShape2::DimNum)
+        {
+            return IsBroadcastMatch(shape2, shape1);
+        }
+        else
+        {
+            auto it1 = shape1.rbegin();
+            auto it2 = shape2.rbegin();
+            while (it1 != shape1.rend())
+            {
+                if (*it1 != *it2) return false;
+                ++it1;
+                ++it2;
+            }
+            return true;
+        }
+    }
+
     namespace NSOperShapeInfo
     {
-        template <typename TShape1, typename TShape2>
-        bool IsBroadcastMatch(const TShape1& shape1, const TShape2& shape2)
-        {
-            if constexpr ((TShape1::DimNum == 0) || (TShape2::DimNum == 0))
-            {
-                return true;
-            }
-            else if constexpr(TShape1::DimNum > TShape2::DimNum)
-            {
-                return IsBroadcastMatch(shape2, shape1);
-            }
-            else
-            {
-                auto it1 = shape1.rbegin();
-                auto it2 = shape2.rbegin();
-                while (it1 != shape1.rend())
-                {
-                    if (*it1 != *it2) return false;
-                    ++it1;
-                    ++it2;
-                }
-                return true;
-            }
-        }
-
         template <typename TShape>
         auto CommonShape(const TShape& shape)
         {

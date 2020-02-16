@@ -190,6 +190,10 @@
     <File Name="layers/_.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="operators">
+    <VirtualDirectory Name="tensor">
+      <File Name="operators/tensor/_.h"/>
+      <File Name="operators/tensor/tile.h"/>
+    </VirtualDirectory>
     <VirtualDirectory Name="math">
       <File Name="operators/math/reduce_sum.h"/>
       <File Name="operators/math/_.h"/>

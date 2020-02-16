@@ -6,6 +6,7 @@
 #include <operators/loss/_.h>
 #include <operators/math/_.h>
 #include <operators/mutating/_.h>
+#include <operators/tensor/_.h>
 
 namespace Test::Operators
 {
@@ -18,5 +19,6 @@ namespace Test::Operators
         Test::Operators::Loss::test();
         Test::Operators::Math::test();
         Test::Operators::Mutating::test();
+        Test::Operators::Tensor::test();
     }
 }

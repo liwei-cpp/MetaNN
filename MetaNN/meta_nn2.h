@@ -2,6 +2,7 @@
 
 #include <MetaNN/data/_.h>
 
+#include <MetaNN/operators/tensor/_.h>
 #include <MetaNN/operators/activations/_.h>
 #include <MetaNN/operators/blas/_.h>
 #include <MetaNN/operators/cate_trans/slice.h>

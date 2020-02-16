@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="DataOpTest2" Version="10.0.0" InternalType="Console">
   <VirtualDirectory Name="operators">
+    <VirtualDirectory Name="tensor">
+      <File Name="operators/tensor/test_tile.cpp"/>
+      <File Name="operators/tensor/_.h"/>
+    </VirtualDirectory>
     <VirtualDirectory Name="cate_trans">
       <File Name="operators/cate_trans/test_slice.cpp"/>
       <File Name="operators/cate_trans/_.h"/>
