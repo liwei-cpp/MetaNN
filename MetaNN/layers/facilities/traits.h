@@ -116,117 +116,31 @@ using LayerOutputItemTypes = typename NSLayerIOMapTrasfer::LayerIOMapForwardTran
 
 template <typename TStoreType, bool store>
 using LayerInternalBuf = std::conditional_t<store, std::stack<TStoreType>, NullParameter>;
-/*
-namespace NSShapePromote
+
+template <typename TData, typename TInput>
+auto Collapse(TInput&& p_input)
 {
-    template <typename T>
-    constexpr size_t ShapeIndex = (size_t)-1;
-    
-    template <>
-    constexpr size_t ShapeIndex<Shape<CategoryTags::Scalar>> = 0;
-    
-    template <>
-    constexpr size_t ShapeIndex<Shape<CategoryTags::Matrix>> = 1;
-    
-    template <>
-    constexpr size_t ShapeIndex<Shape<CategoryTags::ThreeDArray>> = 2;
-    
-    template <typename TSubCate>
-    constexpr size_t ShapeIndex<Shape<CategoryTags::Batch<TSubCate>>> = 10 + ShapeIndex<Shape<TSubCate>>;
-    
-    template <typename TSubCate>
-    constexpr size_t ShapeIndex<Shape<CategoryTags::Sequence<TSubCate>>> = 10 + ShapeIndex<Shape<TSubCate>>;
-    
-    template <typename TSubCate>
-    constexpr size_t ShapeIndex<Shape<CategoryTags::BatchSequence<TSubCate>>> = 100 + ShapeIndex<Shape<TSubCate>>;
-    
-    template <typename TShape1, typename TShape2>
-    auto ShapePromoteHelper(const TShape1& shape1, const TShape2& shape2)
+    using AimCategory = DataCategory<TData>;
+    if constexpr (IsValidCategoryTag<AimCategory>)
     {
-        if constexpr (ShapeIndex<TShape1> > ShapeIndex<TShape2>)
+        constexpr size_t AimDim = AimCategory::DimNum;
+        constexpr size_t OriDim = DataCategory<TInput>::DimNum;
+        static_assert(OriDim >= AimDim);
+        if constexpr (OriDim == AimDim)
         {
-            return ShapePromoteHelper(shape2, shape1);
-        }
-        else if constexpr (ShapeIndex<TShape1> == ShapeIndex<TShape2>)
-        {
-            if (shape1 != shape2)
-            {
-                throw std::runtime_error("Shape promote error: shape mismatch.");
-            }
-            return shape1;
-        }
-        else if constexpr ((std::is_same_v<TShape1, Shape<CategoryTags::Scalar>>) &&
-                           (ShapeIndex<TShape2> >= 0))
-        {
-            return shape2;
-        }
-        else if constexpr ((std::is_same_v<TShape1, Shape<CategoryTags::Matrix>>) &&
-                           (ShapeIndex<TShape2> >= 1))
-        {
-            if ((shape1.RowNum() != shape2.RowNum()) || (shape1.ColNum() != shape2.ColNum()))
-            {
-                throw std::runtime_error("Shape promote error: shape mismatch.");
-            }
-            return shape2;
-        }
-        else if constexpr ((std::is_same_v<TShape1, Shape<CategoryTags::ThreeDArray>>) &&
-                           (ShapeIndex<TShape2> >= 2))
-        {
-            if ((shape1.RowNum() != shape2.RowNum()) ||
-                (shape1.ColNum() != shape2.ColNum()) ||
-                (shape1.PageNum() != shape2.PageNum()))
-            {
-                throw std::runtime_error("Shape promote error: shape mismatch.");
-            }
-            return shape2;
+            return std::forward<TInput>(p_input);
         }
         else
         {
-            static_assert(DependencyFalse<TShape1>);
+            return ReduceSum<PolicyContainer<PModifyDimNumIs<OriDim - AimDim>>>(std::forward<TInput>(p_input));
         }
-    }
-    
-    template <typename TShape>
-    auto ShapePromote_(const TShape& s)
-    {
-        return s;
-    }
-
-    template <typename TShape, typename TData1, typename... TDatas>
-    auto ShapePromote_(const TShape& shape, const TData1& data, const TDatas&... rem)
-    {
-        if constexpr (IsOutOfDataCategory<TData1>)
-        {
-            return ShapePromote_(shape, rem...);
-        }
-        else
-        {
-            auto res = NSShapePromote::ShapePromoteHelper(shape, data.Shape());
-            return ShapePromote_(res, rem...);
-        }
-    }
-}
-
-template <typename TData>
-auto ShapePromote(const TData& data)
-{
-    static_assert(IsInDataCategory<TData>, "All data types are invalid.");
-    return data.Shape();
-}
-
-template <typename TDataHead, typename... TData>
-auto ShapePromote(const TDataHead& head, const TData&... data)
-{
-    if constexpr (IsOutOfDataCategory<TDataHead>)
-    {
-        return ShapePromote(data...);
     }
     else
     {
-        return NSShapePromote::ShapePromote_(head.Shape(), data...);
+        return NullParameter{};
     }
 }
-*/
+
 namespace NSShapeChecker
 {
     template <typename TShape, bool bTrigger>
