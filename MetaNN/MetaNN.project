@@ -154,6 +154,7 @@
       <File Name="layers/compose/batch_iter_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="elementary">
+      <File Name="layers/elementary/permute_layer.h"/>
       <File Name="layers/elementary/abs_layer.h"/>
       <File Name="layers/elementary/add_layer.h"/>
       <File Name="layers/elementary/interpolate_layer.h"/>
@@ -162,7 +163,6 @@
       <File Name="layers/elementary/tanh_layer.h"/>
       <File Name="layers/elementary/relu_layer.h"/>
       <File Name="layers/elementary/multiply_layer.h"/>
-      <File Name="layers/elementary/transpose_layer.h"/>
       <File Name="layers/elementary/_.h"/>
       <File Name="layers/elementary/dot_layer.h"/>
     </VirtualDirectory>

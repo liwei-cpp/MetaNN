@@ -3,10 +3,10 @@
 namespace MetaNN::Helper
 {
 // Int_ ===========================================================================
-    template <int N>
+    template <auto N>
     struct Int_
     {
-        constexpr static int value = N;
+        constexpr static auto value = N;
     };
 // ================================================================================
 // MakeIndexSequence ==============================================================

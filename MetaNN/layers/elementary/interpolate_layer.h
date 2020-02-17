@@ -41,10 +41,6 @@ namespace MetaNN
             auto input1 = LayerTraits::PickItemFromCont<InputMap, InterpolateLayerWeight1>(std::forward<TIn>(p_in));
             auto input2 = LayerTraits::PickItemFromCont<InputMap, InterpolateLayerWeight2>(std::forward<TIn>(p_in));
             auto lambda = LayerTraits::PickItemFromCont<InputMap, InterpolateLayerLambda>(std::forward<TIn>(p_in));
-            auto proShape = LayerTraits::ShapePromote(input1, input2, lambda);
-            auto res = Interpolate(Duplicate(input1, proShape),
-                                   Duplicate(input2, proShape),
-                                   Duplicate(lambda, proShape));
 
             if constexpr (IsFeedbackOutput)
             {
@@ -52,12 +48,12 @@ namespace MetaNN
                 m_weight2Shape.PushDataShape(input2);
                 m_lambdaShape.PushDataShape(lambda);
 
-                m_input1Stack.push(std::move(input1));
-                m_input2Stack.push(std::move(input2));
-                m_lambdaStack.push(std::move(lambda));
+                m_input1Stack.push(input1);
+                m_input2Stack.push(input2);
+                m_lambdaStack.push(lambda);
             }
 
-            return LayerOutputCont<InterpolateLayer>().template Set<LayerOutput>(std::move(res));
+            return LayerOutputCont<InterpolateLayer>().template Set<LayerOutput>(Interpolate(input1, input2, lambda));
         }
 
         template <typename TGrad>
@@ -84,13 +80,13 @@ namespace MetaNN
                 auto curInput1 = m_input1Stack.top();
                 auto curInput2 = m_input2Stack.top();
 
-                auto res2 = grad * Duplicate(1 - curLambda, grad.Shape());
-                auto res1 = grad * Duplicate(curLambda, grad.Shape());
-                auto resLambda = grad * (Duplicate(curInput1, grad.Shape()) - Duplicate(curInput2, grad.Shape()));
+                auto res2 = grad * (1 - curLambda);
+                auto res1 = grad * curLambda;
+                auto resLambda = grad * (curInput1 - curInput2);
                 
-                auto out1 = Collapse(std::move(res1), curInput1.Shape());
-                auto out2 = Collapse(std::move(res2), curInput2.Shape());
-                auto outLambda = Collapse(std::move(resLambda), curLambda.Shape());
+                auto out1 = LayerTraits::Collapse<TInterpolateLayerWeight1FP>(std::move(res1));
+                auto out2 = LayerTraits::Collapse<TInterpolateLayerWeight2FP>(std::move(res2));
+                auto outLambda = LayerTraits::Collapse<TInterpolateLayerLambdaFP>(std::move(resLambda));
                 
                 m_weight1Shape.CheckDataShape(out1);
                 m_weight2Shape.CheckDataShape(out2);

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="LayerTest2" Version="10.0.0" InternalType="Console">
   <VirtualDirectory Name="elementary">
+    <File Name="elementary/test_interpolate_layer.cpp"/>
+    <File Name="elementary/test_permute_layer.cpp"/>
+    <File Name="elementary/test_multiply_layer.cpp"/>
     <File Name="elementary/test_add_layer.cpp"/>
     <File Name="elementary/test_tanh_layer.cpp"/>
     <File Name="elementary/test_sigmoid_layer.cpp"/>

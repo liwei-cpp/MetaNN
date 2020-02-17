@@ -198,4 +198,35 @@ namespace MetaNN
             return ResType(std::forward<TP>(oper));
         }
     }
+    
+    namespace OperPermute
+    {
+        template <typename TIndexSeq, typename TDimArray>
+        struct DimInv_;
+        
+        template <size_t... Index, typename TDimArray>
+        struct DimInv_<std::index_sequence<Index...>, TDimArray>
+        {
+            using type = PDimArrayIs<ValueSequential::Order<TDimArray, Index>...>;
+        };
+    }
+
+    template <typename TDimPolicy, typename TP,
+              typename = std::enable_if_t<IsValidOper<OpTags::Permute, TP>>>
+    auto PermuteInv(TP&& oper)
+    {
+        constexpr auto dims = PolicySelect<DimPolicy, TDimPolicy>::DimArray;
+        static_assert(OperPermute::ValidDims(dims));
+        if constexpr (OperPermute::TrivalDims(dims))
+        {
+            return std::forward<TP>(oper);
+        }
+        else
+        {
+            using PDim = PickPolicyOjbect<TDimPolicy, DimPolicy, DimPolicy::DimArrayValueCate>;
+            using PModDim = typename OperPermute::DimInv_<std::make_index_sequence<dims.size()>,
+                                                          PDim>::type;
+            return Permute<PolicyContainer<PModDim>>(std::forward<TP>(oper));
+        }
+    }
 }

@@ -22,14 +22,14 @@ namespace MetaNN
     ValuePolicyTemplate(PModifyDimNumIs, DimPolicy, ModifyDimNum);
 
     template <size_t... uDims>
-    struct DimArrayIs : virtual public DimPolicy
+    struct PDimArrayIs : virtual public DimPolicy
     {
         using MinorClass = DimPolicy::DimArrayValueCate;
         static constexpr std::array<size_t, sizeof...(uDims)> DimArray{uDims...};
     };
 
     template <bool... uDims>
-    struct DimBitArrayIs : virtual public DimPolicy
+    struct PDimBitArrayIs : virtual public DimPolicy
     {
         using MinorClass = DimPolicy::DimBitArrayValueCate;
         static constexpr std::array<bool, sizeof...(uDims)> DimBitArray{uDims...};

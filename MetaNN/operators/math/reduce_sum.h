@@ -19,7 +19,7 @@ namespace MetaNN
         template <typename TPDim, size_t... I>
         struct DimArrToBitHelper_<TPDim, std::index_sequence<I...>>
         {
-            using type = DimBitArrayIs<ValueSequential::Contains<TPDim, I>...>;
+            using type = PDimBitArrayIs<ValueSequential::Contains<TPDim, I>...>;
         };
 
         template <typename TPolicy, size_t uDimNum>
@@ -35,7 +35,7 @@ namespace MetaNN
         template <size_t uTrueBound, size_t... I>
         struct ModDimToBitHelper_<uTrueBound, std::index_sequence<I...>>
         {
-            using type = DimBitArrayIs<(I < uTrueBound)...>;
+            using type = PDimBitArrayIs<(I < uTrueBound)...>;
         };
 
         template <typename TPolicy, size_t uDimNum>
@@ -52,7 +52,7 @@ namespace MetaNN
         template <size_t... I>
         struct DefaultToBitHelper_<std::index_sequence<I...>>
         {
-            using type = DimBitArrayIs<(I >= 0)...>;
+            using type = PDimBitArrayIs<(I >= 0)...>;
         };
 
         template <size_t uDimNum>

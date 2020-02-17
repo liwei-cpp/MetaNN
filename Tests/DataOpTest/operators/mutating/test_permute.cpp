@@ -58,6 +58,33 @@ namespace
         assert(res(2, 1) == 6);
         cout << "done" << endl;
     }
+    
+    void test_permute_case3()
+    {
+        cout << "Test permute case 3 (inverse operation of permute)...\t";
+        auto ori = GenTensor<CheckElement>(0, 1, 3, 2, 5);
+        auto op = Permute<PolicyContainer<DimArrayIs<2, 0, 1>>>(ori);
+        auto op2 = PermuteInv<PolicyContainer<DimArrayIs<2, 0, 1>>>(op);
+        assert(op2.Shape()[0] == 3);
+        assert(op2.Shape()[1] == 2);
+        assert(op2.Shape()[2] == 5);
+        
+        auto res = Evaluate(op2);
+        assert(res.Shape()[0] == 3);
+        assert(res.Shape()[1] == 2);
+        assert(res.Shape()[2] == 5);
+        for (size_t i = 0; i < 3; ++i)
+        {
+            for (size_t j = 0; j< 2; ++j)
+            {
+                for (size_t k = 0; k < 5; ++k)
+                {
+                    assert(fabs(ori(i, j, k) - res(i, j, k)) <= 0.001f);
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Operators::Mutating
@@ -66,5 +93,6 @@ namespace Test::Operators::Mutating
     {
         test_permute_case1();
         test_permute_case2();
+        test_permute_case3();
     }
 }

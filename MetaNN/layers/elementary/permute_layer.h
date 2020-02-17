@@ -8,7 +8,7 @@
 namespace MetaNN
 {
     template <typename TInputs, typename TPolicies>
-    class TransposeLayer
+    class PermuteLayer
     {
         static_assert(IsPolicyContainer<TPolicies>);
         using CurLayerPolicy = PlainPolicy<TPolicies>;
@@ -26,9 +26,10 @@ namespace MetaNN
         
     private:
         using TLayerInputFP = typename InputMap::template Find<LayerInput>;
+        using TDimArray = PickPolicyOjbect<CurLayerPolicy, DimPolicy, DimPolicy::DimArrayValueCate>;
 
     public:
-        TransposeLayer(std::string name)
+        PermuteLayer(std::string name)
             : m_name(std::move(name))
         {}
 
@@ -36,13 +37,13 @@ namespace MetaNN
         auto FeedForward(TIn&& p_in)
         {
             auto val = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
-            auto res = Transpose(val);
+            auto res = Permute<PolicyContainer<TDimArray>>(val);
             
             if constexpr (IsFeedbackOutput)
             {
                 m_inputShape.PushDataShape(std::move(val));
             }
-            return LayerOutputCont<TransposeLayer>().template Set<LayerOutput>(std::move(res));
+            return LayerOutputCont<PermuteLayer>().template Set<LayerOutput>(std::move(res));
         }
 
         template <typename TGrad>
@@ -54,16 +55,16 @@ namespace MetaNN
                 {
                     LayerTraits::PopoutFromStack(m_inputShape);
                 }
-                return LayerInputCont<TransposeLayer>();
+                return LayerInputCont<PermuteLayer>();
             }
             else
             {
                 auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
-                auto res = Transpose(std::move(grad));
+                auto res = PermuteInv<PolicyContainer<TDimArray>>(grad);
                 m_inputShape.CheckDataShape(res);
                 
                 LayerTraits::PopoutFromStack(m_inputShape);
-                return LayerInputCont<TransposeLayer>().template Set<LayerInput>(std::move(res));
+                return LayerInputCont<PermuteLayer>().template Set<LayerInput>(std::move(res));
             }
         }
 
@@ -78,4 +79,8 @@ namespace MetaNN
         std::string m_name;
         LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
     };
+    
+    template <typename TInputs, typename TPolicies>
+    using TransposeLayer = PermuteLayer<TInputs,
+                                        ChangePolicy<PDimArrayIs<1, 0>, TPolicies>>;
 }

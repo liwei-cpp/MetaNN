@@ -37,8 +37,6 @@ namespace MetaNN
         {
             const auto& input1 = LayerTraits::PickItemFromCont<InputMap, LeftOperand>(std::forward<TIn>(p_in));
             const auto& input2 = LayerTraits::PickItemFromCont<InputMap, RightOperand>(std::forward<TIn>(p_in));
-            auto proShape = LayerTraits::ShapePromote(input1, input2);
-            auto res = DuplicateOrKeep(input1, proShape) * DuplicateOrKeep(input2, proShape);
             
             if constexpr (IsFeedbackOutput)
             {
@@ -48,7 +46,7 @@ namespace MetaNN
                 m_inputShape2.PushDataShape(input2);
             }
 
-            return LayerOutputCont<MultiplyLayer>().template Set<LayerOutput>(std::move(res));
+            return LayerOutputCont<MultiplyLayer>().template Set<LayerOutput>(input1 * input2);
         }
         
         template <typename TGrad>
@@ -73,10 +71,10 @@ namespace MetaNN
 
                 auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
 
-                auto grad1 = grad * DuplicateOrKeep(input1, grad.Shape());
-                auto grad2 = grad * DuplicateOrKeep(input2, grad.Shape());
-                auto res1 = CollapseOrOmit(std::move(grad2), input1);
-                auto res2 = CollapseOrOmit(std::move(grad1), input2);
+                auto grad1 = grad * input1;
+                auto grad2 = grad * input2;
+                auto res1 = LayerTraits::Collapse<TLeftOperandFP>(grad2);
+                auto res2 = LayerTraits::Collapse<TRightOperandFP>(grad1);
                 m_inputShape1.CheckDataShape(res1);
                 m_inputShape2.CheckDataShape(res2);
                 

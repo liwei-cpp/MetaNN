@@ -71,9 +71,10 @@ struct PickPolicyOjbect_<PolicyContainer<TCurPolicy, TPolicies...>, TMajorClass,
 {
     constexpr static bool IsThePolicy = std::is_same_v<typename TCurPolicy::MajorClass, TMajorClass> &&
                                         std::is_same_v<typename TCurPolicy::MinorClass, TMinorClass>;
-    using type = std::conditional_t<IsThePolicy,
-                                    TCurPolicy,
-                                    PickPolicyOjbect_<PolicyContainer<TPolicies...>, TMajorClass, TMinorClass>>;
+    using type =
+        typename std::conditional_t<IsThePolicy,
+                                    Identity_<TCurPolicy>,
+                                    PickPolicyOjbect_<PolicyContainer<TPolicies...>, TMajorClass, TMinorClass>>::type;
 };
 
 template <typename TPolicyContainer, typename TMajorClass, typename TMinorClass>
