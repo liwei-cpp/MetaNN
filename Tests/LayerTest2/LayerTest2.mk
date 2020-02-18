@@ -60,8 +60,8 @@ AS       := as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_permute_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix) \
-	
+Objects0=$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_permute_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) \
+	$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix) 
 
 
 
@@ -92,6 +92,14 @@ PreBuild:
 ##
 ## Objects
 ##
+$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(ObjectSuffix): elementary/test_softmax_layer.cpp $(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_softmax_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(DependSuffix): elementary/test_softmax_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(DependSuffix) -MM elementary/test_softmax_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(PreprocessSuffix): elementary/test_softmax_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_softmax_layer.cpp$(PreprocessSuffix) elementary/test_softmax_layer.cpp
+
 $(IntermediateDirectory)/main.cpp$(ObjectSuffix): main.cpp $(IntermediateDirectory)/main.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/main.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/main.cpp$(DependSuffix): main.cpp

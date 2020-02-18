@@ -7,6 +7,22 @@
 
 namespace MetaNN
 {
+    namespace NSSoftmaxLayer
+    {
+        template <bool IsSaveData, typename TPolicy, typename TInput>
+        struct OutputDataStack_
+        {
+            using type = NullParameter;
+        };
+        
+        template <typename TPolicy, typename TInput>
+        struct OutputDataStack_<true, TPolicy, TInput>
+        {
+            using ItemType = decltype(Softmax<TPolicy>(std::declval<TInput>()));
+            using type = std::stack<ItemType>;
+        };
+    }
+    
     template <typename TInputs, typename TPolicies>
     class SoftmaxLayer
     {
@@ -29,7 +45,7 @@ namespace MetaNN
 
         auto FeedForwardCal(const TLayerInputFP& val)
         {
-            return Softmax(val);
+            return Softmax<CurLayerPolicy>(val);
         }
     public:
         SoftmaxLayer(std::string name)
@@ -40,7 +56,7 @@ namespace MetaNN
         auto FeedForward(TIn&& p_in)
         {
             auto val = LayerTraits::PickItemFromCont<InputMap, LayerInput>(std::forward<TIn>(p_in));
-            auto res = FeedForwardCal(val);
+            auto res = Softmax<CurLayerPolicy>(val);
             if constexpr (IsFeedbackOutput)
             {
                 m_inputShape.PushDataShape(val);
@@ -69,7 +85,7 @@ namespace MetaNN
                 auto softmaxRes = m_data.top();
                 auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
 
-                auto res = SoftmaxGrad(std::move(grad), std::move(softmaxRes));
+                auto res = SoftmaxGrad<CurLayerPolicy>(std::move(grad), std::move(softmaxRes));
                 m_inputShape.CheckDataShape(res);
                 
                 LayerTraits::PopoutFromStack(m_data, m_inputShape);
@@ -86,8 +102,8 @@ namespace MetaNN
         }
     private:
         std::string m_name;
-        using TempDataType = RemConstRef<std::invoke_result_t<decltype(&SoftmaxLayer::FeedForwardCal), SoftmaxLayer, TLayerInputFP>>;
-        LayerTraits::LayerInternalBuf<TempDataType, IsFeedbackOutput> m_data;
+        using TInternalBuf = typename NSSoftmaxLayer::OutputDataStack_<IsFeedbackOutput, CurLayerPolicy, TLayerInputFP>::type;
+        TInternalBuf m_data;
         LayerTraits::ShapeChecker<TLayerInputFP,  IsFeedbackOutput> m_inputShape;
     };
 }

@@ -7,6 +7,7 @@ namespace Test::Layer::Elementary
     void test_permute_layer();
     void test_relu_layer();
     void test_sigmoid_layer();
+    void test_softmax_layer();
     void test_tanh_layer();
 
     void Test()
@@ -18,6 +19,7 @@ namespace Test::Layer::Elementary
         test_permute_layer();
         test_relu_layer();
         test_sigmoid_layer();
+        test_softmax_layer();
         test_tanh_layer();
     }
 }
