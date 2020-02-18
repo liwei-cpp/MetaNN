@@ -13,7 +13,7 @@ CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=root
-Date                   :=02/17/20
+Date                   :=02/18/20
 CodeLitePath           :=/root/.codelite
 LinkerName             :=g++
 SharedObjectLinkerName :=g++ -shared -fPIC
@@ -60,7 +60,8 @@ AS       := as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_permute_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(ObjectSuffix) 
+Objects0=$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_permute_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) $(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix) \
+	
 
 
 
@@ -91,22 +92,6 @@ PreBuild:
 ##
 ## Objects
 ##
-$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix): elementary/test_interpolate_layer.cpp $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_interpolate_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(DependSuffix): elementary/test_interpolate_layer.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(DependSuffix) -MM elementary/test_interpolate_layer.cpp
-
-$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(PreprocessSuffix): elementary/test_interpolate_layer.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(PreprocessSuffix) elementary/test_interpolate_layer.cpp
-
-$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(ObjectSuffix): elementary/test_permute_layer.cpp $(IntermediateDirectory)/elementary_test_permute_layer.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_permute_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(DependSuffix): elementary/test_permute_layer.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(DependSuffix) -MM elementary/test_permute_layer.cpp
-
-$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(PreprocessSuffix): elementary/test_permute_layer.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_permute_layer.cpp$(PreprocessSuffix) elementary/test_permute_layer.cpp
-
 $(IntermediateDirectory)/main.cpp$(ObjectSuffix): main.cpp $(IntermediateDirectory)/main.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/main.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/main.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/main.cpp$(DependSuffix): main.cpp
@@ -114,38 +99,6 @@ $(IntermediateDirectory)/main.cpp$(DependSuffix): main.cpp
 
 $(IntermediateDirectory)/main.cpp$(PreprocessSuffix): main.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/main.cpp$(PreprocessSuffix) main.cpp
-
-$(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix): elementary/test_add_layer.cpp $(IntermediateDirectory)/elementary_test_add_layer.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_add_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/elementary_test_add_layer.cpp$(DependSuffix): elementary/test_add_layer.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_add_layer.cpp$(DependSuffix) -MM elementary/test_add_layer.cpp
-
-$(IntermediateDirectory)/elementary_test_add_layer.cpp$(PreprocessSuffix): elementary/test_add_layer.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_add_layer.cpp$(PreprocessSuffix) elementary/test_add_layer.cpp
-
-$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix): elementary/test_relu_layer.cpp $(IntermediateDirectory)/elementary_test_relu_layer.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_relu_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(DependSuffix): elementary/test_relu_layer.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(DependSuffix) -MM elementary/test_relu_layer.cpp
-
-$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(PreprocessSuffix): elementary/test_relu_layer.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_relu_layer.cpp$(PreprocessSuffix) elementary/test_relu_layer.cpp
-
-$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix): elementary/test_abs_layer.cpp $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_abs_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(DependSuffix): elementary/test_abs_layer.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(DependSuffix) -MM elementary/test_abs_layer.cpp
-
-$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(PreprocessSuffix): elementary/test_abs_layer.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(PreprocessSuffix) elementary/test_abs_layer.cpp
-
-$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix): elementary/test_sigmoid_layer.cpp $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(DependSuffix)
-	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_sigmoid_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) $(IncludePath)
-$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(DependSuffix): elementary/test_sigmoid_layer.cpp
-	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(DependSuffix) -MM elementary/test_sigmoid_layer.cpp
-
-$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(PreprocessSuffix): elementary/test_sigmoid_layer.cpp
-	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(PreprocessSuffix) elementary/test_sigmoid_layer.cpp
 
 $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(ObjectSuffix): elementary/test_multiply_layer.cpp $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_multiply_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(ObjectSuffix) $(IncludePath)
@@ -155,6 +108,22 @@ $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(DependSuffix): elem
 $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(PreprocessSuffix): elementary/test_multiply_layer.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_multiply_layer.cpp$(PreprocessSuffix) elementary/test_multiply_layer.cpp
 
+$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix): elementary/test_sigmoid_layer.cpp $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_sigmoid_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(DependSuffix): elementary/test_sigmoid_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(DependSuffix) -MM elementary/test_sigmoid_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(PreprocessSuffix): elementary/test_sigmoid_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_sigmoid_layer.cpp$(PreprocessSuffix) elementary/test_sigmoid_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(ObjectSuffix): elementary/test_permute_layer.cpp $(IntermediateDirectory)/elementary_test_permute_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_permute_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(DependSuffix): elementary/test_permute_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(DependSuffix) -MM elementary/test_permute_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_permute_layer.cpp$(PreprocessSuffix): elementary/test_permute_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_permute_layer.cpp$(PreprocessSuffix) elementary/test_permute_layer.cpp
+
 $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(ObjectSuffix): elementary/test_tanh_layer.cpp $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(DependSuffix)
 	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_tanh_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(ObjectSuffix) $(IncludePath)
 $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(DependSuffix): elementary/test_tanh_layer.cpp
@@ -162,6 +131,46 @@ $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(DependSuffix): elementa
 
 $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(PreprocessSuffix): elementary/test_tanh_layer.cpp
 	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_tanh_layer.cpp$(PreprocessSuffix) elementary/test_tanh_layer.cpp
+
+$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix): loss/test_nll_loss_layer.cpp $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/loss/test_nll_loss_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(DependSuffix): loss/test_nll_loss_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(DependSuffix) -MM loss/test_nll_loss_layer.cpp
+
+$(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(PreprocessSuffix): loss/test_nll_loss_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/loss_test_nll_loss_layer.cpp$(PreprocessSuffix) loss/test_nll_loss_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix): elementary/test_add_layer.cpp $(IntermediateDirectory)/elementary_test_add_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_add_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/elementary_test_add_layer.cpp$(DependSuffix): elementary/test_add_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_add_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_add_layer.cpp$(DependSuffix) -MM elementary/test_add_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_add_layer.cpp$(PreprocessSuffix): elementary/test_add_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_add_layer.cpp$(PreprocessSuffix) elementary/test_add_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix): elementary/test_abs_layer.cpp $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_abs_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(DependSuffix): elementary/test_abs_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(DependSuffix) -MM elementary/test_abs_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_abs_layer.cpp$(PreprocessSuffix): elementary/test_abs_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_abs_layer.cpp$(PreprocessSuffix) elementary/test_abs_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix): elementary/test_interpolate_layer.cpp $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_interpolate_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(DependSuffix): elementary/test_interpolate_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(DependSuffix) -MM elementary/test_interpolate_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(PreprocessSuffix): elementary/test_interpolate_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_interpolate_layer.cpp$(PreprocessSuffix) elementary/test_interpolate_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix): elementary/test_relu_layer.cpp $(IntermediateDirectory)/elementary_test_relu_layer.cpp$(DependSuffix)
+	$(CXX) $(IncludePCH) $(SourceSwitch) "/home/MetaNN/Tests/LayerTest2/elementary/test_relu_layer.cpp" $(CXXFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix) $(IncludePath)
+$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(DependSuffix): elementary/test_relu_layer.cpp
+	@$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) -MG -MP -MT$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(ObjectSuffix) -MF$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(DependSuffix) -MM elementary/test_relu_layer.cpp
+
+$(IntermediateDirectory)/elementary_test_relu_layer.cpp$(PreprocessSuffix): elementary/test_relu_layer.cpp
+	$(CXX) $(CXXFLAGS) $(IncludePCH) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) $(IntermediateDirectory)/elementary_test_relu_layer.cpp$(PreprocessSuffix) elementary/test_relu_layer.cpp
 
 
 -include $(IntermediateDirectory)/*$(DependSuffix)
