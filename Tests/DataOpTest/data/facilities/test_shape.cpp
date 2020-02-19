@@ -17,11 +17,11 @@ namespace
         Shape<3> sh2;
         assert(sh == sh2);
 
-        assert(sh != Shape<3>(1,2,3));
+        assert(sh != Shape(1,2,3));
         
         assert(sh != Shape<4>());
         
-        assert(Shape<3>(1,2,3) == Shape<3>(1,2,3));
+        assert(Shape(1,2,3) == Shape<3>(1,2,3));
         cout << "done" << endl;
     }
     

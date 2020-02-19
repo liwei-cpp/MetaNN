@@ -243,4 +243,7 @@ namespace MetaNN
     {
         return !(val1 == val2);
     }
+
+    template <typename... TShapeParameter>
+    explicit Shape(TShapeParameter... shapes) -> Shape<sizeof...(TShapeParameter)>;
 }

@@ -24,7 +24,7 @@ namespace
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
     
-        assert(res.Shape() == Shape<3>(5, 7, 4));
+        assert(res.Shape() == Shape(5, 7, 4));
 
         for (size_t i = 0; i < 7; ++i)
         {
@@ -62,7 +62,7 @@ namespace
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
     
-        assert(res.Shape() == Shape<3>(5, 7, 4));
+        assert(res.Shape() == Shape(5, 7, 4));
 
         for (size_t i = 0; i < 7; ++i)
         {
@@ -111,7 +111,7 @@ namespace
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
     
-        assert(res.Shape() == Shape<3>(5, 7, 4));
+        assert(res.Shape() == Shape(5, 7, 4));
 
         for (size_t i = 0; i < 7; ++i)
         {
@@ -147,7 +147,7 @@ namespace
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
     
-        assert(res.Shape() == Shape<2>(5, 4));
+        assert(res.Shape() == Shape(5, 4));
     
         for (size_t i = 0; i < 4; ++i)
         {
@@ -180,7 +180,7 @@ namespace
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
-        assert(res.Shape() == Shape<2>(5, 4));
+        assert(res.Shape() == Shape(5, 4));
     
         for (size_t i = 0; i < 4; ++i)
         {
@@ -221,7 +221,7 @@ namespace
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
-        assert(res.Shape() == Shape<2>(5, 4));
+        assert(res.Shape() == Shape(5, 4));
     
         for (size_t i = 0; i < 4; ++i)
         {

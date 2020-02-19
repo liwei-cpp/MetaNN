@@ -11,13 +11,13 @@ namespace
     void test_tile_case1()
     {
         cout << "Test tile case 1 (h/v expand)...\t";
-        Shape<2> aimShape(2, 2);
+        Shape aimShape(2, 2);
 
         Vector<int, DeviceTags::CPU> ori(2);
         ori.SetValue(0, 0);
         ori.SetValue(1, 1);
         {
-            auto op = Tile<PolicyContainer<DimArrayIs<0>>>(ori, aimShape);
+            auto op = Tile<PolicyContainer<PDimArrayIs<0>>>(ori, aimShape);
             
             auto res = Evaluate(op);
             static_assert(IsMatrix<decltype(res)>);
@@ -31,7 +31,7 @@ namespace
         }
         
         {
-            auto op = Tile<PolicyContainer<DimArrayIs<1>>>(ori, aimShape);
+            auto op = Tile<PolicyContainer<PDimArrayIs<1>>>(ori, aimShape);
             
             auto res = Evaluate(op);
             static_assert(IsMatrix<decltype(res)>);
@@ -54,7 +54,7 @@ namespace
         ori.SetValue(0, 0, 1); ori.SetValue(0, 1, 2); ori.SetValue(0, 2, 3);
         ori.SetValue(1, 0, 4); ori.SetValue(1, 1, 5); ori.SetValue(1, 2, 6);
         {
-            auto op = Tile(ori, Shape<2>(2, 6));
+            auto op = Tile(ori, Shape(2, 6));
             
             auto res = Evaluate(op);
             static_assert(IsMatrix<decltype(res)>);
@@ -69,7 +69,7 @@ namespace
         }
         
         {
-            auto op = Tile(ori, Shape<2>(4, 3));
+            auto op = Tile(ori, Shape(4, 3));
             
             auto res = Evaluate(op);
             static_assert(IsMatrix<decltype(res)>);
@@ -88,13 +88,13 @@ namespace
     {
         cout << "Test tile case 3 (general)...\t";
         auto ori = GenTensor<int>(0, 1, 2, 5, 3);
-        auto op = Tile<PolicyContainer<DimArrayIs<0, 3>>>(ori, Shape<5>(7, 4, 15, 4, 3));
+        auto op = Tile<PolicyContainer<PDimArrayIs<0, 3>>>(ori, Shape(7, 4, 15, 4, 3));
         static_assert(DataCategory<decltype(op)>::DimNum == 5);;
-        assert(op.Shape() == Shape<5>(7, 4, 15, 4, 3));
+        assert(op.Shape() == Shape(7, 4, 15, 4, 3));
 
         auto res = Evaluate(op);
         static_assert(DataCategory<decltype(res)>::DimNum == 5);;
-        assert(res.Shape() == Shape<5>(7, 4, 15, 4, 3));
+        assert(res.Shape() == Shape(7, 4, 15, 4, 3));
 
         for (size_t a1 = 0; a1 < 7; ++a1)
             for (size_t a2 = 0; a2 < 4; ++a2)

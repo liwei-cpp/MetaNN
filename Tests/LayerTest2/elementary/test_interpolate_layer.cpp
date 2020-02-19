@@ -156,7 +156,7 @@ namespace
 
             auto out = layer.FeedForward(input);
             auto res = Evaluate(out.Get<LayerOutput>());
-            assert(res.Shape() == Shape<2>(loop_count, 3));
+            assert(res.Shape() == Shape(loop_count, 3));
             for (size_t i = 0; i < loop_count; ++i)
             {
                 for (size_t j = 0; j < 3; ++j)

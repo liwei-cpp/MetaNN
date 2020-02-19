@@ -12,7 +12,7 @@ namespace
     {
         cout << "Test permute case 1 ...\t";
         auto ori = GenTensor<CheckElement>(0, 1, 3, 2, 5);
-        auto op = Permute<PolicyContainer<DimArrayIs<2, 0, 1>>>(ori);
+        auto op = Permute<PolicyContainer<PDimArrayIs<2, 0, 1>>>(ori);
         assert(op.Shape()[0] == 5);
         assert(op.Shape()[1] == 3);
         assert(op.Shape()[2] == 2);
@@ -45,7 +45,7 @@ namespace
         ori.SetValue(1, 1, 5);
         ori.SetValue(1, 2, 6);
         
-        auto op = Permute<PolicyContainer<DimArrayIs<1, 0>>>(ori);
+        auto op = Permute<PolicyContainer<PDimArrayIs<1, 0>>>(ori);
         assert(op.Shape()[0] == 3);
         assert(op.Shape()[1] == 2);
         
@@ -63,8 +63,8 @@ namespace
     {
         cout << "Test permute case 3 (inverse operation of permute)...\t";
         auto ori = GenTensor<CheckElement>(0, 1, 3, 2, 5);
-        auto op = Permute<PolicyContainer<DimArrayIs<2, 0, 1>>>(ori);
-        auto op2 = PermuteInv<PolicyContainer<DimArrayIs<2, 0, 1>>>(op);
+        auto op = Permute<PolicyContainer<PDimArrayIs<2, 0, 1>>>(ori);
+        auto op2 = PermuteInv<PolicyContainer<PDimArrayIs<2, 0, 1>>>(op);
         assert(op2.Shape()[0] == 3);
         assert(op2.Shape()[1] == 2);
         assert(op2.Shape()[2] == 5);

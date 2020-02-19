@@ -13,7 +13,7 @@ namespace
         cout << "Test reduce sum case 1 (Matrix)\t";
         auto ori = GenTensor<int>(1, 0, 2, 3);
         {
-            auto op = ReduceSum<PolicyContainer<DimArrayIs<1>>>(ori);
+            auto op = ReduceSum<PolicyContainer<PDimArrayIs<1>>>(ori);
             static_assert(IsVector<decltype(op)>);
             assert(op.Shape()[0] == 2);
 
@@ -24,7 +24,7 @@ namespace
             assert(res(1) == 3);
         }
         {
-            auto op = ReduceSum<PolicyContainer<DimArrayIs<0>>>(ori);
+            auto op = ReduceSum<PolicyContainer<PDimArrayIs<0>>>(ori);
             static_assert(IsVector<decltype(op)>);
             assert(op.Shape()[0] == 3);
 
@@ -46,7 +46,7 @@ namespace
         ori.SetValue(1, -0.9567f);
         ori.SetValue(2, 0.2958f);
 
-        auto op = ReduceSum<PolicyContainer<DimArrayIs<0>>>(ori);
+        auto op = ReduceSum<PolicyContainer<PDimArrayIs<0>>>(ori);
         static_assert(IsScalar<decltype(op)>);
 
         auto res = Evaluate(op);
@@ -61,7 +61,7 @@ namespace
         cout << "Test reduce sum case 3 (Matrix, Keep Dim)\t";
         auto ori = GenTensor<int>(1, 0, 2, 3);
         {
-            auto op = ReduceSum<PolicyContainer<DimArrayIs<1>, PKeepDim>>(ori);
+            auto op = ReduceSum<PolicyContainer<PDimArrayIs<1>, PKeepDim>>(ori);
             static_assert(IsMatrix<decltype(op)>);
             assert(op.Shape()[0] == 2);
             assert(op.Shape()[1] == 1);
@@ -74,7 +74,7 @@ namespace
             assert(res(1, 0) == 3);
         }
         {
-            auto op = ReduceSum<PolicyContainer<DimArrayIs<0>, PKeepDim>>(ori);
+            auto op = ReduceSum<PolicyContainer<PDimArrayIs<0>, PKeepDim>>(ori);
             static_assert(IsMatrix<decltype(op)>);
             assert(op.Shape()[0] == 1);
             assert(op.Shape()[1] == 3);
@@ -98,7 +98,7 @@ namespace
         ori.SetValue(1, -0.9567f);
         ori.SetValue(2, 0.2958f);
 
-        auto op = ReduceSum<PolicyContainer<DimArrayIs<0>, PKeepDim>>(ori);
+        auto op = ReduceSum<PolicyContainer<PDimArrayIs<0>, PKeepDim>>(ori);
         static_assert(IsVector<decltype(op)>);
 
         auto res = Evaluate(op);

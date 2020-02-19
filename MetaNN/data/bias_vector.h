@@ -67,7 +67,7 @@ namespace MetaNN
 
     public:
         explicit BiasVector(size_t vecLen, size_t pos, TScalar scalar)
-            : m_shape(MetaNN::Shape<1>{vecLen})
+            : m_shape(MetaNN::Shape(vecLen))
             , m_pos(pos)
             , m_scalar(std::move(scalar))
         {
