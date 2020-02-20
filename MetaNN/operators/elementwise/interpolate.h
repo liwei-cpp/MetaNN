@@ -2,6 +2,7 @@
 
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
+#include <MetaNN/facilities/_.h>
 #include <MetaNN/operators/facilities/_.h>
 #include <stdexcept>
 
@@ -23,7 +24,7 @@ namespace OperInterpolate::NSCaseGen
     public:
         EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TInputHandle3 oriHandle3,
                  TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {oriHandle1.DataPtr(), oriHandle2.DataPtr(), oriHandle3.DataPtr()},
                        outputHandle.DataPtr())
             , m_inputHandle1(std::move(oriHandle1))

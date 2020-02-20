@@ -2,6 +2,7 @@
 
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
+#include <MetaNN/facilities/_.h>
 #include <MetaNN/operators/facilities/_.h>
 #include <cassert>
 #include <type_traits>
@@ -22,7 +23,7 @@ namespace OperSign::NSCaseGen
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
             , m_outputHandle(std::move(outputHandle))

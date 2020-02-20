@@ -3,6 +3,7 @@
 #include <MetaNN/policies/change_policy.h>
 #include <MetaNN/policies/policy_selector.h>
 #include <MetaNN/facilities/cont_metafuns/value_sequential.h>
+#include <MetaNN/facilities/_.h>
 #include <cassert>
 
 namespace MetaNN::OpTags
@@ -105,7 +106,7 @@ namespace MetaNN
             using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
             EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape)
-                : BaseType(std::type_index(typeid(EvalItem)),
+                : BaseType(TypeID<EvalItem>(),
                            {oriHandle.DataPtr()}, outputHandle.DataPtr())
                 , m_inputHandle(std::move(oriHandle))
                 , m_outputHandle(std::move(outputHandle))

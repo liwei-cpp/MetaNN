@@ -3,6 +3,7 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_buffer.h>
 #include <MetaNN/evaluate/eval_plan.h>
+#include <MetaNN/facilities/_.h>
 #include <cstring>
 #include <type_traits>
 
@@ -20,7 +21,7 @@ namespace MetaNN
 
             EvalItem(EvalHandle<PrincipalDataType<CategoryTag, ElementType, DeviceType>> resBuf,
                      Shape<uDim> p_shape)
-                : BaseEvalItem<TDevice>(std::type_index(typeid(EvalItem)),
+                : BaseEvalItem<TDevice>(TypeID<EvalItem>(),
                                         {}, resBuf.DataPtr())
                 , m_resHandle(std::move(resBuf))
                 , m_shape(std::move(p_shape))

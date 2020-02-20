@@ -3,6 +3,7 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/_.h>
+#include <MetaNN/facilities/_.h>
 #include <cassert>
 #include <type_traits>
 
@@ -24,7 +25,7 @@ namespace OperSlice::NSCaseGen
 
         template <typename TAuxParams>
         EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& p_params)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
             , m_id(p_params.m_elemID)

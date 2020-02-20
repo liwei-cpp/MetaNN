@@ -4,6 +4,7 @@
 #include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/_.h>
 #include <MetaNN/policies/policy_selector.h>
+#include <MetaNN/facilities/_.h>
 #include <cassert>
 #include <cmath>
 #include <type_traits>
@@ -27,7 +28,7 @@ namespace OperSoftmax::NSCaseGen
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
         EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
             , m_outputHandle(std::move(outputHandle))
@@ -129,7 +130,7 @@ namespace OperSoftmaxGrad::NSCaseGen
         using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
         EvalItem(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {gradHandle.DataPtr(), oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_gradHandle(std::move(gradHandle))
             , m_inputHandle(std::move(oriHandle))
@@ -226,7 +227,7 @@ namespace OperSoftmaxGrad::NSCaseNLLLossGrad
     public:
         EvalItem(TGradHandle gradHandle, TWeightHandle weightHandle,
                     TSoftmaxHandle softmaxHandle, TOutputHandle outputHandle)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {gradHandle.DataPtr(), weightHandle.DataPtr(), softmaxHandle.DataPtr()},
                        outputHandle.DataPtr())
             , m_gradHandle(std::move(gradHandle))

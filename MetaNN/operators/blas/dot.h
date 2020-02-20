@@ -2,6 +2,7 @@
 
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
+#include <MetaNN/facilities/_.h>
 #include <MetaNN/operators/facilities/_.h>
 #include <MetaNN/policies/policy_selector.h>
 #include <cassert>
@@ -25,7 +26,7 @@ namespace OperDot::NSCaseGen
 
         EvalItem(TInputHandle1 operand1, TInputHandle2 operand2, 
                  TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {operand1.DataPtr(), operand2.DataPtr()},
                        outputHandle.DataPtr())
             , m_operand1(std::move(operand1))

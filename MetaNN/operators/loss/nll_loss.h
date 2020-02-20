@@ -2,6 +2,7 @@
 
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
+#include <MetaNN/facilities/_.h>
 #include <MetaNN/operators/facilities/_.h>
 #include <MetaNN/operators/loss/facilities/organizer.h>
 #include <cassert>
@@ -26,7 +27,7 @@ namespace OperNLLLoss::NSCaseGen
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
         EvalItem(TTruthHandle truthHandle, TPredHandle predHandle, TOutputHandle outputHandle)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {truthHandle.DataPtr(), predHandle.DataPtr()},
                        outputHandle.DataPtr())
             , m_truthHandle(std::move(truthHandle))
@@ -120,7 +121,7 @@ namespace OperNLLLossGrad::NSCaseGen
 
         EvalItem(TGradHandle gradHandle, TTruthHandle truthHandle, TPredHandle predHandle,
                  TOutputHandle outputHandle)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {gradHandle.DataPtr(), truthHandle.DataPtr(), predHandle.DataPtr()},
                        outputHandle.DataPtr())
             , m_gradHandle(std::move(gradHandle))

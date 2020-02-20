@@ -1,7 +1,6 @@
 #pragma once
 #include <list>
 #include <memory>
-#include <typeindex>
 #include <MetaNN/evaluate/eval_group.h>
 
 namespace MetaNN
@@ -11,7 +10,7 @@ namespace MetaNN
     {
     public:
         using DeviceType = TDevice;
-        BaseEvalItemDispatcher(std::type_index evalItemID)
+        BaseEvalItemDispatcher(size_t evalItemID)
             : m_evalItemID(evalItemID)
         {}
         virtual ~BaseEvalItemDispatcher() = default;
@@ -21,7 +20,7 @@ namespace MetaNN
         
         virtual std::unique_ptr<BaseEvalGroup<DeviceType>> PickNextGroup() = 0;
     protected:
-        const std::type_index m_evalItemID;
+        const size_t m_evalItemID;
     };
     
     template <typename TEvalGroup>
@@ -31,7 +30,7 @@ namespace MetaNN
         using TBase = BaseEvalItemDispatcher<typename TEvalGroup::DeviceType>;
 
     public:
-        TrivalEvalItemDispatcher(std::type_index evalItemID)
+        TrivalEvalItemDispatcher(size_t evalItemID)
             : TBase(evalItemID) {}
 
         virtual void Add(std::unique_ptr<BaseEvalItem<typename TBase::DeviceType>> item) final override

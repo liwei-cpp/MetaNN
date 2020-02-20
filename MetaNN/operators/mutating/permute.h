@@ -4,6 +4,7 @@
 #include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/_.h>
 #include <MetaNN/policies/policy_selector.h>
+#include <MetaNN/facilities/_.h>
 #include <cassert>
 #include <type_traits>
 
@@ -24,7 +25,7 @@ namespace MetaNN
             using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
             EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape)
-                : BaseType(std::type_index(typeid(EvalItem)),
+                : BaseType(TypeID<EvalItem>(),
                            {oriHandle.DataPtr()}, outputHandle.DataPtr())
                 , m_inputHandle(std::move(oriHandle))
                 , m_outputHandle(std::move(outputHandle))

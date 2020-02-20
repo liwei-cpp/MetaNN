@@ -1,7 +1,7 @@
 #pragma once
+#include <MetaNN/facilities/_.h>
 #include <string>
 #include <stdexcept>
-#include <typeindex>
 #include <unordered_map>
 
 namespace MetaNN
@@ -26,7 +26,7 @@ namespace MetaNN
         template <typename TType>
         NSWeightBuffer::Cont<TType>* GetCont() const
         {
-            const std::type_index typeID = std::type_index(typeid(TType));
+            const size_t typeID = TypeID<TType>();
             auto it = m_params.find(typeID);
             if (it == m_params.end())
             {
@@ -40,15 +40,14 @@ namespace MetaNN
         void Set(const std::string& name, T&& t)
         {
             using RawT = RemConstRef<T>;
-            const std::type_index typeID = std::type_index(typeid(RawT));
-
-            auto it = m_params.find(typeID);
-            if (it == m_params.end())
+            auto* contPtr = GetCont<RawT>();
+            if (!contPtr)
             {
+                const size_t typeID = TypeID<RawT>();
                 m_params.emplace(typeID, std::make_unique<NSWeightBuffer::Cont<RawT>>());
-                it = m_params.find(typeID);
+                contPtr = GetCont<RawT>();
             }
-            NSWeightBuffer::Cont<RawT>* contPtr = static_cast<NSWeightBuffer::Cont<RawT>*>(it->second.get());
+
             if (contPtr->data.find(name) != contPtr->data.end())
             {
                 throw std::runtime_error("Duplicate parameter with name: " + name);
@@ -60,16 +59,9 @@ namespace MetaNN
         template <typename T>
         const T* TryGet(const std::string& name) const
         {
-            const std::type_index typeID = std::type_index(typeid(T));
-            auto it = m_params.find(typeID);
-            
-            if (it == m_params.end())
-            {
-                return nullptr;
-            }
-            
-            const auto* cont = static_cast<NSWeightBuffer::Cont<T>*>(it->second.get());
-            
+            const auto* cont = GetCont<T>();
+            if (!cont) return nullptr;
+
             auto it2 = cont->data.find(name);
             if (it2 == cont->data.end())
             {
@@ -81,15 +73,8 @@ namespace MetaNN
         template <typename T>
         T* TryGet(const std::string& name)
         {
-            const std::type_index typeID = std::type_index(typeid(T));
-            auto it = m_params.find(typeID);
-            
-            if (it == m_params.end())
-            {
-                return nullptr;
-            }
-            
-            auto* cont = static_cast<NSWeightBuffer::Cont<T>*>(it->second.get());
+            auto* cont = GetCont<T>();
+            if (!cont) return nullptr;
             
             auto it2 = cont->data.find(name);
             if (it2 == cont->data.end())
@@ -113,6 +98,6 @@ namespace MetaNN
             m_params.clear();
         }        
     private:
-        std::unordered_map<std::type_index, std::unique_ptr<NSWeightBuffer::BaseCont>> m_params;
+        std::unordered_map<size_t, std::unique_ptr<NSWeightBuffer::BaseCont>> m_params;
     };
 }

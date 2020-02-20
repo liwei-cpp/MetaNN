@@ -1,7 +1,7 @@
 #pragma once
 
 #include <MetaNN/data/facilities/shape.h>
-#include <MetaNN/facilities/traits.h>
+#include <MetaNN/facilities/_.h>
 #include <algorithm>
 
 namespace MetaNN
@@ -28,7 +28,7 @@ namespace MetaNN
             EvalItem(std::vector<TInputHandle> p_input, TOutputHandle p_output,
                      std::vector<const void*> p_dependencies,
                      Shape<uDim> p_outputShape)
-                : BaseEvalItem<DeviceType>(std::type_index(typeid(EvalItem)),
+                : BaseEvalItem<DeviceType>(TypeID<EvalItem>(),
                                            std::move(p_dependencies), p_output.DataPtr())
                 , m_inputs(std::move(p_input))
                 , m_output(std::move(p_output))

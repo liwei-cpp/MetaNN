@@ -149,7 +149,7 @@ namespace MetaNN
         std::unordered_map<DataPtr, size_t> m_nodeInActNum;
         std::unordered_map<DataPtr, std::set<DataPtr>> m_nodeAimPos;
         std::unordered_map<DataPtr, std::unique_ptr<BaseEvalItem<TDevice>>> m_nodes;
-        std::unordered_map<std::type_index, std::unique_ptr<BaseEvalItemDispatcher<TDevice>>> m_itemDispatcher;
+        std::unordered_map<size_t, std::unique_ptr<BaseEvalItemDispatcher<TDevice>>> m_itemDispatcher;
         std::set<DataPtr> m_procNodes;
     };
     

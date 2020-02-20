@@ -2,6 +2,7 @@
 
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
+#include <MetaNN/facilities/_.h>
 #include <MetaNN/operators/facilities/_.h>
 #include <MetaNN/policies/policy_container.h>
 #include <stdexcept>
@@ -23,7 +24,7 @@ namespace OperatorMultiply::NSCaseGen
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> outputShape)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {oriHandle1.DataPtr(), oriHandle2.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle1(std::move(oriHandle1))
             , m_inputHandle2(std::move(oriHandle2))
@@ -114,7 +115,7 @@ namespace NSCaseGen
     public:
         template <typename TAuxParams>
         EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
-            : BaseType(std::type_index(typeid(EvalItem)),
+            : BaseType(TypeID<EvalItem>(),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
             , m_value(params.Value())

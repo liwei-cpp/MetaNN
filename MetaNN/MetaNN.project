@@ -142,6 +142,7 @@
     <File Name="facilities/traits.h"/>
     <File Name="facilities/var_type_dict.h"/>
     <File Name="facilities/_.h"/>
+    <File Name="facilities/type_id.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="layers">
     <VirtualDirectory Name="compose">
