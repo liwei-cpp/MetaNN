@@ -37,22 +37,26 @@ namespace MetaNN
 
     namespace NSVarScaleFiller
     {
-        template <typename TElem, typename TDevice>
-        auto GetFanInFanOut(const Scalar<TElem, TDevice>&)
+        template <typename TElem, typename TDevice, size_t uDim>
+        auto GetFanInFanOut(const Tensor<TElem, TDevice, uDim>& t)
         {
-            return std::tuple{1, 1};
-        }
-        
-        template <typename TElem, typename TDevice>
-        auto GetFanInFanOut(const Matrix<TElem, TDevice>& mat)
-        {
-            return std::tuple{mat.Shape()[0], mat.Shape()[1]};
-        }
-        
-        template <typename TElem, typename TDevice>
-        auto GetFanInFanOut(const ThreeDArray<TElem, TDevice>& arr)
-        {
-            return std::tuple{1, arr.Shape()[0]};
+            if constexpr (uDim == 1)
+            {
+                return std::tuple{1, 1};    
+            }
+            else if constexpr (uDim == 2)
+            {
+                return std::tuple{t.Shape()[0], t.Shape()[1]};
+            }
+            else if (uDim > 2)
+            {
+                const size_t count = t.Shape().Count();
+                return std::tuple{count / t.Shape()[uDim - 1], count / t.Shape()[uDim-2]};
+            }
+            else
+            {
+                static_assert(DependencyFalse<Tensor<TElem, TDevice, uDim>>, "Dimension is 0.");
+            }
         }
     }
     
