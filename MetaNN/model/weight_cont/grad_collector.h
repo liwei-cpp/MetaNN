@@ -1,4 +1,6 @@
 #pragma once
+#include <MetaNN/model/facilities/weight_buffer.h>
+#include <MetaNN/operators/math/reduce_sum.h>
 #include <list>
 #include <stdexcept>
 #include <unordered_map>
@@ -35,20 +37,20 @@ struct GradInfo
     
     auto Grad() const
     {
-        switch (grad.Shape().BatchNum())
+        switch (grad.Shape()[0])
         {
         case 0:
             throw std::runtime_error("Empty grad.");
         case 1:
             return MakeDynamic(grad[0]);
         default:
-            return MakeDynamic(Collapse(grad, weight.Shape()));
+            return MakeDynamic(ReduceSum<PolicyContainer<PModifyDimNumIs<1>>>(grad));
         }
     }
     
 private:
     WeightType weight;
-    DynamicBatch<GradItemType> grad;
+    ScalableTensor<GradItemType> grad;
 };
 
 template <typename TElement, typename TDevice>
@@ -80,95 +82,38 @@ private:
     
 public:
     template<typename TWeight, typename TGrad>
-    void Collect(std::string_view name, const TWeight& weight, TGrad&& grad)
+    void Collect(const std::string& name, const TWeight& weight, TGrad&& grad)
     {
-        if constexpr (IsScalar<TWeight>)
+        using TGradInfo = GradInfo<TElement, TDevice, typename TWeight::CategoryTag>;
+        
+        auto* ptr = m_weightBuffer.TryGet<TGradInfo>(name);
+        if (!ptr)
         {
-            auto it = GetOrCreateEntry(name, m_scalarGrad, m_scalarGradMap, weight);
-            it->Push(std::forward<TGrad>(grad));
+            m_weightBuffer.Set(name, TGradInfo(weight));
+            ptr = m_weightBuffer.TryGet<TGradInfo>(name);
         }
-        else if constexpr (IsMatrix<TWeight>)
-        {
-            auto it = GetOrCreateEntry(name, m_matrixGrad, m_matrixGradMap, weight);
-            it->Push(std::forward<TGrad>(grad));
-        }
-        else if constexpr (IsThreeDArray<TWeight>)
-        {
-            auto it = GetOrCreateEntry(name, m_3dArrayGrad, m_3dArrayGradMap, weight);
-            it->Push(std::forward<TGrad>(grad));
-        }
-        else
-        {
-            static_assert(DependencyFalse<TWeight>);
-        }
+        ptr->Push(std::forward<TGrad>(grad));
     }
 
     void Clear()
     {
-        m_scalarGrad.clear();
-        m_scalarGradMap.clear();
-        m_matrixGrad.clear();
-        m_matrixGradMap.clear();
-        m_3dArrayGrad.clear();
-        m_3dArrayGradMap.clear();
+        m_weightBuffer.Clear();
     }
 
     template <typename TCategory>
     const auto& GetContainer() const
     {
-        if constexpr (std::is_same_v<TCategory, CategoryTags::Scalar>)
-        {
-            return m_scalarGrad;
-        }
-        else if constexpr (std::is_same_v<TCategory, CategoryTags::Matrix>)
-        {
-            return m_matrixGrad;
-        }
-        else if constexpr (std::is_same_v<TCategory, CategoryTags::ThreeDArray>)
-        {
-            return m_3dArrayGrad;
-        }
-        else
-        {
-            static_assert(DependencyFalse<TCategory>);
-        }
-    }
-    
-    template <typename TCategory>
-    const auto& GetGradInfo(std::string_view p_paramName)
-    {
-        if constexpr (std::is_same_v<TCategory, CategoryTags::Scalar>)
-        {
-            return GetEntry(p_paramName, m_scalarGradMap);
-        }
-        else if constexpr (std::is_same_v<TCategory, CategoryTags::Matrix>)
-        {
-            return GetEntry(p_paramName, m_matrixGradMap);
-        }
-        else if constexpr (std::is_same_v<TCategory, CategoryTags::ThreeDArray>)
-        {
-            return GetEntry(p_paramName, m_3dArrayGradMap);
-        }
-        else
-        {
-            static_assert(DependencyFalse<TCategory>);
-        }
-    }
+        using TGradInfo = GradInfo<TElement, TDevice, TCategory>;
 
+        auto* cont = m_weightBuffer.GetCont<TGradInfo>();
+        if (!cont)
+        {
+            throw std::runtime_error("Grad container not exist");
+        }
+        return cont->data;
+    }
+    
 private:
-    template <typename TCategory>
-    using GradContainer = std::list<GradInfo<TElement, TDevice, TCategory>>;
-    
-    template <typename TCategory>
-    using GradContIter = typename GradContainer<TCategory>::iterator;
-    
-    GradContainer<CategoryTags::Scalar> m_scalarGrad;
-    std::unordered_map<std::string_view, GradContIter<CategoryTags::Scalar>> m_scalarGradMap;
-    
-    GradContainer<CategoryTags::Matrix> m_matrixGrad;
-    std::unordered_map<std::string_view, GradContIter<CategoryTags::Matrix>> m_matrixGradMap;
-    
-    GradContainer<CategoryTags::ThreeDArray> m_3dArrayGrad;
-    std::unordered_map<std::string_view, GradContIter<CategoryTags::ThreeDArray>> m_3dArrayGradMap;
+    WeightBuffer m_weightBuffer;
 };
 }

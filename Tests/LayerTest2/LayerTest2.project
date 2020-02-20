@@ -116,4 +116,9 @@
   </VirtualDirectory>
   <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>
+  <VirtualDirectory Name="source">
+    <File Name="source/_.h"/>
+    <File Name="source/test_value_source_layer.cpp"/>
+    <File Name="source/test_param_source_layer.cpp"/>
+  </VirtualDirectory>
 </CodeLite_Project>

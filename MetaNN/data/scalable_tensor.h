@@ -93,10 +93,20 @@ namespace MetaNN
     public:
         explicit ScalableTensor() = default;
         
-        template <typename... TShapeParameter>
+        template <typename... TShapeParameter,
+                  typename = std::enable_if_t<(std::is_convertible_v<TShapeParameter, size_t> && ...)>>
         explicit ScalableTensor(TShapeParameter... shapes)
             : m_shape(0, shapes...)
         {}
+        
+        explicit ScalableTensor(const MetaNN::Shape<ElemShapeDim>& itemShape)
+        {
+            for (size_t i = 0; i < ElemShapeDim; ++i)
+            {
+                m_shape[i + 1] = itemShape[i];
+            }
+            m_shape[0] = 0;
+        }
         
         template <typename TIterator,
                   typename = std::enable_if_t<IsIterator<TIterator>>>

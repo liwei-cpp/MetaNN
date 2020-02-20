@@ -15,3 +15,6 @@
 #include <MetaNN/layers/elementary/softmax_layer.h>
 #include <MetaNN/layers/elementary/tanh_layer.h>
 #include <MetaNN/layers/loss/_.h>
+#include <MetaNN/layers/source/_.h>
+#include <MetaNN/model/param_initializer/_.h>
+#include <MetaNN/model/weight_cont/_.h>

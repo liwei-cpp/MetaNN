@@ -14,18 +14,10 @@ namespace MetaNN
 
         struct ValueTypeTypeCate;
         using ValueType = float;
-        
-        struct NumeratorValueCate;
-        static constexpr int Numerator = 0;
-        
-        struct DenominatorValueCate;
-        static constexpr int Denominator = 1;
 
     };
 #include <MetaNN/policies/policy_macro_begin.h>
     TypePolicyTemplate(PValueTypeIs, ValueSourcePolicy, ValueType);
-    ValuePolicyTemplate(PNumeratorIs, ValueSourcePolicy, Numerator);
-    ValuePolicyTemplate(PDenominatorIs, ValueSourcePolicy, Denominator);
 #include <MetaNN/policies/policy_macro_end.h>
 
     template <typename TInputs, typename TPolicies>
@@ -42,6 +34,7 @@ namespace MetaNN
         using ValueType = typename PolicySelect<ValueSourcePolicy, CurLayerPolicy>::ValueType;
         constexpr static int Numerator = PolicySelect<ValueSourcePolicy, CurLayerPolicy>::Numerator;
         constexpr static int Denominator = PolicySelect<ValueSourcePolicy, CurLayerPolicy>::Denominator;
+        static_assert(std::is_same_v<ValueType, RemConstRef<ValueType>>);
 
     public:
         using InputPortSet = LayerPortSet<>;
@@ -49,14 +42,14 @@ namespace MetaNN
         using InputMap = typename EmptyLayerIOMap_<InputPortSet>::type;
         
     public:
-        ValueSourceLayer(std::string name)
+        ValueSourceLayer(std::string name, ValueType p_value)
             : m_name(std::move(name))
+            , m_value(p_value)
         {}
         
         auto FeedForward(const VarTypeDict<>::Values<>&)
         {
-            static const ValueType val = static_cast<ValueType>(Numerator * 1.0 / Denominator);
-            return LayerOutputCont<ValueSourceLayer>().template Set<LayerOutput>(val);
+            return LayerOutputCont<ValueSourceLayer>().template Set<LayerOutput>(m_value);
         }
 
         template <typename TGrad>
@@ -66,5 +59,6 @@ namespace MetaNN
         }
     private:
         std::string m_name;
+        ValueType m_value;
     };
 }

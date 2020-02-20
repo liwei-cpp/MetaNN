@@ -9,7 +9,7 @@
 namespace MetaNN::LayerTraits
 {
 template <typename TWeight, typename TGradStack, typename TGradCollector>
-void ParamGradCollect(std::string_view name, const TWeight& weight, TGradStack& gradStack,
+void ParamGradCollect(const std::string& name, const TWeight& weight, TGradStack& gradStack,
                       TGradCollector& col)
 {
     size_t stackSize = gradStack.size();
@@ -31,7 +31,7 @@ void ParamGradCollect(std::string_view name, const TWeight& weight, TGradStack& 
             gradStack.pop();
             dBatch.PushBack(std::move(g));
         }
-        auto tmp = Collapse(dBatch, weight.Shape());
+        auto tmp = ReduceSum<PolicyContainer<PModifyDimNumIs<1>>>(dBatch);
         col.Collect(name, weight, std::move(tmp));
         return;
     }

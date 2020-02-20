@@ -275,6 +275,9 @@
       <File Name="model/weight_cont/_.h"/>
     </VirtualDirectory>
     <File Name="model/model.h"/>
+    <VirtualDirectory Name="facilities">
+      <File Name="model/facilities/weight_buffer.h"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>

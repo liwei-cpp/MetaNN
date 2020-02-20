@@ -70,9 +70,14 @@ namespace MetaNN
         using DeviceType = TDevice;
 
     public:
-        template <typename...TShapeParams>
+        template <typename...TShapeParams,
+                  typename = std::enable_if_t<(std::is_convertible_v<TShapeParams, size_t> && ...)>>
         explicit ZeroTensor(TShapeParams&&... shapeParams)
             : m_shape(std::forward<TShapeParams>(shapeParams)...)
+        {}
+        
+        explicit ZeroTensor(MetaNN::Shape<uDim> p_shape)
+            : m_shape(std::move(p_shape))
         {}
     
         const auto& Shape() const noexcept

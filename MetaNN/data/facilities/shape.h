@@ -72,11 +72,12 @@ namespace MetaNN
 
         explicit Shape() = default;
         
-        template <typename TFirstParam, typename... TShapeParameter>
-        explicit Shape(TFirstParam firstParam, TShapeParameter... shapes)
+        template <typename... TIntTypes,
+                  typename = std::enable_if_t<(std::is_convertible_v<TIntTypes, size_t> && ...)>>
+        explicit Shape(TIntTypes... shapes)
         {
-            static_assert(sizeof...(TShapeParameter) + 1 == uDimNum);
-            NSShape::FillShape<0>(m_dims, firstParam, shapes...);
+            static_assert(sizeof...(TIntTypes) == uDimNum);
+            NSShape::FillShape<0>(m_dims, shapes...);
         }
         
         bool operator == (const Shape& val) const

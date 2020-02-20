@@ -41,7 +41,7 @@ namespace MetaNN
         {
             if constexpr (IsPrincipal)
             {
-                m_dataShape = Shape<ParamCategory>(std::forward<TParams>(p_params)...);
+                m_dataShape = Shape<ParamCategory::DimNum>(std::forward<TParams>(p_params)...);
             }
             else
             {
@@ -144,7 +144,7 @@ namespace MetaNN
     private:
         std::string m_name;
         std::string m_paramName;
-        Shape<ParamCategory> m_dataShape;
+        Shape<ParamCategory::DimNum> m_dataShape;
         ParamType m_data;
         
         using AimGradType = DynamicData<ElementType, DeviceType, ParamCategory>;

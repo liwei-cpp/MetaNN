@@ -46,19 +46,13 @@ namespace MetaNN
         template <typename TElem, typename TDevice>
         auto GetFanInFanOut(const Matrix<TElem, TDevice>& mat)
         {
-            return std::tuple{mat.Shape().RowNum(), mat.Shape().ColNum()};
+            return std::tuple{mat.Shape()[0], mat.Shape()[1]};
         }
         
         template <typename TElem, typename TDevice>
         auto GetFanInFanOut(const ThreeDArray<TElem, TDevice>& arr)
         {
-            return std::tuple{1, arr.Shape().PageNum()};
-        }
-        
-        template <typename TElem, typename TDevice>
-        auto GetFanInFanOut(const ThreeDArraySequence<TElem, TDevice>& data)
-        {
-            return std::tuple{data.Shape().Length(), data.Shape().PageNum()};
+            return std::tuple{1, arr.Shape()[0]};
         }
     }
     
