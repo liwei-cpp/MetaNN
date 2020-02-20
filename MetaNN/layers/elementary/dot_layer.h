@@ -9,87 +9,23 @@ namespace MetaNN
 {
     namespace NSDotLayer
     {
-        template <typename TDataCategory>
-        constexpr unsigned CategoryWeight = 0;
+        template <typename TIndexArr, size_t uModDim>
+        struct ModeDim2PermuteArrHelper_;
 
-        template <>
-        constexpr unsigned CategoryWeight<CategoryTags::Matrix> = 1;
-
-        template <>
-        constexpr unsigned CategoryWeight<CategoryTags::BatchMatrix> = 2;
-
-        template <>
-        constexpr unsigned CategoryWeight<CategoryTags::MatrixSequence> = 2;
-
-        template <>
-        constexpr unsigned CategoryWeight<CategoryTags::BatchMatrixSequence> = 3;
-
-        template <bool Swap = false, typename TFirstOper, typename TSecondOper>
-        auto ShapePrompt(TFirstOper&& first, TSecondOper&& second)
+        template <size_t... I, size_t uModDim>
+        struct ModeDim2PermuteArrHelper_<std::index_sequence<I...>, uModDim>
         {
-            static_assert(CategoryWeight<DataCategory<TFirstOper>>, "First operand is illegal.");
-            static_assert(CategoryWeight<DataCategory<TSecondOper>>, "Second operand is illegal.");
+            constexpr static size_t dimLen = sizeof...(I);
+            using type = PDimArrayIs<((I + uModDim) % dimLen)...>;
+        };
 
-            if constexpr (CategoryWeight<DataCategory<TFirstOper>> == CategoryWeight<DataCategory<TSecondOper>>)
-            {
-                static_assert(std::is_same_v<DataCategory<TFirstOper>, DataCategory<TSecondOper>>,
-                              "Cannot know how to prompt the shape.");
-                static_assert(!Swap);
-                return std::pair{std::forward<TFirstOper>(first), std::forward<TSecondOper>(second)};
-            }
-            else if constexpr (CategoryWeight<DataCategory<TFirstOper>> < CategoryWeight<DataCategory<TSecondOper>>)
-            {
-                return ShapePrompt<true>(std::forward<TFirstOper>(first), std::forward<TSecondOper>(second));
-            }
-            else if constexpr (std::is_same_v<DataCategory<TFirstOper>, CategoryTags::BatchMatrix> &&
-                               std::is_same_v<DataCategory<TSecondOper>, CategoryTags::Matrix>)
-            {
-                Shape<CategoryTags::BatchMatrix> promptShape{first.Shape().BatchNum(), second.Shape()};
-                auto promoted = Duplicate(std::forward<TSecondOper>(second), promptShape);
-                if constexpr (Swap)
-                {
-                    return std::pair{std::move(promoted), std::forward<TFirstOper>(first)};
-                }
-                else
-                {
-                    return std::pair{std::forward<TFirstOper>(first), std::move(promoted)};
-                }
-            }
-            else if constexpr (std::is_same_v<DataCategory<TFirstOper>, CategoryTags::MatrixSequence> &&
-                               std::is_same_v<DataCategory<TSecondOper>, CategoryTags::Matrix>)
-            {
-                Shape<CategoryTags::MatrixSequence> promptShape{first.Shape().Length(), second.Shape()};
-                auto promoted = Duplicate(std::forward<TSecondOper>(second), promptShape);
-                if constexpr (Swap)
-                {
-                    return std::pair{std::move(promoted), std::forward<TFirstOper>(first)};
-                }
-                else
-                {
-                    return std::pair{std::forward<TFirstOper>(first), std::move(promoted)};
-                }
-            }
-            else if constexpr (std::is_same_v<DataCategory<TFirstOper>, CategoryTags::BatchMatrixSequence> &&
-                               std::is_same_v<DataCategory<TSecondOper>, CategoryTags::Matrix>)
-            {
-                Shape<CategoryTags::MatrixSequence> promptShape{first.Shape().SeqLenContainer(), second.Shape()};
-                auto promoted = Duplicate(std::forward<TSecondOper>(second), promptShape);
-                if constexpr (Swap)
-                {
-                    return std::pair{std::move(promoted), std::forward<TFirstOper>(first)};
-                }
-                else
-                {
-                    return std::pair{std::forward<TFirstOper>(first), std::move(promoted)};
-                }
-            }
-            else
-            {
-                static_assert(DependencyFalse<TFirstOper, TSecondOper>, "Illegal operand combination.");
-            }
-        }
+        template <size_t uDim, size_t uModDim>
+        struct ModeDim2PermuteArr_
+        {
+            using type = typename ModeDim2PermuteArrHelper_<std::make_index_sequence<uDim>, uModDim>::type;
+        };
     }
-
+    
     template <typename TInputs, typename TPolicies>
     class DotLayer
     {
@@ -110,6 +46,8 @@ namespace MetaNN
     private:
         using TLeftOperandFP = typename InputMap::template Find<LeftOperand>;
         using TRightOperandFP = typename InputMap::template Find<RightOperand>;
+        
+        constexpr static size_t modDimNum = PolicySelect<DimPolicy, CurLayerPolicy>::ModifyDimNum;
 
     public:
         DotLayer(std::string name)
@@ -121,8 +59,7 @@ namespace MetaNN
         {
             const auto& input1 = LayerTraits::PickItemFromCont<InputMap, LeftOperand>(std::forward<TIn>(p_in));
             const auto& input2 = LayerTraits::PickItemFromCont<InputMap, RightOperand>(std::forward<TIn>(p_in));
-            auto [proInput1, proInput2] = NSDotLayer::ShapePrompt(input1, input2);
-            auto res = Dot(proInput1, proInput2);
+            auto res = Dot<CurLayerPolicy>(input1, input2);
             
             if constexpr (IsFeedbackOutput)
             {
@@ -131,6 +68,9 @@ namespace MetaNN
                 m_inputShape1.PushDataShape(input1);
                 m_inputShape2.PushDataShape(input2);
             }
+            
+            static_assert(DataCategory<decltype(res)>::DimNum ==
+                          DataCategory<decltype(input1)>::DimNum + DataCategory<decltype(input2)>::DimNum - modDimNum * 2);
 
             return LayerOutputCont<DotLayer>().template Set<LayerOutput>(std::move(res));
         }
@@ -155,19 +95,24 @@ namespace MetaNN
 
                 auto input1 = m_input1.top(); auto input2 = m_input2.top();
                 auto grad = std::forward<TGrad>(p_grad).template Get<LayerOutput>();
+                static_assert(DataCategory<decltype(grad)>::DimNum ==
+                              DataCategory<TLeftOperandFP>::DimNum + DataCategory<TRightOperandFP>::DimNum - modDimNum * 2,
+                              "Grad has mismatch dimension.");
+                
+                using PPermute1 = typename NSDotLayer::ModeDim2PermuteArr_<DataCategory<TRightOperandFP>::DimNum, modDimNum>::type;
+                constexpr size_t grad1DotDim = DataCategory<TRightOperandFP>::DimNum - modDimNum;
+                auto grad1 = Dot<PolicyContainer<PModifyDimNumIs<grad1DotDim>>>(grad, Permute<PolicyContainer<PPermute1>>(input2));
 
-                auto [proInput1, proInput2] = NSDotLayer::ShapePrompt(input1, input2);
-                auto grad1 = Dot(grad, Transpose(proInput2));
-                auto grad2 = Dot(Transpose(proInput1), grad);
+                constexpr size_t grad2DotDim = DataCategory<TLeftOperandFP>::DimNum - modDimNum;
+                using PPermute2 = typename NSDotLayer::ModeDim2PermuteArr_<DataCategory<TLeftOperandFP>::DimNum, grad2DotDim>::type;
+                auto grad2 = Dot<PolicyContainer<PModifyDimNumIs<grad2DotDim>>>(Permute<PolicyContainer<PPermute2>>(input1), grad);
 
-                auto res1 = CollapseOrOmit(std::move(grad1), input1);
-                auto res2 = CollapseOrOmit(std::move(grad2), input2);
-                m_inputShape1.CheckDataShape(res1);
-                m_inputShape2.CheckDataShape(res2);
+                m_inputShape1.CheckDataShape(grad1);
+                m_inputShape2.CheckDataShape(grad2);
 
                 LayerTraits::PopoutFromStack(m_input1, m_input2, m_inputShape1, m_inputShape2);
-                return LayerInputCont<DotLayer>().template Set<LeftOperand>(std::move(res1))
-                                                 .template Set<RightOperand>(std::move(res2));
+                return LayerInputCont<DotLayer>().template Set<LeftOperand>(std::move(grad1))
+                                                 .template Set<RightOperand>(std::move(grad2));
             }
         }
         

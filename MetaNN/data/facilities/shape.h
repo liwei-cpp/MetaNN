@@ -245,6 +245,7 @@ namespace MetaNN
         return !(val1 == val2);
     }
 
-    template <typename... TShapeParameter>
+    template <typename... TShapeParameter,
+              typename = std::enable_if_t<(std::is_convertible_v<TShapeParameter, size_t> && ...)>>
     explicit Shape(TShapeParameter... shapes) -> Shape<sizeof...(TShapeParameter)>;
 }

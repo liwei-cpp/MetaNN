@@ -200,6 +200,14 @@ namespace MetaNN
         }
     }
     
+    template <typename TP,
+              typename = std::enable_if_t<IsValidOper<OpTags::Permute, TP>>>
+    auto Transpose(TP&& oper)
+    {
+        static_assert(DataCategory<TP>::DimNum == 2);
+        return Permute<PolicyContainer<PDimArrayIs<1, 0>>>(std::forward<TP>(oper));
+    }
+    
     namespace OperPermute
     {
         template <typename TIndexSeq, typename TDimArray>

@@ -2,6 +2,7 @@ namespace Test::Layer::Elementary
 {
     void test_abs_layer();
     void test_add_layer();
+    void test_dot_layer();
     void test_interpolate_layer();
     void test_multiply_layer();
     void test_permute_layer();
@@ -14,6 +15,7 @@ namespace Test::Layer::Elementary
     {
         test_abs_layer();
         test_add_layer();
+        test_dot_layer();
         test_interpolate_layer();
         test_multiply_layer();
         test_permute_layer();

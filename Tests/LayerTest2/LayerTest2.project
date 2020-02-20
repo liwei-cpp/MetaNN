@@ -15,6 +15,7 @@
     <File Name="elementary/test_relu_layer.cpp"/>
     <File Name="elementary/test_abs_layer.cpp"/>
     <File Name="elementary/_.h"/>
+    <File Name="elementary/test_dot_layer.cpp"/>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
