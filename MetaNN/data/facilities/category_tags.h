@@ -15,6 +15,10 @@ namespace MetaNN
         {
             constexpr static size_t DimNum = uDim;
         };
+        
+        using Scalar = Tensor<0>;
+        using Vector = Tensor<1>;
+        using Matrix = Tensor<2>;
     }
 
     template <typename T>

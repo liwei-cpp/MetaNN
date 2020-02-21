@@ -125,5 +125,9 @@
   <VirtualDirectory Name="compose">
     <File Name="compose/_.h"/>
     <File Name="compose/test_compose_kenrel.cpp"/>
+    <File Name="compose/test_bias_layer.cpp"/>
+    <File Name="compose/test_weight_layer.cpp"/>
+    <File Name="compose/test_linear_layer.cpp"/>
+    <File Name="compose/test_single_layer_perceptron.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>
