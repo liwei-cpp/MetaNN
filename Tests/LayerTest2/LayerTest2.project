@@ -122,4 +122,8 @@
     <File Name="source/test_value_source_layer.cpp"/>
     <File Name="source/test_param_source_layer.cpp"/>
   </VirtualDirectory>
+  <VirtualDirectory Name="compose">
+    <File Name="compose/_.h"/>
+    <File Name="compose/test_compose_kenrel.cpp"/>
+  </VirtualDirectory>
 </CodeLite_Project>
