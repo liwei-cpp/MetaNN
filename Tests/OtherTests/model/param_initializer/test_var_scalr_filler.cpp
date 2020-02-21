@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <iostream>
 using namespace std;
@@ -15,9 +15,9 @@ namespace
         filler.Fill(mat);
     
         float mean = 0;
-        for (size_t i = 0; i < mat.Shape().RowNum(); ++i)
+        for (size_t i = 0; i < mat.Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < mat.Shape().ColNum(); ++j)
+            for (size_t j = 0; j < mat.Shape()[1]; ++j)
             {
                 mean += mat(i, j);
             }
@@ -25,9 +25,9 @@ namespace
         mean /= mat.Shape().Count();
     
         float var = 0;
-        for (size_t i = 0; i < mat.Shape().RowNum(); ++i)
+        for (size_t i = 0; i < mat.Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < mat.Shape().ColNum(); ++j)
+            for (size_t j = 0; j < mat.Shape()[1]; ++j)
             {
                 var += (mat(i, j) - mean) * (mat(i, j) - mean);
             }
@@ -48,9 +48,9 @@ namespace
         filler.Fill(mat);
     
         float mean = 0;
-        for (size_t i = 0; i < mat.Shape().RowNum(); ++i)
+        for (size_t i = 0; i < mat.Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < mat.Shape().ColNum(); ++j)
+            for (size_t j = 0; j < mat.Shape()[1]; ++j)
             {
                 mean += mat(i, j);
             }
@@ -58,9 +58,9 @@ namespace
         mean /= mat.Shape().Count();
     
         float var = 0;
-        for (size_t i = 0; i < mat.Shape().RowNum(); ++i)
+        for (size_t i = 0; i < mat.Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < mat.Shape().ColNum(); ++j)
+            for (size_t j = 0; j < mat.Shape()[1]; ++j)
             {
                 var += (mat(i, j) - mean) * (mat(i, j) - mean);
             }

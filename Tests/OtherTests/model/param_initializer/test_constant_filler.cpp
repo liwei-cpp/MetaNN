@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <iostream>
 using namespace std;
@@ -13,8 +13,7 @@ namespace
         Matrix<CheckElement, CheckDevice> data(3, 7);
         filler.Fill(data);
         
-        assert(data.Shape().RowNum() == 3);
-        assert(data.Shape().ColNum() == 7);
+        assert(data.Shape() == Shape(3, 7));
         
         for (size_t i = 0; i < 3; ++i)
         {
@@ -33,8 +32,7 @@ namespace
         Matrix<CheckElement, CheckDevice> data(3, 7);
         filler.Fill(data);
         
-        assert(data.Shape().RowNum() == 3);
-        assert(data.Shape().ColNum() == 7);
+        assert(data.Shape() == Shape(3, 7));
         
         for (size_t i = 0; i < 3; ++i)
         {

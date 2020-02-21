@@ -2,9 +2,9 @@
 <CodeLite_Workspace Name="MetaNN" Database="" Version="10.0.0">
   <Project Name="MetaNN" Path="MetaNN/MetaNN.project" Active="No"/>
   <Project Name="LayerTest" Path="Tests/LayerTest/LayerTest.project" Active="No"/>
-  <Project Name="OtherTests" Path="Tests/OtherTests/OtherTests.project" Active="No"/>
+  <Project Name="OtherTests" Path="Tests/OtherTests/OtherTests.project" Active="Yes"/>
   <Project Name="DataOpTest" Path="Tests/DataOpTest/DataOpTest.project" Active="No"/>
-  <Project Name="LayerTest2" Path="Tests/LayerTest2/LayerTest2.project" Active="Yes"/>
+  <Project Name="LayerTest2" Path="Tests/LayerTest2/LayerTest2.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Debug" Selected="yes">
       <Environment/>
