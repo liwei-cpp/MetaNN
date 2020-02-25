@@ -54,4 +54,10 @@ namespace NSFind
     
     template <typename TCon, typename TKey>
     using Find = typename Find_<TCon, TKey>::type;
+
+// HasKey =================================================================================
+    template <typename TCon, typename TKey>
+    constexpr static bool HasKey = !std::is_same_v<Find<TCon, TKey>, void>;
 }
+
+

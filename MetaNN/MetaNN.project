@@ -175,9 +175,9 @@
       <File Name="layers/facilities/make_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="recurrent">
+      <File Name="layers/recurrent/_.h"/>
       <File Name="layers/recurrent/gru_step.h"/>
       <File Name="layers/recurrent/recurrent_layer.h"/>
-      <File Name="layers/recurrent/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="loss">
       <File Name="layers/loss/nll_loss_layer.h"/>

@@ -11,3 +11,5 @@
 #include <MetaNN/layers/source/_.h>
 #include <MetaNN/model/param_initializer/_.h>
 #include <MetaNN/model/weight_cont/_.h>
+
+#include <MetaNN/layers/recurrent/recurrent_layer.h>

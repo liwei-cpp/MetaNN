@@ -1,17 +1,51 @@
 #pragma once
-
+#include <MetaNN/facilities/cont_metafuns/_.h>
 namespace MetaNN
 {
+    struct KernelSublayer;
+
     template <typename TPort> struct Previous;
-    
+
+    namespace NSRecurrentLayer
+    {
+        template <typename TKey>
+        constexpr bool IsPreviousPort = false;
+
+        template <typename TKey>
+        constexpr bool IsPreviousPort<Previous<TKey>> = true;    
+    }
+
+    template <typename TPortName, size_t ID>
+    struct SeqID : public Helper::KVBinder<TPortName, Helper::Int_<ID>>
+    {
+        static_assert(!NSRecurrentLayer::IsPreviousPort<TPortName>,
+                      "Previous port should not correspond to sequence tensor");
+    };
+
     namespace NSRecurrentLayer
     {
         template <typename T>
-        constexpr bool IsBatchCategory = IsBatchCategoryTag<typename T::CategoryTag> || IsBatchSequenceCategoryTag<typename T::CategoryTag>;
-        
-        template <typename T>
-        constexpr bool IsSequenceCategory = IsSequenceCategoryTag<typename T::CategoryTag>;
+        constexpr static bool IsSeqID = false;
 
+        template <typename TPortName, size_t ID>
+        constexpr static bool IsSeqID<SeqID<TPortName, ID>> = true;
+    }
+
+    struct RnnPolicy
+    {
+        using MajorClass = RnnPolicy;
+        struct SeqIdContTypeCate;
+    };
+
+    template <typename... TSeqIDs>
+    struct PSeqIDsAre : virtual public RnnPolicy
+    {
+        using MinorClass = RnnPolicy::SeqIdContTypeCate;
+        using SeqIdCont = PSeqIDsAre;
+    };
+
+    namespace NSRecurrentLayer
+    {
         template <typename TInputSet, typename TOutputSet>
         struct CheckPortOverLap_;
         
@@ -20,46 +54,125 @@ namespace MetaNN
         {
             constexpr static bool value = (Set::HasKey<TInputSet, Previous<TOutputPorts>> && ...);
         };
+
+        template <typename TSeqIdCont, typename TInputPortSet>
+        constexpr static bool SeqIdsValid = false;
+
+        template <typename TInputPortSet, typename... TSeqIds>
+        constexpr static bool SeqIdsValid<PSeqIDsAre<TSeqIds...>, TInputPortSet>
+            = (Set::HasKey<TInputPortSet, typename TSeqIds::KeyType> && ...);
+
+        constexpr size_t IDSwap(size_t seqID, size_t oriID)
+        {
+            return (oriID == 0) ? seqID :
+                   ((oriID <= seqID) ? oriID - 1 : oriID);
+        }
+
+        template <size_t SeqID, typename TIndexes>
+        struct GetPermuteInfo_;
+
+        template <size_t SeqID, size_t... Indexes>
+        struct GetPermuteInfo_<SeqID, std::index_sequence<Indexes...>>
+        {
+            using type = PDimArrayIs<IDSwap(SeqID, Indexes)...>;
+        };
+
+        template <typename TSeqInfo, bool IsPrevious, typename TValue>
+        struct Wrapper2KernelInputMapHelper_;
         
+        template <typename TValue>
+        struct Wrapper2KernelInputMapHelper_<void, false, TValue>
+        {
+            using type = TValue;
+        };
+        
+        template <typename TValue>
+        struct Wrapper2KernelInputMapHelper_<void, true, TValue>
+        {
+            using type = RemConstRef<decltype(MakeDynamic(std::declval<TValue>()))>;
+        };        
+
+        template <size_t ID, typename TValue>
+        struct Wrapper2KernelInputMapHelper_<Helper::Int_<ID>, false, TValue>
+        {
+            constexpr static size_t ValueDim = DataCategory<TValue>::DimNum;
+            using PermutePolicy = PolicyContainer<typename GetPermuteInfo_<ID, std::make_index_sequence<ValueDim>>::type>;
+            using PermuteType = decltype(Permute<PermutePolicy>(std::declval<TValue>()));
+            using type = decltype(std::declval<PermuteType>()[0]);
+        };
+        
+        template <typename TInputMap, typename TSeqIdCont>
+        struct Wrapper2KernelInputMap_;
+        
+        template <typename... TKeys, typename... TValues, typename TSeqIdCont>
+        struct Wrapper2KernelInputMap_<LayerIOMap<LayerKV<TKeys, TValues>...>, TSeqIdCont>
+        {
+            using type = 
+                LayerIOMap<LayerKV<TKeys, 
+                                   typename Wrapper2KernelInputMapHelper_<Map::Find<TSeqIdCont, TKeys>, IsPreviousPort<TKeys>, TValues>::type>...>;
+        };
+        
+        template <typename TInputMap, typename TSeqIDs>
+        struct CalKernelInputMap_;
+        
+        template <typename TSeqIDs>
+        struct CalKernelInputMap_<NullParameter, TSeqIDs>
+        {
+            using type = NullParameter;
+        };
+        
+        template <typename... TKeys, typename... TValues, typename TSeqIDs>
+        struct CalKernelInputMap_<LayerIOMap<LayerKV<TKeys, TValues>...>, TSeqIDs>
+        {
+            static_assert((IsPreviousPort<TKeys> || ...), "No Previous port in the input port set.");
+            using type = typename Wrapper2KernelInputMap_<LayerIOMap<LayerKV<TKeys, TValues>...>,
+                                                          TSeqIDs>::type;
+        };
+        
+        template <typename TMap, typename TInputPortset>
+        constexpr static bool InputMapPortsetMatch = false;
+        
+        template <typename... TKeys, typename... TValues, typename TInputPortset>
+        constexpr static bool InputMapPortsetMatch<LayerIOMap<LayerKV<TKeys, TValues>...>, TInputPortset>
+            = Set::IsEqual<LayerIOMap<TKeys...>, TInputPortset>;
+
         template <typename TInputMap, typename TPolicies>
-        struct KernelGenerator_;
-        
-        template <typename TPolicies>
-        struct KernelGenerator_<NullParameter, TPolicies>
+        struct KernelGenerator_
         {
             using WrapperPolicy = PlainPolicy<TPolicies>;
-            
+
             template <typename UInput, typename UPolicies>
             using Kernel = typename PolicySelect<LayerStructurePolicy, WrapperPolicy>::template ActFunc<UInput, UPolicies>;
             static_assert(!LayerStructurePolicy::template IsDummyActFun<Kernel>, "Use PActFuncIs<...> to set kernel sublayer.");
 
             using KernelPolicy = SubPolicyPicker<TPolicies, KernelSublayer>;
-
             constexpr static bool IsUpdate = PolicySelect<GradPolicy, KernelPolicy>::IsUpdate;
             constexpr static bool UseBptt = PolicySelect<RecurrentLayerPolicy, KernelPolicy>::UseBptt;
-            constexpr static bool UpdateFeedbackOutput = PolicySelect<GradPolicy, WrapperPolicy>::IsFeedbackOutput ||
-                                                         (IsUpdate && UseBptt);
+            constexpr static bool UpdateFeedbackOutput =
+                PolicySelect<GradPolicy, WrapperPolicy>::IsFeedbackOutput || (IsUpdate && UseBptt);
+
             using AmendKernelPolicy = typename std::conditional_t<UpdateFeedbackOutput,
                                                                   ChangePolicy_<PFeedbackOutput, KernelPolicy>,
                                                                   Identity_<KernelPolicy>>::type;
 
-            using KernelType = Kernel<NullParameter, AmendKernelPolicy>;
-            
+            using SeqIdCont = typename PolicySelect<RnnPolicy, WrapperPolicy>::SeqIdCont;
+            using KernelInputMap = typename CalKernelInputMap_<TInputMap, SeqIdCont>::type;
+            using KernelType = Kernel<KernelInputMap, AmendKernelPolicy>;
             using InputPortSet = typename KernelType::InputPortSet;
             using OutputPortSet = typename KernelType::OutputPortSet;
+            
+            using InputMap = typename std::conditional_t<std::is_same_v<KernelInputMap, NullParameter>,
+                                                         EmptyLayerIOMap_<InputPortSet>,
+                                                         Identity_<TInputMap>>::type;
+            static_assert(InputMapPortsetMatch<InputMap, InputPortSet>, "Invalid input port set.");
             static_assert(CheckPortOverLap_<InputPortSet, OutputPortSet>::value);
-            
-            using InputMap = EmptyLayerIOMap_<InputPortSet>;
-            
-            constexpr static bool IsTrival = false;
+            static_assert(SeqIdsValid<SeqIdCont, InputPortSet>,
+                          "Some sequence id not correcponds to any RNN port.");            
+            static_assert(Sequential::Size<SeqIdCont> != 0,
+                          "Trival recurrent layer is not allowed.");
+
         };
-        
-        template <typename TKey>
-        constexpr bool IsPreviousPort = false;
-        
-        template <typename TKey>
-        constexpr bool IsPreviousPort<Previous<TKey>> = true;
-        
+
         template <typename TKey>
         struct PreviousToPrimePort_;
         
@@ -68,107 +181,7 @@ namespace MetaNN
         {
             using type = TKey;
         };
-        
-        template <typename TValue, bool IsSequence, bool IsPrevious>
-        struct Wrapper2KernelInputMapHelper_
-        {
-            static_assert(!(IsSequence && IsPrevious), "Previous<> is sequence.");
-            using type = TValue;
-        };
-        
-        template <typename TValue>
-        struct Wrapper2KernelInputMapHelper_<TValue, true, false>
-        {
-            using type = decltype(std::declval<TValue>().operator[](0));
-        };
-        
-        template <typename TValue>
-        struct Wrapper2KernelInputMapHelper_<TValue, false, true>
-        {
-            using type = decltype(MakeDynamic(std::declval<TValue>()));
-        };
-        
-        template <typename TInputMap>
-        struct Wrapper2KernelInputMap_;
-        
-        template <typename... TKeys, typename... TValues>
-        struct Wrapper2KernelInputMap_<LayerIOMap<LayerKV<TKeys, TValues>...>>
-        {
-            using type = 
-                LayerIOMap<LayerKV<TKeys, 
-                           typename Wrapper2KernelInputMapHelper_<TValues, IsSequenceCategory<TValues>, IsPreviousPort<TKeys>>::type>...>;
-        };
-        
-        template <typename TKey, typename TValue>
-        constexpr bool PreviousSeqCheck = !(IsPreviousPort<TKey> && IsSequenceCategoryTag<typename TValue::CategoryTag>);
-        
-        template <typename... TKeys, typename... TValues, typename TPolicies>
-        struct KernelGenerator_<LayerIOMap<LayerKV<TKeys, TValues>...>, TPolicies>
-        {
-            static_assert((!IsBatchCategory<TValues> && ...), "No batch input is allowed in RNN layer.");
-            static_assert((IsPreviousPort<TKeys> || ...), "No Previous port in the input port set.");
-            static_assert((PreviousSeqCheck<TKeys, TValues> && ...),
-                          "Previous ports should not be sequencal.");
 
-            constexpr static bool IsTrival = !(IsSequenceCategory<TValues> || ...);
-            
-            using WrapperPolicy = PlainPolicy<TPolicies>;
-            
-            template <typename UInput, typename UPolicies>
-            using Kernel = typename PolicySelect<LayerStructurePolicy, WrapperPolicy>::template ActFunc<UInput, UPolicies>;
-            static_assert(!LayerStructurePolicy::template IsDummyActFun<Kernel>, "Use PActFuncIs<...> to set kernel sublayer.");
-
-            using KernelPolicy = SubPolicyPicker<TPolicies, KernelSublayer>;
-            
-            constexpr static bool IsUpdate = PolicySelect<GradPolicy, KernelPolicy>::IsUpdate;
-            constexpr static bool UseBptt = PolicySelect<RecurrentLayerPolicy, KernelPolicy>::UseBptt;
-            constexpr static bool UpdateFeedbackOutput =
-                PolicySelect<GradPolicy, WrapperPolicy>::IsFeedbackOutput || (!IsTrival && IsUpdate && UseBptt);
-                
-            using AmendKernelPolicy = typename std::conditional_t<UpdateFeedbackOutput,
-                                                                  ChangePolicy_<PFeedbackOutput, KernelPolicy>,
-                                                                  Identity_<KernelPolicy>>::type;
-
-            using KernelInputMap = typename Wrapper2KernelInputMap_<LayerIOMap<LayerKV<TKeys, TValues>...>>::type;
-            using KernelType = Kernel<KernelInputMap, AmendKernelPolicy>;
-
-            using InputPortSet = typename KernelType::InputPortSet;
-            using OutputPortSet = typename KernelType::OutputPortSet;
-            static_assert(CheckPortOverLap_<InputPortSet, OutputPortSet>::value);
-            static_assert(Set::IsEqual<LayerPortSet<TKeys...>, InputPortSet>, "Invalid input port set.");
-            
-            using InputMap = LayerIOMap<LayerKV<TKeys, TValues>...>;
-        };
-        
-        template <typename TKeys, typename TInputCont>
-        struct IsNonBatch_;
-        
-        template <typename TInputCont, typename... TKeys>
-        struct IsNonBatch_<VarTypeDict<TKeys...>, TInputCont>
-        {
-            static constexpr bool value = 
-                !(IsBatchCategory<typename TInputCont::template ValueType<TKeys>> || ...);
-        };
-        
-        template <typename TKeys, typename TInputCont>
-        struct IsNonSeq_;
-        
-        template <typename TInputCont, typename... TKeys>
-        struct IsNonSeq_<VarTypeDict<TKeys...>, TInputCont>
-        {
-            static constexpr bool value = 
-                !(IsSequenceCategory<typename TInputCont::template ValueType<TKeys>> || ...);
-        };
-        
-        template <typename TKeys, typename TInputCont>
-        struct IsAllSeq_;
-        
-        template <typename TInputCont, typename... TKeys>
-        struct IsAllSeq_<VarTypeDict<TKeys...>, TInputCont>
-        {
-            static constexpr bool value = (IsSequenceCategory<typename TInputCont::template ValueType<TKeys>> && ...);
-        };
-        
         template <bool bFeedbackOutput, typename TInputMap>
         struct ShapeDictHelper
         {
@@ -177,12 +190,6 @@ namespace MetaNN
 
             template <typename TIn>
             static void PickShapeInfo(type&, const TIn&) {}
-            
-            template <typename TRes>
-            static auto Collapse(type&, TRes&& p_res)
-            {
-                return std::forward<TRes>(p_res);
-            }
         };
         
         template <typename... TKeys, typename... TValues>
@@ -207,7 +214,7 @@ namespace MetaNN
                 shapeStack.push(res);
             }
             
-            template <typename TKeysCont, typename TShapeCont, typename TCont>
+            template <typename TKeysCont, typename TSeqIdCont, typename TShapeCont, typename TCont>
             static auto CollapseHelper(const TShapeCont& p_shape, TCont&& p_cont)
             {
                 if constexpr (Sequential::Size<TKeysCont> == 0)
@@ -216,59 +223,91 @@ namespace MetaNN
                 {
                     using CurType = Sequential::Head<TKeysCont>;
                     const auto& oriValue = p_cont.template Get<CurType>();
-                    if constexpr (!std::is_same_v<RemConstRef<decltype(oriValue.Shape())>,
-                                                  typename TShapeCont::template ValueType<CurType>>)
+                    if constexpr (Map::HasKey<TSeqIdCont, CurType>)
                     {
-                        auto newValue = MetaNN::Collapse(oriValue, p_shape.template Get<CurType>());
+                        constexpr size_t seqID = Map::Find<TSeqIdCont, CurType>::value;
+                        constexpr static size_t ValueDim = DataCategory<decltype(oriValue)>::DimNum;
+                        using PermutePolicy = typename GetPermuteInfo_<seqID, std::make_index_sequence<ValueDim>>::type;
+                        auto newValue = Permute<PolicyContainer<PermutePolicy>>(oriValue);
+                        assert(newValue.Shape() == p_shape.template Get<CurType>());
                         auto newCont = std::forward<TCont>(p_cont).template Set<CurType>(newValue);
-                        return CollapseHelper<Sequential::Tail<TKeysCont>>(p_shape, std::move(newCont));
+                        return CollapseHelper<Sequential::Tail<TKeysCont>, TSeqIdCont>(p_shape, std::move(newCont));
+                    }
+                    else if constexpr (!IsPreviousPort<CurType>)
+                    {
+                        auto newValue = ReduceSum<PolicyContainer<PModifyDimNumIs<1>>>(oriValue);
+                        assert(newValue.Shape() == p_shape.template Get<CurType>());
+                        auto newCont = std::forward<TCont>(p_cont).template Set<CurType>(newValue);
+                        return CollapseHelper<Sequential::Tail<TKeysCont>, TSeqIdCont>(p_shape, std::move(newCont));
                     }
                     else
-                        return CollapseHelper<Sequential::Tail<TKeysCont>>(p_shape, std::forward<TCont>(p_cont));
+                    {
+                        return CollapseHelper<Sequential::Tail<TKeysCont>, TSeqIdCont>(p_shape, std::forward<TCont>(p_cont));
+                    }
                 }
             }
 
-            template <typename TRes>
+            template <typename TSeqIdCont, typename TRes>
             static auto Collapse(type& shapeStack, TRes&& p_res)
             {
                 assert(!shapeStack.empty());
                 
                 auto currentShapeDict = shapeStack.top();
                 shapeStack.pop();
-                return CollapseHelper<VarTypeDict<TKeys...>>(currentShapeDict, std::forward<TRes>(p_res));
+                return CollapseHelper<VarTypeDict<TKeys...>, TSeqIdCont>(currentShapeDict, std::forward<TRes>(p_res));
             }
         };
         
-        template <typename TKeyCont, typename TIn, size_t pos = 0>
-        size_t GetSeqNum(const TIn& p_in, size_t prev = 0)
+        template <typename TKeyCont, typename TSeqID, typename TInput, typename TOutput>
+        auto PermuteBySeqID(const TInput& p_input, TOutput&& p_output)
         {
-            if constexpr (pos == Sequential::Size<TKeyCont>)
-            {
-                return prev;
-            }
+            if constexpr (Sequential::Size<TKeyCont> == 0)
+                return std::forward<TOutput>(p_output);
             else
             {
-                using TCurKey = Sequential::At<TKeyCont, pos>;
-                using TCurValue = typename TIn::template ValueType<TCurKey>;
-                
-                size_t seqValue = 0;
-                if constexpr (IsSequenceCategory<TCurValue>)
+                using CurType = Sequential::Head<TKeyCont>;
+                auto curValue = p_input.template Get<CurType>();
+                if constexpr (Map::HasKey<TSeqID, CurType>)
                 {
-                    seqValue = p_in.template Get<TCurKey>().Shape().Length();
-                    if (seqValue == 0)
-                        throw std::runtime_error("Empty sequence as input.");
+                    constexpr size_t curSeqID = Map::Find<TSeqID, CurType>::value;
+                    constexpr static size_t ValueDim = DataCategory<decltype(curValue)>::DimNum;
+                    using PermutePolicy = typename GetPermuteInfo_<curSeqID, std::make_index_sequence<ValueDim>>::type;
+                    auto newValue = Permute<PolicyContainer<PermutePolicy>>(std::move(curValue));
+                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(newValue);
+                    return PermuteBySeqID<Sequential::Tail<TKeyCont>, TSeqID>(p_input, std::move(newOutput));
                 }
-
-                if (prev == 0) prev = seqValue;
-                else if ((prev != seqValue) && (seqValue != 0))
+                else
                 {
-                    throw std::runtime_error("Sequence number mismatch.");
+                    auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(curValue);
+                    return PermuteBySeqID<Sequential::Tail<TKeyCont>, TSeqID>(p_input, std::move(newOutput));
                 }
-                return GetSeqNum<TKeyCont, TIn, pos + 1>(p_in, prev);
             }
         }
         
-        template <typename TKeyCont, typename TInput, typename TOutput>
+        template <typename TKeyCont, typename TSeqID, typename TIn>
+        size_t GetSeqNum(const TIn& p_in, size_t prev = 0)
+        {
+            if constexpr (Sequential::Size<TKeyCont> == 0)
+                return prev;
+            else
+            {
+                using CurType = Sequential::Head<TKeyCont>;
+                if constexpr(Map::HasKey<TSeqID, CurType>)
+                {
+                    size_t seqValue = p_in.template Get<CurType>().Shape()[0];
+                    if (seqValue == 0)
+                        throw std::runtime_error("Empty sequence as input.");
+                    if (prev == 0) prev = seqValue;
+                    else if ((prev != seqValue) && (seqValue != 0))
+                    {
+                        throw std::runtime_error("Sequence number mismatch.");
+                    }
+                }
+                return GetSeqNum<Sequential::Tail<TKeyCont>, TSeqID>(p_in, prev);
+            }
+        }
+        
+        template <typename TKeyCont, typename TSeqID, typename TInput, typename TOutput>
         auto Split0(const TInput& p_input, TOutput&& p_output)
         {
             if constexpr (Sequential::Size<TKeyCont> == 0)
@@ -277,27 +316,27 @@ namespace MetaNN
             {
                 using CurType = Sequential::Head<TKeyCont>;
                 auto curValue = p_input.template Get<CurType>();
-                if constexpr (IsSequenceCategory<decltype(curValue)>)
+                if constexpr (Map::HasKey<TSeqID, CurType>)
                 {
                     auto inputValue = curValue[0];
                     auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(inputValue);
-                    return Split0<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput));
+                    return Split0<Sequential::Tail<TKeyCont>, TSeqID>(p_input, std::move(newOutput));
                 }
                 else if constexpr (IsPreviousPort<CurType>)
                 {
                     auto inputValue = MakeDynamic(std::move(curValue));
                     auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(inputValue);
-                    return Split0<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput));
+                    return Split0<Sequential::Tail<TKeyCont>, TSeqID>(p_input, std::move(newOutput));
                 }
                 else
                 {
                     auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(curValue);
-                    return Split0<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput));
+                    return Split0<Sequential::Tail<TKeyCont>, TSeqID>(p_input, std::move(newOutput));
                 }
             }
         }
         
-        template <typename TKeyCont, typename TInput, typename TPrevious, typename TOutput>
+        template <typename TKeyCont, typename TSeqID, typename TInput, typename TPrevious, typename TOutput>
         auto SplitN(const TInput& p_input, TOutput&& p_output, const TPrevious& p_previous, size_t id)
         {
             assert(id != 0);
@@ -307,28 +346,27 @@ namespace MetaNN
             else
             {
                 using CurType = Sequential::Head<TKeyCont>;
-                using CurValueType = typename RemConstRef<TInput>::template ValueType<CurType>;
                 if constexpr (IsPreviousPort<CurType>)
                 {
                     using PrimeType = typename PreviousToPrimePort_<CurType>::type;
                     auto curValue = p_previous.template Get<PrimeType>();
                     auto inputValue = MakeDynamic(std::move(curValue));
                     auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(inputValue);
-                    return SplitN<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), p_previous, id);
+                    return SplitN<Sequential::Tail<TKeyCont>, TSeqID>(p_input, std::move(newOutput), p_previous, id);
                 }
                 else
                 {
                     auto curValue = p_input.template Get<CurType>();
-                    if constexpr (IsSequenceCategory<CurValueType>)
+                    if constexpr (Map::HasKey<TSeqID, CurType>)
                     {
                         auto inputValue = curValue[id];
                         auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(inputValue);
-                        return SplitN<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), p_previous, id);
+                        return SplitN<Sequential::Tail<TKeyCont>, TSeqID>(p_input, std::move(newOutput), p_previous, id);
                     }
                     else
                     {
                         auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(curValue);
-                        return SplitN<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput), p_previous, id);
+                        return SplitN<Sequential::Tail<TKeyCont>, TSeqID>(p_input, std::move(newOutput), p_previous, id);
                     }
                 }
             }
@@ -343,7 +381,7 @@ namespace MetaNN
             {
                 using CurType = Sequential::Head<TKeyCont>;
                 using CurValueType = typename RemConstRef<TInput>::template ValueType<CurType>;
-                DynamicSequence<CurValueType> aimValue;
+                ScalableTensor<CurValueType> aimValue;
                 aimValue.PushBack(std::forward<TInput>(p_input).template Get<CurType>());
                 auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(aimValue);
                 return InitOutputCont<Sequential::Tail<TKeyCont>>(std::forward<TInput>(p_input), std::move(newOutput));
@@ -362,6 +400,28 @@ namespace MetaNN
                 return FillOutputCont<Sequential::Tail<TKeyCont>>(std::forward<TInput>(p_input), std::forward<TOutput>(p_output));
             }
         }
+
+        template <typename TKeyCont, typename TIn>
+        size_t GetGradSeqNum(const TIn& p_in, size_t prev = 0)
+        {
+            if constexpr (Sequential::Size<TKeyCont> == 0)
+                return prev;
+            else
+            {
+                using CurType = Sequential::Head<TKeyCont>;
+
+                size_t seqValue = p_in.template Get<CurType>().Shape()[0];
+                if (seqValue == 0)
+                    throw std::runtime_error("Empty sequence as input.");
+                if (prev == 0) prev = seqValue;
+                else if ((prev != seqValue) && (seqValue != 0))
+                {
+                    throw std::runtime_error("Sequence number mismatch.");
+                }
+
+                return GetGradSeqNum<Sequential::Tail<TKeyCont>>(p_in, prev);
+            }
+        }
         
         template <typename TKeyCont, typename TInput, typename TOutput>
         auto GradSplit(const TInput& p_input, TOutput&& p_output)
@@ -372,9 +432,8 @@ namespace MetaNN
             {
                 using CurType = Sequential::Head<TKeyCont>;
                 auto curValue = p_input.template Get<CurType>();
-                static_assert(IsSequenceCategory<decltype(curValue)>);
-                
-                auto inputValue = curValue[curValue.Shape().Length() - 1];
+
+                auto inputValue = curValue[curValue.Shape()[0] - 1];
                 auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(inputValue)));
                 return GradSplit<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput));
             }
@@ -389,8 +448,7 @@ namespace MetaNN
             {
                 using CurType = Sequential::Head<TKeyCont>;
                 auto curValue = p_input.template Get<CurType>();
-                static_assert(IsSequenceCategory<decltype(curValue)>);
-                
+
                 auto inputValue = curValue[id];
                 if constexpr (!UseBptt)
                 {
@@ -474,9 +532,9 @@ namespace MetaNN
         using InputPortSet = typename KernelGen::InputPortSet;
         using OutputPortSet = typename KernelGen::OutputPortSet;
         using InputMap = typename KernelGen::InputMap;
-        
-        constexpr static bool IsTrivalLayer = KernelGen::IsTrival;
+
     private:
+        using SeqIdCont = typename PolicySelect<RnnPolicy, CurrentPolicy>::SeqIdCont;
         using TShapeDickHelper = typename NSRecurrentLayer::ShapeDictHelper<IsFeedbackOutput, InputMap>;
 
     public:
@@ -520,35 +578,27 @@ namespace MetaNN
         auto FeedForward(TIn&& p_in)
         {
             using TOriInputCont = RemConstRef<TIn>;
-            static_assert(NSRecurrentLayer::IsNonBatch_<typename TOriInputCont::Keys, TOriInputCont>::value);
-            if constexpr (IsTrivalLayer)
-            {
-                static_assert(NSRecurrentLayer::IsNonSeq_<typename TOriInputCont::Keys, TOriInputCont>::value);
-                return m_kernel.FeedForward(p_in);
-            }
-            else
-            {
-                const size_t seqNum = NSRecurrentLayer::GetSeqNum<typename TOriInputCont::Keys>(p_in);
-                if (seqNum == 0)
-                {
-                    throw std::runtime_error("Empty sequence as input.");
-                }
-                
-                TShapeDickHelper::PickShapeInfo(m_inputShapeStack, p_in);
-                
-                auto firstInputCont = NSRecurrentLayer::Split0<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create());
-                auto previousOutput = m_kernel.FeedForward(std::move(firstInputCont));
-                using OutputKeys = typename decltype(previousOutput)::Keys;
-                auto outputCont = NSRecurrentLayer::InitOutputCont<OutputKeys>(previousOutput, OutputKeys::Create());
+            TShapeDickHelper::PickShapeInfo(m_inputShapeStack, p_in);
 
-                for (size_t i = 1; i < seqNum; ++i)
-                {
-                    auto curInputCont = NSRecurrentLayer::SplitN<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create(), previousOutput, i);
-                    previousOutput = m_kernel.FeedForward(std::move(curInputCont));
-                    NSRecurrentLayer::FillOutputCont<OutputKeys>(previousOutput, outputCont);
-                }
-                return outputCont;
+            auto permuteRes = NSRecurrentLayer::PermuteBySeqID<typename TOriInputCont::Keys, SeqIdCont>(std::forward<TIn>(p_in), TOriInputCont::Keys::Create());
+            const size_t seqNum = NSRecurrentLayer::GetSeqNum<typename TOriInputCont::Keys, SeqIdCont>(permuteRes);
+            if (seqNum == 0)
+            {
+                throw std::runtime_error("Empty sequence as input.");
             }
+
+            auto firstInputCont = NSRecurrentLayer::Split0<typename TOriInputCont::Keys, SeqIdCont>(p_in, TOriInputCont::Keys::Create());
+            auto previousOutput = m_kernel.FeedForward(std::move(firstInputCont));
+            using OutputKeys = typename decltype(previousOutput)::Keys;
+            auto outputCont = NSRecurrentLayer::InitOutputCont<OutputKeys>(previousOutput, OutputKeys::Create());
+
+            for (size_t i = 1; i < seqNum; ++i)
+            {
+                auto curInputCont = NSRecurrentLayer::SplitN<typename TOriInputCont::Keys, SeqIdCont>(p_in, TOriInputCont::Keys::Create(), previousOutput, i);
+                previousOutput = m_kernel.FeedForward(std::move(curInputCont));
+                NSRecurrentLayer::FillOutputCont<OutputKeys>(previousOutput, outputCont);
+            }
+            return outputCont;
         }
 
         template <typename TIn>
@@ -558,20 +608,14 @@ namespace MetaNN
                 static_assert(KernelType::IsFeedbackOutput);
 
             using TOriInputCont = RemConstRef<TIn>;
-            if constexpr (IsTrivalLayer)
-            {
-                static_assert(NSRecurrentLayer::IsNonBatch_<typename TOriInputCont::Keys, TOriInputCont>::value);
-                return m_kernel.FeedBackward(p_in);
-            }
-            else if constexpr (!IsFeedbackOutput && !IsUpdate)
+            if constexpr (!IsFeedbackOutput && !IsUpdate)
             {
                 static_assert(!KernelType::IsFeedbackOutput);
                 return LayerInputCont<RecurrentLayer>();
             }
             else if constexpr (!IsFeedbackOutput)
             {
-                static_assert(NSRecurrentLayer::IsAllSeq_<typename TOriInputCont::Keys, TOriInputCont>::value, "All grads should be Sequencal.");
-                const size_t seqNum = NSRecurrentLayer::GetSeqNum<typename TOriInputCont::Keys>(p_in);
+                const size_t seqNum = NSRecurrentLayer::GetGradSeqNum<typename TOriInputCont::Keys>(p_in);
                 if (seqNum == 0)
                 {
                     throw std::runtime_error("Empty sequence as grad input.");
@@ -590,8 +634,7 @@ namespace MetaNN
             }
             else
             {
-                static_assert(NSRecurrentLayer::IsAllSeq_<typename TOriInputCont::Keys, TOriInputCont>::value, "All grads should be Sequencal.");
-                const size_t seqNum = NSRecurrentLayer::GetSeqNum<typename TOriInputCont::Keys>(p_in);
+                const size_t seqNum = NSRecurrentLayer::GetGradSeqNum<typename TOriInputCont::Keys>(p_in);
                 if (seqNum == 0)
                 {
                     throw std::runtime_error("Empty sequence as grad input.");
@@ -611,7 +654,7 @@ namespace MetaNN
                 auto filledPrevGrad = NSRecurrentLayer::FillPrevGradOutput<OutputGradKeys>(curOutputCont, std::move(outputGrad));
 
                 NSRecurrentLayer::ReverseOutputCont<OutputGradKeys>(filledPrevGrad);
-                return TShapeDickHelper::Collapse(m_inputShapeStack, std::move(filledPrevGrad));
+                return TShapeDickHelper::template Collapse<SeqIdCont>(m_inputShapeStack, std::move(filledPrevGrad));
             }
         }
     private:
