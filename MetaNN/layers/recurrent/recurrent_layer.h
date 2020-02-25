@@ -587,14 +587,14 @@ namespace MetaNN
                 throw std::runtime_error("Empty sequence as input.");
             }
 
-            auto firstInputCont = NSRecurrentLayer::Split0<typename TOriInputCont::Keys, SeqIdCont>(p_in, TOriInputCont::Keys::Create());
+            auto firstInputCont = NSRecurrentLayer::Split0<typename TOriInputCont::Keys, SeqIdCont>(permuteRes, TOriInputCont::Keys::Create());
             auto previousOutput = m_kernel.FeedForward(std::move(firstInputCont));
             using OutputKeys = typename decltype(previousOutput)::Keys;
             auto outputCont = NSRecurrentLayer::InitOutputCont<OutputKeys>(previousOutput, OutputKeys::Create());
 
             for (size_t i = 1; i < seqNum; ++i)
             {
-                auto curInputCont = NSRecurrentLayer::SplitN<typename TOriInputCont::Keys, SeqIdCont>(p_in, TOriInputCont::Keys::Create(), previousOutput, i);
+                auto curInputCont = NSRecurrentLayer::SplitN<typename TOriInputCont::Keys, SeqIdCont>(permuteRes, TOriInputCont::Keys::Create(), previousOutput, i);
                 previousOutput = m_kernel.FeedForward(std::move(curInputCont));
                 NSRecurrentLayer::FillOutputCont<OutputKeys>(previousOutput, outputCont);
             }

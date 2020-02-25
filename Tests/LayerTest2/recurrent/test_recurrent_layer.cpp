@@ -31,12 +31,39 @@ namespace
             : TBase(TBase::CreateSublayers().template Set<AddSublayer>(std::move(p_name)))
         { }
     };
+    
+    struct AddSublayer1;
+    struct AddSublayer2;
+
+    namespace NSAddWrapLayer2
+    {
+        using Topology = ComposeTopology<Sublayer<AddSublayer1, AddLayer>,
+                                         Sublayer<AddSublayer2, AddLayer>,
+                                         InConnect<LeftOperand, AddSublayer1, LeftOperand>,
+                                         InConnect<RightOperand, AddSublayer2, LeftOperand>,
+                                         InConnect<Previous<LayerOutput>, AddSublayer1, RightOperand>,
+                                         InternalConnect<AddSublayer1, LayerOutput, AddSublayer2, RightOperand>,
+                                         OutConnect<AddSublayer2, LayerOutput, LayerOutput>>;
+        template <typename TInputMap, typename TPolicies>
+        using Base = ComposeKernel<LayerPortSet<LeftOperand, RightOperand, Previous<LayerOutput>>,
+                                   LayerPortSet<LayerOutput>, TInputMap, TPolicies, Topology>;
+
+    }
+
+    template <typename TInputs, typename TPolicies>
+    class AddWrapLayer2 : public NSAddWrapLayer2::Base<TInputs, TPolicies>
+    {
+        using TBase = NSAddWrapLayer2::Base<TInputs, TPolicies>;
+    public:
+        AddWrapLayer2(std::string p_name)
+            : TBase(TBase::CreateSublayers().template Set<AddSublayer1>(std::move(p_name + "/1"))
+                                            .template Set<AddSublayer2>(std::move(p_name + "/2")))
+        { }
+    };
 }
 
 namespace
 {
-    using TrivalInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>,
-                                      LayerKV<Previous<LayerOutput>, Matrix<CheckElement, CheckDevice>>>;
     void test_recurrent_layer1()
     {
         cout << "Test recurrent layer case 1...\t";
@@ -193,6 +220,148 @@ namespace
 
         cout << "done" << endl;
     }
+    
+    void test_recurrent_layer4()
+    {
+        cout << "Test recurrent layer case 4 (2 inputs)...\t";
+        using RootLayer = MakeInferLayer<RecurrentLayer, PSeqIDsAre<SeqID<LeftOperand, 0>>, PActFuncIs<AddWrapLayer2>>;
+        static_assert(!RootLayer::IsUpdate);
+        static_assert(!RootLayer::IsFeedbackOutput);
+        
+        RootLayer layer("root");
+        auto lInput = GenTensor<CheckElement>(-1, 0.01f, 3, 5, 7);
+        auto rInput = GenTensor<CheckElement>(-1, 0.01f, 5, 7);
+        auto prev = GenTensor<CheckElement>(2, -0.03f, 5, 7);
+        auto outputCont = layer.FeedForward(LayerInputCont<RootLayer>()
+                                            .Set<LeftOperand>(lInput)
+                                            .Set<RightOperand>(rInput)
+                                            .Set<Previous<LayerOutput>>(prev));
+        auto res = Evaluate(outputCont.Get<LayerOutput>());
+        
+        assert(res.Shape() == Shape(3, 5, 7));
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(0, j, k) - lInput(0, j, k) - rInput(j, k) - prev(j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(1, j, k) - lInput(1, j, k) - rInput(j, k) - res(0, j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(2, j, k) - lInput(2, j, k) - rInput(j, k) - res(1, j, k)) < 0.001f);
+            }
+        }
+        
+        LayerNeutralInvariant(layer);
+
+        cout << "done" << endl;
+    }
+    
+    void test_recurrent_layer5()
+    {
+        cout << "Test recurrent layer case 5 (2 inputs, non-zero seq ID)...\t";
+        using RootLayer = MakeInferLayer<RecurrentLayer, PSeqIDsAre<SeqID<LeftOperand, 1>>, PActFuncIs<AddWrapLayer2>>;
+        static_assert(!RootLayer::IsUpdate);
+        static_assert(!RootLayer::IsFeedbackOutput);
+        
+        RootLayer layer("root");
+        auto lInput = GenTensor<CheckElement>(-1, 0.01f, 5, 3, 7);
+        auto rInput = GenTensor<CheckElement>(-1, 0.01f, 5, 7);
+        auto prev = GenTensor<CheckElement>(2, -0.03f, 5, 7);
+        auto outputCont = layer.FeedForward(LayerInputCont<RootLayer>()
+                                            .Set<LeftOperand>(lInput)
+                                            .Set<RightOperand>(rInput)
+                                            .Set<Previous<LayerOutput>>(prev));
+        auto res = Evaluate(outputCont.Get<LayerOutput>());
+        
+        assert(res.Shape() == Shape(3, 5, 7));
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(0, j, k) - lInput(j, 0, k) - rInput(j, k) - prev(j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(1, j, k) - lInput(j, 1, k) - rInput(j, k) - res(0, j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(2, j, k) - lInput(j, 2, k) - rInput(j, k) - res(1, j, k)) < 0.001f);
+            }
+        }
+        
+        LayerNeutralInvariant(layer);
+
+        cout << "done" << endl;
+    }
+    
+    void test_recurrent_layer6()
+    {
+        cout << "Test recurrent layer case 6 (2 inputs, non-zero seq ID)...\t";
+        using RootLayer = MakeInferLayer<RecurrentLayer, PSeqIDsAre<SeqID<LeftOperand, 1>, SeqID<RightOperand, 2>>,
+                                                         PActFuncIs<AddWrapLayer2>>;
+        static_assert(!RootLayer::IsUpdate);
+        static_assert(!RootLayer::IsFeedbackOutput);
+        
+        RootLayer layer("root");
+        auto lInput = GenTensor<CheckElement>(-1, 0.01f, 5, 3, 7);
+        auto rInput = GenTensor<CheckElement>(-1, 0.01f, 5, 7, 3);
+        auto prev = GenTensor<CheckElement>(2, -0.03f, 5, 7);
+        auto outputCont = layer.FeedForward(LayerInputCont<RootLayer>()
+                                            .Set<LeftOperand>(lInput)
+                                            .Set<RightOperand>(rInput)
+                                            .Set<Previous<LayerOutput>>(prev));
+        auto res = Evaluate(outputCont.Get<LayerOutput>());
+        
+        assert(res.Shape() == Shape(3, 5, 7));
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(0, j, k) - lInput(j, 0, k) - rInput(j, k, 0) - prev(j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(1, j, k) - lInput(j, 1, k) - rInput(j, k, 1) - res(0, j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(2, j, k) - lInput(j, 2, k) - rInput(j, k, 2) - res(1, j, k)) < 0.001f);
+            }
+        }
+        
+        LayerNeutralInvariant(layer);
+
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Recurrent
@@ -202,5 +371,8 @@ namespace Test::Layer::Recurrent
         test_recurrent_layer1();
         test_recurrent_layer2();
         test_recurrent_layer3();
+        test_recurrent_layer4();
+        test_recurrent_layer5();
+        test_recurrent_layer6();
     }
 }
