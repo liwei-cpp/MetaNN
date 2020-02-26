@@ -362,6 +362,224 @@ namespace
 
         cout << "done" << endl;
     }
+
+    using SeqInputMap2 = LayerIOMap<LayerKV<LeftOperand, Tensor<CheckElement, CheckDevice, 3>>,
+                                    LayerKV<RightOperand, Tensor<CheckElement, CheckDevice, 2>>,
+                                    LayerKV<Previous<LayerOutput>, Matrix<CheckElement, CheckDevice>>>;
+    void test_recurrent_layer7()
+    {
+        cout << "Test recurrent layer case 7 (2 inputs, output grad)...\t";
+        using RootLayer = MakeTrainLayer<RecurrentLayer, SeqInputMap2, PSeqIDsAre<SeqID<LeftOperand, 0>>, PActFuncIs<AddWrapLayer2>, PFeedbackOutput>;
+        static_assert(!RootLayer::IsUpdate);
+        static_assert(RootLayer::IsFeedbackOutput);
+        
+        RootLayer layer("root");
+        auto lInput = GenTensor<CheckElement>(-1, 0.01f, 3, 5, 7);
+        auto rInput = GenTensor<CheckElement>(-1, 0.01f, 5, 7);
+        auto prev = GenTensor<CheckElement>(2, -0.03f, 5, 7);
+        auto outputCont = layer.FeedForward(LayerInputCont<RootLayer>()
+                                            .Set<LeftOperand>(lInput)
+                                            .Set<RightOperand>(rInput)
+                                            .Set<Previous<LayerOutput>>(prev));
+        auto res = Evaluate(outputCont.Get<LayerOutput>());
+        
+        assert(res.Shape() == Shape(3, 5, 7));
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(0, j, k) - lInput(0, j, k) - rInput(j, k) - prev(j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(1, j, k) - lInput(1, j, k) - rInput(j, k) - res(0, j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(2, j, k) - lInput(2, j, k) - rInput(j, k) - res(1, j, k)) < 0.001f);
+            }
+        }
+        
+        auto grad = GenTensor<CheckElement>(0, 0.13f, 3, 5, 7);
+        auto gradOutputCont = layer.FeedBackward(LayerOutputCont<RootLayer>()
+                                                 .Set<LayerOutput>(grad));
+        auto gradL = Evaluate(gradOutputCont.Get<LeftOperand>());
+        auto gradR = Evaluate(gradOutputCont.Get<RightOperand>());
+        auto grad_prev = Evaluate(gradOutputCont.Get<Previous<LayerOutput>>());
+        assert(gradL.Shape() == lInput.Shape());
+        assert(gradR.Shape() == rInput.Shape());
+        assert(grad_prev.Shape() == prev.Shape());
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(gradL(2, j, k) - grad(2, j, k)) < 0.001f);
+                assert(fabs(gradL(1, j, k) - grad(1, j, k) - grad(2, j, k)) < 0.001f);
+                assert(fabs(gradL(0, j, k) - grad(0, j, k) - grad(1, j, k) - grad(2, j, k)) < 0.001f);
+                assert(fabs(gradR(j, k) - grad(0, j, k) - 2 * grad(1, j, k) - 3 * grad(2, j, k)) < 0.001f);
+                assert(fabs(grad_prev(j, k) - gradL(0, j, k)) < 0.001f);
+            }
+        }
+        LayerNeutralInvariant(layer);
+
+        cout << "done" << endl;
+    }
+    
+    void test_recurrent_layer8()
+    {
+        cout << "Test recurrent layer case 8 (2 inputs, non-zero seq ID, out grad)...\t";
+        using RootLayer = MakeTrainLayer<RecurrentLayer, SeqInputMap2, PSeqIDsAre<SeqID<LeftOperand, 1>>, PActFuncIs<AddWrapLayer2>, PFeedbackOutput>;
+        static_assert(!RootLayer::IsUpdate);
+        static_assert(RootLayer::IsFeedbackOutput);
+        
+        RootLayer layer("root");
+        auto lInput = GenTensor<CheckElement>(-1, 0.01f, 5, 3, 7);
+        auto rInput = GenTensor<CheckElement>(-1, 0.01f, 5, 7);
+        auto prev = GenTensor<CheckElement>(2, -0.03f, 5, 7);
+        auto outputCont = layer.FeedForward(LayerInputCont<RootLayer>()
+                                            .Set<LeftOperand>(lInput)
+                                            .Set<RightOperand>(rInput)
+                                            .Set<Previous<LayerOutput>>(prev));
+        auto res = Evaluate(outputCont.Get<LayerOutput>());
+        
+        assert(res.Shape() == Shape(3, 5, 7));
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(0, j, k) - lInput(j, 0, k) - rInput(j, k) - prev(j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(1, j, k) - lInput(j, 1, k) - rInput(j, k) - res(0, j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(2, j, k) - lInput(j, 2, k) - rInput(j, k) - res(1, j, k)) < 0.001f);
+            }
+        }
+        
+        auto grad = GenTensor<CheckElement>(0, 0.13f, 3, 5, 7);
+        auto gradOutputCont = layer.FeedBackward(LayerOutputCont<RootLayer>()
+                                                 .Set<LayerOutput>(grad));
+        auto gradL = Evaluate(gradOutputCont.Get<LeftOperand>());
+        auto gradR = Evaluate(gradOutputCont.Get<RightOperand>());
+        auto grad_prev = Evaluate(gradOutputCont.Get<Previous<LayerOutput>>());
+        assert(gradL.Shape() == lInput.Shape());
+        assert(gradR.Shape() == rInput.Shape());
+        assert(grad_prev.Shape() == prev.Shape());
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(gradL(j, 2, k) - grad(2, j, k)) < 0.001f);
+                assert(fabs(gradL(j, 1, k) - grad(1, j, k) - grad(2, j, k)) < 0.001f);
+                assert(fabs(gradL(j, 0, k) - grad(0, j, k) - grad(1, j, k) - grad(2, j, k)) < 0.001f);
+                assert(fabs(gradR(j, k) - grad(0, j, k) - 2 * grad(1, j, k) - 3 * grad(2, j, k)) < 0.001f);
+                assert(fabs(grad_prev(j, k) - gradL(j, 0, k)) < 0.001f);
+            }
+        }
+
+        LayerNeutralInvariant(layer);
+
+        cout << "done" << endl;
+    }
+
+    using SeqInputMap3 = LayerIOMap<LayerKV<LeftOperand, Tensor<CheckElement, CheckDevice, 3>>,
+                                    LayerKV<RightOperand, Tensor<CheckElement, CheckDevice, 3>>,
+                                    LayerKV<Previous<LayerOutput>, Matrix<CheckElement, CheckDevice>>>;
+    void test_recurrent_layer9()
+    {
+        cout << "Test recurrent layer case 9 (2 inputs, non-zero seq ID, output grad)...\t";
+        using RootLayer = MakeTrainLayer<RecurrentLayer, SeqInputMap3,
+                                         PSeqIDsAre<SeqID<LeftOperand, 1>, SeqID<RightOperand, 2>>,
+                                         PActFuncIs<AddWrapLayer2>, PFeedbackOutput>;
+        static_assert(!RootLayer::IsUpdate);
+        static_assert(RootLayer::IsFeedbackOutput);
+        
+        RootLayer layer("root");
+        auto lInput = GenTensor<CheckElement>(-1, 0.01f, 5, 3, 7);
+        auto rInput = GenTensor<CheckElement>(-1, 0.01f, 5, 7, 3);
+        auto prev = GenTensor<CheckElement>(2, -0.03f, 5, 7);
+        auto outputCont = layer.FeedForward(LayerInputCont<RootLayer>()
+                                            .Set<LeftOperand>(lInput)
+                                            .Set<RightOperand>(rInput)
+                                            .Set<Previous<LayerOutput>>(prev));
+        auto res = Evaluate(outputCont.Get<LayerOutput>());
+        
+        assert(res.Shape() == Shape(3, 5, 7));
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(0, j, k) - lInput(j, 0, k) - rInput(j, k, 0) - prev(j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(1, j, k) - lInput(j, 1, k) - rInput(j, k, 1) - res(0, j, k)) < 0.001f);
+            }
+        }
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(res(2, j, k) - lInput(j, 2, k) - rInput(j, k, 2) - res(1, j, k)) < 0.001f);
+            }
+        }
+
+        auto grad = GenTensor<CheckElement>(0, 0.13f, 3, 5, 7);
+        auto gradOutputCont = layer.FeedBackward(LayerOutputCont<RootLayer>()
+                                                 .Set<LayerOutput>(grad));
+        auto gradL = Evaluate(gradOutputCont.Get<LeftOperand>());
+        auto gradR = Evaluate(gradOutputCont.Get<RightOperand>());
+        auto grad_prev = Evaluate(gradOutputCont.Get<Previous<LayerOutput>>());
+        assert(gradL.Shape() == lInput.Shape());
+        assert(gradR.Shape() == rInput.Shape());
+        assert(grad_prev.Shape() == prev.Shape());
+        
+        for (size_t j = 0; j < 5; ++j)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                assert(fabs(gradL(j, 2, k) - grad(2, j, k)) < 0.001f);
+                assert(fabs(gradL(j, 1, k) - grad(1, j, k) - grad(2, j, k)) < 0.001f);
+                assert(fabs(gradL(j, 0, k) - grad(0, j, k) - grad(1, j, k) - grad(2, j, k)) < 0.001f);
+
+                assert(fabs(gradR(j, k, 2) - grad(2, j, k)) < 0.001f);
+                assert(fabs(gradR(j, k, 1) - grad(1, j, k) - grad(2, j, k)) < 0.001f);
+                assert(fabs(gradR(j, k, 0) - grad(0, j, k) - grad(1, j, k) - grad(2, j, k)) < 0.001f);
+
+                assert(fabs(grad_prev(j, k) - gradL(j, 0, k)) < 0.001f);
+            }
+        }
+
+        LayerNeutralInvariant(layer);
+
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Layer::Recurrent
@@ -374,5 +592,8 @@ namespace Test::Layer::Recurrent
         test_recurrent_layer4();
         test_recurrent_layer5();
         test_recurrent_layer6();
+        test_recurrent_layer7();
+        test_recurrent_layer8();
+        test_recurrent_layer9();
     }
 }

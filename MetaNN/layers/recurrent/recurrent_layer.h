@@ -78,7 +78,15 @@ namespace MetaNN
         };
 
         template <typename TSeqInfo, bool IsPrevious, typename TValue>
-        struct Wrapper2KernelInputMapHelper_;
+        struct Wrapper2KernelInputMapHelper_
+        {
+            static_assert(!IsPrevious);
+            constexpr static size_t ValueDim = DataCategory<TValue>::DimNum;
+            constexpr static size_t ID = TSeqInfo::value;
+            using PermutePolicy = PolicyContainer<typename GetPermuteInfo_<ID, std::make_index_sequence<ValueDim>>::type>;
+            using PermuteType = decltype(Permute<PermutePolicy>(std::declval<TValue>()));
+            using type = decltype(std::declval<PermuteType>()[0]);
+        };
         
         template <typename TValue>
         struct Wrapper2KernelInputMapHelper_<void, false, TValue>
@@ -92,15 +100,6 @@ namespace MetaNN
             using type = RemConstRef<decltype(MakeDynamic(std::declval<TValue>()))>;
         };        
 
-        template <size_t ID, typename TValue>
-        struct Wrapper2KernelInputMapHelper_<Helper::Int_<ID>, false, TValue>
-        {
-            constexpr static size_t ValueDim = DataCategory<TValue>::DimNum;
-            using PermutePolicy = PolicyContainer<typename GetPermuteInfo_<ID, std::make_index_sequence<ValueDim>>::type>;
-            using PermuteType = decltype(Permute<PermutePolicy>(std::declval<TValue>()));
-            using type = decltype(std::declval<PermuteType>()[0]);
-        };
-        
         template <typename TInputMap, typename TSeqIdCont>
         struct Wrapper2KernelInputMap_;
         
@@ -228,7 +227,7 @@ namespace MetaNN
                         constexpr size_t seqID = Map::Find<TSeqIdCont, CurType>::value;
                         constexpr static size_t ValueDim = DataCategory<decltype(oriValue)>::DimNum;
                         using PermutePolicy = typename GetPermuteInfo_<seqID, std::make_index_sequence<ValueDim>>::type;
-                        auto newValue = Permute<PolicyContainer<PermutePolicy>>(oriValue);
+                        auto newValue = PermuteInv<PolicyContainer<PermutePolicy>>(oriValue);
                         assert(newValue.Shape() == p_shape.template Get<CurType>());
                         auto newCont = std::forward<TCont>(p_cont).template Set<CurType>(newValue);
                         return CollapseHelper<Sequential::Tail<TKeysCont>, TSeqIdCont>(p_shape, std::move(newCont));
