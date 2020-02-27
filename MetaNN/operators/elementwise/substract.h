@@ -10,6 +10,7 @@ namespace MetaNN::OpTags
 {
     struct Substract;
     struct SubstractFromNum;
+    struct SubstractByNum;
 }
 
 namespace MetaNN
@@ -113,12 +114,12 @@ namespace NSCaseGen
             : BaseType(TypeID<EvalItem>(),
                        {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
-            , m_minuend(params.Value())
+            , m_value(params.Value())
             , m_outputHandle(std::move(outputHandle))
         {}
         
         const TInputHandle m_inputHandle;
-        double m_minuend;
+        double m_value;
         TOutputHandle m_outputHandle;
     };
 
@@ -148,7 +149,7 @@ namespace NSCaseGen
 
             for (size_t i = 0; i < count; ++i)
             {
-                mem_out[i] = evalItem.m_minuend - mem_in[i];
+                mem_out[i] = evalItem.m_value - mem_in[i];
             }
             evalItem.m_outputHandle.SetData(std::move(out));
         }
@@ -175,10 +176,102 @@ struct OperSeq_<OpTags::SubstractFromNum>
                                                  PolicyContainer<PPassAuxParam>>>;
 };
 
+/// Substract by number
+namespace OperSubstractByNum
+{
+template <typename TOper, typename TNumber>
+constexpr bool Valid()
+{
+    if constexpr ((!IsValidCategoryTag<DataCategory<TOper>>) || (IsValidCategoryTag<DataCategory<TNumber>>))
+    {
+        return false;
+    }
+    else
+    {
+        return std::is_constructible_v<typename RemConstRef<TOper>::ElementType, TNumber>;
+    }
+}
+
+namespace NSCaseGen
+{
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    {
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
+            : BaseType(TypeID<EvalItem>(),
+                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            , m_inputHandle(std::move(oriHandle))
+            , m_value(params.Value())
+            , m_outputHandle(std::move(outputHandle))
+        {}
+        
+        const TInputHandle m_inputHandle;
+        double m_value;
+        TOutputHandle m_outputHandle;
+    };
+
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
+        {
+            const auto& input = evalItem.m_inputHandle.Data();
+
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out(input.Shape());
+
+            const size_t count = input.Shape().Count();
+            assert(count == out.Shape().Count());
+
+            auto low_in = LowerAccess(input);
+            const ElementType* mem_in = low_in.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                mem_out[i] = mem_in[i] - evalItem.m_value;
+            }
+            evalItem.m_outputHandle.SetData(std::move(out));
+        }
+    };
+}}
+
+template <typename TOper, typename TNumber>
+constexpr bool IsValidOper<OpTags::SubstractByNum, TOper, TNumber>
+    = OperSubstractByNum::Valid<TOper, TNumber>();
+
+template <typename TCate>
+struct OperAuxParams<OpTags::SubstractByNum, TCate> : public OperAuxValue<double>
+{
+    using TBase = OperAuxValue<double>;
+    using TBase::TBase;
+    using TBase::operator =;
+};
+
+template <>
+struct OperSeq_<OpTags::SubstractByNum>
+{
+    using type = OperCalAlgoChain<TailCalculator<OperSubstractByNum::NSCaseGen::EvalItem,
+                                                 OperSubstractByNum::NSCaseGen::EvalGroup,
+                                                 PolicyContainer<PPassAuxParam>>>;
+};
+
 // Interface
 template <typename TP1, typename TP2,
           typename = std::enable_if_t<IsValidOper<OpTags::Substract, TP1, TP2> ||
-                                      IsValidOper<OpTags::SubstractFromNum, TP1, TP2>>>
+                                      IsValidOper<OpTags::SubstractFromNum, TP1, TP2> ||
+                                      IsValidOper<OpTags::SubstractByNum, TP1, TP2>>>
 auto operator- (TP1&& p_m1, TP2&& p_m2)
 {
     if constexpr (IsValidOper<OpTags::Substract, TP1, TP2>)
@@ -194,6 +287,13 @@ auto operator- (TP1&& p_m1, TP2&& p_m2)
         using ResType = Operator<OpTags::SubstractFromNum, OperandContainer<rawOp>>;
         OperAuxParams<OpTags::SubstractFromNum, OperCateCal<OpTags::SubstractFromNum, PolicyContainer<>, rawOp>> params(p_m1);
         return ResType(std::move(params), std::forward<TP2>(p_m2));
+    }
+    else if constexpr (IsValidOper<OpTags::SubstractByNum, TP1, TP2>)
+    {
+        using rawOp = RemConstRef<TP1>;
+        using ResType = Operator<OpTags::SubstractByNum, OperandContainer<rawOp>>;
+        OperAuxParams<OpTags::SubstractByNum, OperCateCal<OpTags::SubstractByNum, PolicyContainer<>, rawOp>> params(p_m2);
+        return ResType(std::move(params), std::forward<TP1>(p_m1));
     }
     else
     {

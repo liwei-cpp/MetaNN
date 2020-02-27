@@ -139,6 +139,32 @@ namespace
         }
         cout << "done" << endl;
     }
+    
+    void test_substract_case6()
+    {
+        cout << "Test substract case 6\t";
+        auto ori = GenTensor<CheckElement>(-100, 3, 6, 10, 7);
+        auto op = ori - 1;
+        static_assert(IsThreeDArray<decltype(op)>);
+        assert(op.Shape() == Shape(6, 10, 7));
+        
+        auto res = Evaluate(op);
+        static_assert(IsThreeDArray<decltype(res)>);
+        assert(res.Shape() == Shape(6, 10, 7));
+        
+        for (size_t p = 0; p < 6; ++p)
+        {
+            for (size_t i = 0; i < 10; ++i)
+            {
+                for (size_t k = 0; k < 7; ++k)
+                {
+                    auto check = ori(p, i, k) - 1;
+                    assert(fabs(check - res(p, i, k)) < 0.001f);
+                }
+            }
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Operators::Elwentwise
@@ -150,5 +176,6 @@ namespace Test::Operators::Elwentwise
         test_substract_case3();
         test_substract_case4();
         test_substract_case5();
+        test_substract_case6();
     }
 }
