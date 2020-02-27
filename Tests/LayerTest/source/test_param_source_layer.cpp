@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <data_gen.h>
 #include <iostream>
@@ -18,7 +18,7 @@ namespace
         auto filler = MakeInitializer<CheckElement>();
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         
-        auto mat = GenMatrix<CheckElement>(10, 3);
+        auto mat = GenTensor<CheckElement>(0, 1, 10, 3);
         filler.SetParam("root", mat);
         
         RootLayer layer("root", "root", 10, 3);
@@ -26,7 +26,7 @@ namespace
         
         LoadBuffer<CheckElement, CheckDevice> weightSaver;
         layer.SaveWeights(weightSaver);
-        auto* w = weightSaver.TryGet<CategoryTags::Matrix>("root");
+        auto* w = weightSaver.TryGet<CategoryTags::Tensor<2>>("root");
         assert(w);
         
         auto wInfo = *w;
@@ -41,7 +41,7 @@ namespace
 
         cout << "done" << endl;
     }
-    
+
     void test_param_source_layer2()
     {
         cout << "Test param source layer case 2 (Init from initializer-filler)...\t";
@@ -62,12 +62,11 @@ namespace
         
         LoadBuffer<CheckElement, CheckDevice> weightSaver;
         layer.SaveWeights(weightSaver);
-        auto* w = weightSaver.TryGet<CategoryTags::Matrix>("root");
+        auto* w = weightSaver.TryGet<CategoryTags::Tensor<2>>("root");
         assert(w);
         
         auto wInfo = *w;
-        assert(wInfo.Shape().RowNum() == 10);
-        assert(wInfo.Shape().ColNum() == 3);
+        assert(wInfo.Shape() == Shape(10, 3));
         for (size_t i = 0; i < 10; ++i)
         {
             for (size_t j = 0; j < 3; ++j)
@@ -78,7 +77,7 @@ namespace
 
         cout << "done" << endl;
     }
-    
+
     void test_param_source_layer3()
     {
         cout << "Test param source layer case 3 (Init from load buffer)...\t";
@@ -90,7 +89,7 @@ namespace
         auto filler = MakeInitializer<CheckElement>();
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         
-        auto mat = GenMatrix<CheckElement>(10, 3);
+        auto mat = GenTensor<CheckElement>(0, 1, 10, 3);
         loadBuffer.Set("root", mat);
 
         RootLayer layer("root", "root", 10, 3);
@@ -98,7 +97,7 @@ namespace
         
         LoadBuffer<CheckElement, CheckDevice> weightSaver;
         layer.SaveWeights(weightSaver);
-        auto* w = weightSaver.TryGet<CategoryTags::Matrix>("root");
+        auto* w = weightSaver.TryGet<CategoryTags::Tensor<2>>("root");
         assert(w);
         assert(*w == mat);
 
@@ -116,7 +115,7 @@ namespace
         auto filler = MakeInitializer<CheckElement>();
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         
-        auto mat = GenMatrix<CheckElement>(10, 3);
+        auto mat = GenTensor<CheckElement>(0, 1, 10, 3);
         loadBuffer.Set("root", mat);
 
         RootLayer layer("root", "root", 10, 3);
@@ -141,7 +140,7 @@ namespace
         auto filler = MakeInitializer<CheckElement>();
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         
-        auto mat = GenMatrix<CheckElement>(10, 3);
+        auto mat = GenTensor<CheckElement>(0, 1, 10, 3);
         loadBuffer.Set("root", mat);
 
         RootLayer layer("root", "root", 10, 3);
@@ -151,7 +150,7 @@ namespace
         auto w = fpRes.template Get<LayerOutput>();
         assert(w == mat);
         
-        auto grad = GenMatrix<CheckElement>(10, 3);
+        auto grad = GenTensor<CheckElement>(0, 1, 10, 3);
         
         // Note: although we feed into the BP leayer, but since no update is set, 
         //       the feedbackward has no effect.
@@ -159,7 +158,7 @@ namespace
         layer.NeutralInvariant();
         cout << "done" << endl;
     }
-    
+
     void test_param_source_layer6()
     {
         cout << "Test param source layer case 6...\t";
@@ -171,7 +170,7 @@ namespace
         auto filler = MakeInitializer<CheckElement>();
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         
-        auto mat = GenMatrix<CheckElement>(10, 3, 0.1, 3);
+        auto mat = GenTensor<CheckElement>(0.1, 3, 10, 3);
         loadBuffer.Set("root", mat);
 
         RootLayer layer("root", "root", 10, 3);
@@ -181,18 +180,18 @@ namespace
         auto w = fpRes.template Get<LayerOutput>();
         assert(w == mat);
         
-        auto grad = GenMatrix<CheckElement>(10, 3);
+        auto grad = GenTensor<CheckElement>(0, 1, 10, 3);
         
         layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
         
         GradCollector<CheckElement, CheckDevice> grad_collector;
         layer.GradCollect(grad_collector);
         
-        auto& gradCont = grad_collector.GetContainer<CategoryTags::Matrix>();
+        auto& gradCont = grad_collector.GetContainer<CategoryTags::Tensor<2>>();
         assert(gradCont.size() == 1);
 
-        auto handle1 = gradCont.front().Weight().EvalRegister();
-        auto handle2 = gradCont.front().Grad().EvalRegister();
+        auto handle1 = gradCont.begin()->second.Weight().EvalRegister();
+        auto handle2 = gradCont.begin()->second.Grad().EvalRegister();
         EvalPlan<CheckDevice>::Inst().Eval();
         
         auto res1 = handle1.Data();
@@ -211,7 +210,7 @@ namespace
         layer.NeutralInvariant();
         cout << "done" << endl;
     }
-    
+
     void test_param_source_layer7()
     {
         cout << "Test param source layer case 7 (dummy grad input)...\t";
@@ -223,7 +222,7 @@ namespace
         auto filler = MakeInitializer<CheckElement>();
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         
-        auto mat = GenMatrix<CheckElement>(10, 3);
+        auto mat = GenTensor<CheckElement>(0, 1, 10, 3);
         loadBuffer.Set("root", mat);
 
         RootLayer layer("root", "root", 10, 3);
@@ -233,7 +232,7 @@ namespace
         auto w = fpRes.template Get<LayerOutput>();
         assert(w == mat);
         
-        auto grad = GenMatrix<CheckElement>(10, 3);
+        auto grad = GenTensor<CheckElement>(0, 1, 10, 3);
         
         layer.FeedBackward(LayerOutputCont<RootLayer>());
         layer.NeutralInvariant();
@@ -244,7 +243,7 @@ namespace
     {
         cout << "Test param source layer case 8 (ZeroMatrix as parameter)...\t";
         
-        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate, PParamTypeIs<ZeroData<CategoryTags::Matrix, CheckElement, CheckDevice>>>;
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate, PParamTypeIs<ZeroTensor<CheckElement, CheckDevice, 2>>>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(!RootLayer::IsUpdate);
         
@@ -252,11 +251,10 @@ namespace
         
         auto fpRes = layer.FeedForward(LayerInputCont<RootLayer>());
         auto w = fpRes.template Get<LayerOutput>();
-        static_assert(std::is_same_v<decltype(w), ZeroData<CategoryTags::Matrix, CheckElement, CheckDevice>>);
-        assert(w.Shape().RowNum() == 10);
-        assert(w.Shape().ColNum() == 3);
+        static_assert(std::is_same_v<decltype(w), ZeroTensor<CheckElement, CheckDevice, 2>>);
+        assert(w.Shape() == Shape(10, 3));
         
-        auto grad = GenMatrix<CheckElement>(10, 3);
+        auto grad = GenTensor<CheckElement>(0, 1, 10, 3);
         
         layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
         layer.NeutralInvariant();

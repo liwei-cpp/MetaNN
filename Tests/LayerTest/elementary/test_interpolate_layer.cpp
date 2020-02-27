@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <data_gen.h>
 #include <cassert>
@@ -142,9 +142,9 @@ namespace
         LayerNeutralInvariant(layer);
         for (size_t loop_count = 1; loop_count < 10; ++loop_count)
         {
-            auto i1 = GenMatrix<CheckElement>(loop_count, 3, 0.1f, 0.13f);
-            auto i2 = GenMatrix<CheckElement>(loop_count, 3, -0.2f, 0.05f);
-            auto delta = GenMatrix<CheckElement>(loop_count, 3, 1.2f, 0.07f);
+            auto i1 = GenTensor<CheckElement>(0.1f, 0.13f, loop_count, 3);
+            auto i2 = GenTensor<CheckElement>(-0.2f, 0.05f, loop_count, 3);
+            auto delta = GenTensor<CheckElement>(1.2f, 0.07f, loop_count, 3);
 
             op1.push_back(i1);
             op2.push_back(i2);
@@ -156,8 +156,7 @@ namespace
 
             auto out = layer.FeedForward(input);
             auto res = Evaluate(out.Get<LayerOutput>());
-            assert(res.Shape().RowNum() == loop_count);
-            assert(res.Shape().ColNum() == 3);
+            assert(res.Shape() == Shape(loop_count, 3));
             for (size_t i = 0; i < loop_count; ++i)
             {
                 for (size_t j = 0; j < 3; ++j)
@@ -171,7 +170,7 @@ namespace
 
         for (size_t loop_count = 9; loop_count >= 1; --loop_count)
         {
-            auto grad = GenMatrix<CheckElement>(loop_count, 3, 2, 1.1f);
+            auto grad = GenTensor<CheckElement>(2, 1.1f, loop_count, 3);
             auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
             auto handle1 = out_grad.Get<InterpolateLayerWeight1>().EvalRegister();

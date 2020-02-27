@@ -9,6 +9,7 @@
 namespace MetaNN::OpTags
 {
     struct Divide;
+    struct DivideFromNum;
     struct DivideByNum;
 }
 
@@ -86,7 +87,114 @@ struct OperSeq_<OpTags::Divide>
                                                  PolicyContainer<PPassShape>>>;
 };
 
+/// Divide from number
+namespace OperDivideFromNum
+{
+    template <typename TNumber, typename TOper>
+    constexpr bool Valid()
+    {
+        if constexpr ((!IsValidCategoryTag<DataCategory<TOper>>) || (IsValidCategoryTag<DataCategory<TNumber>>))
+        {
+            return false;
+        }
+        else
+        {
+            return std::is_constructible_v<typename RemConstRef<TOper>::ElementType, TNumber>;
+        }
+    }
+}
+namespace OperDivideFromNum::NSCaseGen
+{
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    {
+        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
+        using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
+    public:
+        template <typename TAuxParams>
+        EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
+            : BaseType(TypeID<EvalItem>(),
+                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            , m_inputHandle(std::move(oriHandle))
+            , m_value(params.Value())
+            , m_outputHandle(std::move(outputHandle))
+        {}
+        
+        const TInputHandle m_inputHandle;
+        double m_value;
+        TOutputHandle m_outputHandle;
+    };
+
+    template <typename TInputHandle, typename TOutputHandle>
+    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    {
+        using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
+    protected:
+        virtual void EvalInternalLogic(EvalItemType& evalItem) final override
+        {
+            const auto& input = evalItem.m_inputHandle.Data();
+
+            using ResType = typename TOutputHandle::DataType;
+            using ElementType = typename ResType::ElementType;
+            ResType out(input.Shape());
+
+            const size_t count = input.Shape().Count();
+            assert(count == out.Shape().Count());
+
+            auto low_in = LowerAccess(input);
+            const ElementType* mem_in = low_in.RawMemory();
+
+            auto low_out = LowerAccess(out);
+            ElementType* mem_out = low_out.MutableRawMemory();
+
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>, "Currently only CPU is supported");
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                mem_out[i] = evalItem.m_value / mem_in[i];
+            }
+            evalItem.m_outputHandle.SetData(std::move(out));
+        }
+    };
+}
+
+template <typename TNumber, typename TOper>
+constexpr bool IsValidOper<OpTags::DivideFromNum, TNumber, TOper>
+    = OperDivideFromNum::Valid<TNumber, TOper>();
+
+template <typename TCate>
+struct OperAuxParams<OpTags::DivideFromNum, TCate> : public OperAuxValue<double>
+{
+    using TBase = OperAuxValue<double>;
+    using TBase::TBase;
+    using TBase::operator =;
+};
+
+template <>
+struct OperSeq_<OpTags::DivideFromNum>
+{
+    using type = OperCalAlgoChain<TailCalculator<OperDivideFromNum::NSCaseGen::EvalItem,
+                                                 OperDivideFromNum::NSCaseGen::EvalGroup,
+                                                 PolicyContainer<PPassAuxParam>>>;
+};
+
 /// Divide by number
+namespace OperDivideByNum
+{
+    template <typename TOper, typename TNumber>
+    constexpr bool Valid()
+    {
+        if constexpr ((!IsValidCategoryTag<DataCategory<TOper>>) || (IsValidCategoryTag<DataCategory<TNumber>>))
+        {
+            return false;
+        }
+        else
+        {
+            return std::is_constructible_v<typename RemConstRef<TOper>::ElementType, TNumber>;
+        }
+    }
+}
+
 namespace OperDivideByNum::NSCaseGen
 {
     template <typename TInputHandle, typename TOutputHandle>
@@ -144,9 +252,7 @@ namespace OperDivideByNum::NSCaseGen
 
 template <typename TOper, typename TNumber>
 constexpr bool IsValidOper<OpTags::DivideByNum, TOper, TNumber>
-    = (IsValidCategoryTag<DataCategory<TOper>>) && 
-      (!IsValidCategoryTag<DataCategory<TNumber>>) &&
-      (std::is_constructible_v<typename RemConstRef<TOper>::ElementType, TNumber>);
+    = OperDivideByNum::Valid<TOper, TNumber>();
 
 template <typename TCate>
 struct OperAuxParams<OpTags::DivideByNum, TCate> : public OperAuxValue<double>
@@ -167,6 +273,7 @@ struct OperSeq_<OpTags::DivideByNum>
 /// Interface
 template <typename TP1, typename TP2,
           typename = std::enable_if_t<IsValidOper<OpTags::Divide, TP1, TP2> ||
+                                      IsValidOper<OpTags::DivideFromNum, TP1, TP2> ||
                                       IsValidOper<OpTags::DivideByNum, TP1, TP2>>>
 auto operator/ (TP1&& p_m1, TP2&& p_m2)
 {
@@ -176,6 +283,13 @@ auto operator/ (TP1&& p_m1, TP2&& p_m2)
         using rawOp2 = RemConstRef<TP2>;
         using ResType = Operator<OpTags::Divide, OperandContainer<rawOp1, rawOp2>>;
         return ResType(std::forward<TP1>(p_m1), std::forward<TP2>(p_m2));
+    }
+    else if constexpr (IsValidOper<OpTags::DivideFromNum, TP1, TP2>)
+    {
+        using rawOp = RemConstRef<TP2>;
+        using ResType = Operator<OpTags::DivideFromNum, OperandContainer<rawOp>>;
+        OperAuxParams<OpTags::DivideFromNum, OperCateCal<OpTags::DivideFromNum, PolicyContainer<>, rawOp>> params(p_m1);
+        return ResType(std::move(params), std::forward<TP2>(p_m2));
     }
     else if constexpr (IsValidOper<OpTags::DivideByNum, TP1, TP2>)
     {

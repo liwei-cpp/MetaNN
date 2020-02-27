@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <data_gen.h>
 #include <cassert>
@@ -90,8 +90,8 @@ namespace
         auto& gradCont = grad_collector.GetContainer<CategoryTags::Matrix>();
         assert(gradCont.size() == 1);
 
-        auto handle1 = gradCont.front().Weight().EvalRegister();
-        auto handle2 = gradCont.front().Grad().EvalRegister();
+        auto handle1 = gradCont.begin()->second.Weight().EvalRegister();
+        auto handle2 = gradCont.begin()->second.Grad().EvalRegister();
         EvalPlan<CheckDevice>::Inst().Eval();
 
         auto w1 = handle1.Data();
@@ -154,9 +154,9 @@ namespace
         auto& gradCont = grad_collector.GetContainer<CategoryTags::Matrix>();
         assert(gradCont.size() == 1);
 
-        auto w1 = gradCont.front().Weight();
+        auto w1 = gradCont.begin()->second.Weight();
         
-        auto handle2 = gradCont.front().Grad().EvalRegister();
+        auto handle2 = gradCont.begin()->second.Grad().EvalRegister();
         EvalPlan<CheckDevice>::Inst().Eval();
         auto g1 = handle2.Data();
         
@@ -187,7 +187,7 @@ namespace
 
         RootLayer layer("root", 8, 4);
 
-        auto w = GenMatrix<CheckElement>(8, 4, 0.1f, 0.5f);
+        auto w = GenTensor<CheckElement>(0.1f, 0.5f, 8, 4);
     
         auto initializer = MakeInitializer<CheckElement>();
         initializer.SetParam("root", w);
@@ -199,7 +199,7 @@ namespace
 
         for (int loop_count = 0; loop_count < 10; ++loop_count)
         {
-            auto input = GenMatrix<CheckElement>(1, 8, loop_count * 0.1f, -0.3f);
+            auto input = GenTensor<CheckElement>(loop_count * 0.1f, -0.3f, 1, 8);
             op_in.push_back(input);
 
             auto out = layer.FeedForward(LayerInputCont<RootLayer>().Set<LayerInput>(input));
@@ -210,8 +210,7 @@ namespace
             EvalPlan<CheckDevice>::Inst().Eval();
 
             auto res = handle1.Data();
-            assert(res.Shape().RowNum() == 1);
-            assert(res.Shape().ColNum() == 4);
+            assert(res.Shape() == Shape(1, 4));
             auto c = handle2.Data();
 
             for (size_t i = 0; i < 4; ++i)
@@ -222,7 +221,7 @@ namespace
 
         for (int loop_count = 9; loop_count >= 0; --loop_count)
         {
-            auto grad = GenMatrix<CheckElement>(1, 4, loop_count * 0.2f, -0.1f);
+            auto grad = GenTensor<CheckElement>(loop_count * 0.2f, -0.1f, 1, 4);
             op_grad.push_back(grad);
             auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
             auto check = Dot(grad, Transpose(w));
@@ -233,8 +232,7 @@ namespace
 
             auto fbOut = handle1.Data();
             auto aimFbout = handle2.Data();
-            assert(fbOut.Shape().RowNum() == 1);
-            assert(fbOut.Shape().ColNum() == 8);
+            assert(fbOut.Shape() == Shape(1, 8));
 
             for (size_t i = 0; i < 8; ++i)
             {
@@ -248,14 +246,14 @@ namespace
         auto& gradCont = grad_collector.GetContainer<CategoryTags::Matrix>();
         assert(gradCont.size() == 1);
         
-        auto w1 = gradCont.front().Weight();
+        auto w1 = gradCont.begin()->second.Weight();
         auto aim = Evaluate(Dot(Transpose(op_in[0]), op_grad[0]));
         for (int loop_count = 1; loop_count < 10; ++loop_count)
         {
             aim = Evaluate(aim + Dot(Transpose(op_in[loop_count]), op_grad[loop_count]));
         }
 
-        auto g1 = Evaluate(gradCont.front().Grad());
+        auto g1 = Evaluate(gradCont.begin()->second.Grad());
 
         for (size_t i = 0; i < 8; ++i)
         {
@@ -288,9 +286,9 @@ namespace
         auto& val = *(loadBuffer.TryGet<CategoryTags::Matrix>("root"));
     
         float mean = 0;
-        for (size_t i = 0; i < val.Shape().RowNum(); ++i)
+        for (size_t i = 0; i < val.Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < val.Shape().ColNum(); ++j)
+            for (size_t j = 0; j < val.Shape()[1]; ++j)
             {
                 mean += val(i, j);
             }
@@ -298,9 +296,9 @@ namespace
         mean /= val.Shape().Count();
     
         float var = 0;
-        for (size_t i = 0; i < val.Shape().RowNum(); ++i)
+        for (size_t i = 0; i < val.Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < val.Shape().ColNum(); ++j)
+            for (size_t j = 0; j < val.Shape()[1]; ++j)
             {
                 var += (val(i, j) - mean) * (val(i, j) - mean);
             }
@@ -326,9 +324,9 @@ namespace
         auto& val = *(loadBuffer.TryGet<CategoryTags::Matrix>("root"));
     
         float mean = 0;
-        for (size_t i = 0; i < val.Shape().RowNum(); ++i)
+        for (size_t i = 0; i < val.Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < val.Shape().ColNum(); ++j)
+            for (size_t j = 0; j < val.Shape()[1]; ++j)
             {
                 mean += val(i, j);
             }
@@ -336,9 +334,9 @@ namespace
         mean /= val.Shape().Count();
     
         float var = 0;
-        for (size_t i = 0; i < val.Shape().RowNum(); ++i)
+        for (size_t i = 0; i < val.Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < val.Shape().ColNum(); ++j)
+            for (size_t j = 0; j < val.Shape()[1]; ++j)
             {
                 var += (val(i, j) - mean) * (val(i, j) - mean);
             }

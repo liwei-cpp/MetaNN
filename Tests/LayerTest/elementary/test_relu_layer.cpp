@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <data_gen.h>
 #include <calculate_tags.h>
 #include <cassert>

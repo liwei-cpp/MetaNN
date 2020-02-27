@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <data_gen.h>
 #include <cassert>
@@ -16,9 +16,7 @@ namespace
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
-        RootLayer layer("root",
-                        Shape<CategoryTags::Matrix>(2, 3),
-                        Shape<CategoryTags::Matrix>(1, 3));
+        RootLayer layer("root", Shape(2, 3), Shape(1, 3));
 
         Matrix<CheckElement, CheckDevice> w1(2, 3);
         w1.SetValue(0, 0, 0.1f);  w1.SetValue(1, 0, 0.2f);
@@ -63,8 +61,7 @@ namespace
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
         
-        RootLayer layer("root",
-                        Shape<CategoryTags::Matrix>(2, 3));
+        RootLayer layer("root", Shape(2, 3));
 
         Matrix<CheckElement, CheckDevice> w1(2, 3);
         w1.SetValue(0, 0, 0.1f);  w1.SetValue(1, 0, 0.2f);
@@ -103,9 +100,7 @@ namespace
         static_assert(RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
-        RootLayer layer("root",
-                        Shape<CategoryTags::Matrix>(2, 3),
-                        Shape<CategoryTags::Matrix>(1, 3));
+        RootLayer layer("root", Shape(2, 3), Shape(1, 3));
 
         Matrix<CheckElement, CheckDevice> w1(2, 3);
         w1.SetValue(0, 0, 0.1f);  w1.SetValue(1, 0, 0.2f);
@@ -150,8 +145,8 @@ namespace
 
         for (auto& p : gradCont)
         {
-            auto w = p.Weight();
-            auto info = Evaluate(p.Grad());
+            auto w = p.second.Weight();
+            auto info = Evaluate(p.second.Grad());
             if (w.Shape() == w1.Shape())
             {
                 weight_update_valid = true;
@@ -194,9 +189,7 @@ namespace
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
-        RootLayer layer("root",
-                        Shape<CategoryTags::Matrix>(2, 3),
-                        Shape<CategoryTags::Matrix>(1, 3));
+        RootLayer layer("root", Shape(2, 3), Shape(1, 3));
 
         Matrix<CheckElement, CheckDevice> w1(2, 3);
         w1.SetValue(0, 0, 0.1f);  w1.SetValue(1, 0, 0.2f);

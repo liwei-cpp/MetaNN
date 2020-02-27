@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <data_gen.h>
 #include <cassert>
@@ -18,15 +18,15 @@ namespace
 
         RootLayer layer("root");
 
-        auto in = GenMatrix<CheckElement>(4, 5, -3.3f, 0.1f);
+        auto in = GenTensor<CheckElement>(-3.3f, 0.1f, 4, 5);
         auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
     
-        assert(res.Shape().RowNum() == 4);
-        assert(res.Shape().ColNum() == 5);
+        assert(res.Shape()[0] == 4);
+        assert(res.Shape()[1] == 5);
     
         for (size_t i = 0; i < 4; ++i)
         {
@@ -53,14 +53,14 @@ namespace
 
         RootLayer layer("root");
 
-        auto in = GenMatrix<CheckElement>(4, 5, -3.3f, 0.1f);
+        auto in = GenTensor<CheckElement>(-3.3f, 0.1f, 4, 5);
         auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
-        assert(res.Shape().RowNum() == 4);
-        assert(res.Shape().ColNum() == 5);
+        assert(res.Shape()[0] == 4);
+        assert(res.Shape()[1] == 5);
     
         for (size_t i = 0; i < 4; ++i)
         {
@@ -71,7 +71,7 @@ namespace
             }
         }
 
-        auto grad = GenMatrix<float>(4, 5, 1.8f, -0.2f);
+        auto grad = GenTensor<float>(1.8f, -0.2f, 4, 5);
         auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
         auto fb = Evaluate(out_grad.Get<LayerInput>());
     
@@ -102,7 +102,7 @@ namespace
         LayerNeutralInvariant(layer);
         for (size_t loop_count = 1; loop_count < 10; ++loop_count)
         {
-            auto in = GenMatrix<CheckElement>(loop_count, 3, -0.1f, 0.02f);
+            auto in = GenTensor<CheckElement>(-0.1f, 0.02f, loop_count, 3);
 
             op.push_back(in);
 
@@ -110,8 +110,8 @@ namespace
 
             auto out = layer.FeedForward(input);
             auto res = Evaluate(out.Get<LayerOutput>());
-            assert(res.Shape().RowNum() == loop_count);
-            assert(res.Shape().ColNum() == 3);
+            assert(res.Shape()[0] == loop_count);
+            assert(res.Shape()[1] == 3);
             for (size_t i = 0; i < loop_count; ++i)
             {
                 for (size_t j = 0; j < 3; ++j)
@@ -124,7 +124,7 @@ namespace
 
         for (size_t loop_count = 9; loop_count >= 1; --loop_count)
         {
-            auto grad = GenMatrix<CheckElement>(loop_count, 3, 2, 1.1f);
+            auto grad = GenTensor<CheckElement>(2, 1.1f, loop_count, 3);
             auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
             auto fb = Evaluate(out_grad.Get<LayerInput>());
@@ -134,7 +134,9 @@ namespace
             {
                 for (size_t j = 0; j < 3; ++j)
                 {
-                    auto aim = in(i, j) / fabs(in(i, j)) * grad(i, j);
+                    float aim = 0;
+                    if (in(i, j) > 0) aim = grad(i, j);
+                    if (in(i, j) < 0) aim = -grad(i, j);
                     assert(fabs(fb(i, j) - aim) < 0.00001f);
                 }
             }
@@ -186,14 +188,14 @@ namespace
 
         RootLayer layer("root");
 
-        auto in = GenMatrix<CheckElement>(4, 5, -3.3f, 0.1f);
+        auto in = GenTensor<CheckElement>(-3.3f, 0.1f, 4, 5);
         auto input = LayerInputCont<RootLayer>().Set<LayerInput>(in);
 
         LayerNeutralInvariant(layer);
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
-        assert(res.Shape().RowNum() == 4);
-        assert(res.Shape().ColNum() == 5);
+        assert(res.Shape()[0] == 4);
+        assert(res.Shape()[1] == 5);
     
         for (size_t i = 0; i < 4; ++i)
         {

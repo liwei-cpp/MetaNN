@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <data_gen.h>
 #include <cassert>
@@ -119,116 +119,116 @@ namespace
         RootLayer layer("root", 4, 6);
 
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root/W",  FillMatrix<CheckElement>(4, 6, weight_input));
-        initializer.SetParam("root/Wz", FillMatrix<CheckElement>(4, 6, weight_update));
-        initializer.SetParam("root/Wr", FillMatrix<CheckElement>(4, 6, weight_reset));
-        initializer.SetParam("root/U",  FillMatrix<CheckElement>(6, 6, trans_input));
-        initializer.SetParam("root/Uz", FillMatrix<CheckElement>(6, 6, trans_update));
-        initializer.SetParam("root/Ur", FillMatrix<CheckElement>(6, 6, trans_reset));
+        initializer.SetParam("root/W",  FillTensor<CheckElement>(weight_input, 4, 6));
+        initializer.SetParam("root/Wz", FillTensor<CheckElement>(weight_update, 4, 6));
+        initializer.SetParam("root/Wr", FillTensor<CheckElement>(weight_reset, 4, 6));
+        initializer.SetParam("root/U",  FillTensor<CheckElement>(trans_input, 6, 6));
+        initializer.SetParam("root/Uz", FillTensor<CheckElement>(trans_update, 6, 6));
+        initializer.SetParam("root/Ur", FillTensor<CheckElement>(trans_reset, 6, 6));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
         
         auto input = LayerInputCont<RootLayer>()
-                     .Set<LayerInput>(FillMatrix<CheckElement>(1, 4, x_np_1))
-                     .Set<Previous<LayerOutput>>(TrivalMatrix(Scalar<CheckElement, CheckDevice>{1}, 1, 6));
+                     .Set<LayerInput>(FillTensor<CheckElement>(x_np_1, 1, 4))
+                     .Set<Previous<LayerOutput>>(TrivalTensor(Scalar<CheckElement, CheckDevice>{1}, 1, 6));
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
         
-        assert(Compare(res, FillMatrix<CheckElement>(1, 6, fres_1), 0.001f));
+        assert(Compare(res, FillTensor<CheckElement>(fres_1, 1, 6), 0.001f));
         cout << "done" << endl;
     }
     
     void test_gru2()
     {
         cout << "Test GRU layer case 2 (test rnn, infer)...\t";
-        using RootLayer = MakeInferLayer<RecurrentLayer, PActFuncIs<GruStep>>;
+        using RootLayer = MakeInferLayer<RecurrentLayer, PActFuncIs<GruStep>, PSeqIDsAre<SeqID<LayerInput, 0>>>;
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
         RootLayer layer("root", 4, 6);
 
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root/kernel/W",  FillMatrix<CheckElement>(4, 6, weight_input));
-        initializer.SetParam("root/kernel/Wz", FillMatrix<CheckElement>(4, 6, weight_update));
-        initializer.SetParam("root/kernel/Wr", FillMatrix<CheckElement>(4, 6, weight_reset));
-        initializer.SetParam("root/kernel/U",  FillMatrix<CheckElement>(6, 6, trans_input));
-        initializer.SetParam("root/kernel/Uz", FillMatrix<CheckElement>(6, 6, trans_update));
-        initializer.SetParam("root/kernel/Ur", FillMatrix<CheckElement>(6, 6, trans_reset));
+        initializer.SetParam("root/kernel/W",  FillTensor<CheckElement>(weight_input, 4, 6));
+        initializer.SetParam("root/kernel/Wz", FillTensor<CheckElement>(weight_update, 4, 6));
+        initializer.SetParam("root/kernel/Wr", FillTensor<CheckElement>(weight_reset, 4, 6));
+        initializer.SetParam("root/kernel/U",  FillTensor<CheckElement>(trans_input, 6, 6));
+        initializer.SetParam("root/kernel/Uz", FillTensor<CheckElement>(trans_update, 6, 6));
+        initializer.SetParam("root/kernel/Ur", FillTensor<CheckElement>(trans_reset, 6, 6));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
         
         auto input = LayerInputCont<RootLayer>()
-                     .Set<LayerInput>(FillMatrixSequence<CheckElement>(3, 1, 4, x_np_1))
-                     .Set<Previous<LayerOutput>>(TrivalMatrix(Scalar<CheckElement, CheckDevice>{1}, 1, 6));
+                     .Set<LayerInput>(FillTensor<CheckElement>(x_np_1, 3, 1, 4))
+                     .Set<Previous<LayerOutput>>(TrivalTensor(Scalar<CheckElement, CheckDevice>{1}, 1, 6));
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
         
-        assert(Compare(res, FillMatrixSequence<CheckElement>(3, 1, 6, fres_1), 0.001f));
+        assert(Compare(res, FillTensor<CheckElement>(fres_1, 3, 1, 6), 0.001f));
         cout << "done" << endl;
     }
     
     void test_gru3()
     {
         cout << "Test GRU layer case 3 (test rnn, infer-2)...\t";
-        using RootLayer = MakeInferLayer<RecurrentLayer, PActFuncIs<GruStep>>;
+        using RootLayer = MakeInferLayer<RecurrentLayer, PActFuncIs<GruStep>, PSeqIDsAre<SeqID<LayerInput, 0>>>;
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
         RootLayer layer("root", 4, 6);
 
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root/kernel/W",  FillMatrix<CheckElement>(4, 6, weight_input));
-        initializer.SetParam("root/kernel/Wz", FillMatrix<CheckElement>(4, 6, weight_update));
-        initializer.SetParam("root/kernel/Wr", FillMatrix<CheckElement>(4, 6, weight_reset));
-        initializer.SetParam("root/kernel/U",  FillMatrix<CheckElement>(6, 6, trans_input));
-        initializer.SetParam("root/kernel/Uz", FillMatrix<CheckElement>(6, 6, trans_update));
-        initializer.SetParam("root/kernel/Ur", FillMatrix<CheckElement>(6, 6, trans_reset));
+        initializer.SetParam("root/kernel/W",  FillTensor<CheckElement>(weight_input, 4, 6));
+        initializer.SetParam("root/kernel/Wz", FillTensor<CheckElement>(weight_update, 4, 6));
+        initializer.SetParam("root/kernel/Wr", FillTensor<CheckElement>(weight_reset, 4, 6));
+        initializer.SetParam("root/kernel/U",  FillTensor<CheckElement>(trans_input, 6, 6));
+        initializer.SetParam("root/kernel/Uz", FillTensor<CheckElement>(trans_update, 6, 6));
+        initializer.SetParam("root/kernel/Ur", FillTensor<CheckElement>(trans_reset, 6, 6));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
         
         auto input = LayerInputCont<RootLayer>()
-                     .Set<LayerInput>(FillMatrixSequence<CheckElement>(3, 2, 4, x_np_2))
-                     .Set<Previous<LayerOutput>>(TrivalMatrix(Scalar<CheckElement, CheckDevice>{1}, 2, 6));
+                     .Set<LayerInput>(FillTensor<CheckElement>(x_np_2, 3, 2, 4))
+                     .Set<Previous<LayerOutput>>(TrivalTensor(Scalar<CheckElement, CheckDevice>{1}, 2, 6));
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
-        assert(Compare(res, FillMatrixSequence<CheckElement>(3, 2, 6, fres_2), 0.001f));
+        assert(Compare(res, FillTensor<CheckElement>(fres_2, 3, 2, 6), 0.001f));
 
         cout << "done" << endl;
     }
     
-    using InputMap = LayerIOMap<LayerKV<LayerInput, MatrixSequence<CheckElement, CheckDevice>>,
-                                LayerKV<Previous<LayerOutput>, TrivalMatrix<Scalar<CheckElement, CheckDevice>>>
+    using InputMap = LayerIOMap<LayerKV<LayerInput, Tensor<CheckElement, CheckDevice, 3>>,
+                                LayerKV<Previous<LayerOutput>, TrivalTensor<Scalar<CheckElement, CheckDevice>, 2>>
                                >;
     void test_gru4()
     {
         cout << "Test GRU layer case 4 (test rnn, train)...\t";
-        using RootLayer = MakeTrainLayer<RecurrentLayer, InputMap, PActFuncIs<GruStep>, PUpdate>;
+        using RootLayer = MakeTrainLayer<RecurrentLayer, InputMap, PActFuncIs<GruStep>, PSeqIDsAre<SeqID<LayerInput, 0>>, PUpdate>;
         static_assert(RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
         RootLayer layer("root", 4, 6);
 
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root/kernel/W",  FillMatrix<CheckElement>(4, 6, weight_input));
-        initializer.SetParam("root/kernel/Wz", FillMatrix<CheckElement>(4, 6, weight_update));
-        initializer.SetParam("root/kernel/Wr", FillMatrix<CheckElement>(4, 6, weight_reset));
-        initializer.SetParam("root/kernel/U",  FillMatrix<CheckElement>(6, 6, trans_input));
-        initializer.SetParam("root/kernel/Uz", FillMatrix<CheckElement>(6, 6, trans_update));
-        initializer.SetParam("root/kernel/Ur", FillMatrix<CheckElement>(6, 6, trans_reset));
+        initializer.SetParam("root/kernel/W",  FillTensor<CheckElement>(weight_input, 4, 6));
+        initializer.SetParam("root/kernel/Wz", FillTensor<CheckElement>(weight_update, 4, 6));
+        initializer.SetParam("root/kernel/Wr", FillTensor<CheckElement>(weight_reset, 4, 6));
+        initializer.SetParam("root/kernel/U",  FillTensor<CheckElement>(trans_input, 6, 6));
+        initializer.SetParam("root/kernel/Uz", FillTensor<CheckElement>(trans_update, 6, 6));
+        initializer.SetParam("root/kernel/Ur", FillTensor<CheckElement>(trans_reset, 6, 6));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
         
         auto input = LayerInputCont<RootLayer>()
-                     .Set<LayerInput>(FillMatrixSequence<CheckElement>(3, 2, 4, x_np_2))
-                     .Set<Previous<LayerOutput>>(TrivalMatrix(Scalar<CheckElement, CheckDevice>{1}, 2, 6));
+                     .Set<LayerInput>(FillTensor<CheckElement>(x_np_2, 3, 2, 4))
+                     .Set<Previous<LayerOutput>>(TrivalTensor(Scalar<CheckElement, CheckDevice>{1}, 2, 6));
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
         
-        assert(Compare(res, FillMatrixSequence<CheckElement>(3, 2, 6, fres_2), 0.001f));
+        assert(Compare(res, FillTensor<CheckElement>(fres_2, 3, 2, 6), 0.001f));
         
         auto grad = LayerOutputCont<RootLayer>()
                     .Set<LayerOutput>(res * -1);
@@ -237,23 +237,24 @@ namespace
         GradCollector<CheckElement, CheckDevice> grad_collector;
         layer.GradCollect(grad_collector);
         
-        const auto& w_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/W").Grad());
-        assert(Compare(w_grad, FillMatrix<CheckElement>(4, 6, wi_grad_check), 0.001f));
+        const auto& matrixCont = grad_collector.GetContainer<CategoryTags::Tensor<2>>();
+        const auto& w_grad = Evaluate(matrixCont.find("root/kernel/W")->second.Grad());
+        assert(Compare(w_grad, FillTensor<CheckElement>(wi_grad_check, 4, 6), 0.001f));
         
-        const auto& wz_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/Wz").Grad());
-        assert(Compare(wz_grad, FillMatrix<CheckElement>(4, 6, wu_grad_check), 0.001f));
+        const auto& wz_grad = Evaluate(matrixCont.find("root/kernel/Wz")->second.Grad());
+        assert(Compare(wz_grad, FillTensor<CheckElement>(wu_grad_check, 4, 6), 0.001f));
         
-        const auto& wr_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/Wr").Grad());
-        assert(Compare(wr_grad, FillMatrix<CheckElement>(4, 6, wr_grad_check), 0.001f));
+        const auto& wr_grad = Evaluate(matrixCont.find("root/kernel/Wr")->second.Grad());
+        assert(Compare(wr_grad, FillTensor<CheckElement>(wr_grad_check, 4, 6), 0.001f));
 
-        const auto& u_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/U").Grad());
-        assert(Compare(u_grad, FillMatrix<CheckElement>(6, 6, check_input_grad), 0.001f));
+        const auto& u_grad = Evaluate(matrixCont.find("root/kernel/U")->second.Grad());
+        assert(Compare(u_grad, FillTensor<CheckElement>(check_input_grad, 6, 6), 0.001f));
         
-        const auto& uz_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/Uz").Grad());
-        assert(Compare(uz_grad, FillMatrix<CheckElement>(6, 6, check_up_grad), 0.001f));
+        const auto& uz_grad = Evaluate(matrixCont.find("root/kernel/Uz")->second.Grad());
+        assert(Compare(uz_grad, FillTensor<CheckElement>(check_up_grad, 6, 6), 0.001f));
         
-        const auto& ur_grad = Evaluate(grad_collector.GetGradInfo<CategoryTags::Matrix>("root/kernel/Ur").Grad());
-        assert(Compare(ur_grad, FillMatrix<CheckElement>(6, 6, check_reset_grad), 0.001f));
+        const auto& ur_grad = Evaluate(matrixCont.find("root/kernel/Ur")->second.Grad());
+        assert(Compare(ur_grad, FillTensor<CheckElement>(check_reset_grad, 6, 6), 0.001f));
 
         LayerNeutralInvariant(layer);
         cout << "done" << endl;

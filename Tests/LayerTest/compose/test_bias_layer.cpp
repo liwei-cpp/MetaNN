@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <data_gen.h>
 #include <cassert>
@@ -14,8 +14,8 @@ namespace
     {
         cout << "Test bias layer case 1 ...\t";
         using RootLayer = MakeInferLayer<BiasLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
-        static_assert(!RootLayer::IsUpdate, "Test Error");
-        static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
+        static_assert(!RootLayer::IsUpdate);
+        static_assert(!RootLayer::IsFeedbackOutput);
 
         RootLayer layer("root", 2, 1);
 
@@ -23,12 +23,12 @@ namespace
         auto filler = MakeInitializer<CheckElement>();
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
 
-        auto mat = GenMatrix<CheckElement>(2, 1);
+        auto mat = GenTensor<CheckElement>(0, 1, 2, 1);
         filler.SetParam("root", mat);
         
         layer.Init(filler, loadBuffer);
 
-        auto input = GenMatrix<CheckElement>(2, 1, 0.5f, -0.1f);
+        auto input = GenTensor<CheckElement>(0.5f, -0.1f, 2, 1);
         auto bi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         LayerNeutralInvariant(layer);
@@ -42,7 +42,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        auto* w = loadBuffer.TryGet<CategoryTags::Matrix>("root");
+        auto* w = loadBuffer.TryGet<CategoryTags::Tensor<2>>("root");
         assert(w);
         
         auto wInfo = *w;
@@ -71,12 +71,12 @@ namespace
         auto filler = MakeInitializer<CheckElement>();
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
 
-        auto mat = GenMatrix<CheckElement>(1, 2);
+        auto mat = GenTensor<CheckElement>(0, 1, 1, 2);
         filler.SetParam("root", mat);
         
         layer.Init(filler, loadBuffer);
     
-        auto input = GenMatrix<CheckElement>(1, 2, 0.5f, -0.1f);
+        auto input = GenTensor<CheckElement>(0.5f, -0.1f, 1, 2);
         auto bi = LayerInputCont<RootLayer>().Set<LayerInput>(input);
 
         LayerNeutralInvariant(layer);
@@ -141,8 +141,8 @@ namespace
         auto& gradCont = grad_collector.GetContainer<CategoryTags::Matrix>();
         assert(gradCont.size() == 1);
 
-        auto handle1 = gradCont.front().Weight().EvalRegister();
-        auto handle2 = gradCont.front().Grad().EvalRegister();
+        auto handle1 = gradCont.begin()->second.Weight().EvalRegister();
+        auto handle2 = gradCont.begin()->second.Grad().EvalRegister();
         EvalPlan<CheckDevice>::Inst().Eval();
 
         auto w1 = handle1.Data();
@@ -207,8 +207,8 @@ namespace
         auto& gradCont = grad_collector.GetContainer<CategoryTags::Matrix>();
         assert(gradCont.size() == 1);
 
-        auto handle1 = gradCont.front().Weight().EvalRegister();
-        auto handle2 = gradCont.front().Grad().EvalRegister();
+        auto handle1 = gradCont.begin()->second.Weight().EvalRegister();
+        auto handle2 = gradCont.begin()->second.Grad().EvalRegister();
         EvalPlan<CheckDevice>::Inst().Eval();
 
         auto w1 = handle1.Data();
@@ -295,8 +295,8 @@ namespace
         auto& gradCont = grad_collector.GetContainer<CategoryTags::Matrix>();
         assert(gradCont.size() == 1);
 
-        auto handle1 = gradCont.front().Weight().EvalRegister();
-        auto handle2 = gradCont.front().Grad().EvalRegister();
+        auto handle1 = gradCont.begin()->second.Weight().EvalRegister();
+        auto handle2 = gradCont.begin()->second.Grad().EvalRegister();
         EvalPlan<CheckDevice>::Inst().Eval();
 
         auto w1 = handle1.Data();
@@ -333,9 +333,9 @@ namespace
         auto val = loadBuffer.TryGet<CategoryTags::Matrix>("root");
         assert(val);
     
-        for (size_t i = 0; i < val->Shape().RowNum(); ++i)
+        for (size_t i = 0; i < val->Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < val->Shape().ColNum(); ++j)
+            for (size_t j = 0; j < val->Shape()[1]; ++j)
             {
                 assert(fabs((*val)(i, j)) < 0.0001);
             }
@@ -361,9 +361,9 @@ namespace
         auto val = loadBuffer.TryGet<CategoryTags::Matrix>("root");
         assert(val);
     
-        for (size_t i = 0; i < val->Shape().RowNum(); ++i)
+        for (size_t i = 0; i < val->Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < val->Shape().ColNum(); ++j)
+            for (size_t j = 0; j < val->Shape()[1]; ++j)
             {
                 assert(fabs((*val)(i, j) - 1.5) < 0.0001);
             }

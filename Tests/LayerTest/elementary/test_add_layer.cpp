@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <data_gen.h>
 #include <cassert>
@@ -20,8 +20,8 @@ namespace
 
         RootLayer layer("root");
 
-        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
-        auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
+        auto i1 = GenTensor<CheckElement>(1, 0.1f, 2, 3);
+        auto i2 = GenTensor<CheckElement>(1.5f, -0.1f, 2, 3);
 
         auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
                                                 .Set<RightOperand>(i2);
@@ -51,8 +51,8 @@ namespace
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
         RootLayer layer("root");
-        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
-        auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
+        auto i1 = GenTensor<CheckElement>(1, 0.1f, 2, 3);
+        auto i2 = GenTensor<CheckElement>(1.5f, -0.1f, 2, 3);
 
         auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
                                                 .Set<RightOperand>(i2);
@@ -67,7 +67,7 @@ namespace
             }
         }
 
-        auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
+        auto grad = GenTensor<CheckElement>(0.7f, -0.2f, 2, 3);
 
         auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
@@ -77,10 +77,9 @@ namespace
 
         auto fb1 = handle1.Data();
         auto fb2 = handle2.Data();
-        assert(fb1.Shape().RowNum() == fb2.Shape().RowNum());
-        assert(fb1.Shape().ColNum() == fb2.Shape().ColNum());
-        assert(fb1.Shape().RowNum() == 2);
-        assert(fb1.Shape().ColNum() == 3);
+        assert(fb1.Shape() == fb2.Shape());
+        assert(fb1.Shape()[0] == 2);
+        assert(fb1.Shape()[1] == 3);
 
         for (size_t i = 0; i < 2; ++i)
         {
@@ -102,8 +101,8 @@ namespace
 
         RootLayer layer("root");
 
-        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
-        auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
+        auto i1 = GenTensor<CheckElement>(1, 0.1f, 2, 3);
+        auto i2 = GenTensor<CheckElement>(1.5f, -0.1f, 2, 3);
 
         auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
                                                 .Set<RightOperand>(i2);
@@ -118,8 +117,8 @@ namespace
             }
         }
 
-        auto i3 = GenMatrix<CheckElement>(2, 3, 1.3, -0.1f);
-        auto i4 = GenMatrix<CheckElement>(2, 3, 2.5f, -0.7f);
+        auto i3 = GenTensor<CheckElement>(1.3, -0.1f, 2, 3);
+        auto i4 = GenTensor<CheckElement>(2.5f, -0.7f, 2, 3);
 
         input = LayerInputCont<RootLayer>().Set<LeftOperand>(i3).Set<RightOperand>(i4);
 
@@ -133,7 +132,7 @@ namespace
             }
         }
 
-        auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
+        auto grad = GenTensor<CheckElement>(0.7f, -0.2f, 2, 3);
 
         auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
@@ -143,10 +142,9 @@ namespace
 
         auto fb1 = handle1.Data();
         auto fb2 = handle2.Data();
-        assert(fb1.Shape().RowNum() == fb2.Shape().RowNum());
-        assert(fb1.Shape().ColNum() == fb2.Shape().ColNum());
-        assert(fb1.Shape().RowNum() == 2);
-        assert(fb1.Shape().ColNum() == 3);
+        assert(fb1.Shape() == fb2.Shape());
+        assert(fb1.Shape()[0] == 2);
+        assert(fb1.Shape()[1] == 3);
 
         for (size_t i = 0; i < 2; ++i)
         {
@@ -157,7 +155,7 @@ namespace
             }
         }
 
-        grad = GenMatrix<CheckElement>(2, 3, -0.7f, 0.2f);
+        grad = GenTensor<CheckElement>(-0.7f, 0.2f, 2, 3);
 
         out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
@@ -168,10 +166,9 @@ namespace
         fb1 = handle1.Data();
         fb2 = handle2.Data();
 
-        assert(fb1.Shape().RowNum() == fb2.Shape().RowNum());
-        assert(fb1.Shape().ColNum() == fb2.Shape().ColNum());
-        assert(fb1.Shape().RowNum() == 2);
-        assert(fb1.Shape().ColNum() == 3);
+        assert(fb1.Shape() == fb2.Shape());
+        assert(fb1.Shape()[0] == 2);
+        assert(fb1.Shape()[1] == 3);
 
         for (size_t i = 0; i < 2; ++i)
         {
@@ -198,7 +195,7 @@ namespace
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
         RootLayer layer("root");
-        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
+        auto i1 = GenTensor<CheckElement>(1, 0.1f, 2, 3);
 
         auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
                                                 .Set<RightOperand>(3.3f);
@@ -214,7 +211,7 @@ namespace
             }
         }
 
-        auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
+        auto grad = GenTensor<CheckElement>(0.7f, -0.2f, 2, 3);
 
         auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
@@ -223,8 +220,8 @@ namespace
         EvalPlan<CheckDevice>::Inst().Eval();
 
         auto fb1 = handle1.Data();
-        assert(fb1.Shape().RowNum() == 2);
-        assert(fb1.Shape().ColNum() == 3);
+        assert(fb1.Shape()[0] == 2);
+        assert(fb1.Shape()[1] == 3);
 
         for (size_t i = 0; i < 2; ++i)
         {
@@ -250,7 +247,7 @@ namespace
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
         RootLayer layer("root");
-        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
+        auto i1 = GenTensor<CheckElement>(1, 0.1f, 2, 3);
 
         auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(3.3f)
                                                 .Set<RightOperand>(i1);
@@ -266,7 +263,7 @@ namespace
             }
         }
 
-        auto grad = GenMatrix<CheckElement>(2, 3, 0.7f, -0.2f);
+        auto grad = GenTensor<CheckElement>(0.7f, -0.2f, 2, 3);
 
         auto out_grad = layer.FeedBackward(LayerOutputCont<RootLayer>().Set<LayerOutput>(grad));
 
@@ -275,8 +272,8 @@ namespace
         EvalPlan<CheckDevice>::Inst().Eval();
 
         auto fb1 = handle1.Data();
-        assert(fb1.Shape().RowNum() == 2);
-        assert(fb1.Shape().ColNum() == 3);
+        assert(fb1.Shape()[0] == 2);
+        assert(fb1.Shape()[1] == 3);
 
         for (size_t i = 0; i < 2; ++i)
         {
@@ -298,8 +295,8 @@ namespace
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
         RootLayer layer("root");
-        auto i1 = GenMatrix<CheckElement>(2, 3, 1, 0.1f);
-        auto i2 = GenMatrix<CheckElement>(2, 3, 1.5f, -0.1f);
+        auto i1 = GenTensor<CheckElement>(1, 0.1f, 2, 3);
+        auto i2 = GenTensor<CheckElement>(1.5f, -0.1f, 2, 3);
 
         auto input = LayerInputCont<RootLayer>().Set<LeftOperand>(i1)
                                                 .Set<RightOperand>(i2);

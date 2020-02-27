@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <data_gen.h>
 #include <cassert>
@@ -17,9 +17,7 @@ namespace
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
-        RootLayer layer("root",
-                        Shape<CategoryTags::Matrix>(2, 3),
-                        Shape<CategoryTags::Matrix>(1, 3));
+        RootLayer layer("root", Shape(2, 3), Shape(1, 3));
     
         Matrix<CheckElement, CheckDevice> w1(2, 3);
         w1.SetValue(0, 0, 0.1f);  w1.SetValue(1, 0, 0.2f);
@@ -63,9 +61,7 @@ namespace
         static_assert(RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
-        RootLayer layer("root",
-                        Shape<CategoryTags::Matrix>(2, 3),
-                        Shape<CategoryTags::Matrix>(1, 3));
+        RootLayer layer("root", Shape(2, 3), Shape(1, 3));
 
         Matrix<CheckElement, CheckDevice> w1(2, 3);
         w1.SetValue(0, 0, 0.1f);  w1.SetValue(1, 0, 0.2f);
@@ -109,8 +105,8 @@ namespace
 
         for (auto& p : gradCont)
         {
-            auto w = p.Weight();
-            auto info = Evaluate(p.Grad());
+            auto w = p.second.Weight();
+            auto info = Evaluate(p.second.Grad());
             if (w.Shape() == w1.Shape())
             {
                 weight_update_valid = true;
@@ -118,9 +114,9 @@ namespace
                 auto tmp = Evaluate(Dot(Transpose(i), g));
                 assert(tmp.Shape() == info.Shape());
 
-                for (size_t i = 0; i < tmp.Shape().RowNum(); ++i)
+                for (size_t i = 0; i < tmp.Shape()[0]; ++i)
                 {
-                    for (size_t j = 0; j < tmp.Shape().ColNum(); ++j)
+                    for (size_t j = 0; j < tmp.Shape()[1]; ++j)
                     {
                         assert(fabs(info(i, j) - tmp(i, j)) < 0.0001f);
                     }
@@ -129,9 +125,9 @@ namespace
             else if (w.Shape() == b1.Shape())
             {
                 bias_update_valid = true;
-                for (size_t i = 0; i < info.Shape().RowNum(); ++i)
+                for (size_t i = 0; i < info.Shape()[0]; ++i)
                 {
-                    for (size_t j = 0; j < info.Shape().ColNum(); ++j)
+                    for (size_t j = 0; j < info.Shape()[1]; ++j)
                     {
                         assert(fabs(info(i, j) - g(i, j)) < 0.0001f);
                     }
@@ -162,9 +158,7 @@ namespace
         static_assert(RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
-        RootLayer layer("root",
-                        Shape<CategoryTags::Matrix>(2, 3),
-                        Shape<CategoryTags::Matrix>(1, 3));
+        RootLayer layer("root", Shape(2, 3), Shape(1, 3));
 
         Matrix<CheckElement, CheckDevice> w1(2, 3);
         w1.SetValue(0, 0, 0.1f);  w1.SetValue(1, 0, 0.2f);
@@ -203,12 +197,12 @@ namespace
         auto& gradCont = grad_collector.GetContainer<CategoryTags::Matrix>();
         assert(gradCont.size() == 1);
 
-        auto w = gradCont.begin()->Weight();
+        auto w = gradCont.begin()->second.Weight();
         assert(w.Shape() == b1.Shape());
-        auto info = Evaluate(gradCont.begin()->Grad());
-        for (size_t i = 0; i < info.Shape().RowNum(); ++i)
+        auto info = Evaluate(gradCont.begin()->second.Grad());
+        for (size_t i = 0; i < info.Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < info.Shape().ColNum(); ++j)
+            for (size_t j = 0; j < info.Shape()[1]; ++j)
             {
                 assert(fabs(w(i, j) - b1(i, j)) < 0.0001f);
                 assert(fabs(info(i, j) - g(i, j)) < 0.0001f);
@@ -231,9 +225,7 @@ namespace
         static_assert(RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
 
-        RootLayer layer("root",
-                        Shape<CategoryTags::Matrix>(2, 3),
-                        Shape<CategoryTags::Matrix>(1, 3));
+        RootLayer layer("root", Shape(2, 3), Shape(1, 3));
 
         Matrix<CheckElement, CheckDevice> w1(2, 3);
         w1.SetValue(0, 0, 0.1f);  w1.SetValue(1, 0, 0.2f);
@@ -272,14 +264,14 @@ namespace
         auto& gradCont = grad_collector.GetContainer<CategoryTags::Matrix>();
         assert(gradCont.size() == 1);
         
-        auto w = gradCont.begin()->Weight();
+        auto w = gradCont.begin()->second.Weight();
         assert(w.Shape() == w1.Shape());
         
-        auto info = Evaluate(gradCont.begin()->Grad());
+        auto info = Evaluate(gradCont.begin()->second.Grad());
         auto tmp = Evaluate(Dot(Transpose(i), g));
-        for (size_t i = 0; i < info.Shape().RowNum(); ++i)
+        for (size_t i = 0; i < info.Shape()[0]; ++i)
         {
-            for (size_t j = 0; j < info.Shape().ColNum(); ++j)
+            for (size_t j = 0; j < info.Shape()[1]; ++j)
             {
                 assert(fabs(info(i, j) - tmp(i, j)) < 0.0001f);
             }

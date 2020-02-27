@@ -1,55 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="LayerTest" Version="10.0.0" InternalType="Console">
-  <Plugins>
-    <Plugin Name="qmake">
-      <![CDATA[00020001N0005Debug0000000000000001N0007Release000000000000]]>
-    </Plugin>
-  </Plugins>
-  <Description/>
-  <Dependencies/>
-  <VirtualDirectory Name="_root">
-    <File Name="main.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="facilities">
-    <File Name="facilities/test_layer_io_map.cpp"/>
-    <File Name="facilities/_.h"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="elementary">
-    <File Name="elementary/test_abs_layer.cpp"/>
-    <File Name="elementary/test_sigmoid_layer.cpp"/>
-    <File Name="elementary/test_tanh_layer.cpp"/>
-    <File Name="elementary/test_add_layer.cpp"/>
-    <File Name="elementary/test_softmax_layer.cpp"/>
-    <File Name="elementary/test_interpolate_layer.cpp"/>
-    <File Name="elementary/test_relu_layer.cpp"/>
-    <File Name="elementary/test_multiply_layer.cpp"/>
-    <File Name="elementary/test_transpose_layer.cpp"/>
-    <File Name="elementary/_.h"/>
-    <File Name="elementary/test_dot_layer.cpp"/>
-  </VirtualDirectory>
   <VirtualDirectory Name="loss">
     <File Name="loss/test_nll_loss_layer.cpp"/>
     <File Name="loss/_.h"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="compose">
-    <File Name="compose/test_linear_layer.cpp"/>
-    <File Name="compose/_.h"/>
-    <File Name="compose/test_compose_kernel.cpp"/>
-    <File Name="compose/test_bias_layer.cpp"/>
-    <File Name="compose/test_weight_layer.cpp"/>
-    <File Name="compose/test_single_layer_perceptron.cpp"/>
-    <File Name="compose/test_batch_iter_layer.cpp"/>
+  <VirtualDirectory Name="elementary">
+    <File Name="elementary/test_softmax_layer.cpp"/>
+    <File Name="elementary/test_interpolate_layer.cpp"/>
+    <File Name="elementary/test_permute_layer.cpp"/>
+    <File Name="elementary/test_multiply_layer.cpp"/>
+    <File Name="elementary/test_add_layer.cpp"/>
+    <File Name="elementary/test_tanh_layer.cpp"/>
+    <File Name="elementary/test_sigmoid_layer.cpp"/>
+    <File Name="elementary/test_relu_layer.cpp"/>
+    <File Name="elementary/test_abs_layer.cpp"/>
+    <File Name="elementary/_.h"/>
+    <File Name="elementary/test_dot_layer.cpp"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="source">
-    <File Name="source/_.h"/>
-    <File Name="source/test_param_source_layer.cpp"/>
-    <File Name="source/test_value_source_layer.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="recurrent">
-    <File Name="recurrent/_.h"/>
-    <File Name="recurrent/test_recurrent_layer.cpp"/>
-    <File Name="recurrent/test_gru.cpp"/>
-  </VirtualDirectory>
+  <Description/>
+  <Dependencies/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -74,7 +43,7 @@
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="yes">
         <DebuggerSearchPaths/>
         <PostConnectCommands/>
         <StartupCommands/>
@@ -114,7 +83,7 @@
       <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
         <![CDATA[]]>
       </Environment>
-      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="yes">
         <DebuggerSearchPaths/>
         <PostConnectCommands/>
         <StartupCommands/>
@@ -143,6 +112,27 @@
       </Completion>
     </Configuration>
   </Settings>
+  <VirtualDirectory Name="_root">
+    <File Name="main.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="source">
+    <File Name="source/_.h"/>
+    <File Name="source/test_value_source_layer.cpp"/>
+    <File Name="source/test_param_source_layer.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="compose">
+    <File Name="compose/_.h"/>
+    <File Name="compose/test_compose_kenrel.cpp"/>
+    <File Name="compose/test_bias_layer.cpp"/>
+    <File Name="compose/test_weight_layer.cpp"/>
+    <File Name="compose/test_linear_layer.cpp"/>
+    <File Name="compose/test_single_layer_perceptron.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="recurrent">
+    <File Name="recurrent/test_gru.cpp"/>
+    <File Name="recurrent/_.h"/>
+    <File Name="recurrent/test_recurrent_layer.cpp"/>
+  </VirtualDirectory>
   <Dependencies Name="Debug"/>
   <Dependencies Name="Release"/>
 </CodeLite_Project>

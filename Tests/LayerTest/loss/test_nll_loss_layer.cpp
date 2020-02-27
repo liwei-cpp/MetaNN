@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <calculate_tags.h>
 #include <data_gen.h>
 #include <cassert>
@@ -19,8 +19,8 @@ namespace
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
         RootLayer layer("root");
-        auto in = GenMatrix<CheckElement>(3, 4, 0.1f, 0.05f);
-        auto weight = GenMatrix<CheckElement>(3, 4, 0.3f, 0.1f);
+        auto in = GenTensor<CheckElement>(0.1f, 0.05f, 3, 4);
+        auto weight = GenTensor<CheckElement>(0.3f, 0.1f, 3, 4);
 
         auto input = LayerInputCont<RootLayer>()
                         .Set<LayerInput>(in)
@@ -32,14 +32,16 @@ namespace
         auto res = Evaluate(out.Get<LayerOutput>());
 
         CheckElement check = 0;
+        CheckElement sum = 0;
         for (size_t i = 0; i < 3; ++i)
         {
             for (size_t j = 0; j < 4; ++j)
             {
                 check -= log(in(i, j)) * weight(i, j);
+                sum += weight(i, j);
             }
         }
-        assert(fabs(res.Value() - check) < 0.0001);
+        assert(fabs(res.Value() - check / sum) < 0.0001);
 
         LayerNeutralInvariant(layer);
 
@@ -58,8 +60,8 @@ namespace
         static_assert(!RootLayer::IsUpdate, "Test Error");
 
         RootLayer layer("root");
-        auto in = GenMatrix<CheckElement>(3, 4, 0.1f, 0.05f);
-        auto weight = GenMatrix<CheckElement>(3, 4, 0.3f, 0.1f);
+        auto in = GenTensor<CheckElement>(0.1f, 0.05f, 3, 4);
+        auto weight = GenTensor<CheckElement>(0.3f, 0.1f, 3, 4);
 
         auto input = LayerInputCont<RootLayer>()
                         .Set<LayerInput>(in)
@@ -70,14 +72,16 @@ namespace
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
         CheckElement check = 0;
+        CheckElement sum = 0;
         for (size_t i = 0; i < 3; ++i)
         {
             for (size_t j = 0; j < 4; ++j)
             {
                 check -= log(in(i, j)) * weight(i, j);
+                sum += weight(i, j);
             }
         }
-        assert(fabs(res.Value() - check) < 0.0001);
+        assert(fabs(res.Value() - check / sum) < 0.0001);
 
         auto fb = LayerOutputCont<RootLayer>().Set<LayerOutput>(Scalar<CheckElement, CheckDevice>(0.5));
         auto out_grad = layer.FeedBackward(fb);
@@ -88,7 +92,7 @@ namespace
         {
             for (size_t j = 0; j < 4; ++j)
             {
-                assert(fabs(g(i, j) + 0.5 * weight(i, j) / in(i, j)) < 0.0001);
+                assert(fabs(g(i, j) + 0.5 * weight(i, j) / in(i, j) / sum) < 0.0001);
             }
         }
         cout << "done" << endl;
@@ -109,8 +113,8 @@ namespace
         LayerNeutralInvariant(layer);
         for (size_t loop_count = 1; loop_count < 10; ++loop_count)
         {
-            auto in = GenMatrix<CheckElement>(loop_count * 2, 4, 0.1f, 0.05f);
-            auto weight = GenMatrix<CheckElement>(loop_count * 2, 4, 0.3f, 0.1f);
+            auto in = GenTensor<CheckElement>(0.1f, 0.05f, loop_count * 2, 4);
+            auto weight = GenTensor<CheckElement>(0.3f, 0.1f, loop_count * 2, 4);
 
             op_in.push_back(in);
             op_weight.push_back(weight);
@@ -121,14 +125,16 @@ namespace
             auto res = Evaluate(out.Get<LayerOutput>());
 
             CheckElement check = 0;
+            CheckElement sum = 0;
             for (size_t i = 0; i < loop_count * 2; ++i)
             {
                 for (size_t j = 0; j < 4; ++j)
                 {
                     check -= log(in(i, j)) * weight(i, j);
+                    sum += weight(i, j);
                 }
             }
-            assert(fabs(res.Value() - check) < 0.0001);
+            assert(fabs(res.Value() - check / sum) < 0.0001);
         }
 
         for (size_t loop_count = 9; loop_count >= 1; --loop_count)
@@ -138,11 +144,20 @@ namespace
 
             auto in = op_in.back(); op_in.pop_back();
             auto weight = op_weight.back(); op_weight.pop_back();
+            
+            CheckElement sum = 0;
             for (size_t i = 0; i < loop_count * 2; ++i)
             {
-                for (size_t j = 0; j < 3; ++j)
+                for (size_t j = 0; j < 4; ++j)
                 {
-                    assert(fabs(fb(i, j) + 0.5 * loop_count * weight(i, j) / in(i, j)) < 0.0001);
+                    sum += weight(i, j);
+                }
+            }
+            for (size_t i = 0; i < loop_count * 2; ++i)
+            {
+                for (size_t j = 0; j < 4; ++j)
+                {
+                    assert(fabs(fb(i, j) + 0.5 * loop_count * weight(i, j) / in(i, j) / sum) < 0.0001);
                 }
             }
         }

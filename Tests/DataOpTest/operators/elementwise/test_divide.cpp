@@ -168,6 +168,29 @@ namespace
         }
         cout << "done" << endl;
     }
+    
+    void test_divide_case8()
+    {
+        cout << "Test divide case 8 (matrix divide from number)\t";
+        auto ori1 = GenTensor<CheckElement>(-100, 3, 10, 7);
+        auto op = 13 / ori1;
+        static_assert(IsMatrix<decltype(op)>);
+        assert(op.Shape() == Shape(10, 7));
+        
+        auto res = Evaluate(op);
+        static_assert(IsMatrix<decltype(res)>);
+        assert(res.Shape() == Shape(10, 7));
+        
+        for (size_t i = 0; i < 10; ++i)
+        {
+            for (size_t k = 0; k < 7; ++k)
+            {
+                auto check = 13 / ori1(i, k);
+                assert(fabs(check - res(i, k)) < 0.001f);
+            }
+        }
+        cout << "done" << endl;
+    }
 }
 
 namespace Test::Operators::Elwentwise
@@ -184,5 +207,8 @@ namespace Test::Operators::Elwentwise
         test_divide_case6();
         
         test_divide_case7();
+        
+        // divide from number
+        test_divide_case8();
     }
 }

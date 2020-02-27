@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn.h>
+#include <MetaNN/meta_nn2.h>
 #include <iostream>
 using namespace std;
 using namespace MetaNN;
@@ -12,23 +12,7 @@ namespace
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
-        RootLayer layer("root");
-        auto out = layer.FeedForward(LayerInputCont<RootLayer>());
-        
-        auto res = out.Get<LayerOutput>();
-        assert(fabs(res < 0.001));
-
-        cout << "done" << endl;
-    }
-    
-    void test_value_source_layer2()
-    {
-        cout << "Test value source layer case 2...\t";
-        using RootLayer = MakeInferLayer<ValueSourceLayer, PNumeratorIs<-1>, PDenominatorIs<2>>;
-        static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
-        static_assert(!RootLayer::IsUpdate, "Test Error");
-        
-        RootLayer layer("root");
+        RootLayer layer("root", -0.5f);
         auto out = layer.FeedForward(LayerInputCont<RootLayer>());
         
         auto res = out.Get<LayerOutput>();
@@ -37,14 +21,14 @@ namespace
         cout << "done" << endl;
     }
     
-    void test_value_source_layer3()
+    void test_value_source_layer2()
     {
-        cout << "Test value source layer case 3...\t";
-        using RootLayer = MakeInferLayer<ValueSourceLayer, PValueTypeIs<int>, PNumeratorIs<3>, PDenominatorIs<2>>;
+        cout << "Test value source layer case 2...\t";
+        using RootLayer = MakeInferLayer<ValueSourceLayer, PValueTypeIs<int>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
-        RootLayer layer("root");
+        RootLayer layer("root", 1.5f);
         auto out = layer.FeedForward(LayerInputCont<RootLayer>());
         
         auto res = out.Get<LayerOutput>();
@@ -61,6 +45,5 @@ namespace Test::Layer::Source
     {
         test_value_source_layer1();
         test_value_source_layer2();
-        test_value_source_layer3();
     }
 }
