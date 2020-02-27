@@ -131,6 +131,7 @@
     <File Name="compose/test_single_layer_perceptron.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="recurrent">
+    <File Name="recurrent/test_gru.cpp"/>
     <File Name="recurrent/_.h"/>
     <File Name="recurrent/test_recurrent_layer.cpp"/>
   </VirtualDirectory>

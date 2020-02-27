@@ -26,7 +26,7 @@ inline auto FillTensor(TIt b, TShapeParams... shapeParams)
     Tensor<TElem, MetaNN::DeviceTags::CPU, dim> res(shapeParams...);
     auto lowLayer = LowerAccess(res);
     auto mem = lowLayer.MutableRawMemory();
-    for (auto i = 0; i < res.Shape().Count(); ++i)
+    for (size_t i = 0; i < res.Shape().Count(); ++i)
     {
         mem[i] = (TElem)(*b);
         ++b;
