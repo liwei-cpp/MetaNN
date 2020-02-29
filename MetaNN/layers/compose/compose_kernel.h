@@ -7,8 +7,6 @@
 #include <MetaNN/policies/change_policy.h>
 #include <MetaNN/policies/policy_operations.h>
 #include <MetaNN/policies/policy_selector.h>
-#include <MetaNN/layers/elementary/add_layer.h>
-#include <MetaNN/layers/elementary/multiply_layer.h>
 #include <type_traits>
 
 namespace MetaNN

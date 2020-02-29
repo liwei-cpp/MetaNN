@@ -319,7 +319,7 @@ namespace
     }
 }
 
-namespace Test::Layer::Elementary
+namespace Test::Layer::Math
 {
     void test_add_layer()
     {

@@ -145,6 +145,11 @@
     <File Name="facilities/type_id.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="layers">
+    <VirtualDirectory Name="math">
+      <File Name="layers/math/add_layer.h"/>
+      <File Name="layers/math/substract_layer.h"/>
+      <File Name="layers/math/_.h"/>
+    </VirtualDirectory>
     <VirtualDirectory Name="compose">
       <File Name="layers/compose/compose_kernel.h"/>
       <File Name="layers/compose/linear_layer.h"/>
@@ -156,7 +161,6 @@
     <VirtualDirectory Name="elementary">
       <File Name="layers/elementary/permute_layer.h"/>
       <File Name="layers/elementary/abs_layer.h"/>
-      <File Name="layers/elementary/add_layer.h"/>
       <File Name="layers/elementary/interpolate_layer.h"/>
       <File Name="layers/elementary/sigmoid_layer.h"/>
       <File Name="layers/elementary/softmax_layer.h"/>
@@ -257,6 +261,7 @@
     <File Name="policies/policy_selector.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="model">
+    <File Name="model/_.h"/>
     <VirtualDirectory Name="param_initializer">
       <File Name="model/param_initializer/constant_filler.h"/>
       <File Name="model/param_initializer/gaussian_filler.h"/>
@@ -274,7 +279,6 @@
       <File Name="model/weight_cont/grad_collector.h"/>
       <File Name="model/weight_cont/_.h"/>
     </VirtualDirectory>
-    <File Name="model/model.h"/>
     <VirtualDirectory Name="facilities">
       <File Name="model/facilities/weight_buffer.h"/>
     </VirtualDirectory>
