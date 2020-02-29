@@ -1,4 +1,4 @@
-#include <MetaNN/meta_nn2.h>
+#include <MetaNN/meta_nn.h>
 #include <iostream>
 using namespace std;
 using namespace MetaNN;

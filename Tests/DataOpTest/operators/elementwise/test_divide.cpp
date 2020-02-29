@@ -1,5 +1,5 @@
 #include <data_gen.h>
-#include <MetaNN/meta_nn2.h>
+#include <MetaNN/meta_nn.h>
 #include <calculate_tags.h>
 #include <cmath>
 #include <iostream>
