@@ -5,15 +5,25 @@
 namespace MetaNN::Set
 {
 // HasKey =================================================================================
-    template <typename TCon, typename TKey>
-    struct HasKey_;
-    
-    template <template <typename...> typename TCon, typename TKey, typename... TValues>
-    struct HasKey_<TCon<TValues...>, TKey>
+namespace NSHasKey
+{
+    template <typename TCon>
+    struct map_;
+        
+    template <template <typename... > typename TCon, typename...TItem>
+    struct map_<TCon<TItem...>> : Helper::KVBinder<TItem, Helper::Int_<true>>...
     {
-        constexpr static bool value = (std::is_same_v<TValues, TKey> || ...);
+        using Helper::KVBinder<TItem, Helper::Int_<true>>::apply ...;
+        static Helper::Int_<false> apply(...);
     };
-    
+}
+    template <typename TCon, typename TKey>
+    struct HasKey_
+    {
+        constexpr static bool value = decltype(NSHasKey::map_<TCon>::apply((TKey*)nullptr))::value;
+        
+    };
+
     template <typename TCon, typename TKey>
     constexpr bool HasKey = HasKey_<TCon, TKey>::value;
 //=========================================================================================
