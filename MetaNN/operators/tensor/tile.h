@@ -1,7 +1,6 @@
 #pragma once
 #include <MetaNN/operators/facilities/_.h>
-#include <MetaNN/policies/change_policy.h>
-#include <MetaNN/policies/policy_selector.h>
+#include <MetaNN/policies/_.h>
 #include <MetaNN/facilities/cont_metafuns/value_sequential.h>
 #include <MetaNN/facilities/_.h>
 #include <cassert>

@@ -251,13 +251,12 @@
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
-    <File Name="policies/change_policy.h"/>
+    <File Name="policies/_.h"/>
     <File Name="policies/inject_policy.h"/>
     <File Name="policies/policy_container.h"/>
     <File Name="policies/policy_macro_begin.h"/>
     <File Name="policies/policy_macro_end.h"/>
     <File Name="policies/policy_operations.h"/>
-    <File Name="policies/policy_selector.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="model">
     <File Name="model/_.h"/>

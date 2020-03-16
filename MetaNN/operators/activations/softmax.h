@@ -3,7 +3,7 @@
 #include <MetaNN/data/facilities/traits.h>
 #include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/operators/facilities/_.h>
-#include <MetaNN/policies/policy_selector.h>
+#include <MetaNN/policies/_.h>
 #include <MetaNN/facilities/_.h>
 #include <cassert>
 #include <cmath>

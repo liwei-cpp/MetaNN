@@ -2,8 +2,7 @@
 
 #include <MetaNN/layers/facilities/policies.h>
 #include <MetaNN/layers/facilities/traits.h>
-#include <MetaNN/policies/policy_operations.h>
-#include <MetaNN/policies/policy_selector.h>
+#include <MetaNN/policies/_.h>
 
 namespace MetaNN
 {

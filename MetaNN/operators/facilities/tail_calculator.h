@@ -2,7 +2,7 @@
 
 #include <MetaNN/operators/facilities/operator_frame.h>
 #include <MetaNN/facilities/cont_metafuns/helpers.h>
-#include <MetaNN/policies/policy_selector.h>
+#include <MetaNN/policies/_.h>
 
 namespace MetaNN
 {
