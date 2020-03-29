@@ -193,66 +193,65 @@
     </VirtualDirectory>
     <File Name="layers/_.h"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="operators">
-    <File Name="operators/_.h"/>
+  <VirtualDirectory Name="operation">
+    <File Name="operation/_.h"/>
     <VirtualDirectory Name="tensor">
-      <File Name="operators/tensor/slice.h"/>
-      <File Name="operators/tensor/_.h"/>
-      <File Name="operators/tensor/tile.h"/>
+      <File Name="operation/tensor/slice.h"/>
+      <File Name="operation/tensor/_.h"/>
+      <File Name="operation/tensor/tile.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="math">
-      <File Name="operators/math/reduce_sum.h"/>
-      <File Name="operators/math/_.h"/>
+      <File Name="operation/math/reduce_sum.h"/>
+      <File Name="operation/math/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
-      <File Name="operators/facilities/_.h"/>
-      <File Name="operators/facilities/policies.h"/>
-      <File Name="operators/facilities/organizer.h"/>
-      <File Name="operators/facilities/tags.h"/>
-      <File Name="operators/facilities/operator_frame.h"/>
-      <File Name="operators/facilities/tail_calculator.h"/>
-      <File Name="operators/facilities/instance_id.h"/>
+      <File Name="operation/facilities/operation_frame.h"/>
+      <File Name="operation/facilities/_.h"/>
+      <File Name="operation/facilities/policies.h"/>
+      <File Name="operation/facilities/organizer.h"/>
+      <File Name="operation/facilities/tags.h"/>
+      <File Name="operation/facilities/tail_calculator.h"/>
+      <File Name="operation/facilities/instance_id.h"/>
     </VirtualDirectory>
-    <File Name="operators/conv.h"/>
+    <File Name="operation/conv.h"/>
     <VirtualDirectory Name="loss">
       <VirtualDirectory Name="facilities">
-        <File Name="operators/loss/facilities/organizer.h"/>
+        <File Name="operation/loss/facilities/organizer.h"/>
       </VirtualDirectory>
-      <File Name="operators/loss/nll_loss.h"/>
-      <File Name="operators/loss/_.h"/>
+      <File Name="operation/loss/nll_loss.h"/>
+      <File Name="operation/loss/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="elementwise">
-      <File Name="operators/elementwise/asin.h"/>
-      <File Name="operators/elementwise/acos.h"/>
-      <File Name="operators/elementwise/abs.h"/>
-      <File Name="operators/elementwise/add.h"/>
-      <File Name="operators/elementwise/divide.h"/>
-      <File Name="operators/elementwise/interpolate.h"/>
-      <File Name="operators/elementwise/multiply.h"/>
-      <File Name="operators/elementwise/sign.h"/>
-      <File Name="operators/elementwise/substract.h"/>
-      <File Name="operators/elementwise/negative.h"/>
-      <File Name="operators/elementwise/_.h"/>
+      <File Name="operation/elementwise/asin.h"/>
+      <File Name="operation/elementwise/acos.h"/>
+      <File Name="operation/elementwise/abs.h"/>
+      <File Name="operation/elementwise/add.h"/>
+      <File Name="operation/elementwise/divide.h"/>
+      <File Name="operation/elementwise/interpolate.h"/>
+      <File Name="operation/elementwise/multiply.h"/>
+      <File Name="operation/elementwise/sign.h"/>
+      <File Name="operation/elementwise/substract.h"/>
+      <File Name="operation/elementwise/negative.h"/>
+      <File Name="operation/elementwise/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="mutating">
-      <File Name="operators/mutating/permute.h"/>
-      <File Name="operators/mutating/_.h"/>
+      <File Name="operation/mutating/permute.h"/>
+      <File Name="operation/mutating/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="blas">
-      <File Name="operators/blas/dot.h"/>
-      <File Name="operators/blas/_.h"/>
+      <File Name="operation/blas/dot.h"/>
+      <File Name="operation/blas/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="activations">
-      <File Name="operators/activations/softmax.h"/>
-      <File Name="operators/activations/relu.h"/>
-      <File Name="operators/activations/sigmoid.h"/>
-      <File Name="operators/activations/tanh.h"/>
-      <File Name="operators/activations/_.h"/>
+      <File Name="operation/activations/softmax.h"/>
+      <File Name="operation/activations/relu.h"/>
+      <File Name="operation/activations/sigmoid.h"/>
+      <File Name="operation/activations/tanh.h"/>
+      <File Name="operation/activations/_.h"/>
     </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/_.h"/>
-    <File Name="policies/inject_policy.h"/>
     <File Name="policies/policy_container.h"/>
     <File Name="policies/policy_macro_begin.h"/>
     <File Name="policies/policy_macro_end.h"/>

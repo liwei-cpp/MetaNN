@@ -1,9 +1,9 @@
 #include <data/_.h>
-#include <operators/_.h>
+#include <operation/_.h>
 
 int main()
 {
     Test::Data::test();
-    Test::Operators::test();
+    Test::Operation::test();
 	return 0;
 }
