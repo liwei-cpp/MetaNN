@@ -108,7 +108,7 @@ namespace OperSoftmax::NSCaseGen
 
     template <typename TPolicy = PolicyContainer<>,
               typename TP,
-              typename = std::enable_if_t<IsValidOper<OpTags::Softmax, TP>>>
+              std::enable_if_t<IsValidOper<OpTags::Softmax, TP>>* = nullptr>
     auto Softmax(TP&& p_m)
     {
         constexpr size_t modDimNum = PolicySelect<DimPolicy, TPolicy>::ModifyDimNum;
@@ -364,7 +364,7 @@ namespace OperSoftmaxGrad::NSCaseNLLLossGrad
     };
 
     template <typename TPolicy = PolicyContainer<>, typename TGrad, typename TInput,
-              typename = std::enable_if_t<IsValidOper<OpTags::SoftmaxGrad, TGrad, TInput>>>
+              std::enable_if_t<IsValidOper<OpTags::SoftmaxGrad, TGrad, TInput>>* = nullptr>
     auto SoftmaxGrad(TGrad&& p_grad, TInput&& p_input)
     {
         static_assert(std::is_same_v<DataCategory<TGrad>, DataCategory<TInput>>);

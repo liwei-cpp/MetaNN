@@ -75,7 +75,7 @@ struct OperSeq_<OpTags::Abs>
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::Abs, TP>>>
+          std::enable_if_t<IsValidOper<OpTags::Abs, TP>>* = nullptr>
 auto Abs(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;

@@ -282,7 +282,7 @@ namespace MetaNN
                                                         (DataCategory<TP>::DimNum > 0);
     
     template <typename TPolicy = PolicyContainer<>, typename TP,
-              typename = std::enable_if_t<IsValidOper<OpTags::ReduceSum, TP>>>
+              std::enable_if_t<IsValidOper<OpTags::ReduceSum, TP>>* = nullptr>
     auto ReduceSum(TP&& oper)
     {
         constexpr bool HasDimArray = HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::DimArrayValueCate>;

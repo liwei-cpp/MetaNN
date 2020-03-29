@@ -281,7 +281,7 @@ namespace MetaNN
     };
 
     template <typename TPolicy = PolicyContainer<>, typename TP, size_t AimDim,
-              typename = std::enable_if_t<IsValidOper<OpTags::Tile, TP>>>
+              std::enable_if_t<IsValidOper<OpTags::Tile, TP>>* = nullptr>
     auto Tile(TP&& oper, Shape<AimDim> aimShape)
     {
         static_assert(DataCategory<TP>::DimNum <= AimDim);

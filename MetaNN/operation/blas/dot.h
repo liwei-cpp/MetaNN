@@ -153,7 +153,7 @@ namespace OperDot::NSCaseGen
 
     template <typename TPolicy = PolicyContainer<>,
               typename TP1, typename TP2,
-              typename = std::enable_if_t<IsValidOper<OpTags::Dot, TP1, TP2>>>
+              std::enable_if_t<IsValidOper<OpTags::Dot, TP1, TP2>>* = nullptr>
     auto Dot(TP1&& p_m1, TP2&& p_m2)
     {
         constexpr size_t modDimNum = PolicySelect<DimPolicy, TPolicy>::ModifyDimNum;

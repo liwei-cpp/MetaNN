@@ -75,7 +75,7 @@ struct OperSeq_<OpTags::Sigmoid>
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::Sigmoid, TP>>>
+          std::enable_if_t<IsValidOper<OpTags::Sigmoid, TP>>* = nullptr>
 auto Sigmoid(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
@@ -152,7 +152,7 @@ struct OperSeq_<OpTags::SigmoidGrad>
 };
 
 template <typename TGrad, typename TInput,
-          typename = std::enable_if_t<IsValidOper<OpTags::SigmoidGrad, TGrad, TInput>>>
+          std::enable_if_t<IsValidOper<OpTags::SigmoidGrad, TGrad, TInput>>* = nullptr>
 auto SigmoidGrad (TGrad&& p_grad, TInput&& p_input)
 {
     static_assert(DataCategory<TInput>::DimNum >= DataCategory<TGrad>::DimNum);

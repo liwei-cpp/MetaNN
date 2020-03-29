@@ -95,7 +95,7 @@ struct OperSeq_<OpTags::Interpolate>
 };
 
 template <typename TP1, typename TP2, typename TP3,
-          typename = std::enable_if_t<IsValidOper<OpTags::Interpolate, TP1, TP2, TP3>>>
+          std::enable_if_t<IsValidOper<OpTags::Interpolate, TP1, TP2, TP3>>* = nullptr>
 auto Interpolate(TP1&& p_m1, TP2&& p_m2, TP3&& p_m3)
 {
     using ResType = Operation<OpTags::Interpolate,

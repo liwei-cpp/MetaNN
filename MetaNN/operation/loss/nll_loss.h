@@ -99,7 +99,7 @@ struct OperSeq_<OpTags::NLLLoss>
 };
 
 template <typename TTruth, typename TPred,
-          typename = std::enable_if_t<IsValidOper<OpTags::NLLLoss, TTruth, TPred>>>
+          std::enable_if_t<IsValidOper<OpTags::NLLLoss, TTruth, TPred>>* = nullptr>
 auto NLLLoss(TTruth&& p_truth, TPred&& p_pred)
 {
     static_assert(std::is_same_v<DataCategory<TTruth>, DataCategory<TPred>>);
@@ -194,7 +194,7 @@ struct OperSeq_<OpTags::NLLLossGrad>
 
 // interface
 template <typename TGrad, typename TTruth, typename TPred,
-          typename = std::enable_if_t<IsValidOper<OpTags::NLLLossGrad, TGrad, TTruth, TPred>>>
+          std::enable_if_t<IsValidOper<OpTags::NLLLossGrad, TGrad, TTruth, TPred>>* = nullptr>
 auto NLLLossGrad(TGrad&& p_grad, TTruth&& p_truth, TPred&& p_pred)
 {
     static_assert(IsScalar<TGrad>);

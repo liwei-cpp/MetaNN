@@ -75,7 +75,7 @@ struct OperSeq_<OpTags::ReLU>
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::ReLU, TP>>>
+          std::enable_if_t<IsValidOper<OpTags::ReLU, TP>>* = nullptr>
 auto ReLU(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
@@ -154,7 +154,7 @@ struct OperSeq_<OpTags::ReLUGrad>
 };
 
 template <typename TGrad, typename TInput,
-          typename = std::enable_if_t<IsValidOper<OpTags::ReLUGrad, TGrad, TInput>>>
+          std::enable_if_t<IsValidOper<OpTags::ReLUGrad, TGrad, TInput>>* = nullptr>
 auto ReLUGrad(TGrad&& p_grad, TInput&& p_input)
 {
     static_assert(DataCategory<TInput>::DimNum >= DataCategory<TGrad>::DimNum);

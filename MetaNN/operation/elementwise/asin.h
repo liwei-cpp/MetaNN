@@ -75,7 +75,7 @@ struct OperSeq_<OpTags::Asin>
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::Asin, TP>>>
+          std::enable_if_t<IsValidOper<OpTags::Asin, TP>>* = nullptr>
 auto Asin(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
@@ -153,7 +153,7 @@ struct OperSeq_<OpTags::AsinGrad>
 };
 
 template <typename TGrad, typename TInput,
-          typename = std::enable_if_t<IsValidOper<OpTags::AsinGrad, TGrad, TInput>>>
+          std::enable_if_t<IsValidOper<OpTags::AsinGrad, TGrad, TInput>>* = nullptr>
 auto AsinGrad(TGrad&& p_grad, TInput&& p_input)
 {
     static_assert(DataCategory<TInput>::DimNum >= DataCategory<TGrad>::DimNum);

@@ -73,7 +73,7 @@ struct OperSeq_<OpTags::Negative>
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::Negative, TP>>>
+          std::enable_if_t<IsValidOper<OpTags::Negative, TP>>* = nullptr>
 auto operator- (TP&& p_m)
 {
     using rawM = RemConstRef<TP>;

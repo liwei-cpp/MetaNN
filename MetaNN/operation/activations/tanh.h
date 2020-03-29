@@ -74,7 +74,7 @@ struct OperSeq_<OpTags::Tanh>
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::Tanh, TP>>>
+          std::enable_if_t<IsValidOper<OpTags::Tanh, TP>>* = nullptr>
 auto Tanh(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;
@@ -152,7 +152,7 @@ struct OperSeq_<OpTags::TanhGrad>
 };
 
 template <typename TGrad, typename TInput,
-          typename = std::enable_if_t<IsValidOper<OpTags::TanhGrad, TGrad, TInput>>>
+          std::enable_if_t<IsValidOper<OpTags::TanhGrad, TGrad, TInput>>* = nullptr>
 auto TanhGrad (TGrad&& p_grad, TInput&& p_input)
 {
     static_assert(DataCategory<TInput>::DimNum >= DataCategory<TGrad>::DimNum);

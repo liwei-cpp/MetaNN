@@ -181,8 +181,8 @@ struct OperSeq_<OpTags::MultiplyWithNum>
 
 // interface
 template <typename TP1, typename TP2,
-          typename = std::enable_if_t<IsValidOper<OpTags::Multiply, TP1, TP2> ||
-                                      IsValidOper<OpTags::MultiplyWithNum, TP1, TP2>>>
+          std::enable_if_t<IsValidOper<OpTags::Multiply, TP1, TP2> ||
+                           IsValidOper<OpTags::MultiplyWithNum, TP1, TP2>>* = nullptr>
 auto operator* (TP1&& p_m1, TP2&& p_m2)
 {
     if constexpr (IsValidOper<OpTags::Add, TP1, TP2>)

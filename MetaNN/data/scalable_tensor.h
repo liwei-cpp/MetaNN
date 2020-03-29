@@ -94,7 +94,7 @@ namespace MetaNN
         explicit ScalableTensor() = default;
         
         template <typename... TShapeParameter,
-                  typename = std::enable_if_t<(std::is_convertible_v<TShapeParameter, size_t> && ...)>>
+                  std::enable_if_t<(std::is_convertible_v<TShapeParameter, size_t> && ...)>* = nullptr>
         explicit ScalableTensor(TShapeParameter... shapes)
             : m_shape(0, shapes...)
         {}
@@ -109,7 +109,7 @@ namespace MetaNN
         }
         
         template <typename TIterator,
-                  typename = std::enable_if_t<IsIterator<TIterator>>>
+                  std::enable_if_t<IsIterator<TIterator>>* = nullptr>
         ScalableTensor(TIterator b, TIterator e)
             : m_shape(NSScalableTensor::ShapeInit(b->Shape()))
         {

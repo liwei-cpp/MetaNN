@@ -72,7 +72,7 @@ namespace MetaNN
 
     public:
         template <typename...TShapeParams,
-                  typename = std::enable_if_t<(std::is_convertible_v<TShapeParams, size_t> && ...)>>
+                  std::enable_if_t<(std::is_convertible_v<TShapeParams, size_t> && ...)>* = nullptr>
         explicit ZeroTensor(TShapeParams&&... shapeParams)
             : m_shape(std::forward<TShapeParams>(shapeParams)...)
         {}

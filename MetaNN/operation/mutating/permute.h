@@ -182,7 +182,7 @@ namespace MetaNN
     }
 
     template <typename TDimPolicy, typename TP,
-              typename = std::enable_if_t<IsValidOper<OpTags::Permute, TP>>>
+              std::enable_if_t<IsValidOper<OpTags::Permute, TP>>* = nullptr>
     auto Permute(TP&& oper)
     {
         constexpr auto dims = PolicySelect<DimPolicy, TDimPolicy>::DimArray;
@@ -201,7 +201,7 @@ namespace MetaNN
     }
     
     template <typename TP,
-              typename = std::enable_if_t<IsValidOper<OpTags::Permute, TP>>>
+              std::enable_if_t<IsValidOper<OpTags::Permute, TP>>* = nullptr>
     auto Transpose(TP&& oper)
     {
         static_assert(DataCategory<TP>::DimNum == 2);
@@ -221,7 +221,7 @@ namespace MetaNN
     }
 
     template <typename TDimPolicy, typename TP,
-              typename = std::enable_if_t<IsValidOper<OpTags::Permute, TP>>>
+              std::enable_if_t<IsValidOper<OpTags::Permute, TP>>* = nullptr>
     auto PermuteInv(TP&& oper)
     {
         constexpr auto dims = PolicySelect<DimPolicy, TDimPolicy>::DimArray;

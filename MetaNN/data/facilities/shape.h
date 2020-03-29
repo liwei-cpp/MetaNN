@@ -73,7 +73,7 @@ namespace MetaNN
         explicit Shape() = default;
         
         template <typename... TIntTypes,
-                  typename = std::enable_if_t<(std::is_convertible_v<TIntTypes, size_t> && ...)>>
+                  std::enable_if_t<(std::is_convertible_v<TIntTypes, size_t> && ...)>* = nullptr>
         explicit Shape(TIntTypes... shapes)
         {
             static_assert(sizeof...(TIntTypes) == uDimNum);
@@ -106,7 +106,7 @@ namespace MetaNN
         }
         
         template <typename... TIntTypes,
-                  typename = std::enable_if_t<(std::is_convertible_v<TIntTypes, size_t> && ...)>>
+                  std::enable_if_t<(std::is_convertible_v<TIntTypes, size_t> && ...)>* = nullptr>
         size_t IndexToOffset(TIntTypes... indexes) const
         {
             static_assert(sizeof...(TIntTypes) == uDimNum);
@@ -246,6 +246,6 @@ namespace MetaNN
     }
 
     template <typename... TShapeParameter,
-              typename = std::enable_if_t<(std::is_convertible_v<TShapeParameter, size_t> && ...)>>
+              std::enable_if_t<(std::is_convertible_v<TShapeParameter, size_t> && ...)>* = nullptr>
     explicit Shape(TShapeParameter... shapes) -> Shape<sizeof...(TShapeParameter)>;
 }

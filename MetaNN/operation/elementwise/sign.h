@@ -79,7 +79,7 @@ struct OperSeq_<OpTags::Sign>
 };
 
 template <typename TP,
-          typename = std::enable_if_t<IsValidOper<OpTags::Sign, TP>>>
+          std::enable_if_t<IsValidOper<OpTags::Sign, TP>>* = nullptr>
 auto Sign(TP&& p_m)
 {
     using rawM = RemConstRef<TP>;

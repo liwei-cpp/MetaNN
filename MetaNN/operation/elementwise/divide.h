@@ -272,9 +272,9 @@ struct OperSeq_<OpTags::DivideByNum>
 
 /// Interface
 template <typename TP1, typename TP2,
-          typename = std::enable_if_t<IsValidOper<OpTags::Divide, TP1, TP2> ||
-                                      IsValidOper<OpTags::DivideFromNum, TP1, TP2> ||
-                                      IsValidOper<OpTags::DivideByNum, TP1, TP2>>>
+          std::enable_if_t<IsValidOper<OpTags::Divide, TP1, TP2> ||
+                           IsValidOper<OpTags::DivideFromNum, TP1, TP2> ||
+                           IsValidOper<OpTags::DivideByNum, TP1, TP2>>* = nullptr>
 auto operator/ (TP1&& p_m1, TP2&& p_m2)
 {
     if constexpr (IsValidOper<OpTags::Divide, TP1, TP2>)
