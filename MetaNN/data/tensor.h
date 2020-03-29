@@ -228,24 +228,12 @@ namespace MetaNN
     template <typename TElem, typename TDevice>
     using Scalar = Tensor<TElem, TDevice, 0>;
 
-    template <typename T>
-    constexpr bool IsScalar = IsTensorWithDim<T, 0>;
-
     template <typename TElem, typename TDevice>
     using Vector = Tensor<TElem, TDevice, 1>;
-    
-    template <typename T>
-    constexpr bool IsVector = IsTensorWithDim<T, 1>;
 
     template <typename TElem, typename TDevice>
     using Matrix = Tensor<TElem, TDevice, 2>;
-    
-    template <typename T>
-    constexpr bool IsMatrix = IsTensorWithDim<T, 2>;
 
     template <typename TElem, typename TDevice>
     using ThreeDArray = Tensor<TElem, TDevice, 3>;
-    
-    template <typename T>
-    constexpr bool IsThreeDArray = IsTensorWithDim<T, 3>;
 }

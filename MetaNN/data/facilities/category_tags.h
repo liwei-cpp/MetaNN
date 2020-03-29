@@ -55,4 +55,16 @@ namespace MetaNN
     
     template <typename T, size_t uDim>
     constexpr bool IsTensorWithDim = std::is_same_v<DataCategory<T>, CategoryTags::Tensor<uDim>>;
+
+    template <typename T>
+    constexpr bool IsScalar = IsTensorWithDim<T, 0>;
+
+    template <typename T>
+    constexpr bool IsVector = IsTensorWithDim<T, 1>;
+
+    template <typename T>
+    constexpr bool IsMatrix = IsTensorWithDim<T, 2>;
+
+    template <typename T>
+    constexpr bool IsThreeDArray = IsTensorWithDim<T, 3>;
 }
