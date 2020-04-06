@@ -3,7 +3,7 @@
 namespace MetaNN
 {
     /// device types
-    struct DeviceTags
+    namespace DeviceTags
     {
         struct CPU;
     };
