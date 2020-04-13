@@ -1,26 +1,19 @@
 #pragma once
 #include <MetaNN/data/facilities/category_tags.h>
 #include <MetaNN/facilities/cont_metafuns/helpers.h>
-#include <cassert>
 #include <array>
+#include <cassert>
+#include <numeric>
 #include <stdexcept>
 
 namespace MetaNN
 {
-    namespace DimConst
-    {
-        constexpr size_t Keep = 0;
-        constexpr size_t Extend = (size_t)-1;
-    }
-    
     namespace NSShape
     {
         template <size_t uDimNum, typename TCurIndexType, typename... TRemainIndexType>
         size_t IndexToOffset(const std::array<size_t, uDimNum>& dims, size_t& gap, TCurIndexType curIdx, TRemainIndexType... remIdx)
         {
             constexpr size_t indexPos = uDimNum - sizeof...(TRemainIndexType) - 1;
-            if (dims[indexPos] == DimConst::Extend)
-                throw std::runtime_error("Invalid dimension value.");
             if (static_cast<size_t>(curIdx) >= dims[indexPos])
                 throw std::runtime_error("Invalid dimension index.");
 
@@ -93,16 +86,8 @@ namespace MetaNN
         
         size_t Count() const
         {
-            size_t res = 1;
-            for (size_t i = 0; i < uDimNum; ++i)
-            {
-                if (m_dims[i] == DimConst::Extend)
-                    return DimConst::Extend;
-                if (m_dims[i] == DimConst::Keep)
-                    return DimConst::Keep;
-                res *= m_dims[i];
-            }
-            return res;
+            return std::accumulate(std::begin(m_dims), std::end(m_dims),
+                                   1, std::multiplies<>());
         }
         
         template <typename... TIntTypes,
@@ -247,5 +232,5 @@ namespace MetaNN
 
     template <typename... TShapeParameter,
               std::enable_if_t<(std::is_convertible_v<TShapeParameter, size_t> && ...)>* = nullptr>
-    explicit Shape(TShapeParameter... shapes) -> Shape<sizeof...(TShapeParameter)>;
+    explicit Shape(TShapeParameter...) -> Shape<sizeof...(TShapeParameter)>;
 }

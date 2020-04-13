@@ -18,8 +18,6 @@ namespace MetaNN
         {
             constexpr size_t uDimNum = TShape::DimNum;
             constexpr size_t indexPos = uDimNum - sizeof...(TRemainParam) - 1;
-            if (shape[indexPos] == DimConst::Extend)
-                throw std::runtime_error("Invalid dimension value.");
             if (static_cast<size_t>(curIdx) >= shape[indexPos])
                 throw std::runtime_error("Invalid dimension index.");
 
