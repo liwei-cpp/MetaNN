@@ -46,7 +46,7 @@ namespace MetaNN
     public:
         using CategoryTag = CategoryTags::Tensor<uDim>;
         using ElementType = TElem;
-        using DeviceType = DeviceTags::CPU;
+        using DeviceType = TDevice;
 
         friend struct LowerAccessImpl<Tensor>;
 
