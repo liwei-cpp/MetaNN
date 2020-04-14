@@ -83,6 +83,7 @@ namespace MetaNN
                           "Only CPU supports this method.");
             static_assert(sizeof...(TPosValParams) == uDim + 1);
 
+            assert(AvailableForWrite());
             size_t gap = 0;
             auto [pos, val] = NSTensor::OffsetAndVal(m_shape, gap, posValParams...);
             (m_mem.RawMemory())[pos] = static_cast<ElementType>(val);
