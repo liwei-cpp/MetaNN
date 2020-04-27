@@ -65,7 +65,6 @@ namespace MetaNN
     template<typename TScalar, size_t uDim>
     class TrivalTensor
     {
-        static_assert(uDim > 0);
     public:
         using CategoryTag = CategoryTags::Tensor<uDim>;
         using ElementType = typename TScalar::ElementType;

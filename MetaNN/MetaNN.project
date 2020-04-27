@@ -109,10 +109,6 @@
       <File Name="data/facilities/traits.h"/>
       <File Name="data/facilities/shape.h"/>
     </VirtualDirectory>
-    <VirtualDirectory Name="general">
-      <File Name="data/general/dynamic.h"/>
-      <File Name="data/general/_.h"/>
-    </VirtualDirectory>
     <File Name="data/trival_tensor.h"/>
     <File Name="data/zero_tensor.h"/>
   </VirtualDirectory>

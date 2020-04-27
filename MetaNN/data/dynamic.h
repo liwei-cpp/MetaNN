@@ -5,7 +5,7 @@ namespace MetaNN
     template <typename TElem, typename TDevice, typename TDataCate>
     class DynamicBase
     {
-    public:
+    protected:
         using EvalType = PrincipalDataType<TDataCate, TElem, TDevice>;
 
     public:
@@ -78,9 +78,8 @@ namespace MetaNN
     
         template <typename TOriData>
         DynamicData(std::shared_ptr<DynamicWrapper<TOriData>> data)
-        {
-            m_internal = std::move(data);
-        }
+            : m_internal(std::move(data))
+        { }
     
         const auto& Shape() const
         {
