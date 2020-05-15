@@ -160,10 +160,10 @@ template <typename TNumber, typename TOper>
 constexpr bool IsValidOper<OpTags::SubstractFromNum, TNumber, TOper>
     = OperSubstractFromNum::Valid<TNumber, TOper>();
 
-template <typename TCate>
-struct OperAuxParams<OpTags::SubstractFromNum, TCate> : public OperAuxValue<double>
+template <typename TElem, typename TCate>
+struct OperAuxParams<OpTags::SubstractFromNum, TElem, TCate> : public OperAuxValue<TElem>
 {
-    using TBase = OperAuxValue<double>;
+    using TBase = OperAuxValue<TElem>;
     using TBase::TBase;
     using TBase::operator =;
 };
@@ -251,10 +251,10 @@ template <typename TOper, typename TNumber>
 constexpr bool IsValidOper<OpTags::SubstractByNum, TOper, TNumber>
     = OperSubstractByNum::Valid<TOper, TNumber>();
 
-template <typename TCate>
-struct OperAuxParams<OpTags::SubstractByNum, TCate> : public OperAuxValue<double>
+template <typename TElem, typename TCate>
+struct OperAuxParams<OpTags::SubstractByNum, TElem, TCate> : public OperAuxValue<TElem>
 {
-    using TBase = OperAuxValue<double>;
+    using TBase = OperAuxValue<TElem>;
     using TBase::TBase;
     using TBase::operator =;
 };
@@ -285,14 +285,18 @@ auto operator- (TP1&& p_m1, TP2&& p_m2)
     {
         using rawOp = RemConstRef<TP2>;
         using ResType = Operation<OpTags::SubstractFromNum, OperandContainer<rawOp>>;
-        OperAuxParams<OpTags::SubstractFromNum, OperCateCal<OpTags::SubstractFromNum, PolicyContainer<>, rawOp>> params(p_m1);
+        OperAuxParams<OpTags::SubstractFromNum,
+                      typename rawOp::ElementType,
+                      OperCateCal<OpTags::SubstractFromNum, PolicyContainer<>, rawOp>> params(p_m1);
         return ResType(std::move(params), std::forward<TP2>(p_m2));
     }
     else if constexpr (IsValidOper<OpTags::SubstractByNum, TP1, TP2>)
     {
         using rawOp = RemConstRef<TP1>;
         using ResType = Operation<OpTags::SubstractByNum, OperandContainer<rawOp>>;
-        OperAuxParams<OpTags::SubstractByNum, OperCateCal<OpTags::SubstractByNum, PolicyContainer<>, rawOp>> params(p_m2);
+        OperAuxParams<OpTags::SubstractByNum,
+                      typename rawOp::ElementType,
+                      OperCateCal<OpTags::SubstractByNum, PolicyContainer<>, rawOp>> params(p_m2);
         return ResType(std::move(params), std::forward<TP1>(p_m1));
     }
     else

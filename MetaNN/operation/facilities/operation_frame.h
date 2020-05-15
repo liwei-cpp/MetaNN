@@ -37,11 +37,11 @@ namespace MetaNN
 
     public:
         explicit Operation(TOperands... p_operands)
-            : Operation(OperAuxParams<TOpTag, CategoryTag>{},
+            : Operation(OperAuxParams<TOpTag, ElementType, CategoryTag>{},
                         std::move(p_operands)...)
         {}
     
-        explicit Operation(OperAuxParams<TOpTag, CategoryTag> auxParams,
+        explicit Operation(OperAuxParams<TOpTag, ElementType, CategoryTag> auxParams,
                            TOperands... p_operands)
             : m_auxParams(std::move(auxParams))
             , m_shapeInfo(m_auxParams, p_operands...)
@@ -81,7 +81,9 @@ namespace MetaNN
             if constexpr (IsValidOper<OpTags::Slice, Operation>)
             {
                 using ResType = Operation<OpTags::Slice, OperandContainer<Operation>>;
-                return ResType(OperAuxParams<OpTags::Slice, typename ResType::CategoryTag>(index), (const Operation&)*this);
+                return ResType(OperAuxParams<OpTags::Slice,
+                                             typename ResType::ElementType,
+                                             typename ResType::CategoryTag>(index), (const Operation&)*this);
             }
             else
             {
@@ -107,7 +109,7 @@ namespace MetaNN
         }
     
     private:
-        OperAuxParams<TOpTag, CategoryTag> m_auxParams;
+        OperAuxParams<TOpTag, ElementType, CategoryTag> m_auxParams;
         OperShapeInfo<TOpTag, CategoryTag, TPolicies> m_shapeInfo;
         std::tuple<TOperands...> m_operands;
 

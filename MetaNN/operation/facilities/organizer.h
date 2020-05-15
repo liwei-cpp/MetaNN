@@ -14,15 +14,12 @@ namespace MetaNN
     constexpr bool IsValidOper = ((IsValidCategoryTag<DataCategory<TOperands>>) && ...);
 
     // data category calculation
-    template <typename... TCategories>
-    struct PickCommonCategory_;
-
-    template <typename THeadCate>
-    struct PickCommonCategory_<THeadCate>
+    template <typename TFirstCate, typename... TCategories>
+    struct PickCommonCategory_
     {
-        using type = THeadCate;
+        using type = TFirstCate;
     };
-    
+
     template <typename TFirstCate, typename TSecondCate, typename... TRemainCates>
     struct PickCommonCategory_<TFirstCate, TSecondCate, TRemainCates...>
     {
@@ -39,33 +36,21 @@ namespace MetaNN
     using OperCateCal = typename OperCategory_<TOpTag, TPolicy, DataCategory<TOperands>...>::type;
 
     // ElementType
-    template <typename TOpTag, typename...TOperands>
-    struct OperElementType_
-    {
-        static_assert(DependencyFalse<TOpTag>, "Operand container is empty");
-    };
-
     template <typename TOpTag, typename TOp1, typename...TOperands>
-    struct OperElementType_<TOpTag, TOp1, TOperands...>
+    struct OperElementType_
     {
         using type = typename TOp1::ElementType;
     };
 
     // DeviceType
-    template <typename TOpTag, typename...TOperands>
-    struct OperDeviceType_
-    {
-        static_assert(DependencyFalse<TOpTag>, "Operand container is empty");
-    };
-
     template <typename TOpTag, typename TOp1, typename...TOperands>
-    struct OperDeviceType_<TOpTag, TOp1, TOperands...>
+    struct OperDeviceType_
     {
         using type = typename TOp1::DeviceType;
     };
 
     // operator auxiliary parameters
-    template <typename TOpTag, typename TCate>
+    template <typename TOpTag, typename TElem, typename TCate>
     class OperAuxParams
     {
     public:
@@ -152,8 +137,8 @@ namespace MetaNN
     class OperShapeInfo
     {
     public:
-        template <typename... TOperands>
-        OperShapeInfo(const OperAuxParams<TOpTag, TCate>&, const TOperands&... operands)
+        template <typename TOperAuxParams, typename... TOperands>
+        OperShapeInfo(const TOperAuxParams&, const TOperands&... operands)
             : m_shape(NSOperShapeInfo::CommonShape((operands.Shape())...))
         {}
 

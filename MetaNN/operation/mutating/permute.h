@@ -129,9 +129,8 @@ namespace MetaNN
     {
         constexpr static size_t uDim = TCate::DimNum;
     public:
-        template <typename TOperand>
-        OperShapeInfo(const OperAuxParams<OpTags::Permute, TCate>&,
-                      const TOperand& operand)
+        template <typename TOperAuxParams, typename TOperand>
+        OperShapeInfo(const TOperAuxParams&, const TOperand& operand)
         {
             constexpr auto dims = PolicySelect<DimPolicy, TPolicies>::DimArray;
             auto prevShape = operand.Shape();

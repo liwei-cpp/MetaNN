@@ -14,7 +14,9 @@ class GenLossOperShapeInfo
 {
 public:
     template <typename TOpTag, typename THead, typename...TRemain>
-    GenLossOperShapeInfo(const OperAuxParams<TOpTag, CategoryTags::Tensor<0>>&,
+    GenLossOperShapeInfo(const OperAuxParams<TOpTag,
+                                             typename THead::ElementType,
+                                             CategoryTags::Tensor<0>>&,
                          const THead& head, const TRemain&... rem)
     { }
     

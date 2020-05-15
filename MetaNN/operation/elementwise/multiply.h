@@ -163,10 +163,10 @@ namespace NSCaseGen
 template <typename TOp1, typename TOp2>
 constexpr bool IsValidOper<OpTags::MultiplyWithNum, TOp1, TOp2> = OperAddWithNum::Valid<TOp1, TOp2>();
 
-template <typename TCate>
-struct OperAuxParams<OpTags::MultiplyWithNum, TCate> : public OperAuxValue<double>
+template <typename TElem, typename TCate>
+struct OperAuxParams<OpTags::MultiplyWithNum, TElem, TCate> : public OperAuxValue<TElem>
 {
-    using TBase = OperAuxValue<double>;
+    using TBase = OperAuxValue<TElem>;
     using TBase::TBase;
     using TBase::operator =;
 };
@@ -198,14 +198,18 @@ auto operator* (TP1&& p_m1, TP2&& p_m2)
         {
             using rawOp = RemConstRef<TP2>;
             using ResType = Operation<OpTags::MultiplyWithNum, OperandContainer<rawOp>>;
-            OperAuxParams<OpTags::MultiplyWithNum, OperCateCal<OpTags::MultiplyWithNum, PolicyContainer<>, rawOp>> params(p_m1);
+            OperAuxParams<OpTags::MultiplyWithNum,
+                          typename rawOp::ElementType,
+                          OperCateCal<OpTags::MultiplyWithNum, PolicyContainer<>, rawOp>> params(p_m1);
             return ResType(std::move(params), std::forward<TP2>(p_m2));
         }
         else if constexpr (IsValidCategoryTag<DataCategory<TP1>> && !IsValidCategoryTag<DataCategory<TP2>>)
         {
             using rawOp = RemConstRef<TP1>;
             using ResType = Operation<OpTags::MultiplyWithNum, OperandContainer<rawOp>>;
-            OperAuxParams<OpTags::MultiplyWithNum, OperCateCal<OpTags::MultiplyWithNum, PolicyContainer<>, rawOp>> params(p_m2);
+            OperAuxParams<OpTags::MultiplyWithNum,
+                          typename rawOp::ElementType,
+                          OperCateCal<OpTags::MultiplyWithNum, PolicyContainer<>, rawOp>> params(p_m2);
             return ResType(std::move(params), std::forward<TP1>(p_m1));
         }
         else

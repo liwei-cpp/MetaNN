@@ -162,10 +162,10 @@ template <typename TNumber, typename TOper>
 constexpr bool IsValidOper<OpTags::DivideFromNum, TNumber, TOper>
     = OperDivideFromNum::Valid<TNumber, TOper>();
 
-template <typename TCate>
-struct OperAuxParams<OpTags::DivideFromNum, TCate> : public OperAuxValue<double>
+template <typename TElem, typename TCate>
+struct OperAuxParams<OpTags::DivideFromNum, TElem, TCate> : public OperAuxValue<TElem>
 {
-    using TBase = OperAuxValue<double>;
+    using TBase = OperAuxValue<TElem>;
     using TBase::TBase;
     using TBase::operator =;
 };
@@ -254,10 +254,10 @@ template <typename TOper, typename TNumber>
 constexpr bool IsValidOper<OpTags::DivideByNum, TOper, TNumber>
     = OperDivideByNum::Valid<TOper, TNumber>();
 
-template <typename TCate>
-struct OperAuxParams<OpTags::DivideByNum, TCate> : public OperAuxValue<double>
+template <typename TElem, typename TCate>
+struct OperAuxParams<OpTags::DivideByNum, TElem, TCate> : public OperAuxValue<TElem>
 {
-    using TBase = OperAuxValue<double>;
+    using TBase = OperAuxValue<TElem>;
     using TBase::TBase;
     using TBase::operator =;
 };
@@ -288,14 +288,16 @@ auto operator/ (TP1&& p_m1, TP2&& p_m2)
     {
         using rawOp = RemConstRef<TP2>;
         using ResType = Operation<OpTags::DivideFromNum, OperandContainer<rawOp>>;
-        OperAuxParams<OpTags::DivideFromNum, OperCateCal<OpTags::DivideFromNum, PolicyContainer<>, rawOp>> params(p_m1);
+        OperAuxParams<OpTags::DivideFromNum, typename rawOp::ElementType,
+                      OperCateCal<OpTags::DivideFromNum, PolicyContainer<>, rawOp>> params(p_m1);
         return ResType(std::move(params), std::forward<TP2>(p_m2));
     }
     else if constexpr (IsValidOper<OpTags::DivideByNum, TP1, TP2>)
     {
         using rawOp = RemConstRef<TP1>;
         using ResType = Operation<OpTags::DivideByNum, OperandContainer<rawOp>>;
-        OperAuxParams<OpTags::DivideByNum, OperCateCal<OpTags::DivideByNum, PolicyContainer<>, rawOp>> params(p_m2);
+        OperAuxParams<OpTags::DivideByNum, typename rawOp::ElementType,
+                      OperCateCal<OpTags::DivideByNum, PolicyContainer<>, rawOp>> params(p_m2);
         return ResType(std::move(params), std::forward<TP1>(p_m1));
     }
     else

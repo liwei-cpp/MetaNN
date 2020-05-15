@@ -168,10 +168,10 @@ namespace NSCaseGen
 template <typename TOp1, typename TOp2>
 constexpr bool IsValidOper<OpTags::AddWithNum, TOp1, TOp2> = OperAddWithNum::Valid<TOp1, TOp2>();
 
-template <typename TCate>
-struct OperAuxParams<OpTags::AddWithNum, TCate> : public OperAuxValue<double>
+template <typename TElem, typename TCate>
+struct OperAuxParams<OpTags::AddWithNum, TElem, TCate> : public OperAuxValue<TElem>
 {
-    using TBase = OperAuxValue<double>;
+    using TBase = OperAuxValue<TElem>;
     using TBase::TBase;
     using TBase::operator =;
 };
@@ -203,14 +203,17 @@ auto operator+ (TP1&& p_m1, TP2&& p_m2)
         {
             using rawOp = RemConstRef<TP2>;
             using ResType = Operation<OpTags::AddWithNum, OperandContainer<rawOp>>;
-            OperAuxParams<OpTags::AddWithNum, OperCateCal<OpTags::AddWithNum, PolicyContainer<>, rawOp>> params(p_m1);
+            OperAuxParams<OpTags::AddWithNum,
+                          typename rawOp::ElementType,
+                          OperCateCal<OpTags::AddWithNum, PolicyContainer<>, rawOp>> params(p_m1);
             return ResType(std::move(params), std::forward<TP2>(p_m2));
         }
         else if constexpr (IsValidCategoryTag<DataCategory<TP1>> && !IsValidCategoryTag<DataCategory<TP2>>)
         {
             using rawOp = RemConstRef<TP1>;
             using ResType = Operation<OpTags::AddWithNum, OperandContainer<rawOp>>;
-            OperAuxParams<OpTags::AddWithNum, OperCateCal<OpTags::AddWithNum, PolicyContainer<>, rawOp>> params(p_m2);
+            OperAuxParams<OpTags::AddWithNum, typename rawOp::ElementType,
+                          OperCateCal<OpTags::AddWithNum, PolicyContainer<>, rawOp>> params(p_m2);
             return ResType(std::move(params), std::forward<TP1>(p_m1));
         }
         else

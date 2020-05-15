@@ -244,8 +244,8 @@ namespace MetaNN
         using type = CategoryTags::Tensor<dimBitArray.size()>;
     };
 
-    template <typename TCate>
-    class OperAuxParams<OpTags::Tile, TCate>
+    template <typename TElem, typename TCate>
+    class OperAuxParams<OpTags::Tile, TElem, TCate>
     {
     public:
         OperAuxParams(Shape<TCate::DimNum> aimShape)
@@ -265,9 +265,8 @@ namespace MetaNN
     class OperShapeInfo<OpTags::Tile, TCate, TPolicy>
     {
     public:
-        template <typename TOp>
-        OperShapeInfo(const OperAuxParams<OpTags::Tile, TCate>& param,
-                      const TOp& op)
+        template <typename TOperAuxParams, typename TOp>
+        OperShapeInfo(const TOperAuxParams& param, const TOp& op)
             : m_shape(param.GetShape())
         { }
 
@@ -303,7 +302,9 @@ namespace MetaNN
         using rawOp = RemConstRef<TP>;
         using ResType = Operation<OpTags::Tile, OperandContainer<rawOp>,
                                   PolicyContainer<TDimBits>>;
-        return ResType(OperAuxParams<OpTags::Tile, CategoryTags::Tensor<AimDim>>(std::move(aimShape)),
+        return ResType(OperAuxParams<OpTags::Tile,
+                                     typename rawOp::ElementType,
+                                     CategoryTags::Tensor<AimDim>>(std::move(aimShape)),
                        std::forward<TP>(oper));
     }
 }

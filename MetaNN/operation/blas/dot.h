@@ -110,10 +110,8 @@ namespace OperDot::NSCaseGen
     class OperShapeInfo<OpTags::Dot, TCate, TPolicies>
     {
     public:
-        template <typename TOperand1, typename TOperand2>
-        OperShapeInfo(const OperAuxParams<OpTags::Dot, TCate>&,
-                      const TOperand1& operand1,
-                      const TOperand2& operand2)
+        template <typename TOperAuxParams, typename TOperand1, typename TOperand2>
+        OperShapeInfo(const TOperAuxParams&, const TOperand1& operand1, const TOperand2& operand2)
         {
             if constexpr(TCate::DimNum > 0)
             {

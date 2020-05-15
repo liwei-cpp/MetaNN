@@ -56,8 +56,8 @@ namespace OperSlice::NSCaseGen
         using type = CategoryTags::Tensor<TOperand::DimNum - 1>;
     };
     
-    template <typename TCate>
-    struct OperAuxParams<OpTags::Slice, TCate>
+    template <typename TElem, typename TCate>
+    struct OperAuxParams<OpTags::Slice, TElem, TCate>
     {
         OperAuxParams(size_t p_elemID)
             : m_elemID(p_elemID) {}
@@ -74,8 +74,8 @@ namespace OperSlice::NSCaseGen
     class OperShapeInfo<OpTags::Slice, TCate, TPolicies>
     {
     public:
-        template <typename TOperand>
-        OperShapeInfo(const OperAuxParams<OpTags::Slice, TCate>&, const TOperand& operand)
+        template <typename TOperAuxParams, typename TOperand>
+        OperShapeInfo(const TOperAuxParams&, const TOperand& operand)
         {
             static_assert(TCate::DimNum + 1 == DataCategory<TOperand>::DimNum);
             if constexpr (TCate::DimNum != 0)
