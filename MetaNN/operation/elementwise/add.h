@@ -173,7 +173,7 @@ struct OperAuxParams<OpTags::AddWithNum, TElem, TCate> : public OperAuxValue<TEl
 {
     using TBase = OperAuxValue<TElem>;
     using TBase::TBase;
-    using TBase::operator =;
+    using TBase::operator==;
 };
 
 template <>
