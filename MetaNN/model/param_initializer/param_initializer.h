@@ -1,6 +1,9 @@
 #pragma once
 #include <MetaNN/data_copy/data_copy.h>
 #include <MetaNN/model/facilities/weight_buffer.h>
+#include <map>
+#include <string>
+
 namespace MetaNN
 {
     template <typename TElem, typename TFillers>
@@ -55,10 +58,32 @@ namespace MetaNN
             using AimType = Tensor<TElem, DeviceTags::CPU, TParamCate::DimNum>;
             return m_weightBuffer.IsExist<AimType>(name);
         }
+        
+        void AddToNameMap(const std::string& layerName, const std::string& paramName)
+        {
+            if (auto it = m_nameMap.find(layerName);
+                it != m_nameMap.end())
+            {
+                if (it->second != paramName)
+                    throw std::runtime_error("Parameter name conflict.");
+            }
+            else
+            {
+                m_nameMap.insert({layerName, paramName});
+            }
+        }
+        
+        const auto& LayerName2ParamName(const std::string& layerName) const
+        {
+            auto it = m_nameMap.find(layerName);
+            if (it == m_nameMap.end()) return layerName;
+            else return it->second;
+        }
     
     private:
         TFillers m_filler;
         WeightBuffer m_weightBuffer;
+        std::map<std::string, std::string> m_nameMap;
     };
     
     namespace NSMakeInitializer

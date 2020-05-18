@@ -12,7 +12,7 @@ namespace
 
     void test_bias_layer1()
     {
-        cout << "Test bias layer case 1 ...\t";
+        cout << "Test bias layer case 1 ...\t" << flush;
         using RootLayer = MakeInferLayer<BiasLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
@@ -24,7 +24,7 @@ namespace
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
 
         auto mat = GenTensor<CheckElement>(0, 1, 2, 1);
-        filler.SetParam("root", mat);
+        filler.SetParam("root/param", mat);
         
         layer.Init(filler, loadBuffer);
 
@@ -42,7 +42,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        auto* w = loadBuffer.TryGet<CategoryTags::Tensor<2>>("root");
+        auto* w = loadBuffer.TryGet<CategoryTags::Tensor<2>>("root/param");
         assert(w);
         
         auto wInfo = *w;
@@ -61,7 +61,7 @@ namespace
     
     void test_bias_layer2()
     {
-        cout << "Test bias layer case 2 ...\t";
+        cout << "Test bias layer case 2 ...\t" << flush;
         using RootLayer = MakeInferLayer<BiasLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsUpdate, "Test Error");
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
@@ -72,7 +72,7 @@ namespace
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
 
         auto mat = GenTensor<CheckElement>(0, 1, 1, 2);
-        filler.SetParam("root", mat);
+        filler.SetParam("root/param", mat);
         
         layer.Init(filler, loadBuffer);
     
@@ -93,14 +93,14 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
 
         cout << "done" << endl;
     }
     
     void test_bias_layer3()
     {
-        cout << "Test bias layer case 3 ...\t";
+        cout << "Test bias layer case 3 ...\t" << flush;
         using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
@@ -112,7 +112,7 @@ namespace
         w.SetValue(1, 0, -0.13f);
 
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root", w);
+        initializer.SetParam("root/param", w);
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
 
@@ -156,14 +156,14 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
 
         cout << "done" << endl;
     }
     
     void test_bias_layer4()
     {
-        cout << "Test bias layer case 4 ...\t";
+        cout << "Test bias layer case 4 ...\t" << flush;
         using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
@@ -175,7 +175,7 @@ namespace
         w.SetValue(1, 0, -0.13f);
 
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root", w);
+        initializer.SetParam("root/param", w);
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
 
@@ -222,14 +222,14 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
 
         cout << "done" << endl;
     }
     
     void test_bias_layer5()
     {
-        cout << "Test bias layer case 5 ...\t";
+        cout << "Test bias layer case 5 ...\t" << flush;
         using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate, "Test Error");
         static_assert(RootLayer::IsFeedbackOutput, "Test Error");
@@ -241,7 +241,7 @@ namespace
         w.SetValue(1, 0, -0.13f);
         
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root", w);
+        initializer.SetParam("root/param", w);
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
 
@@ -310,13 +310,13 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
         cout << "done" << endl;
     }
     
     void test_bias_layer6()
     {
-        cout << "Test bias layer case 6 ...\t";
+        cout << "Test bias layer case 6 ...\t" << flush;
         
         struct RootFiller;
         using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
@@ -328,9 +328,9 @@ namespace
         auto initializer = MakeInitializer<CheckElement>(InitializerKV<RootFiller>(ConstantFiller{0}));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
     
-        auto val = loadBuffer.TryGet<CategoryTags::Matrix>("root");
+        auto val = loadBuffer.TryGet<CategoryTags::Matrix>("root/param");
         assert(val);
     
         for (size_t i = 0; i < val->Shape()[0]; ++i)
@@ -345,7 +345,7 @@ namespace
     
     void test_bias_layer7()
     {
-        cout << "Test bias layer case 7 ...\t";
+        cout << "Test bias layer case 7 ...\t" << flush;
         struct RootFiller;
         using RootLayer = MakeTrainLayer<BiasLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsUpdate, "Test Error");
@@ -356,9 +356,9 @@ namespace
         auto initializer = MakeInitializer<CheckElement>(InitializerKV<RootFiller>(ConstantFiller{1.5}));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
     
-        auto val = loadBuffer.TryGet<CategoryTags::Matrix>("root");
+        auto val = loadBuffer.TryGet<CategoryTags::Matrix>("root/param");
         assert(val);
     
         for (size_t i = 0; i < val->Shape()[0]; ++i)

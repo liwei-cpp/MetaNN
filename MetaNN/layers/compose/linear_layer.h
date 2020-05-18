@@ -41,8 +41,8 @@ namespace MetaNN
     public:
         LinearLayer(const std::string& p_name, WeightParamShapeType weightShape, BiasParamShapeType biasShape)
             : TBase(TBase::CreateSublayers()
-                        .template Set<WeightParamSublayer>(p_name + "/weight", p_name + "/weight", std::move(weightShape))
-                        .template Set<BiasParamSublayer>(p_name + "/bias", p_name + "/bias", std::move(biasShape))
+                        .template Set<WeightParamSublayer>(p_name + "/weight", std::move(weightShape))
+                        .template Set<BiasParamSublayer>(p_name + "/bias", std::move(biasShape))
                         .template Set<AddSublayer>(p_name + "/add")
                         .template Set<DotSublayer>(p_name + "/dot"))
         { }

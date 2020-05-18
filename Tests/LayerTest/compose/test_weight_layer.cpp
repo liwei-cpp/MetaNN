@@ -12,7 +12,7 @@ namespace
     
     void test_weight_layer1()
     {
-        cout << "Test weight layer case 1 ...\t";
+        cout << "Test weight layer case 1 ...\t" << flush;
         using RootLayer = MakeInferLayer<WeightLayer, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(!RootLayer::IsUpdate);
@@ -24,7 +24,7 @@ namespace
         w.SetValue(0, 1, -0.41f);
     
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root", w);
+        initializer.SetParam("root/param", w);
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
     
@@ -44,7 +44,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
 
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
@@ -52,7 +52,7 @@ namespace
     
     void test_weight_layer2()
     {
-        cout << "Test weight layer case 2 ...\t";
+        cout << "Test weight layer case 2 ...\t" << flush;
         using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
@@ -64,7 +64,7 @@ namespace
         w.SetValue(0, 1, -0.41f);
     
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root", w);
+        initializer.SetParam("root/param", w);
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
     
@@ -105,7 +105,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
         LayerNeutralInvariant(layer);
 
         cout << "done" << endl;
@@ -113,7 +113,7 @@ namespace
     
     void test_weight_layer3()
     {
-        cout << "Test weight layer case 3 ...\t";
+        cout << "Test weight layer case 3 ...\t" << flush;
         using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
@@ -125,7 +125,7 @@ namespace
         w.SetValue(1, 0, 0.1f); w.SetValue(1, 1, 1.17f);
 
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root", w);
+        initializer.SetParam("root/param", w);
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
 
@@ -172,7 +172,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
 
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
@@ -180,7 +180,7 @@ namespace
     
     void test_weight_layer4()
     {
-        cout << "Test weight layer case 4 ...\t";
+        cout << "Test weight layer case 4 ...\t" << flush;
         using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
@@ -190,7 +190,7 @@ namespace
         auto w = GenTensor<CheckElement>(0.1f, 0.5f, 8, 4);
     
         auto initializer = MakeInitializer<CheckElement>();
-        initializer.SetParam("root", w);
+        initializer.SetParam("root/param", w);
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         layer.Init(initializer, loadBuffer);
 
@@ -265,7 +265,7 @@ namespace
 
         loadBuffer.Clear();
         layer.SaveWeights(loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
 
         LayerNeutralInvariant(layer);
         cout << "done" << endl;
@@ -274,16 +274,16 @@ namespace
     struct RootFiller;
     void test_weight_layer5()
     {
-        cout << "Test weight layer case 5 ...\t";
+        cout << "Test weight layer case 5 ...\t" << flush;
         using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         RootLayer layer("root", 800, 400);
 
         auto initializer = MakeInitializer<CheckElement>(InitializerKV<RootFiller>(UniformFiller{-1, 1}));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         LayerInit(layer, initializer, loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
 
-        auto& val = *(loadBuffer.TryGet<CategoryTags::Matrix>("root"));
+        auto& val = *(loadBuffer.TryGet<CategoryTags::Matrix>("root/param"));
     
         float mean = 0;
         for (size_t i = 0; i < val.Shape()[0]; ++i)
@@ -312,16 +312,16 @@ namespace
     
     void test_weight_layer6()
     {
-        cout << "Test weight layer case 6 ...\t";
+        cout << "Test weight layer case 6 ...\t" << flush;
         using RootLayer = MakeTrainLayer<WeightLayer, CommonInputMap, PUpdate, PFeedbackOutput, PInitializerIs<RootFiller>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         RootLayer layer("root", 400, 200);
 
         auto initializer = MakeInitializer<CheckElement>(InitializerKV<RootFiller>(UniformFiller{-1.5, 1.5}));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         LayerInit(layer, initializer, loadBuffer);
-        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root"));
+        assert(loadBuffer.IsParamExist<CategoryTags::Matrix>("root/param"));
 
-        auto& val = *(loadBuffer.TryGet<CategoryTags::Matrix>("root"));
+        auto& val = *(loadBuffer.TryGet<CategoryTags::Matrix>("root/param"));
     
         float mean = 0;
         for (size_t i = 0; i < val.Shape()[0]; ++i)

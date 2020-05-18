@@ -52,7 +52,7 @@ namespace MetaNN
             static auto ctor(const std::string& p_name, TSublayerCont&& sublayerCont, TWeightShape&& weightShape, TParams&&... params)
             {
                 return std::forward<TSublayerCont>(sublayerCont)
-                        .template Set<WeightParamSublayer>(p_name + "/weight", p_name + "/weight", std::forward<TWeightShape>(weightShape))
+                        .template Set<WeightParamSublayer>(p_name + "/weight", std::forward<TWeightShape>(weightShape))
                         .template Set<DotSublayer>(p_name + "/dot")
                         .template Set<ActivateSublayer>(p_name + "/act", std::forward<TParams>(params)...);
             }

@@ -21,7 +21,7 @@ namespace
         auto mat = GenTensor<CheckElement>(0, 1, 10, 3);
         filler.SetParam("root", mat);
         
-        RootLayer layer("root", "root", 10, 3);
+        RootLayer layer("root", 10, 3);
         layer.Init(filler, loadBuffer);
         
         LoadBuffer<CheckElement, CheckDevice> weightSaver;
@@ -57,7 +57,7 @@ namespace
                 (InitializerKV<RootFiller>(ConstantFiller{3}));
         LoadBuffer<CheckElement, CheckDevice> loadBuffer;
         
-        RootLayer layer("root", "root", 10, 3);
+        RootLayer layer("root", 10, 3);
         layer.Init(filler, loadBuffer);
         
         LoadBuffer<CheckElement, CheckDevice> weightSaver;
@@ -92,7 +92,7 @@ namespace
         auto mat = GenTensor<CheckElement>(0, 1, 10, 3);
         loadBuffer.Set("root", mat);
 
-        RootLayer layer("root", "root", 10, 3);
+        RootLayer layer("root", 10, 3);
         layer.Init(filler, loadBuffer);
         
         LoadBuffer<CheckElement, CheckDevice> weightSaver;
@@ -118,7 +118,7 @@ namespace
         auto mat = GenTensor<CheckElement>(0, 1, 10, 3);
         loadBuffer.Set("root", mat);
 
-        RootLayer layer("root", "root", 10, 3);
+        RootLayer layer("root", 10, 3);
         layer.Init(filler, loadBuffer);
         
         auto check = layer.FeedForward(LayerInputCont<RootLayer>());
@@ -143,7 +143,7 @@ namespace
         auto mat = GenTensor<CheckElement>(0, 1, 10, 3);
         loadBuffer.Set("root", mat);
 
-        RootLayer layer("root", "root", 10, 3);
+        RootLayer layer("root", 10, 3);
         layer.Init(filler, loadBuffer);
         
         auto fpRes = layer.FeedForward(LayerInputCont<RootLayer>());
@@ -173,7 +173,7 @@ namespace
         auto mat = GenTensor<CheckElement>(0.1, 3, 10, 3);
         loadBuffer.Set("root", mat);
 
-        RootLayer layer("root", "root", 10, 3);
+        RootLayer layer("root", 10, 3);
         layer.Init(filler, loadBuffer);
         
         auto fpRes = layer.FeedForward(LayerInputCont<RootLayer>());
@@ -225,7 +225,7 @@ namespace
         auto mat = GenTensor<CheckElement>(0, 1, 10, 3);
         loadBuffer.Set("root", mat);
 
-        RootLayer layer("root", "root", 10, 3);
+        RootLayer layer("root", 10, 3);
         layer.Init(filler, loadBuffer);
         
         auto fpRes = layer.FeedForward(LayerInputCont<RootLayer>());
@@ -247,7 +247,7 @@ namespace
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(!RootLayer::IsUpdate);
         
-        RootLayer layer("root", "root", 10, 3);
+        RootLayer layer("root", 10, 3);
         
         auto fpRes = layer.FeedForward(LayerInputCont<RootLayer>());
         auto w = fpRes.template Get<LayerOutput>();

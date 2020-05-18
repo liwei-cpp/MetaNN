@@ -34,9 +34,8 @@ namespace MetaNN
 
     public:
         template <typename... TParams>
-        ParamSourceLayer(std::string name, std::string paramName, TParams&&... p_params)
+        ParamSourceLayer(std::string name, TParams&&... p_params)
             : m_name(std::move(name))
-            , m_paramName(std::move(paramName))
         {
             if constexpr (IsPrincipal)
             {
@@ -53,6 +52,7 @@ namespace MetaNN
         {
             if constexpr (IsPrincipal)
             {
+                m_paramName = initializer.LayerName2ParamName(m_name);
                 if (auto matPtr = loadBuffer.template TryGet<ParamCategory>(m_paramName); matPtr)
                 {
                     if (matPtr->Shape() != m_dataShape)
@@ -79,7 +79,7 @@ namespace MetaNN
                     }
                     else
                     {
-                        throw std::runtime_error("Cannot get the initializer.");
+                        throw std::runtime_error("Cannot get the initializer for layer: " + m_name + " (" + m_paramName + ")");
                     }
                 }
                 loadBuffer.Set(m_paramName, m_data);
