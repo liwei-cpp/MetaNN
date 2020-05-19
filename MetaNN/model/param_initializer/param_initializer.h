@@ -73,11 +73,14 @@ namespace MetaNN
             }
         }
         
-        const auto& LayerName2ParamName(const std::string& layerName) const
+        auto LayerName2ParamName(const std::string& layerName) const
         {
-            auto it = m_nameMap.find(layerName);
-            if (it == m_nameMap.end()) return layerName;
-            else return it->second;
+            for (auto it = m_nameMap.rbegin(); it != m_nameMap.rend(); ++it)
+            {
+                if (layerName.find(it->first) != 0) continue;
+                return it->second + layerName.substr(it->first.size());
+            }
+            return layerName;
         }
     
     private:
