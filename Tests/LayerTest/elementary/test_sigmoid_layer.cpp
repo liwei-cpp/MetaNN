@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
+    using CommonInputMap = LayerInMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
     void test_sigmoid_layer1()
     {
         cout << "Test sigmoid layer case 1 ...\t";

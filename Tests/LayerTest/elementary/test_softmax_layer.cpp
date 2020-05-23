@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
+    using CommonInputMap = LayerInMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
     
     void test_softmax_layer1()
     {
@@ -194,7 +194,7 @@ namespace
         cout << "done" << endl;
     }
     
-    using InputMap2 = LayerIOMap<LayerKV<LayerInput, Tensor<CheckElement, CheckDevice, 3>>>;
+    using InputMap2 = LayerInMap<LayerKV<LayerInput, Tensor<CheckElement, CheckDevice, 3>>>;
     
     void test_softmax_layer5()
     {

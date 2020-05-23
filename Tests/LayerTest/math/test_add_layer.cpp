@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+    using CommonInputMap = LayerInMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                      >;
     void test_add_layer1()
@@ -186,7 +186,7 @@ namespace
     {
         cout << "Test add layer case 4 (add with number)...\t";
         
-        using InputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+        using InputMap = LayerInMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
                                     LayerKV<RightOperand, int>
                                    >;
 
@@ -238,7 +238,7 @@ namespace
     {
         cout << "Test add layer case 5 (add with number 2)...\t";
         
-        using InputMap = LayerIOMap<LayerKV<LeftOperand, int>,
+        using InputMap = LayerInMap<LayerKV<LeftOperand, int>,
                                     LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                    >;
 

@@ -1,5 +1,7 @@
 #pragma once
 #include <MetaNN/facilities/cont_metafuns/helpers.h>
+#include <MetaNN/facilities/cont_metafuns/map.h>
+#include <MetaNN/facilities/cont_metafuns/sequential.h>
 #include <MetaNN/facilities/var_type_dict.h>
 
 namespace MetaNN
@@ -11,41 +13,32 @@ namespace MetaNN
     { };
     
     template <typename... TLayerKVs>
-    struct LayerIOMap : TLayerKVs...
+    struct LayerInMap
     {
-        using TLayerKVs::apply...;
-        static NullParameter apply(...);
-        
         template <typename TKey>
-        struct Find_
-        {
-            using type = decltype(LayerIOMap::apply((TKey*)nullptr));
-        };
-    
-        template <typename TKey>
-        using Find = typename Find_<TKey>::type;
+        using Find = Map::Find<LayerInMap, TKey, NullParameter>;
     };
     
     template <typename TLayerPorts>
-    struct EmptyLayerIOMap_;
+    struct EmptyLayerInMap_;
     
     template <typename... TKeys>
-    struct EmptyLayerIOMap_<LayerPortSet<TKeys...>>
+    struct EmptyLayerInMap_<LayerPortSet<TKeys...>>
     {
-        using type = LayerIOMap<LayerKV<TKeys, NullParameter>...>;
+        using type = LayerInMap<LayerKV<TKeys, NullParameter>...>;
     };
     
-    template <typename TIoMap>
-    struct IsEmptyLayerIOMap_;
+    template <typename TInMap>
+    struct IsEmptyLayerInMap_;
     
     template <typename... TKVs>
-    struct IsEmptyLayerIOMap_<LayerIOMap<TKVs...>>
+    struct IsEmptyLayerInMap_<LayerInMap<TKVs...>>
     {
         constexpr static bool value = (std::is_same_v<typename TKVs::ValueType, NullParameter> && ...);
     };
     
-    template <typename TIoMap>
-    constexpr bool IsEmptyLayerIOMap = IsEmptyLayerIOMap_<TIoMap>::value;
+    template <typename TInMap>
+    constexpr bool IsEmptyLayerInMap = IsEmptyLayerInMap_<TInMap>::value;
     
     template <typename TSet>
     struct LayerContainer_;
@@ -76,8 +69,10 @@ namespace MetaNN
     struct CheckInputMapAvailable_;
 
     template <typename... TKVs, typename TKeySet>
-    struct CheckInputMapAvailable_<LayerIOMap<TKVs...>, TKeySet>
+    struct CheckInputMapAvailable_<LayerInMap<TKVs...>, TKeySet>
     {
-        constexpr static bool value = (Set::HasKey<TKeySet, typename TKVs::KeyType> && ...);
+        constexpr static bool value1 = (sizeof...(TKVs) == Sequential::Size<TKeySet>);
+        constexpr static bool value2 = (Set::HasKey<TKeySet, typename TKVs::KeyType> && ...);
+        constexpr static bool value = value1 && value2;
     };
 }

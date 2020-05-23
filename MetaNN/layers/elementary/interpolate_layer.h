@@ -20,7 +20,7 @@ namespace MetaNN
                                           struct InterpolateLayerLambda>;
         using OutputPortSet = LayerPortSet<struct LayerOutput>;
         using InputMap = typename std::conditional_t<std::is_same_v<TInputs, NullParameter>,
-                                                     EmptyLayerIOMap_<InputPortSet>,
+                                                     EmptyLayerInMap_<InputPortSet>,
                                                      Identity_<TInputs>>::type;
         static_assert(CheckInputMapAvailable_<InputMap, InputPortSet>::value);
         

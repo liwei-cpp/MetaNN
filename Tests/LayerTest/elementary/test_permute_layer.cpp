@@ -44,7 +44,7 @@ namespace
         cout << "done" << endl;
     }
 
-    using InputMap1 = LayerIOMap<LayerKV<LayerInput, Tensor<CheckElement, CheckDevice, 3>>>;
+    using InputMap1 = LayerInMap<LayerKV<LayerInput, Tensor<CheckElement, CheckDevice, 3>>>;
     void test_permute_layer2()
     {
         cout << "Test permute layer case 2 ...\t";
@@ -164,7 +164,7 @@ namespace
         cout << "done" << endl;
     }
 
-    using InputMap2 = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
+    using InputMap2 = LayerInMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>>;
     void test_permute_layer5()
     {
         cout << "Test transpose layer case 2 ...\t";

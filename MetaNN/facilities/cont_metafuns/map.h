@@ -36,24 +36,24 @@ namespace NSCreateFromItems
 // Find ===================================================================================
 namespace NSFind
 {
-    template <typename TCon>
+    template <typename TCon, typename TDefault>
     struct map_;
         
-    template <template <typename... > typename TCon, typename...TItem>
-    struct map_<TCon<TItem...>> : TItem...
+    template <template <typename... > typename TCon, typename...TItem, typename TDefault>
+    struct map_<TCon<TItem...>, TDefault> : TItem...
     {
         using TItem::apply ...;
-        static void apply(...);
+        static TDefault apply(...);
     };
 }
-    template <typename TCon, typename TKey>
+    template <typename TCon, typename TKey, typename TDefault>
     struct Find_
     {
-        using type = decltype(NSFind::map_<TCon>::apply((TKey*)nullptr));
+        using type = decltype(NSFind::map_<TCon, TDefault>::apply((TKey*)nullptr));
     };
     
-    template <typename TCon, typename TKey>
-    using Find = typename Find_<TCon, TKey>::type;
+    template <typename TCon, typename TKey, typename TDefault = void>
+    using Find = typename Find_<TCon, TKey, TDefault>::type;
 
 // HasKey =================================================================================
     template <typename TCon, typename TKey>

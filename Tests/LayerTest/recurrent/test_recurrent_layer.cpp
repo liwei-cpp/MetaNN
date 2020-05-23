@@ -109,7 +109,7 @@ namespace
         cout << "done" << endl;
     }
     
-    using SeqInputMap = LayerIOMap<LayerKV<LayerInput, Tensor<CheckElement, CheckDevice, 3>>,
+    using SeqInputMap = LayerInMap<LayerKV<LayerInput, Tensor<CheckElement, CheckDevice, 3>>,
                                    LayerKV<Previous<LayerOutput>, Matrix<CheckElement, CheckDevice>>>;
         
     void test_recurrent_layer2()
@@ -363,7 +363,7 @@ namespace
         cout << "done" << endl;
     }
 
-    using SeqInputMap2 = LayerIOMap<LayerKV<LeftOperand, Tensor<CheckElement, CheckDevice, 3>>,
+    using SeqInputMap2 = LayerInMap<LayerKV<LeftOperand, Tensor<CheckElement, CheckDevice, 3>>,
                                     LayerKV<RightOperand, Tensor<CheckElement, CheckDevice, 2>>,
                                     LayerKV<Previous<LayerOutput>, Matrix<CheckElement, CheckDevice>>>;
     void test_recurrent_layer7()
@@ -503,7 +503,7 @@ namespace
         cout << "done" << endl;
     }
 
-    using SeqInputMap3 = LayerIOMap<LayerKV<LeftOperand, Tensor<CheckElement, CheckDevice, 3>>,
+    using SeqInputMap3 = LayerInMap<LayerKV<LeftOperand, Tensor<CheckElement, CheckDevice, 3>>,
                                     LayerKV<RightOperand, Tensor<CheckElement, CheckDevice, 3>>,
                                     LayerKV<Previous<LayerOutput>, Matrix<CheckElement, CheckDevice>>>;
     void test_recurrent_layer9()

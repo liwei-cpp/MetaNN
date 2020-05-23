@@ -2,7 +2,7 @@
 #include <MetaNN/facilities/cont_metafuns/_.h>
 #include <MetaNN/layers/facilities/make_layer.h>
 #include <MetaNN/layers/facilities/policies.h>
-#include <MetaNN/layers/facilities/layer_io_map.h>
+#include <MetaNN/layers/facilities/layer_in_map.h>
 #include <MetaNN/layers/facilities/traits.h>
 #include <MetaNN/policies/_.h>
 #include <type_traits>
@@ -485,7 +485,7 @@ namespace NSSI
     struct InputTypeFillInConnect_<ClauseSeq<TCur, TRemain...>, TInFMap, TOutputCont, TInputDataMap>
     {
         using CurValueSeq = MultiMap::Find<TInFMap, TCur>;
-        using TCurDataMap = typename InputTypeFillInConnectHelper_<LayerIOMap<>, TInputDataMap, CurValueSeq>::type;
+        using TCurDataMap = typename InputTypeFillInConnectHelper_<LayerInMap<>, TInputDataMap, CurValueSeq>::type;
         using NewOutputCont = Sequential::PushBack<TOutputCont, TCurDataMap>;
         using type = typename InputTypeFillInConnect_<ClauseSeq<TRemain...>, TInFMap, NewOutputCont, TInputDataMap>::type;
     };
@@ -643,7 +643,7 @@ struct SublayerInstantiation_
                                                                           ClauseRefine::InternalFMap<InterConnects>>::type;
 
     /// Instantiation
-    using type = typename std::conditional_t<IsEmptyLayerIOMap<TInputs>,
+    using type = typename std::conditional_t<IsEmptyLayerInMap<TInputs>,
                                              NSSI::TrivalInst_<OrderedSublayers, TSublayerClauses, SublayerPolicyFinal>,
                                              NSSI::NontrivalInst_<TInputs, OrderedSublayers, TSublayerClauses, InConnects, InterConnects, SublayerPolicyFinal>>::type;
 
@@ -1077,7 +1077,7 @@ public:
     using InputPortSet = TInputPortSet;
     using OutputPortSet = TOutputPortSet;
     using InputMap = typename std::conditional_t<std::is_same_v<TInputMap, NullParameter>,
-                                                 EmptyLayerIOMap_<InputPortSet>,
+                                                 EmptyLayerInMap_<InputPortSet>,
                                                  Identity_<TInputMap>>::type;
     static_assert(CheckInputMapAvailable_<InputMap, InputPortSet>::value);
     

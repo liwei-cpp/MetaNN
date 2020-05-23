@@ -104,10 +104,10 @@ namespace MetaNN
         struct Wrapper2KernelInputMap_;
         
         template <typename... TKeys, typename... TValues, typename TSeqIdCont>
-        struct Wrapper2KernelInputMap_<LayerIOMap<LayerKV<TKeys, TValues>...>, TSeqIdCont>
+        struct Wrapper2KernelInputMap_<LayerInMap<LayerKV<TKeys, TValues>...>, TSeqIdCont>
         {
             using type = 
-                LayerIOMap<LayerKV<TKeys, 
+                LayerInMap<LayerKV<TKeys, 
                                    typename Wrapper2KernelInputMapHelper_<Map::Find<TSeqIdCont, TKeys>, IsPreviousPort<TKeys>, TValues>::type>...>;
         };
         
@@ -121,10 +121,10 @@ namespace MetaNN
         };
         
         template <typename... TKeys, typename... TValues, typename TSeqIDs>
-        struct CalKernelInputMap_<LayerIOMap<LayerKV<TKeys, TValues>...>, TSeqIDs>
+        struct CalKernelInputMap_<LayerInMap<LayerKV<TKeys, TValues>...>, TSeqIDs>
         {
             static_assert((IsPreviousPort<TKeys> || ...), "No Previous port in the input port set.");
-            using type = typename Wrapper2KernelInputMap_<LayerIOMap<LayerKV<TKeys, TValues>...>,
+            using type = typename Wrapper2KernelInputMap_<LayerInMap<LayerKV<TKeys, TValues>...>,
                                                           TSeqIDs>::type;
         };
         
@@ -132,8 +132,8 @@ namespace MetaNN
         constexpr static bool InputMapPortsetMatch = false;
         
         template <typename... TKeys, typename... TValues, typename TInputPortset>
-        constexpr static bool InputMapPortsetMatch<LayerIOMap<LayerKV<TKeys, TValues>...>, TInputPortset>
-            = Set::IsEqual<LayerIOMap<TKeys...>, TInputPortset>;
+        constexpr static bool InputMapPortsetMatch<LayerInMap<LayerKV<TKeys, TValues>...>, TInputPortset>
+            = Set::IsEqual<LayerInMap<TKeys...>, TInputPortset>;
 
         template <typename TInputMap, typename TPolicies>
         struct KernelGenerator_
@@ -161,7 +161,7 @@ namespace MetaNN
             using OutputPortSet = typename KernelType::OutputPortSet;
             
             using InputMap = typename std::conditional_t<std::is_same_v<KernelInputMap, NullParameter>,
-                                                         EmptyLayerIOMap_<InputPortSet>,
+                                                         EmptyLayerInMap_<InputPortSet>,
                                                          Identity_<TInputMap>>::type;
             static_assert(InputMapPortsetMatch<InputMap, InputPortSet>, "Invalid input port set.");
             static_assert(CheckPortOverLap_<InputPortSet, OutputPortSet>::value);
@@ -192,7 +192,7 @@ namespace MetaNN
         };
         
         template <typename... TKeys, typename... TValues>
-        struct ShapeDictHelper<true, LayerIOMap<LayerKV<TKeys, TValues>...>>
+        struct ShapeDictHelper<true, LayerInMap<LayerKV<TKeys, TValues>...>>
         {
             using shapeDictType = typename VarTypeDict<TKeys...>::template Values<RemConstRef<decltype(std::declval<TValues>().Shape())>...>;
             using type = std::stack<shapeDictType>;

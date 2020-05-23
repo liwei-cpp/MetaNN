@@ -3,7 +3,7 @@
 #include <stack>
 #include <type_traits>
 #include <MetaNN/facilities/var_type_dict.h>
-#include <MetaNN/layers/facilities/layer_io_map.h>
+#include <MetaNN/layers/facilities/layer_in_map.h>
 #include <MetaNN/facilities/cont_metafuns/sequential.h>
 
 namespace MetaNN::LayerTraits
@@ -68,7 +68,7 @@ auto PickItemFromCont(TCont&& cont)
     }
 }
 
-namespace NSLayerIOMapTrasfer
+namespace NSLayerInMapTrasfer
 {
 template <typename TVarTypeDictOutter, typename TVarTypeDictInner, typename... TKVs>
 struct CreateVarTypeDict_;
@@ -94,15 +94,15 @@ struct VarTypeDict2IOMap_;
 template <typename TVarTypeDict, typename... TKeys>
 struct VarTypeDict2IOMap_<TVarTypeDict, VarTypeDict<TKeys...>>
 {
-    using type = LayerIOMap<LayerKV<TKeys, typename TVarTypeDict::template ValueType<TKeys>>
+    using type = LayerInMap<LayerKV<TKeys, typename TVarTypeDict::template ValueType<TKeys>>
                             ...>;
 };
 
-template <typename TLayer, typename TLayerIOMap>
-struct LayerIOMapForwardTransfer_;
+template <typename TLayer, typename TLayerInMap>
+struct LayerInMapForwardTransfer_;
 
 template <typename TLayer, typename... TKVs>
-struct LayerIOMapForwardTransfer_<TLayer, LayerIOMap<TKVs...>>
+struct LayerInMapForwardTransfer_<TLayer, LayerInMap<TKVs...>>
 {
     using TVarTypeDictFill = typename CreateVarTypeDict_<std::tuple<>, std::tuple<>, TKVs...>::type;    
     using TForwardRes = decltype(std::declval<TLayer>().FeedForward(std::declval<TVarTypeDictFill>()));
@@ -112,7 +112,7 @@ struct LayerIOMapForwardTransfer_<TLayer, LayerIOMap<TKVs...>>
 }
 
 template <typename TLayer>
-using LayerOutputItemTypes = typename NSLayerIOMapTrasfer::LayerIOMapForwardTransfer_<TLayer, typename TLayer::InputMap>::type;
+using LayerOutputItemTypes = typename NSLayerInMapTrasfer::LayerInMapForwardTransfer_<TLayer, typename TLayer::InputMap>::type;
 
 template <typename TStoreType, bool store>
 using LayerInternalBuf = std::conditional_t<store, std::stack<TStoreType>, NullParameter>;

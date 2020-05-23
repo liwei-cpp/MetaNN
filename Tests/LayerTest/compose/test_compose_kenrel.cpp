@@ -244,7 +244,7 @@ namespace
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
         using Input2Type = TrivalTensor<Scalar<CheckElement, CheckDevice>, 2>;
-        using CheckInputs = LayerIOMap<LayerKV<Input1, Input1Type>,
+        using CheckInputs = LayerInMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
                                                      SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
@@ -294,15 +294,15 @@ namespace
         using Sublayer3Output = decltype(Sigmoid(declval<Sublayer2Output>()));
         using Sublayer4Output = decltype(Tanh(declval<Sublayer2Output>()));
 
-        using Layer1Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
+        using Layer1Final = AddLayer<LayerInMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
                                      PolicyContainer<PNoUpdate, PFeedbackOutput>>;
-        using Layer2Final = MultiplyLayer<LayerIOMap<LayerKV<RightOperand, Input1Type>, LayerKV<LeftOperand, Sublayer2Left>>,
+        using Layer2Final = MultiplyLayer<LayerInMap<LayerKV<RightOperand, Input1Type>, LayerKV<LeftOperand, Sublayer2Left>>,
                                           PolicyContainer<PUpdate, PFeedbackOutput>>;
-        using Layer3Final = SigmoidLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
+        using Layer3Final = SigmoidLayer<LayerInMap<LayerKV<LayerInput, Sublayer2Output>>,
                                          PolicyContainer<PFeedbackOutput>>;
-        using Layer4Final = TanhLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
+        using Layer4Final = TanhLayer<LayerInMap<LayerKV<LayerInput, Sublayer2Output>>,
                                       PolicyContainer<PFeedbackOutput>>;
-        using Layer5Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Sublayer3Output>, LayerKV<RightOperand, Sublayer4Output>>,
+        using Layer5Final = AddLayer<LayerInMap<LayerKV<LeftOperand, Sublayer3Output>, LayerKV<RightOperand, Sublayer4Output>>,
                                      PolicyContainer<PFeedbackOutput>>;
         static_assert(std::is_same_v<Check::type, std::tuple<Layer1Final, Layer2Final, Layer3Final, Layer4Final, Layer5Final>>);
         cout << "done" << endl;
@@ -314,7 +314,7 @@ namespace
         using namespace MetaNN::NSComposeKernel;
         using namespace MetaNN::Helper;
         
-        using CheckInputs = LayerIOMap<LayerKV<Input1, NullParameter>,
+        using CheckInputs = LayerInMap<LayerKV<Input1, NullParameter>,
                                        LayerKV<Input2, NullParameter>>;
         using CheckPolicyContainer = PolicyContainer<SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
                                                      SubPolicyContainer<Sublayer2, PFeedbackNoOutput>,
@@ -377,7 +377,7 @@ namespace
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
         using Input2Type = TrivalTensor<Scalar<CheckElement, CheckDevice>, 2>;
-        using CheckInputs = LayerIOMap<LayerKV<Input1, Input1Type>,
+        using CheckInputs = LayerInMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
                                                      SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
@@ -389,15 +389,15 @@ namespace
         using Sublayer3Output = decltype(Sigmoid(declval<Sublayer2Output>()));
         using Sublayer4Output = decltype(Tanh(declval<Sublayer2Output>()));
         
-        using Layer1Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
+        using Layer1Final = AddLayer<LayerInMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
                                      PolicyContainer<PNoUpdate, PFeedbackOutput>>;
-        using Layer2Final = MultiplyLayer<LayerIOMap<LayerKV<RightOperand, Input1Type>, LayerKV<LeftOperand, Sublayer2Left>>,
+        using Layer2Final = MultiplyLayer<LayerInMap<LayerKV<RightOperand, Input1Type>, LayerKV<LeftOperand, Sublayer2Left>>,
                                           PolicyContainer<PUpdate, PFeedbackOutput>>;
-        using Layer3Final = SigmoidLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
+        using Layer3Final = SigmoidLayer<LayerInMap<LayerKV<LayerInput, Sublayer2Output>>,
                                          PolicyContainer<PFeedbackOutput>>;
-        using Layer4Final = TanhLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
+        using Layer4Final = TanhLayer<LayerInMap<LayerKV<LayerInput, Sublayer2Output>>,
                                       PolicyContainer<PFeedbackOutput>>;
-        using Layer5Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Sublayer3Output>, LayerKV<RightOperand, Sublayer4Output>>,
+        using Layer5Final = AddLayer<LayerInMap<LayerKV<LeftOperand, Sublayer3Output>, LayerKV<RightOperand, Sublayer4Output>>,
                                      PolicyContainer<PFeedbackOutput>>;
 
         using check = CT::Instances<CheckInputs, CheckPolicyContainer>;
@@ -425,7 +425,7 @@ namespace
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
         using Input2Type = TrivalTensor<Scalar<CheckElement, CheckDevice>, 2>;
-        using CheckInputs = LayerIOMap<LayerKV<Input1, Input1Type>,
+        using CheckInputs = LayerInMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
                                                      SubPolicyContainer<Sublayer1, PNoUpdate, PFeedbackNoOutput>,
@@ -441,15 +441,15 @@ namespace
         using Sublayer3Output = decltype(Sigmoid(declval<Sublayer2Output>()));
         using Sublayer4Output = decltype(Tanh(declval<Sublayer2Output>()));
         
-        using Layer1Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
+        using Layer1Final = AddLayer<LayerInMap<LayerKV<LeftOperand, Input1Type>, LayerKV<RightOperand, Input2Type>>,
                                      PolicyContainer<PNoUpdate, PFeedbackOutput>>;
-        using Layer2Final = MultiplyLayer<LayerIOMap<LayerKV<RightOperand, Input1Type>, LayerKV<LeftOperand, Sublayer2Left>>,
+        using Layer2Final = MultiplyLayer<LayerInMap<LayerKV<RightOperand, Input1Type>, LayerKV<LeftOperand, Sublayer2Left>>,
                                           PolicyContainer<PUpdate, PFeedbackOutput>>;
-        using Layer3Final = SigmoidLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
+        using Layer3Final = SigmoidLayer<LayerInMap<LayerKV<LayerInput, Sublayer2Output>>,
                                          PolicyContainer<PFeedbackOutput>>;
-        using Layer4Final = TanhLayer<LayerIOMap<LayerKV<LayerInput, Sublayer2Output>>,
+        using Layer4Final = TanhLayer<LayerInMap<LayerKV<LayerInput, Sublayer2Output>>,
                                       PolicyContainer<PFeedbackOutput>>;
-        using Layer5Final = AddLayer<LayerIOMap<LayerKV<LeftOperand, Sublayer3Output>, LayerKV<RightOperand, Sublayer4Output>>,
+        using Layer5Final = AddLayer<LayerInMap<LayerKV<LeftOperand, Sublayer3Output>, LayerKV<RightOperand, Sublayer4Output>>,
                                      PolicyContainer<PFeedbackOutput>>;
 
         static_assert(std::is_same_v<ArrayType,

@@ -166,11 +166,11 @@
       <File Name="layers/elementary/dot_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
+      <File Name="layers/facilities/layer_in_map.h"/>
       <File Name="layers/facilities/_.h"/>
       <File Name="layers/facilities/interface_fun.h"/>
       <File Name="layers/facilities/policies.h"/>
       <File Name="layers/facilities/traits.h"/>
-      <File Name="layers/facilities/layer_io_map.h"/>
       <File Name="layers/facilities/make_layer.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="recurrent">

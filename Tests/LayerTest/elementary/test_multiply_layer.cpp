@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+    using CommonInputMap = LayerInMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                      >;
     
@@ -182,7 +182,7 @@ namespace
     {
         cout << "Test multiply layer case 4 (multiply with number)...\t";
         
-        using InputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+        using InputMap = LayerInMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
                                     LayerKV<RightOperand, int>
                                    >;
 
@@ -233,7 +233,7 @@ namespace
     {
         cout << "Test multiply layer case 5 (multiply with number 2)...\t";
         
-        using InputMap = LayerIOMap<LayerKV<LeftOperand, int>,
+        using InputMap = LayerInMap<LayerKV<LeftOperand, int>,
                                     LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                    >;
 

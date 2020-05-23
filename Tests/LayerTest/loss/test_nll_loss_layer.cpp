@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>,
+    using CommonInputMap = LayerInMap<LayerKV<LayerInput, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<LossLayerWeight, Matrix<CheckElement, CheckDevice>>>;
 
     void test_nll_loss_layer1()

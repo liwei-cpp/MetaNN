@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+    using CommonInputMap = LayerInMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                      >;
     void test_substract_layer1()
@@ -186,7 +186,7 @@ namespace
     {
         cout << "Test substract layer case 4 (substract with number)...\t";
         
-        using InputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+        using InputMap = LayerInMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
                                     LayerKV<RightOperand, int>
                                    >;
 
@@ -238,7 +238,7 @@ namespace
     {
         cout << "Test substract layer case 5 (substract with number 2)...\t";
         
-        using InputMap = LayerIOMap<LayerKV<LeftOperand, int>,
+        using InputMap = LayerInMap<LayerKV<LeftOperand, int>,
                                     LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                    >;
 

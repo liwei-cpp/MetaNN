@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<InterpolateLayerWeight1, Matrix<CheckElement, CheckDevice>>,
+    using CommonInputMap = LayerInMap<LayerKV<InterpolateLayerWeight1, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<InterpolateLayerWeight2, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<InterpolateLayerLambda, Matrix<CheckElement, CheckDevice>>>;
     void test_interpolate_layer1()

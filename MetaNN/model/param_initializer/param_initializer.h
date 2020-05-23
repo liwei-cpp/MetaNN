@@ -125,6 +125,6 @@ namespace MetaNN
         using FillContType = VarTypeDict<typename RemConstRef<TInitializers>::KeyType ...>;
         auto fillCont = NSMakeInitializer::CreateFillerCont(FillContType::Create(), std::forward<TInitializers>(fillers)...);
         
-        return ParamInitializer<TElem, RemConstRef<decltype(fillCont)>>(std::move(fillCont));
+        return ParamInitializer<TElem, decltype(fillCont)>(std::move(fillCont));
     }
 }

@@ -8,7 +8,7 @@ using namespace std;
 
 namespace
 {
-    using CommonInputMap = LayerIOMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
+    using CommonInputMap = LayerInMap<LayerKV<LeftOperand, Matrix<CheckElement, CheckDevice>>,
                                       LayerKV<RightOperand, Matrix<CheckElement, CheckDevice>>
                                      >;
     
@@ -251,7 +251,7 @@ namespace
         cout << "done" << endl;
     }
 
-    using MultiDimInputMap = LayerIOMap<LayerKV<LeftOperand, Tensor<CheckElement, CheckDevice, 3>>,
+    using MultiDimInputMap = LayerInMap<LayerKV<LeftOperand, Tensor<CheckElement, CheckDevice, 3>>,
                                         LayerKV<RightOperand, Tensor<CheckElement, CheckDevice, 4>>>;
     void test_dot_layer6()
     {

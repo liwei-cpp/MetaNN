@@ -133,7 +133,7 @@ namespace
     {
         cout << "Test param source layer case 5...\t";
         
-        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerInMap<>, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput, "Test Error");
         static_assert(!RootLayer::IsUpdate, "Test Error");
         
@@ -163,7 +163,7 @@ namespace
     {
         cout << "Test param source layer case 6...\t";
         
-        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerInMap<>, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
         
@@ -215,7 +215,7 @@ namespace
     {
         cout << "Test param source layer case 7 (dummy grad input)...\t";
         
-        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerInMap<>, PUpdate, PParamTypeIs<Matrix<CheckElement, CheckDevice>>>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(RootLayer::IsUpdate);
         
@@ -243,7 +243,7 @@ namespace
     {
         cout << "Test param source layer case 8 (ZeroMatrix as parameter)...\t";
         
-        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerIOMap<>, PUpdate, PParamTypeIs<ZeroTensor<CheckElement, CheckDevice, 2>>>;
+        using RootLayer = MakeTrainLayer<ParamSourceLayer, LayerInMap<>, PUpdate, PParamTypeIs<ZeroTensor<CheckElement, CheckDevice, 2>>>;
         static_assert(!RootLayer::IsFeedbackOutput);
         static_assert(!RootLayer::IsUpdate);
         

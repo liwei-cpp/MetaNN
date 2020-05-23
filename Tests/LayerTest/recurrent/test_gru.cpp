@@ -199,7 +199,7 @@ namespace
         cout << "done" << endl;
     }
     
-    using InputMap = LayerIOMap<LayerKV<LayerInput, Tensor<CheckElement, CheckDevice, 3>>,
+    using InputMap = LayerInMap<LayerKV<LayerInput, Tensor<CheckElement, CheckDevice, 3>>,
                                 LayerKV<Previous<LayerOutput>, TrivalTensor<Scalar<CheckElement, CheckDevice>, 2>>
                                >;
     void test_gru4()

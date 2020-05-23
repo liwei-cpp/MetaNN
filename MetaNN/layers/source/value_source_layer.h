@@ -38,7 +38,7 @@ namespace MetaNN
     public:
         using InputPortSet = LayerPortSet<>;
         using OutputPortSet = LayerPortSet<struct LayerOutput>;
-        using InputMap = typename EmptyLayerIOMap_<InputPortSet>::type;
+        using InputMap = typename EmptyLayerInMap_<InputPortSet>::type;
         
     public:
         ValueSourceLayer(std::string name, ValueType p_value)
