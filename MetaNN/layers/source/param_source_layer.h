@@ -25,7 +25,7 @@ namespace MetaNN
 
     public:
         static constexpr bool IsFeedbackOutput = false;
-        static constexpr bool IsUpdate = IsPrincipal ? PolicySelect<GradPolicy, CurLayerPolicy>::IsUpdate : false;
+        static constexpr bool IsUpdate = IsPrincipal && PolicySelect<GradPolicy, CurLayerPolicy>::IsUpdate;
 
     public:
         using InputPortSet = LayerPortSet<>;
@@ -70,7 +70,6 @@ namespace MetaNN
                 }
                 else
                 {
-                    m_data = ParamType(m_dataShape);
                     using InitializerName = typename PolicySelect<ParamPolicy, CurLayerPolicy>::Initializer;
                     if constexpr (!std::is_same_v<InitializerName, NullParameter>)
                     {
@@ -113,10 +112,7 @@ namespace MetaNN
         {
             if constexpr (IsUpdate)
             {
-                if (!m_paramGradStack.empty())
-                {
-                    throw std::runtime_error("NeutralInvariant Fail!");
-                }
+                LayerTraits::CheckStackEmpty(m_paramGradStack);
             }
         }
         
