@@ -331,7 +331,7 @@ namespace NSTPO
               typename TCheckInternals>
     struct MainLoop
     {
-        static_assert((Sequential::Size<TCheckInternals> == 0), "Cycle exist in the compose layer");
+        static_assert(Sequential::Size<TCheckInternals> == 0);
         using type = Sequential::Cascade<TOrderedSublayers, TUnorderedSublayers>;
     };
     
