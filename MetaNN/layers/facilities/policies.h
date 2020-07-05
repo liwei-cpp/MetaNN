@@ -19,16 +19,6 @@ ValuePolicyObj(PNoUpdate,         GradPolicy, IsUpdate, false);
 ValuePolicyObj(PFeedbackOutput,   GradPolicy, IsFeedbackOutput, true);
 ValuePolicyObj(PFeedbackNoOutput, GradPolicy, IsFeedbackOutput, false);
 
-    struct RecurrentLayerPolicy
-    {
-        using MajorClass = RecurrentLayerPolicy;
-
-        struct UseBpttValueCate;
-        constexpr static bool UseBptt = true;
-    };
-    ValuePolicyObj(PEnableBptt,  RecurrentLayerPolicy, UseBptt, true);
-    ValuePolicyObj(PDisableBptt,  RecurrentLayerPolicy, UseBptt, false);
-
     struct ParamPolicy
     {
         using MajorClass = ParamPolicy;

@@ -35,7 +35,15 @@ namespace MetaNN
     {
         using MajorClass = RnnPolicy;
         struct SeqIdContTypeCate;
+        
+        struct UseBpttValueCate;
+        constexpr static bool UseBptt = true;
     };
+    
+#include <MetaNN/policies/policy_macro_begin.h>
+    ValuePolicyObj(PEnableBptt,  RnnPolicy, UseBptt, true);
+    ValuePolicyObj(PDisableBptt,  RnnPolicy, UseBptt, false);
+#include <MetaNN/policies/policy_macro_end.h>
 
     template <typename... TSeqIDs>
     struct PSeqIDsAre : virtual public RnnPolicy
@@ -146,7 +154,7 @@ namespace MetaNN
 
             using KernelPolicy = SubPolicyPicker<TPolicies, KernelSublayer>;
             constexpr static bool IsUpdate = PolicySelect<GradPolicy, KernelPolicy>::IsUpdate;
-            constexpr static bool UseBptt = PolicySelect<RecurrentLayerPolicy, KernelPolicy>::UseBptt;
+            constexpr static bool UseBptt = PolicySelect<RnnPolicy, KernelPolicy>::UseBptt;
             constexpr static bool UpdateFeedbackOutput =
                 PolicySelect<GradPolicy, WrapperPolicy>::IsFeedbackOutput || (IsUpdate && UseBptt);
 
