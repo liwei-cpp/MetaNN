@@ -194,9 +194,6 @@ namespace MetaNN
         {
             static_assert(!bFeedbackOutput);
             using type = NullParameter;
-
-            template <typename TIn>
-            static void PickShapeInfo(type&, const TIn&) {}
         };
         
         template <typename... TKeys, typename... TValues>
@@ -585,7 +582,10 @@ namespace MetaNN
         auto FeedForward(TIn&& p_in)
         {
             using TOriInputCont = RemConstRef<TIn>;
-            TShapeDickHelper::PickShapeInfo(m_inputShapeStack, p_in);
+            if constexpr (IsFeedbackOutput)
+            {
+                TShapeDickHelper::PickShapeInfo(m_inputShapeStack, p_in);
+            }
 
             auto permuteRes = NSRecurrentLayer::PermuteBySeqID<typename TOriInputCont::Keys, SeqIdCont>(std::forward<TIn>(p_in), TOriInputCont::Keys::Create());
             const size_t seqNum = NSRecurrentLayer::GetSeqNum<typename TOriInputCont::Keys, SeqIdCont>(permuteRes);
