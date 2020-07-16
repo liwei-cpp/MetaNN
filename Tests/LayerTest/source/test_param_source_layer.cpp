@@ -192,7 +192,7 @@ namespace
 
         auto handle1 = gradCont.begin()->second.Weight().EvalRegister();
         auto handle2 = gradCont.begin()->second.Grad().EvalRegister();
-        EvalPlan<CheckDevice>::Inst().Eval();
+        EvalPlan::Inst().Eval();
         
         auto res1 = handle1.Data();
         auto resg = handle2.Data();

@@ -38,7 +38,7 @@ namespace
         assert(rm.Shape()[1] == 20);
 
         const auto& evalHandle = rm.EvalRegister();
-        EvalPlan<DeviceTags::CPU>::Inst().Eval();
+        EvalPlan::Inst().Eval();
 
         auto rm1 = evalHandle.Data();
         for (size_t i=0; i<10; ++i)

@@ -21,15 +21,14 @@ namespace MetaNN
         }
         
         template <typename TInputHandle, typename TOutputHandle, size_t uDim>
-        class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+        class EvalItem : public BaseEvalItem
         {
         public:
             using DeviceType = DeviceTypeFromHandle<TOutputHandle>;
             EvalItem(std::vector<TInputHandle> p_input, TOutputHandle p_output,
                      std::vector<const void*> p_dependencies,
                      Shape<uDim> p_outputShape)
-                : BaseEvalItem<DeviceType>(TypeID<EvalItem>(),
-                                           std::move(p_dependencies), p_output.DataPtr())
+                : BaseEvalItem(TypeID<EvalItem>(), std::move(p_dependencies), p_output.DataPtr())
                 , m_inputs(std::move(p_input))
                 , m_output(std::move(p_output))
                 , m_outputShape(std::move(p_outputShape))
@@ -193,7 +192,7 @@ namespace MetaNN
             if (!m_evalBuf.IsEvaluated())
             {
                 auto outHandle = m_evalBuf.Handle();
-                if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(outHandle.DataPtr()))
+                if (!EvalPlan::Inst().IsAlreayRegisted(outHandle.DataPtr()))
                 {
                     using TOpEvalHandle = std::decay_t<decltype(std::declval<TData>().EvalRegister())>;
 
@@ -212,7 +211,7 @@ namespace MetaNN
                     using DispatcherType = TrivalEvalItemDispatcher<GroupType>;
 
                     auto item = std::make_unique<ItemType>(std::move(handleBuf), std::move(outHandle), std::move(depVec), m_shape);
-                    EvalPlan<DeviceType>::Inst().template Register<DispatcherType>(std::move(item));
+                    EvalPlan::Inst().template Register<DispatcherType>(std::move(item));
                 }
             }
             return m_evalBuf.ConstHandle();

@@ -21,7 +21,7 @@ namespace
         assert(rm.Shape()[1] == 20);
 
         const auto& evalHandle = rm.EvalRegister();
-        EvalPlan<CheckDevice>::Inst().Eval();
+        EvalPlan::Inst().Eval();
 
         auto rm1 = evalHandle.Data();
         for (size_t i=0; i<10; ++i)
@@ -46,7 +46,7 @@ namespace
         const auto& evalRes1 = rm1.EvalRegister();
         const auto& evalRes2 = rm2.EvalRegister();
 
-        EvalPlan<CheckDevice>::Inst().Eval();
+        EvalPlan::Inst().Eval();
         for (size_t j = 0; j < 100; ++j)
         {
             for (size_t k = 0; k < 10; ++k)

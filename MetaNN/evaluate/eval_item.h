@@ -3,11 +3,9 @@
 
 namespace MetaNN
 {
-    template <typename TDevice>
     class BaseEvalItem
     {
     public:
-        using DeviceType = TDevice;
         BaseEvalItem(size_t evalItemID,
                      std::vector<const void*>&& p_inputs, const void* p_output)
             : m_id(evalItemID)

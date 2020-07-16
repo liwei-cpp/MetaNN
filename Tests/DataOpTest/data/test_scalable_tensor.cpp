@@ -29,7 +29,7 @@ namespace
         assert(!rm1.IsEmpty());
 
         auto evalHandle = rm1.EvalRegister();
-        EvalPlan<DeviceTags::CPU>::Inst().Eval();
+        EvalPlan::Inst().Eval();
         auto rm2 = evalHandle.Data();
     
         assert(rm2(0) == 3);
@@ -73,7 +73,7 @@ namespace
         assert(!rm1.IsEmpty());
 
         auto evalHandle = rm1.EvalRegister();
-        EvalPlan<DeviceTags::CPU>::Inst().Eval();
+        EvalPlan::Inst().Eval();
         auto rm2 = evalHandle.Data();
 
         for (size_t i = 0; i < 10; ++i)
@@ -127,7 +127,7 @@ namespace
         assert(!rm1.IsEmpty());
 
         auto evalHandle = rm1.EvalRegister();
-        EvalPlan<DeviceTags::CPU>::Inst().Eval();
+        EvalPlan::Inst().Eval();
         auto rm2 = evalHandle.Data();
 
         for (size_t p = 0; p < 7; ++p)

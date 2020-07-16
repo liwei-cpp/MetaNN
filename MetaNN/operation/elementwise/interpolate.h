@@ -17,16 +17,15 @@ namespace OperInterpolate::NSCaseGen
 {
     template <typename TInputHandle1, typename TInputHandle2, typename TInputHandle3,
               typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TInputHandle3 oriHandle3,
                  TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape)
-            : BaseType(TypeID<EvalItem>(),
-                       {oriHandle1.DataPtr(), oriHandle2.DataPtr(), oriHandle3.DataPtr()},
-                       outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {oriHandle1.DataPtr(), oriHandle2.DataPtr(), oriHandle3.DataPtr()},
+                           outputHandle.DataPtr())
             , m_inputHandle1(std::move(oriHandle1))
             , m_inputHandle2(std::move(oriHandle2))
             , m_inputHandle3(std::move(oriHandle3))

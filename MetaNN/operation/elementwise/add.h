@@ -17,14 +17,13 @@ namespace MetaNN
 namespace OperAdd::NSCaseGen
 {
     template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         EvalItem(TInputHandle1 oriHandle1, TInputHandle2 oriHandle2, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> outputShape)
-            : BaseType(TypeID<EvalItem>(),
-                       {oriHandle1.DataPtr(), oriHandle2.DataPtr()}, outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {oriHandle1.DataPtr(), oriHandle2.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle1(std::move(oriHandle1))
             , m_inputHandle2(std::move(oriHandle2))
             , m_outputHandle(std::move(outputHandle))
@@ -112,15 +111,14 @@ constexpr bool Valid()
 namespace NSCaseGen
 {
     template <typename TInputHandle, typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         template <typename TAuxParams>
         EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& params)
-            : BaseType(TypeID<EvalItem>(),
-                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
             , m_value(params.Value())
             , m_outputHandle(std::move(outputHandle))

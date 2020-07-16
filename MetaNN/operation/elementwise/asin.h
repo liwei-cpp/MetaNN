@@ -19,14 +19,13 @@ namespace MetaNN
 namespace OperAsin::NSCaseGen
 {
     template <typename TInputHandle, typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle)
-            : BaseType(TypeID<EvalItem>(),
-                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
             , m_outputHandle(std::move(outputHandle))
         {}
@@ -89,15 +88,14 @@ namespace MetaNN
 namespace OperAsinGrad::NSCaseGen
 {
     template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         EvalItem(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle)
-            : BaseType(TypeID<EvalItem>(),
-                       {gradHandle.DataPtr(), oriHandle.DataPtr()},
-                       outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {gradHandle.DataPtr(), oriHandle.DataPtr()},
+                           outputHandle.DataPtr())
             , m_gradHandle(std::move(gradHandle))
             , m_inputHandle(std::move(oriHandle))
             , m_outputHandle(std::move(outputHandle))

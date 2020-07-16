@@ -17,14 +17,13 @@ namespace MetaNN
 namespace OperNegative::NSCaseGen
 {
     template <typename TInputHandle, typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle)
-            : BaseType(TypeID<EvalItem>(),
-                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
             , m_outputHandle(std::move(outputHandle))
         {}

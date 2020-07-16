@@ -96,7 +96,7 @@ namespace MetaNN
             if (!m_evalBuf.IsEvaluated())
             {
                 auto evalHandle = m_evalBuf.Handle();
-                if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(evalHandle.DataPtr()))
+                if (!EvalPlan::Inst().IsAlreayRegisted(evalHandle.DataPtr()))
                 {
                     using TOperSeqCont = typename OperSeq_<TOpTag>::type;
 

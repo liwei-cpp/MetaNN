@@ -12,15 +12,15 @@ namespace MetaNN
     namespace NSTrivalTensor
     {
         template <typename TScalarHandle, typename TOutputHandle, size_t uDim>
-        class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+        class EvalItem : public BaseEvalItem
         {
         public:
             using DeviceType = DeviceTypeFromHandle<TOutputHandle>;
 
             EvalItem(TScalarHandle p_scalar, TOutputHandle resBuf,
                      Shape<uDim> p_shape)
-                : BaseEvalItem<DeviceType>(TypeID<EvalItem>(),
-                                           { p_scalar.DataPtr() }, resBuf.DataPtr())
+                : BaseEvalItem(TypeID<EvalItem>(),
+                               { p_scalar.DataPtr() }, resBuf.DataPtr())
                 , m_resHandle(std::move(resBuf))
                 , m_shape(std::move(p_shape))
                 , m_scalarHandle(std::move(p_scalar))
@@ -94,7 +94,7 @@ namespace MetaNN
             {
                 auto outHandle = m_evalBuf.Handle();
         
-                if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(outHandle.DataPtr()))
+                if (!EvalPlan::Inst().IsAlreayRegisted(outHandle.DataPtr()))
                 {
                     auto handle = m_scalar.EvalRegister();
 
@@ -103,7 +103,7 @@ namespace MetaNN
                     using DispatcherType = TrivalEvalItemDispatcher<GroupType>;
 
                     auto item = std::make_unique<ItemType>(std::move(handle), std::move(outHandle), m_shape);
-                    EvalPlan<DeviceType>::Inst().template Register<DispatcherType>(std::move(item));
+                    EvalPlan::Inst().template Register<DispatcherType>(std::move(item));
                 }
             }
             return m_evalBuf.ConstHandle();

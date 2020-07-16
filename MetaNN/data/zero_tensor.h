@@ -12,7 +12,7 @@ namespace MetaNN
     namespace NSZeroTensor
     {
         template <typename TElem, typename TDevice, size_t uDim>
-        class EvalItem : public BaseEvalItem<TDevice>
+        class EvalItem : public BaseEvalItem
         {
         public:
             using CategoryTag = CategoryTags::Tensor<uDim>;
@@ -21,8 +21,7 @@ namespace MetaNN
 
             EvalItem(EvalHandle<PrincipalDataType<CategoryTag, ElementType, DeviceType>> resBuf,
                      Shape<uDim> p_shape)
-                : BaseEvalItem<TDevice>(TypeID<EvalItem>(),
-                                        {}, resBuf.DataPtr())
+                : BaseEvalItem(TypeID<EvalItem>(), {}, resBuf.DataPtr())
                 , m_resHandle(std::move(resBuf))
                 , m_shape(std::move(p_shape))
             {
@@ -100,9 +99,9 @@ namespace MetaNN
             if (!m_evalBuf.IsEvaluated())
             {
                 auto evalHandle = m_evalBuf.Handle();
-                if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(evalHandle.DataPtr()))
+                if (!EvalPlan::Inst().IsAlreayRegisted(evalHandle.DataPtr()))
                 {
-                    EvalPlan<DeviceType>::Inst().template Register<TItemDispatcher>(
+                    EvalPlan::Inst().template Register<TItemDispatcher>(
                         std::make_unique<TEvalItem>(std::move(evalHandle), m_shape));
                 }
             }

@@ -18,17 +18,16 @@ namespace MetaNN
 namespace OperDot::NSCaseGen
 {
     template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle, typename TPolicy>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
         EvalItem(TInputHandle1 operand1, TInputHandle2 operand2, 
                  TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape)
-            : BaseType(TypeID<EvalItem>(),
-                       {operand1.DataPtr(), operand2.DataPtr()},
-                       outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {operand1.DataPtr(), operand2.DataPtr()},
+                           outputHandle.DataPtr())
             , m_operand1(std::move(operand1))
             , m_operand2(std::move(operand2))
             , m_outputHandle(std::move(outputHandle))

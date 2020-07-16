@@ -18,15 +18,14 @@ namespace MetaNN
     namespace OperPermute::NSCaseGen
     {
         template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
-        class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+        class EvalItem : public BaseEvalItem
         {
-            using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         public:
             using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
             EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, Shape<CategoryTag::DimNum> shape)
-                : BaseType(TypeID<EvalItem>(),
-                           {oriHandle.DataPtr()}, outputHandle.DataPtr())
+                : BaseEvalItem(TypeID<EvalItem>(),
+                               {oriHandle.DataPtr()}, outputHandle.DataPtr())
                 , m_inputHandle(std::move(oriHandle))
                 , m_outputHandle(std::move(outputHandle))
                 , m_outShape(std::move(shape))

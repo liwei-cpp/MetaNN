@@ -6,36 +6,33 @@
 
 namespace MetaNN
 {
-    template <typename TDevice>
     class BaseEvalGroup
     {
     public:
-        using DeviceType = TDevice;
         virtual ~BaseEvalGroup() = default;
         
-        virtual bool CanAdd(const BaseEvalItem<TDevice>&) = 0;
-        virtual void Add(std::unique_ptr<BaseEvalItem<TDevice>>) = 0;
+        virtual bool CanAdd(const BaseEvalItem&) = 0;
+        virtual void Add(std::unique_ptr<BaseEvalItem>) = 0;
         virtual void Eval() = 0;
         virtual std::list<const void*> ResultPointers() const = 0;
     };
     
     template <typename TEvalItem>
-    class TrivalEvalGroup : public BaseEvalGroup<typename TEvalItem::DeviceType>
+    class TrivalEvalGroup : public BaseEvalGroup
     {
     public:
-        using DeviceType = typename TEvalItem::DeviceType;
-        virtual bool CanAdd(const BaseEvalItem<DeviceType>&) override final
+        virtual bool CanAdd(const BaseEvalItem&) override final
         {
             return m_evalItem == nullptr;
         }
         
-        virtual void Add(std::unique_ptr<BaseEvalItem<DeviceType>> item) override final
+        virtual void Add(std::unique_ptr<BaseEvalItem> item) override final
         {
             if (m_evalItem)
             {
                 throw std::runtime_error("Cannot add to this group any more!");
             }
-            BaseEvalItem<DeviceType>* to = item.release();
+            BaseEvalItem* to = item.release();
             auto aim = static_cast<TEvalItem*>(to);
             m_evalItem = std::unique_ptr<TEvalItem>(aim);
         }

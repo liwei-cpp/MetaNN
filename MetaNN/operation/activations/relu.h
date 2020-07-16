@@ -18,14 +18,13 @@ namespace MetaNN
 namespace OperReLU::NSCaseGen
 {
     template <typename TInputHandle, typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle)
-            : BaseType(TypeID<EvalItem>(),
-                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
             , m_outputHandle(std::move(outputHandle))
         {}
@@ -55,7 +54,7 @@ namespace OperReLU::NSCaseGen
             auto low_out = LowerAccess(out);
             ElementType* mem_out = low_out.MutableRawMemory();
 
-            static_assert(std::is_same_v<typename EvalItemType::DeviceType, DeviceTags::CPU>,
+            static_assert(std::is_same_v<DeviceTypeFromHandle<TOutputHandle>, DeviceTags::CPU>,
                           "Currently only CPU is supported");
         
             const ElementType zero{};
@@ -90,14 +89,13 @@ namespace MetaNN
 namespace OperReLUGrad::NSCaseGen
 {
     template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
     public:
         EvalItem(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle)
-            : BaseType(TypeID<EvalItem>(),
-                       {gradHandle.DataPtr(), oriHandle.DataPtr()}, outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {gradHandle.DataPtr(), oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_gradHandle(std::move(gradHandle))
             , m_inputHandle(std::move(oriHandle))
             , m_outputHandle(std::move(outputHandle))

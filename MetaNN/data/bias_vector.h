@@ -13,15 +13,15 @@ namespace MetaNN
     namespace NSBiasVector
     {
         template <typename TInputHandle, typename TOutputHandle>
-        class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+        class EvalItem : public BaseEvalItem
         {
         public:
             using DeviceType = DeviceTypeFromHandle<TOutputHandle>;
 
             EvalItem(TInputHandle inputHandle, TOutputHandle outputHandle,
                      size_t vecLen, size_t pos)
-                : BaseEvalItem<DeviceType>(TypeID<EvalItem>(),
-                                           { inputHandle.DataPtr() }, outputHandle.DataPtr())
+                : BaseEvalItem(TypeID<EvalItem>(),
+                               { inputHandle.DataPtr() }, outputHandle.DataPtr())
                 , m_inputHandle(std::move(inputHandle))
                 , m_resHandle(std::move(outputHandle))
                 , m_vecLen(vecLen)
@@ -93,7 +93,7 @@ namespace MetaNN
             {
                 auto outHandle = m_evalBuf.Handle();
         
-                if (!EvalPlan<DeviceType>::Inst().IsAlreayRegisted(outHandle.DataPtr()))
+                if (!EvalPlan::Inst().IsAlreayRegisted(outHandle.DataPtr()))
                 {
                     auto handle = m_scalar.EvalRegister();
 
@@ -102,7 +102,7 @@ namespace MetaNN
                     using DispatcherType = TrivalEvalItemDispatcher<GroupType>;
 
                     auto item = std::make_unique<ItemType>(std::move(handle), std::move(outHandle), m_shape[0], m_pos);
-                    EvalPlan<DeviceType>::Inst().template Register<DispatcherType>(std::move(item));
+                    EvalPlan::Inst().template Register<DispatcherType>(std::move(item));
                 }
             }
             return m_evalBuf.ConstHandle();

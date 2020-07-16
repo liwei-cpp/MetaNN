@@ -23,13 +23,12 @@ namespace MetaNN
 namespace OperSoftmax::NSCaseGen
 {
     template <typename TInputHandle, typename TOutputHandle, typename TPolicy>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
         EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle)
-            : BaseType(TypeID<EvalItem>(),
-                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
             , m_outputHandle(std::move(outputHandle))
         {}
@@ -125,13 +124,12 @@ namespace MetaNN
 namespace OperSoftmaxGrad::NSCaseGen
 {
     template <typename TGradHandle, typename TInputHandle, typename TOutputHandle, typename TPolicy>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
         EvalItem(TGradHandle gradHandle, TInputHandle oriHandle, TOutputHandle outputHandle)
-            : BaseType(TypeID<EvalItem>(),
-                       {gradHandle.DataPtr(), oriHandle.DataPtr()}, outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {gradHandle.DataPtr(), oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_gradHandle(std::move(gradHandle))
             , m_inputHandle(std::move(oriHandle))
             , m_outputHandle(std::move(outputHandle))
@@ -221,15 +219,14 @@ namespace OperSoftmaxGrad::NSCaseNLLLossGrad
     
     template <typename TGradHandle, typename TWeightHandle, 
               typename TSoftmaxHandle, typename TOutputHandle, typename TPolicy>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
         EvalItem(TGradHandle gradHandle, TWeightHandle weightHandle,
                     TSoftmaxHandle softmaxHandle, TOutputHandle outputHandle)
-            : BaseType(TypeID<EvalItem>(),
-                       {gradHandle.DataPtr(), weightHandle.DataPtr(), softmaxHandle.DataPtr()},
-                       outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {gradHandle.DataPtr(), weightHandle.DataPtr(), softmaxHandle.DataPtr()},
+                           outputHandle.DataPtr())
             , m_gradHandle(std::move(gradHandle))
             , m_weightHandle(std::move(weightHandle))
             , m_softmaxHandle(std::move(softmaxHandle))
@@ -327,7 +324,6 @@ namespace OperSoftmaxGrad::NSCaseNLLLossGrad
                 }
 
                 auto outHandle = evalRes.Handle();
-                using TDevice = DeviceTypeFromHandle<decltype(outHandle)>;
 
                 auto gradHandle = oper0.template Operand<0>().EvalRegister();
                 auto softmaxHandle = oper1.EvalRegister();
@@ -348,7 +344,7 @@ namespace OperSoftmaxGrad::NSCaseNLLLossGrad
                 
                 auto item = std::make_unique<TItem>(std::move(gradHandle), std::move(weightHandle),
                                                     std::move(softmaxHandle), std::move(outHandle));
-                EvalPlan<TDevice>::Inst().template Register<EvalDispatcher>(std::move(item));
+                EvalPlan::Inst().template Register<EvalDispatcher>(std::move(item));
         }
     }
 };

@@ -428,7 +428,7 @@ namespace MetaNN
         }
         
         template <typename TKeyCont, typename TInput, typename TOutput>
-        auto GradSplit(const TInput& p_input, TOutput&& p_output)
+        auto GradSplit0(const TInput& p_input, TOutput&& p_output)
         {
             if constexpr (Sequential::Size<TKeyCont> == 0)
                 return std::forward<TOutput>(p_output);
@@ -439,7 +439,7 @@ namespace MetaNN
 
                 auto inputValue = curValue[curValue.Shape()[0] - 1];
                 auto newOutput = std::forward<TOutput>(p_output).template Set<CurType>(MakeDynamic(std::move(inputValue)));
-                return GradSplit<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput));
+                return GradSplit0<Sequential::Tail<TKeyCont>>(p_input, std::move(newOutput));
             }
         }
         
@@ -581,27 +581,27 @@ namespace MetaNN
         template <typename TIn>
         auto FeedForward(TIn&& p_in)
         {
-            using TOriInputCont = RemConstRef<TIn>;
+            using TInputKeys = typename RemConstRef<TIn>::Keys;
             if constexpr (IsFeedbackOutput)
             {
                 TShapeDickHelper::PickShapeInfo(m_inputShapeStack, p_in);
             }
 
-            auto permuteRes = NSRecurrentLayer::PermuteBySeqID<typename TOriInputCont::Keys, SeqIdCont>(std::forward<TIn>(p_in), TOriInputCont::Keys::Create());
-            const size_t seqNum = NSRecurrentLayer::GetSeqNum<typename TOriInputCont::Keys, SeqIdCont>(permuteRes);
+            auto permuteRes = NSRecurrentLayer::PermuteBySeqID<TInputKeys, SeqIdCont>(std::forward<TIn>(p_in), TInputKeys::Create());
+            const size_t seqNum = NSRecurrentLayer::GetSeqNum<TInputKeys, SeqIdCont>(permuteRes);
             if (seqNum == 0)
             {
                 throw std::runtime_error("Empty sequence as input.");
             }
 
-            auto firstInputCont = NSRecurrentLayer::Split0<typename TOriInputCont::Keys, SeqIdCont>(permuteRes, TOriInputCont::Keys::Create());
+            auto firstInputCont = NSRecurrentLayer::Split0<TInputKeys, SeqIdCont>(permuteRes, TInputKeys::Create());
             auto previousOutput = m_kernel.FeedForward(std::move(firstInputCont));
             using OutputKeys = typename decltype(previousOutput)::Keys;
             auto outputCont = NSRecurrentLayer::InitOutputCont<OutputKeys>(previousOutput, OutputKeys::Create());
 
             for (size_t i = 1; i < seqNum; ++i)
             {
-                auto curInputCont = NSRecurrentLayer::SplitN<typename TOriInputCont::Keys, SeqIdCont>(permuteRes, TOriInputCont::Keys::Create(), previousOutput, i);
+                auto curInputCont = NSRecurrentLayer::SplitN<TInputKeys, SeqIdCont>(permuteRes, TInputKeys::Create(), previousOutput, i);
                 previousOutput = m_kernel.FeedForward(std::move(curInputCont));
                 NSRecurrentLayer::FillOutputCont<OutputKeys>(previousOutput, outputCont);
             }
@@ -614,7 +614,7 @@ namespace MetaNN
             if constexpr (UseBptt)
                 static_assert(KernelType::IsFeedbackOutput);
 
-            using TOriInputCont = RemConstRef<TIn>;
+            using TInputKeys = typename RemConstRef<TIn>::Keys;
             if constexpr (!IsFeedbackOutput && !IsUpdate)
             {
                 static_assert(!KernelType::IsFeedbackOutput);
@@ -622,18 +622,18 @@ namespace MetaNN
             }
             else if constexpr (!IsFeedbackOutput)
             {
-                const size_t seqNum = NSRecurrentLayer::GetGradSeqNum<typename TOriInputCont::Keys>(p_in);
+                const size_t seqNum = NSRecurrentLayer::GetGradSeqNum<TInputKeys>(p_in);
                 if (seqNum == 0)
                 {
                     throw std::runtime_error("Empty sequence as grad input.");
                 }
                 
-                auto curInputCont = NSRecurrentLayer::GradSplit<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create());
+                auto curInputCont = NSRecurrentLayer::GradSplit0<TInputKeys>(p_in, TInputKeys::Create());
                 auto curOutputCont = m_kernel.FeedBackward(std::move(curInputCont));
 
                 for (size_t i = 2; i <= seqNum; ++i)
                 {
-                    auto curInputCont = NSRecurrentLayer::GradSplitN<typename TOriInputCont::Keys, UseBptt>(p_in, curOutputCont, TOriInputCont::Keys::Create(), seqNum - i);
+                    auto curInputCont = NSRecurrentLayer::GradSplitN<TInputKeys, UseBptt>(p_in, curOutputCont, TInputKeys::Create(), seqNum - i);
                     curOutputCont = m_kernel.FeedBackward(std::move(curInputCont));
                 }
                 
@@ -641,19 +641,19 @@ namespace MetaNN
             }
             else
             {
-                const size_t seqNum = NSRecurrentLayer::GetGradSeqNum<typename TOriInputCont::Keys>(p_in);
+                const size_t seqNum = NSRecurrentLayer::GetGradSeqNum<TInputKeys>(p_in);
                 if (seqNum == 0)
                 {
                     throw std::runtime_error("Empty sequence as grad input.");
                 }
                 
-                auto firstInputGrad = NSRecurrentLayer::GradSplit<typename TOriInputCont::Keys>(p_in, TOriInputCont::Keys::Create());
+                auto firstInputGrad = NSRecurrentLayer::GradSplit0<TInputKeys>(p_in, TInputKeys::Create());
                 auto curOutputCont = m_kernel.FeedBackward(std::move(firstInputGrad));
                 using OutputGradKeys = typename decltype(curOutputCont)::Keys;
                 auto outputGrad = NSRecurrentLayer::InitOutputCont<OutputGradKeys>(curOutputCont, OutputGradKeys::Create());
                 for (size_t i = 2; i <= seqNum; ++i)
                 {
-                    auto curInputCont = NSRecurrentLayer::GradSplitN<typename TOriInputCont::Keys, UseBptt>(p_in, curOutputCont, TOriInputCont::Keys::Create(), seqNum - i);
+                    auto curInputCont = NSRecurrentLayer::GradSplitN<TInputKeys, UseBptt>(p_in, curOutputCont, TInputKeys::Create(), seqNum - i);
                     curOutputCont = m_kernel.FeedBackward(std::move(curInputCont));
                     NSRecurrentLayer::FillNormalGradOutput<OutputGradKeys>(curOutputCont, outputGrad);
                 }

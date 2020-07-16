@@ -7,7 +7,6 @@
 
 namespace MetaNN
 {
-    template <typename TDevice>
     class EvalPlan
     {
         using DataPtr = const void*;
@@ -19,7 +18,7 @@ namespace MetaNN
         }
 
         template <typename TDispatcher>
-        void Register(std::unique_ptr<BaseEvalItem<TDevice>> item)
+        void Register(std::unique_ptr<BaseEvalItem> item)
         {
             assert(item);
             DataPtr outPtr = item->OutputPtr();
@@ -136,7 +135,7 @@ namespace MetaNN
                 auto it = m_nodes.find(curNodePtr);
                 assert(it != m_nodes.end());
                 
-                std::unique_ptr<BaseEvalItem<TDevice>> curNode = std::move(it->second);
+                std::unique_ptr<BaseEvalItem> curNode = std::move(it->second);
                 
                 const auto itemID = curNode->ID();
                 auto dispIt = m_itemDispatcher.find(itemID);
@@ -148,17 +147,16 @@ namespace MetaNN
     private:
         std::unordered_map<DataPtr, size_t> m_nodeInActNum;
         std::unordered_map<DataPtr, std::set<DataPtr>> m_nodeAimPos;
-        std::unordered_map<DataPtr, std::unique_ptr<BaseEvalItem<TDevice>>> m_nodes;
-        std::unordered_map<size_t, std::unique_ptr<BaseEvalItemDispatcher<TDevice>>> m_itemDispatcher;
+        std::unordered_map<DataPtr, std::unique_ptr<BaseEvalItem>> m_nodes;
+        std::unordered_map<size_t, std::unique_ptr<BaseEvalItemDispatcher>> m_itemDispatcher;
         std::set<DataPtr> m_procNodes;
     };
     
     template <typename TData>
     auto Evaluate(const TData& data)
     {
-        using DeviceType = typename TData::DeviceType;
         auto evalHandle = data.EvalRegister();
-        EvalPlan<DeviceType>::Inst().Eval();
+        EvalPlan::Inst().Eval();
         return evalHandle.Data();
     }
 }

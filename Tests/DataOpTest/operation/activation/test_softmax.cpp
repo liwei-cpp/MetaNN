@@ -52,7 +52,7 @@ namespace
 
             const auto& evalHandle1 = res.EvalRegister();
             const auto& evalHandle2 = res2.EvalRegister();
-            EvalPlan<DeviceTags::CPU>::Inst().Eval();
+            EvalPlan::Inst().Eval();
 
             auto cm1 = evalHandle1.Data();
             auto cm2 = evalHandle2.Data();

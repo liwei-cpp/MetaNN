@@ -92,7 +92,7 @@ namespace
 
         auto handle1 = gradCont.begin()->second.Weight().EvalRegister();
         auto handle2 = gradCont.begin()->second.Grad().EvalRegister();
-        EvalPlan<CheckDevice>::Inst().Eval();
+        EvalPlan::Inst().Eval();
 
         auto w1 = handle1.Data();
         auto g1 = handle2.Data();
@@ -157,7 +157,7 @@ namespace
         auto w1 = gradCont.begin()->second.Weight();
         
         auto handle2 = gradCont.begin()->second.Grad().EvalRegister();
-        EvalPlan<CheckDevice>::Inst().Eval();
+        EvalPlan::Inst().Eval();
         auto g1 = handle2.Data();
         
         assert(fabs(w1(0, 0) - 1.1) < 0.001);
@@ -207,7 +207,7 @@ namespace
 
             auto handle1 = out.Get<LayerOutput>().EvalRegister();
             auto handle2 = check.EvalRegister();
-            EvalPlan<CheckDevice>::Inst().Eval();
+            EvalPlan::Inst().Eval();
 
             auto res = handle1.Data();
             assert(res.Shape() == Shape(1, 4));
@@ -228,7 +228,7 @@ namespace
 
             auto handle1 = out_grad.Get<LayerInput>().EvalRegister();
             auto handle2 = check.EvalRegister();
-            EvalPlan<CheckDevice>::Inst().Eval();
+            EvalPlan::Inst().Eval();
 
             auto fbOut = handle1.Data();
             auto aimFbout = handle2.Data();

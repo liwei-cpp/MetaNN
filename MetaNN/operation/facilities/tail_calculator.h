@@ -131,10 +131,8 @@ namespace MetaNN
                                                  std::move(std::get<Index>(operHandles))...,
                                                  std::move(resHandle));
 
-            using DeviceType = DeviceTypeFromHandle<TResHandle>;
-
             using TDispatcher = typename PolicySelect<TailCalculatorPolicy, TPolicy>::template Dispatcher<GroupType>;
-            EvalPlan<DeviceType>::Inst().template Register<TDispatcher>(std::move(item));
+            EvalPlan::Inst().template Register<TDispatcher>(std::move(item));
         }
     };
 }

@@ -17,16 +17,15 @@ namespace MetaNN
 namespace OperSlice::NSCaseGen
 {
     template <typename TInputHandle, typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
         template <typename TAuxParams>
         EvalItem(TInputHandle oriHandle, TOutputHandle outputHandle, const TAuxParams& p_params)
-            : BaseType(TypeID<EvalItem>(),
-                       {oriHandle.DataPtr()}, outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {oriHandle.DataPtr()}, outputHandle.DataPtr())
             , m_inputHandle(std::move(oriHandle))
             , m_id(p_params.m_elemID)
             , m_outputHandle(std::move(outputHandle))

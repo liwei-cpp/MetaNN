@@ -20,16 +20,15 @@ namespace MetaNN
 namespace OperNLLLoss::NSCaseGen
 {
     template <typename TTruthHandle, typename TPredHandle, typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
         EvalItem(TTruthHandle truthHandle, TPredHandle predHandle, TOutputHandle outputHandle)
-            : BaseType(TypeID<EvalItem>(),
-                       {truthHandle.DataPtr(), predHandle.DataPtr()},
-                       outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {truthHandle.DataPtr(), predHandle.DataPtr()},
+                           outputHandle.DataPtr())
             , m_truthHandle(std::move(truthHandle))
             , m_predHandle(std::move(predHandle))
             , m_outputHandle(std::move(outputHandle))
@@ -113,17 +112,16 @@ namespace MetaNN
 namespace OperNLLLossGrad::NSCaseGen
 {
     template <typename TGradHandle, typename TTruthHandle, typename TPredHandle, typename TOutputHandle>
-    class EvalItem : public BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>
+    class EvalItem : public BaseEvalItem
     {
-        using BaseType = BaseEvalItem<DeviceTypeFromHandle<TOutputHandle>>;
     public:
         using CategoryTag = CategoryTagFromHandle<TOutputHandle>;
 
         EvalItem(TGradHandle gradHandle, TTruthHandle truthHandle, TPredHandle predHandle,
                  TOutputHandle outputHandle)
-            : BaseType(TypeID<EvalItem>(),
-                       {gradHandle.DataPtr(), truthHandle.DataPtr(), predHandle.DataPtr()},
-                       outputHandle.DataPtr())
+            : BaseEvalItem(TypeID<EvalItem>(),
+                           {gradHandle.DataPtr(), truthHandle.DataPtr(), predHandle.DataPtr()},
+                           outputHandle.DataPtr())
             , m_gradHandle(std::move(gradHandle))
             , m_truthHandle(std::move(truthHandle))
             , m_predHandle(std::move(predHandle))
