@@ -192,7 +192,7 @@ namespace MetaNN
             if (!m_evalBuf.IsEvaluated())
             {
                 auto outHandle = m_evalBuf.Handle();
-                if (!EvalPlan::Inst().IsAlreayRegisted(outHandle.DataPtr()))
+                if (!EvalPlan::Inst().IsAlreadyRegisted(outHandle.DataPtr()))
                 {
                     using TOpEvalHandle = std::decay_t<decltype(std::declval<TData>().EvalRegister())>;
 

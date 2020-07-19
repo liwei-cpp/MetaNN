@@ -22,7 +22,7 @@ namespace MetaNN
         {
             assert(item);
             DataPtr outPtr = item->OutputPtr();
-            if (IsAlreayRegisted(outPtr)) return;
+            if (IsAlreadyRegisted(outPtr)) return;
             
             const auto itemID = item->ID();
             auto dispIt = m_itemDispatcher.find(itemID);
@@ -51,21 +51,13 @@ namespace MetaNN
             }
         }
         
-        bool IsAlreayRegisted(DataPtr ptr) const
+        bool IsAlreadyRegisted(DataPtr ptr) const
         {
             return m_nodes.find(ptr) != m_nodes.end();
         }
         
         void Eval()
         {
-            if (m_procNodes.empty())
-            {
-                assert(m_nodes.empty());
-                assert(m_nodeInActNum.empty());
-                assert(m_nodeAimPos.empty());
-                return;
-            }
-
             AddToDispatcher(m_procNodes);
             
             while (!m_procNodes.empty())
@@ -127,6 +119,8 @@ namespace MetaNN
 
     private:
         EvalPlan() = default;
+        EvalPlan(const EvalPlan&) = delete;
+        EvalPlan& operator= (const EvalPlan&) = delete;
 
         void AddToDispatcher(const std::set<DataPtr>& procNodes)
         {

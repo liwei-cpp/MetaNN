@@ -93,7 +93,7 @@ namespace MetaNN
             {
                 auto outHandle = m_evalBuf.Handle();
         
-                if (!EvalPlan::Inst().IsAlreayRegisted(outHandle.DataPtr()))
+                if (!EvalPlan::Inst().IsAlreadyRegisted(outHandle.DataPtr()))
                 {
                     auto handle = m_scalar.EvalRegister();
 

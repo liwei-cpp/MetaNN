@@ -21,7 +21,7 @@ namespace MetaNN
 
     private:
         const size_t m_id;
-        std::vector<const void*> m_inputPtrs;
+        const std::vector<const void*> m_inputPtrs;
         const void* m_outputPtr;
     };
 }
