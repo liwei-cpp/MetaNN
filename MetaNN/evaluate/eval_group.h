@@ -11,7 +11,6 @@ namespace MetaNN
     public:
         virtual ~BaseEvalGroup() = default;
         
-        virtual bool CanAdd(const BaseEvalItem&) = 0;
         virtual void Add(std::unique_ptr<BaseEvalItem>) = 0;
         virtual void Eval() = 0;
         virtual std::list<const void*> ResultPointers() const = 0;
@@ -21,11 +20,6 @@ namespace MetaNN
     class TrivalEvalGroup : public BaseEvalGroup
     {
     public:
-        virtual bool CanAdd(const BaseEvalItem&) override final
-        {
-            return m_evalItem == nullptr;
-        }
-        
         virtual void Add(std::unique_ptr<BaseEvalItem> item) override final
         {
             if (m_evalItem)
