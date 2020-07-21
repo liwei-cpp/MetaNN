@@ -101,7 +101,7 @@ namespace MetaNN
                 auto evalHandle = m_evalBuf.Handle();
                 if (!EvalPlan::Inst().IsAlreadyRegisted(evalHandle.DataPtr()))
                 {
-                    EvalPlan::Inst().template Register<TItemDispatcher>(
+                    EvalPlan::Inst().Register<TItemDispatcher>(
                         std::make_unique<TEvalItem>(std::move(evalHandle), m_shape));
                 }
             }
