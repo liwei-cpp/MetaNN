@@ -132,7 +132,7 @@ namespace MetaNN
                                                  std::move(resHandle));
 
             using TDispatcher = typename PolicySelect<TailCalculatorPolicy, TPolicy>::template Dispatcher<GroupType>;
-            EvalPlan::Inst().template Register<TDispatcher>(std::move(item));
+            EvalPlan::Inst().Register<TDispatcher>(std::move(item));
         }
     };
 }

@@ -15,7 +15,7 @@ namespace MetaNN
     template <typename T>
     size_t TypeID()
     {
-        static size_t id = NSTypeID::GenTypeID();
+        const static size_t id = NSTypeID::GenTypeID();
         return id;
     }
 }

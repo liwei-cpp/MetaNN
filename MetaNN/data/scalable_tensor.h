@@ -12,7 +12,7 @@ namespace MetaNN
         auto ShapeInit(const Shape<OriDim>& ori)
         {
             Shape<OriDim + 1> res;
-            if constexpr (OriDim)
+            if constexpr (OriDim != 0)
             {
                 std::copy(std::begin(ori), std::end(ori), std::begin(res) + 1);
             }
@@ -140,7 +140,7 @@ namespace MetaNN
                 m_shape = NSScalableTensor::ShapeInit(data.Shape());
             }
             
-            if constexpr (ElemShapeDim)
+            if constexpr (ElemShapeDim != 0)
             {
                 if (!std::equal(std::begin(m_shape) + 1, std::end(m_shape), std::begin(data.Shape())))
                 {
@@ -211,7 +211,7 @@ namespace MetaNN
                     using DispatcherType = TrivalEvalItemDispatcher<GroupType>;
 
                     auto item = std::make_unique<ItemType>(std::move(handleBuf), std::move(outHandle), std::move(depVec), m_shape);
-                    EvalPlan::Inst().template Register<DispatcherType>(std::move(item));
+                    EvalPlan::Inst().Register<DispatcherType>(std::move(item));
                 }
             }
             return m_evalBuf.ConstHandle();

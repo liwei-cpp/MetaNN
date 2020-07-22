@@ -103,7 +103,7 @@ namespace MetaNN
                     using DispatcherType = TrivalEvalItemDispatcher<GroupType>;
 
                     auto item = std::make_unique<ItemType>(std::move(handle), std::move(outHandle), m_shape);
-                    EvalPlan::Inst().template Register<DispatcherType>(std::move(item));
+                    EvalPlan::Inst().Register<DispatcherType>(std::move(item));
                 }
             }
             return m_evalBuf.ConstHandle();

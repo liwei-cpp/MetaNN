@@ -344,7 +344,7 @@ namespace OperSoftmaxGrad::NSCaseNLLLossGrad
                 
                 auto item = std::make_unique<TItem>(std::move(gradHandle), std::move(weightHandle),
                                                     std::move(softmaxHandle), std::move(outHandle));
-                EvalPlan::Inst().template Register<EvalDispatcher>(std::move(item));
+                EvalPlan::Inst().Register<EvalDispatcher>(std::move(item));
         }
     }
 };
