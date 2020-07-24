@@ -53,27 +53,34 @@ private:
 };
 
 template <typename TData>
-class ConstEvalHandle
+class ConstEvalHandle;
+
+template <typename TElem, typename TDevice, size_t uDim>
+class ConstEvalHandle<Tensor<TElem, TDevice, uDim>>
 {
 public:
-    using DataType = TData;
+    using DataType = Tensor<TElem, TDevice, uDim>;
 
-    ConstEvalHandle(TData data)
+    ConstEvalHandle(DataType data)
         : m_constData(std::move(data))
-    {}
+    {
+        auto low = LowerAccess(m_constData);
+        m_dataPtr = (void*)(low.RawMemory());
+    }
     
-    const TData& Data() const
+    const DataType& Data() const
     {
         return m_constData;
     }
     
     const void* DataPtr() const
     {
-        return &m_constData;
+        return m_dataPtr;
     }
     
 private:
-    TData m_constData;
+    DataType m_constData;
+    void* m_dataPtr;
 };
 
 template <typename TData>

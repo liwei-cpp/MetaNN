@@ -26,7 +26,7 @@ namespace MetaNN
         public:
             using DeviceType = DeviceTypeFromHandle<TOutputHandle>;
             EvalItem(std::vector<TInputHandle> p_input, TOutputHandle p_output,
-                     std::vector<const void*> p_dependencies,
+                     std::set<const void*> p_dependencies,
                      Shape<uDim> p_outputShape)
                 : BaseEvalItem(TypeID<EvalItem>(), std::move(p_dependencies), p_output.DataPtr())
                 , m_inputs(std::move(p_input))
@@ -197,13 +197,12 @@ namespace MetaNN
                     using TOpEvalHandle = std::decay_t<decltype(std::declval<TData>().EvalRegister())>;
 
                     std::vector<TOpEvalHandle> handleBuf;
-                    std::vector<const void*> depVec;
+                    std::set<const void*> depVec;
                     handleBuf.reserve(m_buffer->size());
-                    depVec.reserve(m_buffer->size());
                     for (size_t i = 0; i < m_buffer->size(); ++i)
                     {
                         handleBuf.push_back((*m_buffer)[i].EvalRegister());
-                        depVec.push_back(handleBuf.back().DataPtr());
+                        depVec.insert(handleBuf.back().DataPtr());
                     }
 
                     using ItemType = NSScalableTensor::EvalItem<TOpEvalHandle, decltype(outHandle), ElemShapeDim + 1>;
