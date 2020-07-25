@@ -1,4 +1,4 @@
-<div align="right">[English Version](readme_eng.md)</div>
+[English Version](readme_eng.md)
 # 关于这个分支
 MetaNN 中包含了很多新的编程尝试，其开发过程也是一个不断总结与提升的过程。我花了一些时间，写了一本书（《C++模板元编程实战》），总结了开发过程中与元编程相关的一些技术。这个分支中的代码对应了该书中的内容。
 
