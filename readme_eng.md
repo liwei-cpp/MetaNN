@@ -1,4 +1,4 @@
-<div align="right">[中文版](readme.md)</div>
+[中文版](readme.md)
 # About this Branch
 MetaNN contains a lot of new programming attempts, and its development process is also a process of continuous summary and improvement. I spent some time writing a Book (C++ Template Metaprogramming in Practice), summarizing some technologies related to metaprogramming in the development process. The code in this branch corresponds to the content in the book.
 
