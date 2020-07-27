@@ -190,13 +190,39 @@
     <File Name="layers/_.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="operation">
+    <VirtualDirectory Name="others">
+      <File Name="operation/others/interpolate.h"/>
+      <File Name="operation/others/_.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="nn">
+      <VirtualDirectory Name="facilities">
+        <File Name="operation/nn/facilities/organizer.h"/>
+      </VirtualDirectory>
+      <File Name="operation/nn/nll_loss.h"/>
+      <File Name="operation/nn/softmax.h"/>
+      <File Name="operation/nn/_.h"/>
+      <File Name="operation/nn/relu.h"/>
+    </VirtualDirectory>
     <File Name="operation/_.h"/>
     <VirtualDirectory Name="tensor">
+      <File Name="operation/tensor/permute.h"/>
+      <File Name="operation/tensor/dot.h"/>
       <File Name="operation/tensor/slice.h"/>
       <File Name="operation/tensor/_.h"/>
       <File Name="operation/tensor/tile.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="math">
+      <File Name="operation/math/substract.h"/>
+      <File Name="operation/math/sign.h"/>
+      <File Name="operation/math/negative.h"/>
+      <File Name="operation/math/multiply.h"/>
+      <File Name="operation/math/divide.h"/>
+      <File Name="operation/math/asin.h"/>
+      <File Name="operation/math/add.h"/>
+      <File Name="operation/math/acos.h"/>
+      <File Name="operation/math/abs.h"/>
+      <File Name="operation/math/tanh.h"/>
+      <File Name="operation/math/sigmoid.h"/>
       <File Name="operation/math/reduce_sum.h"/>
       <File Name="operation/math/_.h"/>
     </VirtualDirectory>
@@ -210,41 +236,6 @@
       <File Name="operation/facilities/instance_id.h"/>
     </VirtualDirectory>
     <File Name="operation/conv.h"/>
-    <VirtualDirectory Name="loss">
-      <VirtualDirectory Name="facilities">
-        <File Name="operation/loss/facilities/organizer.h"/>
-      </VirtualDirectory>
-      <File Name="operation/loss/nll_loss.h"/>
-      <File Name="operation/loss/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="elementwise">
-      <File Name="operation/elementwise/asin.h"/>
-      <File Name="operation/elementwise/acos.h"/>
-      <File Name="operation/elementwise/abs.h"/>
-      <File Name="operation/elementwise/add.h"/>
-      <File Name="operation/elementwise/divide.h"/>
-      <File Name="operation/elementwise/interpolate.h"/>
-      <File Name="operation/elementwise/multiply.h"/>
-      <File Name="operation/elementwise/sign.h"/>
-      <File Name="operation/elementwise/substract.h"/>
-      <File Name="operation/elementwise/negative.h"/>
-      <File Name="operation/elementwise/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="mutating">
-      <File Name="operation/mutating/permute.h"/>
-      <File Name="operation/mutating/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="blas">
-      <File Name="operation/blas/dot.h"/>
-      <File Name="operation/blas/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="activations">
-      <File Name="operation/activations/softmax.h"/>
-      <File Name="operation/activations/relu.h"/>
-      <File Name="operation/activations/sigmoid.h"/>
-      <File Name="operation/activations/tanh.h"/>
-      <File Name="operation/activations/_.h"/>
-    </VirtualDirectory>
   </VirtualDirectory>
   <VirtualDirectory Name="policies">
     <File Name="policies/_.h"/>

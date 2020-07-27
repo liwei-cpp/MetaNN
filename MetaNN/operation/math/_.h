@@ -1,1 +1,12 @@
+#include <MetaNN/operation/math/abs.h>
+#include <MetaNN/operation/math/acos.h>
+#include <MetaNN/operation/math/add.h>
+#include <MetaNN/operation/math/asin.h>
+#include <MetaNN/operation/math/divide.h>
+#include <MetaNN/operation/math/multiply.h>
+#include <MetaNN/operation/math/negative.h>
 #include <MetaNN/operation/math/reduce_sum.h>
+#include <MetaNN/operation/math/sigmoid.h>
+#include <MetaNN/operation/math/sign.h>
+#include <MetaNN/operation/math/substract.h>
+#include <MetaNN/operation/math/tanh.h>

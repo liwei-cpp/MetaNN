@@ -23,6 +23,29 @@
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
+  <VirtualDirectory Name="_root">
+    <File Name="main.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="source">
+    <File Name="source/_.h"/>
+    <File Name="source/test_value_source_layer.cpp"/>
+    <File Name="source/test_param_source_layer.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="compose">
+    <File Name="compose/_.h"/>
+    <File Name="compose/test_compose_kenrel.cpp"/>
+    <File Name="compose/test_bias_layer.cpp"/>
+    <File Name="compose/test_weight_layer.cpp"/>
+    <File Name="compose/test_linear_layer.cpp"/>
+    <File Name="compose/test_single_layer_perceptron.cpp"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="recurrent">
+    <File Name="recurrent/test_gru.cpp"/>
+    <File Name="recurrent/_.h"/>
+    <File Name="recurrent/test_recurrent_layer.cpp"/>
+  </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
   <Settings Type="Executable">
     <GlobalSettings>
       <Compiler Options="" C_Options="" Assembler="">
@@ -116,27 +139,4 @@
       </Completion>
     </Configuration>
   </Settings>
-  <VirtualDirectory Name="_root">
-    <File Name="main.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="source">
-    <File Name="source/_.h"/>
-    <File Name="source/test_value_source_layer.cpp"/>
-    <File Name="source/test_param_source_layer.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="compose">
-    <File Name="compose/_.h"/>
-    <File Name="compose/test_compose_kenrel.cpp"/>
-    <File Name="compose/test_bias_layer.cpp"/>
-    <File Name="compose/test_weight_layer.cpp"/>
-    <File Name="compose/test_linear_layer.cpp"/>
-    <File Name="compose/test_single_layer_perceptron.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="recurrent">
-    <File Name="recurrent/test_gru.cpp"/>
-    <File Name="recurrent/_.h"/>
-    <File Name="recurrent/test_recurrent_layer.cpp"/>
-  </VirtualDirectory>
-  <Dependencies Name="Debug"/>
-  <Dependencies Name="Release"/>
 </CodeLite_Project>

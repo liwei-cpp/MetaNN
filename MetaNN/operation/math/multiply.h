@@ -159,7 +159,7 @@ namespace NSCaseGen
 }}
 
 template <typename TOp1, typename TOp2>
-constexpr bool IsValidOper<OpTags::MultiplyWithNum, TOp1, TOp2> = OperAddWithNum::Valid<TOp1, TOp2>();
+constexpr bool IsValidOper<OpTags::MultiplyWithNum, TOp1, TOp2> = OperMultiplyWithNum::Valid<TOp1, TOp2>();
 
 template <typename TElem, typename TCate>
 struct OperAuxParams<OpTags::MultiplyWithNum, TElem, TCate> : public OperAuxValue<TElem>
@@ -183,7 +183,7 @@ template <typename TP1, typename TP2,
                            IsValidOper<OpTags::MultiplyWithNum, TP1, TP2>>* = nullptr>
 auto operator* (TP1&& p_m1, TP2&& p_m2)
 {
-    if constexpr (IsValidOper<OpTags::Add, TP1, TP2>)
+    if constexpr (IsValidOper<OpTags::Multiply, TP1, TP2>)
     {
         using rawOp1 = RemConstRef<TP1>;
         using rawOp2 = RemConstRef<TP2>;

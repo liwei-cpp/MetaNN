@@ -4,7 +4,7 @@
 #include <MetaNN/evaluate/eval_plan.h>
 #include <MetaNN/facilities/_.h>
 #include <MetaNN/operation/facilities/_.h>
-#include <MetaNN/operation/loss/facilities/organizer.h>
+#include <MetaNN/operation/nn/facilities/organizer.h>
 #include <cassert>
 #include <cmath>
 #include <type_traits>

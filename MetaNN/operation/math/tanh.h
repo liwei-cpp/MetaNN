@@ -5,6 +5,7 @@
 #include <MetaNN/operation/facilities/_.h>
 #include <MetaNN/facilities/_.h>
 #include <cassert>
+#include <cmath>
 #include <type_traits>
 
 namespace MetaNN::OpTags
