@@ -12,3 +12,4 @@
 /MetaNN/Debug/
 /MetaNN/Release/
 .idea
+cmake-build-debug
