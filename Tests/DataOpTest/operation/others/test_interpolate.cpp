@@ -84,7 +84,7 @@ namespace
     }
 }
 
-namespace Test::Operation::Elwentwise
+namespace Test::Operation::Others
 {
     void test_interpolate()
     {

@@ -87,7 +87,7 @@ namespace
     }
 }
 
-namespace Test::Operation::Mutating
+namespace Test::Operation::Tensor
 {
     void test_permute()
     {

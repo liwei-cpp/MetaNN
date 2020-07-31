@@ -1,48 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="DataOpTest" Version="10.0.0" InternalType="Console">
   <VirtualDirectory Name="operation">
+    <VirtualDirectory Name="others">
+      <File Name="operation/others/test_interpolate.cpp"/>
+      <File Name="operation/others/_.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="nn">
+      <File Name="operation/nn/test_nll_loss.cpp"/>
+      <File Name="operation/nn/test_softmax.cpp"/>
+      <File Name="operation/nn/test_relu.cpp"/>
+      <File Name="operation/nn/_.h"/>
+    </VirtualDirectory>
     <VirtualDirectory Name="tensor">
+      <File Name="operation/tensor/test_permute.cpp"/>
+      <File Name="operation/tensor/test_dot.cpp"/>
       <File Name="operation/tensor/test_slice.cpp"/>
       <File Name="operation/tensor/test_tile.cpp"/>
       <File Name="operation/tensor/_.h"/>
     </VirtualDirectory>
-    <VirtualDirectory Name="blas">
-      <File Name="operation/blas/test_dot.cpp"/>
-      <File Name="operation/blas/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="loss">
-      <File Name="operation/loss/test_nll_loss.cpp"/>
-      <File Name="operation/loss/_.h"/>
-    </VirtualDirectory>
     <VirtualDirectory Name="math">
+      <File Name="operation/math/test_substract.cpp"/>
+      <File Name="operation/math/test_sign.cpp"/>
+      <File Name="operation/math/test_negative.cpp"/>
+      <File Name="operation/math/test_multiply.cpp"/>
+      <File Name="operation/math/test_divide.cpp"/>
+      <File Name="operation/math/test_asin.cpp"/>
+      <File Name="operation/math/test_add.cpp"/>
+      <File Name="operation/math/test_acos.cpp"/>
+      <File Name="operation/math/test_abs.cpp"/>
+      <File Name="operation/math/test_tanh.cpp"/>
+      <File Name="operation/math/test_sigmoid.cpp"/>
       <File Name="operation/math/test_reduce_sum.cpp"/>
       <File Name="operation/math/_.h"/>
     </VirtualDirectory>
-    <VirtualDirectory Name="elementwise">
-      <File Name="operation/elementwise/test_interpolate.cpp"/>
-      <File Name="operation/elementwise/test_divide.cpp"/>
-      <File Name="operation/elementwise/test_negative.cpp"/>
-      <File Name="operation/elementwise/test_asin.cpp"/>
-      <File Name="operation/elementwise/test_sign.cpp"/>
-      <File Name="operation/elementwise/test_acos.cpp"/>
-      <File Name="operation/elementwise/test_abs.cpp"/>
-      <File Name="operation/elementwise/_.h"/>
-      <File Name="operation/elementwise/test_add.cpp"/>
-      <File Name="operation/elementwise/test_substract.cpp"/>
-      <File Name="operation/elementwise/test_multiply.cpp"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="activation">
-      <File Name="operation/activation/test_softmax.cpp"/>
-      <File Name="operation/activation/test_tanh.cpp"/>
-      <File Name="operation/activation/test_sigmoid.cpp"/>
-      <File Name="operation/activation/test_relu.cpp"/>
-      <File Name="operation/activation/_.h"/>
-    </VirtualDirectory>
     <File Name="operation/_.h"/>
-    <VirtualDirectory Name="mutating">
-      <File Name="operation/mutating/_.h"/>
-      <File Name="operation/mutating/test_permute.cpp"/>
-    </VirtualDirectory>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>

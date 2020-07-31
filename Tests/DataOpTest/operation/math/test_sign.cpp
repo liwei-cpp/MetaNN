@@ -110,7 +110,7 @@ namespace
     }
 }
 
-namespace Test::Operation::Elwentwise
+namespace Test::Operation::Math
 {
     void test_sign()
     {

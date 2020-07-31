@@ -112,7 +112,7 @@ namespace
     }
 }
 
-namespace Test::Operation::Blas
+namespace Test::Operation::Tensor
 {
     void test_dot()
     {

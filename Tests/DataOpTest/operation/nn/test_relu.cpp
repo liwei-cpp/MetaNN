@@ -40,7 +40,7 @@ namespace
     }
 }
 
-namespace Test::Operation::Activation
+namespace Test::Operation::NN
 {
     void test_relu()
     {
@@ -83,7 +83,7 @@ namespace
     }
 }
 
-namespace Test::Operation::Activation
+namespace Test::Operation::NN
 {
     void test_relu_grad()
     {
