@@ -349,7 +349,7 @@ namespace
     }
 }
 
-namespace Test::Layer::Compose
+namespace Test::Layer::Composite
 {
     void test_weight_layer()
     {

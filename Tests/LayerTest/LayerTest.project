@@ -1,47 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="LayerTest" Version="10.0.0" InternalType="Console">
-  <VirtualDirectory Name="math">
-    <File Name="math/test_add_layer.cpp"/>
-    <File Name="math/test_substract_layer.cpp"/>
-    <File Name="math/_.h"/>
+  <VirtualDirectory Name="composite">
+    <File Name="composite/test_single_layer_perceptron.cpp"/>
+    <File Name="composite/test_linear_layer.cpp"/>
+    <File Name="composite/test_weight_layer.cpp"/>
+    <File Name="composite/test_bias_layer.cpp"/>
+    <File Name="composite/test_compose_kenrel.cpp"/>
+    <File Name="composite/_.cpp"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="loss">
-    <File Name="loss/test_nll_loss_layer.cpp"/>
-    <File Name="loss/_.h"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="elementary">
-    <File Name="elementary/test_softmax_layer.cpp"/>
-    <File Name="elementary/test_interpolate_layer.cpp"/>
-    <File Name="elementary/test_permute_layer.cpp"/>
-    <File Name="elementary/test_multiply_layer.cpp"/>
-    <File Name="elementary/test_tanh_layer.cpp"/>
-    <File Name="elementary/test_sigmoid_layer.cpp"/>
-    <File Name="elementary/test_relu_layer.cpp"/>
-    <File Name="elementary/test_abs_layer.cpp"/>
-    <File Name="elementary/_.h"/>
-    <File Name="elementary/test_dot_layer.cpp"/>
+  <VirtualDirectory Name="principal">
+    <VirtualDirectory Name="nn">
+      <File Name="principal/nn/test_nll_loss_layer.cpp"/>
+      <File Name="principal/nn/test_softmax_layer.cpp"/>
+      <File Name="principal/nn/test_relu_layer.cpp"/>
+      <File Name="principal/nn/_.cpp"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="others">
+      <File Name="principal/others/test_value_source_layer.cpp"/>
+      <File Name="principal/others/test_param_source_layer.cpp"/>
+      <File Name="principal/others/_.cpp"/>
+      <File Name="principal/others/test_interpolate_layer.cpp"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="tensor">
+      <File Name="principal/tensor/test_permute_layer.cpp"/>
+      <File Name="principal/tensor/_.cpp"/>
+      <File Name="principal/tensor/test_dot_layer.cpp"/>
+    </VirtualDirectory>
+    <File Name="principal/_.cpp"/>
+    <VirtualDirectory Name="math">
+      <File Name="principal/math/test_tanh_layer.cpp"/>
+      <File Name="principal/math/test_sigmoid_layer.cpp"/>
+      <File Name="principal/math/test_multiply_layer.cpp"/>
+      <File Name="principal/math/test_substract_layer.cpp"/>
+      <File Name="principal/math/test_add_layer.cpp"/>
+      <File Name="principal/math/_.cpp"/>
+      <File Name="principal/math/test_abs_layer.cpp"/>
+    </VirtualDirectory>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="_root">
     <File Name="main.cpp"/>
   </VirtualDirectory>
-  <VirtualDirectory Name="source">
-    <File Name="source/_.h"/>
-    <File Name="source/test_value_source_layer.cpp"/>
-    <File Name="source/test_param_source_layer.cpp"/>
-  </VirtualDirectory>
-  <VirtualDirectory Name="compose">
-    <File Name="compose/_.h"/>
-    <File Name="compose/test_compose_kenrel.cpp"/>
-    <File Name="compose/test_bias_layer.cpp"/>
-    <File Name="compose/test_weight_layer.cpp"/>
-    <File Name="compose/test_linear_layer.cpp"/>
-    <File Name="compose/test_single_layer_perceptron.cpp"/>
-  </VirtualDirectory>
   <VirtualDirectory Name="recurrent">
+    <File Name="recurrent/_.cpp"/>
     <File Name="recurrent/test_gru.cpp"/>
-    <File Name="recurrent/_.h"/>
     <File Name="recurrent/test_recurrent_layer.cpp"/>
   </VirtualDirectory>
   <Dependencies Name="Debug"/>

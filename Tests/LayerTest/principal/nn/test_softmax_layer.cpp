@@ -253,7 +253,7 @@ namespace
     }
 }
 
-namespace Test::Layer::Elementary
+namespace Test::Layer::Principal
 {
     void test_softmax_layer()
     {

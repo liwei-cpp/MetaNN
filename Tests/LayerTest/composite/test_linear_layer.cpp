@@ -285,7 +285,7 @@ namespace
     }
 }
 
-namespace Test::Layer::Compose
+namespace Test::Layer::Composite
 {
     void test_linear_layer()
     {

@@ -39,7 +39,7 @@ namespace
     }
 }
 
-namespace Test::Layer::Source
+namespace Test::Layer::Principal
 {
     void test_value_source_layer()
     {

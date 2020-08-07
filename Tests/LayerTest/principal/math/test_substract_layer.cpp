@@ -319,7 +319,7 @@ namespace
     }
 }
 
-namespace Test::Layer::Math
+namespace Test::Layer::Principal
 {
     void test_substract_layer()
     {

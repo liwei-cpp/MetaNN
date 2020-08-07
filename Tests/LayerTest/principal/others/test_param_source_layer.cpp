@@ -262,7 +262,7 @@ namespace
     }
 }
 
-namespace Test::Layer::Source
+namespace Test::Layer::Principal
 {
     void test_param_source_layer()
     {

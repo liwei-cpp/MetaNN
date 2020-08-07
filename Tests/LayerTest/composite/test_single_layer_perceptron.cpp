@@ -227,7 +227,7 @@ namespace
     }
 }
 
-namespace Test::Layer::Compose
+namespace Test::Layer::Composite
 {
     void test_single_layer_perceptron()
     {
