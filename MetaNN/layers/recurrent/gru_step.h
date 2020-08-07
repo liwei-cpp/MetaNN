@@ -1,11 +1,7 @@
 #pragma once
-#include <MetaNN/layers/compose/compose_kernel.h>
-#include <MetaNN/layers/compose/weight_layer.h>
-#include <MetaNN/layers/elementary/sigmoid_layer.h>
-#include <MetaNN/layers/elementary/tanh_layer.h>
-#include <MetaNN/layers/elementary/multiply_layer.h>
-#include <MetaNN/layers/elementary/interpolate_layer.h>
-#include <MetaNN/layers/math/add_layer.h>
+#include <MetaNN/layers/composite/compose_kernel.h>
+#include <MetaNN/layers/composite/weight_layer.h>
+#include <MetaNN/layers/principal/_.h>
 
 namespace MetaNN
 {

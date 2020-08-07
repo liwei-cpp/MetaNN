@@ -140,30 +140,42 @@
     <File Name="facilities/type_id.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="layers">
-    <VirtualDirectory Name="math">
-      <File Name="layers/math/add_layer.h"/>
-      <File Name="layers/math/substract_layer.h"/>
-      <File Name="layers/math/_.h"/>
+    <VirtualDirectory Name="composite">
+      <File Name="layers/composite/weight_layer.h"/>
+      <File Name="layers/composite/single_layer_perceptron.h"/>
+      <File Name="layers/composite/linear_layer.h"/>
+      <File Name="layers/composite/bias_layer.h"/>
+      <File Name="layers/composite/compose_kernel.h"/>
+      <File Name="layers/composite/_.h"/>
     </VirtualDirectory>
-    <VirtualDirectory Name="compose">
-      <File Name="layers/compose/compose_kernel.h"/>
-      <File Name="layers/compose/linear_layer.h"/>
-      <File Name="layers/compose/_.h"/>
-      <File Name="layers/compose/bias_layer.h"/>
-      <File Name="layers/compose/weight_layer.h"/>
-      <File Name="layers/compose/single_layer_perceptron.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="elementary">
-      <File Name="layers/elementary/permute_layer.h"/>
-      <File Name="layers/elementary/abs_layer.h"/>
-      <File Name="layers/elementary/interpolate_layer.h"/>
-      <File Name="layers/elementary/sigmoid_layer.h"/>
-      <File Name="layers/elementary/softmax_layer.h"/>
-      <File Name="layers/elementary/tanh_layer.h"/>
-      <File Name="layers/elementary/relu_layer.h"/>
-      <File Name="layers/elementary/multiply_layer.h"/>
-      <File Name="layers/elementary/_.h"/>
-      <File Name="layers/elementary/dot_layer.h"/>
+    <VirtualDirectory Name="principal">
+      <VirtualDirectory Name="nn">
+        <File Name="layers/principal/nn/nll_loss_layer.h"/>
+        <File Name="layers/principal/nn/softmax_layer.h"/>
+        <File Name="layers/principal/nn/relu_layer.h"/>
+        <File Name="layers/principal/nn/_.h"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="others">
+        <File Name="layers/principal/others/value_source_layer.h"/>
+        <File Name="layers/principal/others/param_source_layer.h"/>
+        <File Name="layers/principal/others/interpolate_layer.h"/>
+        <File Name="layers/principal/others/_.h"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="tensor">
+        <File Name="layers/principal/tensor/permute_layer.h"/>
+        <File Name="layers/principal/tensor/dot_layer.h"/>
+        <File Name="layers/principal/tensor/_.h"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="math">
+        <File Name="layers/principal/math/substract_layer.h"/>
+        <File Name="layers/principal/math/add_layer.h"/>
+        <File Name="layers/principal/math/tanh_layer.h"/>
+        <File Name="layers/principal/math/sigmoid_layer.h"/>
+        <File Name="layers/principal/math/multiply_layer.h"/>
+        <File Name="layers/principal/math/_.h"/>
+        <File Name="layers/principal/math/abs_layer.h"/>
+      </VirtualDirectory>
+      <File Name="layers/principal/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="facilities">
       <File Name="layers/facilities/layer_in_map.h"/>
@@ -177,15 +189,6 @@
       <File Name="layers/recurrent/_.h"/>
       <File Name="layers/recurrent/gru_step.h"/>
       <File Name="layers/recurrent/recurrent_layer.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="loss">
-      <File Name="layers/loss/nll_loss_layer.h"/>
-      <File Name="layers/loss/_.h"/>
-    </VirtualDirectory>
-    <VirtualDirectory Name="source">
-      <File Name="layers/source/_.h"/>
-      <File Name="layers/source/param_source_layer.h"/>
-      <File Name="layers/source/value_source_layer.h"/>
     </VirtualDirectory>
     <File Name="layers/_.h"/>
   </VirtualDirectory>

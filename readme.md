@@ -1,5 +1,5 @@
 # TODO 列表
-* 调整Layer目录中文件的位置，使得其与 Operation 中的结构相对应
+* 调整 Test/Layer 目录中文件的位置，使得其与 Operation 中的结构相对应
 * 完成 ReadMe 的英文版
 * 引入Reshape operator，改变数据的类别与结构
 * 考虑 training 相关的模块
