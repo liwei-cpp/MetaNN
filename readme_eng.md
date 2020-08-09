@@ -725,8 +725,7 @@ In order to achieve higher computing speed, the bottom layer of the framework ne
 ### Combination of Different Operations
 In most cases, the evaluation of the expression template can be seen in the topological order of the graph: to evaluate a node, you need to evaluate the predecessor node first. But in some cases, we can simplify this evaluation process. For example, if the current node is logarithm and its child node is exponent, then we can cancel out the operations of logarithm and exponent. We can also introduce more complex mechanisms to simplify the evaluation process to a certain extent.
 
-In fact, this is a very typical evaluation optimization method. The ```OperSeq_``` template is specially introduced in MetaNN for this purpose to achieve this function. ```OperSeq_``` implements a typical responsibility chain pattern, which can handle "special" situations in expression templates. To
-事实上，这是一种非常典型的求值优化手段。 MetaNN 中为此专门引入了 ```OperSeq_``` 模板以实现类似的功能。 ```OperSeq_``` 实现了典型的职责链模式，可以处理表达式模板中“特殊”的情况。Taking ```RowSoftmaxGrad``` as an example, MetaNN defines:
+In fact, this is a very typical evaluation optimization method. The ```OperSeq_``` template is specially introduced in MetaNN for this purpose to achieve this function. ```OperSeq_``` implements a typical responsibility chain pattern, which can handle "special" situations in expression templates. Taking ```RowSoftmaxGrad``` as an example, MetaNN defines:
 ```cpp
 template <>
 struct OperSeq_<OpTags::SoftmaxGrad>
