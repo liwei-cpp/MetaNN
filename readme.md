@@ -1,5 +1,5 @@
+[English Version](readme_eng.md)
 # TODO 列表
-* 完成 ReadMe 的英文版
 * 引入Reshape operator，改变数据的类别与结构
 * 考虑 training 相关的模块
 * 考虑CNN的相关支持（相对较大的工作）
@@ -10,7 +10,7 @@ MetaNN 是一个深度学习框架的骨架，旨在探索 C++ 模板元编程�
 本文会简述 MetaNN 的主体设计思想，核心组件以及优化的可能性。
 
 ## 代码组织与运行环境
-MetaNN 是一个 C++ 模板库，与其它模板库类似，它的核心逻辑都包含在头文件中（以 .h 结尾）。除了这些头文件外，MetaNN 还包含了若干测试工程：Tests/DataOpTest，Tests/LayerTest 与 Tests/OtherTests ，它们用于测试 MestNN 的内部逻辑，同时也是简单的示例，展示了 MetaNN 中的数据与操作，层，以及其它部分的使用方式。它们会调用 MetaNN 中包含的逻辑实现具体的计算。 读者可以阅读这其中的代码从使用者的角度了解 MetaNN 的工作原理。
+MetaNN 是一个 C++ 模板库，与其它模板库类似，它的核心逻辑都包含在头文件中（以 .h 结尾）。除了这些头文件外，MetaNN 还包含了若干测试工程：Tests/DataOpTest，Tests/LayerTest 与 Tests/OtherTests ，它们用于测试 MetaNN 的内部逻辑，同时也是简单的示例，展示了 MetaNN 中的数据与操作，层，以及其它部分的使用方式。它们会调用 MetaNN 中包含的逻辑实现具体的计算。 读者可以阅读这其中的代码从使用者的角度了解 MetaNN 的工作原理。
 
 ### 运行环境
 MetaNN 库以及测试项目均使用 CodeLite 进行开发。 测试程序可以在如下的环境上编译并运行：
@@ -85,9 +85,9 @@ ZeroTensor<CheckElement, CheckDevice, 3>(5, 10, 20);
 上述声明的类型不同，可以应用于不同的场景。每种类型都采用了不同的方式存储其内部数据，并提供不同的访问接口。MetaNN 将这些类型划分成不同的类别，可以用如下的方式获取特定数据类型所对应的类别：
 ```cpp
 IsMatrix<Matrix<int, DeviceTags::CPU>>;                    // true
-IsMatrix<ZeroTensor<CheckElement, CheckDevice, 3>>;        // false
-IsThreeDArray<ZeroTensor<CheckElement, CheckDevice, 3>>;	 // true
-IsThreeDArray<ZeroTensor<CheckElement, CheckDevice, 3>>;	 // false
+IsMatrix<ZeroTensor<int, DeviceTags::CPU, 3>>;        // false
+IsThreeDArray<ZeroTensor<int, DeviceTags::CPU, 3>>;	  // true
+IsMatrix<ZeroTensor<int, DeviceTags::CPU, 3>>;	      // false
 ```
 或者使用如下的方式：
 ```cpp
@@ -95,7 +95,7 @@ IsThreeDArray<ZeroTensor<CheckElement, CheckDevice, 3>>;	 // false
 DataCategory<Matrix<int, DeviceTags::CPU>>;
 
 // CategoryTags::Tensor<3>
-DataCategory<ZeroTensor<CheckElement, CheckDevice, 3>>;
+DataCategory<ZeroTensor<int, DeviceTags::CPU, 3>>;
 ```
 
 除了自身特有的接口外，具有相同类别的数据类型提供一组通用的接口。比如，所有的数据类型都提供了```Shape()```接口来返回其形状。但```Shape()```的返回对象的类型则根据数据类型的不同而不同：矩阵类别的对象需要提供接口返回行数与列数，而三维张量对应的```Shape()```则会返回三个维度的数值。此外，每个数据类型都要提供求值接口以转换为相应主体类型的对象（我们会在后面讨论求值的过程）。
@@ -264,10 +264,10 @@ Tensor<int, DeviceTags::CPU, 3> rm2(5, 2, 3);
 auto rm3 = rm1 + rm2;
 ```
 
-当然，操作所支持的操作数组合也是可以扩展的。比如，我们可以为加法扩展出支持矩阵列表的版本。但要在特化 ```IsValidOper``` 模板的同时为这种类型的加法行为给出明确的定义。
+当然，操作所支持的操作数组合也是可以扩展的，可以通过特化 ```IsValidOper``` 引入相应的扩展，但要在同时为相应的操作给出明确的定义。
 
 ## 基本层
-层是 MetaNN 中相对高级的组件。当前很多深度学习框架都抛弃了层的概念，转而将操作与层的概念合并起来。 MetaNN 认为区分层与操作，可以更好地描述不同层面上的抽象。本节讨论基本层。
+层是 MetaNN 中相对高级的组件。当前很多深度学习框架都弱化了层的概念，转而将操作与层的概念合并起来。 MetaNN 认为区分层与操作，可以更好地描述不同层面上的抽象。本节讨论基本层。
 
 ### 设计理念
 层是 MetaNN 对外的接口。基本层封装了操作，调用具体的操作实现数据的正向、反向传播。每个基本层都能实现特定的功能，比如将两个矩阵相加，或者求矩阵的点乘。虽然基本层的功能相对单一，但其行为细节是可以配制的。比如，我们可以指定某个层是否要在训练的过程中更新其中所包含的参数。层应该了解其具体的行为细节，并根据其进行相应的优化。
@@ -386,7 +386,7 @@ ValuePolicyTemplate(PUpdateIs, GradPolicy, IsUpdate);
 接下来，让我们看一下如何使用 Policy 对象来指定层的行为细节。
 
 #### 在层中使用 Policy 对象
-MetaNN 中的大部分层都被声明为模板。接收一个模板参数，该模板参数是一个“容器”，可以存放零到多个 Policy 对象：
+MetaNN 中的大部分层都被声明为模板。接收两个模板参数，其中的之一是一个“容器”，可以存放零到多个 Policy 对象：
 ```cpp
 template <typename TInputMap, typename TPolicies>
 class AddLayer;
@@ -394,7 +394,7 @@ class AddLayer;
 // layer is an object with interfaces such as feed-backward and feed-forward;
 AddLayer<TInputMap, PolicyContainer<PUpdate, PFeedbackOutput>> layer;
 ```
-上述程序使用 Policy 对象的列表作为模板参数，实例化了 ```WeightLayer``` 模板。可以利用 MetaNN 所提供的元函数使得定义更加清晰易懂：
+上述程序使用 Policy 对象的列表作为模板参数，实例化了 ```AddLayer``` 模板。可以利用 MetaNN 所提供的元函数使得定义更加清晰易懂：
 ```cpp
 using MyLayer = MakeInferLayer<AddLayer, PUpdate, PFeedbackOutput>;
 MyLayer layer;
@@ -435,7 +435,7 @@ public:
     static constexpr bool IsFeedbackOutput
     	= PolicySelect<FeedbackPolicy, TPolicies>::IsFeedbackOutput;
 ```
-实际的实现过程与这里所讨论的有少许出入（因为涉及到组合层，需要进一步处理）。但这里所展示的代码并不影响我们对逻辑的理解。 MetaNN 提供了元函数 ```PolicySelect``` 来选择 Policy 。它接收 ```PolicyContainer``` 列表以及要查询的 Policy 的主体、次要类别，返回相应的 Policy 值（当然，对于类型或枚举 Policy ，则返回相应的类型与枚举信息）。
+实际的实现过程与这里所讨论的有少许出入（因为涉及到组合层，需要进一步处理）。但这里所展示的代码并不影响我们对逻辑的理解。 MetaNN 提供了元函数 ```PolicySelect``` 来选择 Policy 。它接收 ```PolicyContainer``` 列表以及要查询的 Policy 的主体、次要类别，返回相应的 Policy 值（当然，对于类型 Policy ，则返回相应的类型信息）。
 
 层会在其内部根据 Policy 的取值对其行为进行调整，尽量减少不必要的计算。
 
@@ -443,7 +443,7 @@ public:
 除了构造函数外，每个层都至少需要提供两个接口，用于进行数据的正向、反向传播。正向、反向传播的输入与输出均是容器。正向传播的输入容器与反向传播的输出容器具有相同的“结构”，在 MetaNN 中称为层的输入容器；正向传播的输出容器与反向传播的输入容器具有相同的“结构”，在 MetaNN 中称为层的输出容器。本节将首先讨论容器的一些特性，之后对正向、反向传播函数的一些特点进行讨论。
 
 #### 容器
-以正向传播为例，通常来说，层会接收一到多个数据作为输出，计算后产生一到多个数据作为输出。一些深度学习框架使用类似 ```std::vector``` 这样的线性表来输入与输出的数据结构——输入数据用一个 ```vector``` 表示，输出数据用另一个 ```vector``` 表示。这种方法有两个缺点：首先，无法通过 ```vertor``` 数据结构本身来区分传递给层的参数。比如，对于一个计算了两个矩阵相减的层，可以规定传入 ```vector``` 的第一个参数为减数，第二个为被减数。但这种规定并没有从程序的角度有所体现，可能会存在误用。
+以正向传播为例，通常来说，层会接收一到多个数据作为输入，计算后产生一到多个数据作为输出。一些深度学习框架使用类似 ```std::vector``` 这样的线性表来输入与输出的数据结构——输入数据用一个 ```vector``` 表示，输出数据用另一个 ```vector``` 表示。这种方法有两个缺点：首先，无法通过 ```vertor``` 数据结构本身来区分传递给层的参数。比如，对于一个计算了两个矩阵相减的层，可以规定传入 ```vector``` 的第一个参数为减数，第二个为被减数。但这种规定并没有从程序的角度有所体现，可能会存在误用。
 
 其次的一个问题是 ```vector``` 这样的列表只能存储类型相同的元素。层的输入与输出数据类型千变万化，使用 ```vector``` 这样的列表无疑限制了输入输出的数据类型。
 
@@ -553,9 +553,9 @@ Operation<OpTags::Add,
 
 ### 层的其它接口
 MetaNN 中的每个层都需要提供正向、反向传播用的接口。除此之外，它们还可能提供如下的接口：
- * ```Init```: 用于初始化层中所包含的参数矩阵。
- * ```LoadWeights```: 用于从外部读取参数矩阵。
- * ```SaveWeights```: 用于将参数矩阵保存到外部。
+ * ```Init```: 用于初始化层中所包含的参数。
+ * ```LoadWeights```: 用于从外部读取参数。
+ * ```SaveWeights```: 用于将参数保存到外部。
  * ```GradCollect```: 用于获取梯度信息。
  * ```NeutralInvariant```: 用于断言层处于中性状态。
 
@@ -727,7 +727,7 @@ auto res2 = handle2.Data();
 ### 求值优化之不同操作的合并
 大部分情况下，对表达式模板的求值可以看图的拓扑排序：要对某个结点求值，就需要先对前驱结点求值。但在一些情况下，我们可以简化这个求值的过程。比如，如果当前结点是求对数，而其子结点是求指数，那么我们可以将求对数与求指数的操作抵消掉。我们还可以引入更复杂的机制，在一定程度上简化求值的过程。
 
-事实上，这是一种非常典型的求值优化手段。 MetaNN 中为此专门引入了 ```OperSeq_``` 模板以实现类似的功能。 ```OperSeq_``` 实现了典型的职责链模式，可以处理表达式模板中“特殊”的情况。以 ```RowSoftmaxDerivative``` 为例，MetaNN 定义了：
+事实上，这是一种非常典型的求值优化手段。 MetaNN 中为此专门引入了 ```OperSeq_``` 模板以实现类似的功能。 ```OperSeq_``` 实现了典型的职责链模式，可以处理表达式模板中“特殊”的情况。以 ```RowSoftmaxGrad``` 为例，MetaNN 定义了：
 ```cpp
 template <>
 struct OperSeq_<OpTags::SoftmaxGrad>
