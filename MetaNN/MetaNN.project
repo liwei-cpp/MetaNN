@@ -167,6 +167,8 @@
         <File Name="layers/principal/tensor/_.h"/>
       </VirtualDirectory>
       <VirtualDirectory Name="math">
+        <File Name="layers/principal/math/acos_layer.h"/>
+        <File Name="layers/principal/math/asin_layer.h"/>
         <File Name="layers/principal/math/substract_layer.h"/>
         <File Name="layers/principal/math/add_layer.h"/>
         <File Name="layers/principal/math/tanh_layer.h"/>

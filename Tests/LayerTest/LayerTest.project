@@ -28,6 +28,8 @@
     </VirtualDirectory>
     <File Name="principal/_.cpp"/>
     <VirtualDirectory Name="math">
+      <File Name="principal/math/test_acos_layer.cpp"/>
+      <File Name="principal/math/test_asin_layer.cpp"/>
       <File Name="principal/math/test_tanh_layer.cpp"/>
       <File Name="principal/math/test_sigmoid_layer.cpp"/>
       <File Name="principal/math/test_multiply_layer.cpp"/>
