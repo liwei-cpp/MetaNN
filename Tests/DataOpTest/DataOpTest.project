@@ -19,6 +19,8 @@
       <File Name="operation/tensor/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="math">
+      <File Name="operation/math/test_cos.cpp"/>
+      <File Name="operation/math/test_sin.cpp"/>
       <File Name="operation/math/test_substract.cpp"/>
       <File Name="operation/math/test_sign.cpp"/>
       <File Name="operation/math/test_negative.cpp"/>

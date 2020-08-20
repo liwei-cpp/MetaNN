@@ -167,6 +167,8 @@
         <File Name="layers/principal/tensor/_.h"/>
       </VirtualDirectory>
       <VirtualDirectory Name="math">
+        <File Name="layers/principal/math/cos_layer.h"/>
+        <File Name="layers/principal/math/sin_layer.h"/>
         <File Name="layers/principal/math/acos_layer.h"/>
         <File Name="layers/principal/math/asin_layer.h"/>
         <File Name="layers/principal/math/substract_layer.h"/>
@@ -217,6 +219,8 @@
       <File Name="operation/tensor/tile.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="math">
+      <File Name="operation/math/cos.h"/>
+      <File Name="operation/math/sin.h"/>
       <File Name="operation/math/substract.h"/>
       <File Name="operation/math/sign.h"/>
       <File Name="operation/math/negative.h"/>
