@@ -1,5 +1,6 @@
 #include <MetaNN/operation/math/abs.h>
 #include <MetaNN/operation/math/acos.h>
+#include <MetaNN/operation/math/acosh.h>
 #include <MetaNN/operation/math/add.h>
 #include <MetaNN/operation/math/asin.h>
 #include <MetaNN/operation/math/cos.h>
@@ -11,4 +12,5 @@
 #include <MetaNN/operation/math/sign.h>
 #include <MetaNN/operation/math/sin.h>
 #include <MetaNN/operation/math/substract.h>
+#include <MetaNN/operation/math/tan.h>
 #include <MetaNN/operation/math/tanh.h>
