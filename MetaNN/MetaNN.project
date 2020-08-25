@@ -167,6 +167,7 @@
         <File Name="layers/principal/tensor/_.h"/>
       </VirtualDirectory>
       <VirtualDirectory Name="math">
+        <File Name="layers/principal/math/asinh_layer.h"/>
         <File Name="layers/principal/math/acosh_layer.h"/>
         <File Name="layers/principal/math/tan_layer.h"/>
         <File Name="layers/principal/math/cos_layer.h"/>
@@ -221,6 +222,7 @@
       <File Name="operation/tensor/tile.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="math">
+      <File Name="operation/math/asinh.h"/>
       <File Name="operation/math/acosh.h"/>
       <File Name="operation/math/tan.h"/>
       <File Name="operation/math/cos.h"/>

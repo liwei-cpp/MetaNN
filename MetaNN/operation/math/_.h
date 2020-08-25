@@ -3,6 +3,7 @@
 #include <MetaNN/operation/math/acosh.h>
 #include <MetaNN/operation/math/add.h>
 #include <MetaNN/operation/math/asin.h>
+#include <MetaNN/operation/math/asinh.h>
 #include <MetaNN/operation/math/cos.h>
 #include <MetaNN/operation/math/divide.h>
 #include <MetaNN/operation/math/multiply.h>

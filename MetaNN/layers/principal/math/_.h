@@ -3,6 +3,7 @@
 #include <MetaNN/layers/principal/math/acosh_layer.h>
 #include <MetaNN/layers/principal/math/add_layer.h>
 #include <MetaNN/layers/principal/math/asin_layer.h>
+#include <MetaNN/layers/principal/math/asinh_layer.h>
 #include <MetaNN/layers/principal/math/cos_layer.h>
 #include <MetaNN/layers/principal/math/multiply_layer.h>
 #include <MetaNN/layers/principal/math/sigmoid_layer.h>

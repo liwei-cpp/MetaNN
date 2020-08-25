@@ -7,6 +7,7 @@ namespace Test::Operation::Math
     void test_acosh();      void test_acosh_grad();
     void test_add();
     void test_asin();       void test_asin_grad();
+    void test_asinh();      void test_asinh_grad();
     void test_cos();        void test_cos_grad();
     void test_divide();
     void test_multiply();
@@ -26,6 +27,7 @@ namespace Test::Operation::Math
         test_acosh();       test_acosh_grad();
         test_add();
         test_asin();        test_asin_grad();
+        test_asinh();       test_asinh_grad();
         test_cos();         test_cos_grad();
         test_divide();
         test_multiply();

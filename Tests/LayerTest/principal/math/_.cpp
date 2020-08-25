@@ -5,6 +5,7 @@ namespace Test::Layer::Principal
     void test_acosh_layer();
     void test_add_layer();
     void test_asin_layer();
+    void test_asinh_layer();
     void test_cos_layer();
     void test_multiply_layer();
     void test_sigmoid_layer();
@@ -20,6 +21,7 @@ namespace Test::Layer::Principal
         test_acosh_layer();
         test_add_layer();
         test_asin_layer();
+        test_asinh_layer();
         test_cos_layer();
         test_multiply_layer();
         test_sigmoid_layer();
