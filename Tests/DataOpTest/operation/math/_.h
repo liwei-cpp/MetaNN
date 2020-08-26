@@ -16,6 +16,7 @@ namespace Test::Operation::Math
     void test_sigmoid();    void test_sigmoid_grad();
     void test_sign();
     void test_sin();        void test_sin_grad();
+    void test_square();     void test_square_grad();
     void test_substract();
     void test_tan();        void test_tan_grad();
     void test_tanh();       void test_tanh_grad();
@@ -36,6 +37,7 @@ namespace Test::Operation::Math
         test_sigmoid();     test_sigmoid_grad();
         test_sign();
         test_sin();         test_sin_grad();
+        test_square();      test_square_grad();
         test_substract();
         test_tan();         test_tan_grad();
         test_tanh();        test_tanh_grad();

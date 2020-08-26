@@ -12,6 +12,7 @@
 #include <MetaNN/operation/math/sigmoid.h>
 #include <MetaNN/operation/math/sign.h>
 #include <MetaNN/operation/math/sin.h>
+#include <MetaNN/operation/math/square.h>
 #include <MetaNN/operation/math/substract.h>
 #include <MetaNN/operation/math/tan.h>
 #include <MetaNN/operation/math/tanh.h>

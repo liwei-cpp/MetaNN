@@ -19,6 +19,7 @@
       <File Name="operation/tensor/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="math">
+      <File Name="operation/math/test_square.cpp"/>
       <File Name="operation/math/test_asinh.cpp"/>
       <File Name="operation/math/test_acosh.cpp"/>
       <File Name="operation/math/test_tan.cpp"/>

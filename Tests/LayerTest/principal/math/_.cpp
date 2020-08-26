@@ -10,6 +10,7 @@ namespace Test::Layer::Principal
     void test_multiply_layer();
     void test_sigmoid_layer();
     void test_sin_layer();
+    void test_square_layer();
     void test_substract_layer();
     void test_tan_layer();
     void test_tanh_layer();
@@ -26,6 +27,7 @@ namespace Test::Layer::Principal
         test_multiply_layer();
         test_sigmoid_layer();
         test_sin_layer();
+        test_square_layer();
         test_substract_layer();
         test_tan_layer();
         test_tanh_layer();
