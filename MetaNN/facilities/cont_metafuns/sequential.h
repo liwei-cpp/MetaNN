@@ -195,13 +195,6 @@ struct imp_
     using type = TState;
 };
 
-template <typename TState, template <typename, typename> typename F,
-          typename T0, typename... TRemain>
-struct imp_<TState, F, T0, TRemain...>
-{
-    using type = typename imp_<F<TState, T0>, F, TRemain...>::type;
-};
-
 template <typename TState, template <typename, typename> typename F, typename T0>
 struct imp_<TState, F, T0>
 {
