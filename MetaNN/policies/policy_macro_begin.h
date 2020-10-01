@@ -1,8 +1,15 @@
-#define TypePolicyObj(PolicyName, Ma, Mi, Val) \
+#define EnumTypePolicyObj(PolicyName, Ma, Mi, Val) \
 struct PolicyName : virtual public Ma\
 { \
     using MinorClass = Ma::Mi##TypeCate; \
     using Mi = Ma::Mi##TypeCate::Val; \
+}
+
+#define TypePolicyObj(PolicyName, Ma, Mi, Val) \
+struct PolicyName : virtual public Ma\
+{ \
+    using MinorClass = Ma::Mi##TypeCate; \
+    using Mi = Val; \
 }
 
 #define ValuePolicyObj(PolicyName, Ma, Mi, Val) \

@@ -28,11 +28,11 @@ namespace MetaNN
         using ScaleMode = ScaleModeTypeCate::FanAvg;
     };
 #include <MetaNN/policies/policy_macro_begin.h>
-    TypePolicyObj(PNormVarScale,    VarScaleFillerPolicy, Distribute, Norm);
-    TypePolicyObj(PUniformVarScale, VarScaleFillerPolicy, Distribute, Uniform);
-    TypePolicyObj(PVarScaleFanIn,   VarScaleFillerPolicy, ScaleMode,  FanIn);
-    TypePolicyObj(PVarScaleFanOut,  VarScaleFillerPolicy, ScaleMode,  FanOut);
-    TypePolicyObj(PVarScaleFanAvg,  VarScaleFillerPolicy, ScaleMode,  FanAvg);
+    EnumTypePolicyObj(PNormVarScale,    VarScaleFillerPolicy, Distribute, Norm);
+    EnumTypePolicyObj(PUniformVarScale, VarScaleFillerPolicy, Distribute, Uniform);
+    EnumTypePolicyObj(PVarScaleFanIn,   VarScaleFillerPolicy, ScaleMode,  FanIn);
+    EnumTypePolicyObj(PVarScaleFanOut,  VarScaleFillerPolicy, ScaleMode,  FanOut);
+    EnumTypePolicyObj(PVarScaleFanAvg,  VarScaleFillerPolicy, ScaleMode,  FanAvg);
 #include <MetaNN/policies/policy_macro_end.h>
 
     namespace NSVarScaleFiller
