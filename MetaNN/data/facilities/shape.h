@@ -19,12 +19,11 @@ namespace MetaNN
 
             if constexpr (sizeof...(TRemainIndexType) == 0)
             {
-                gap = 1;
                 return static_cast<size_t>(curIdx);
             }
             else
             {
-                size_t curGap = 0;
+                size_t curGap = 1;
                 size_t res = IndexToOffset(dims, curGap, remIdx...);
                 gap = curGap * dims[indexPos + 1];
                 res += static_cast<size_t>(curIdx) * gap;
@@ -37,7 +36,7 @@ namespace MetaNN
                              const std::array<size_t, uDimNum>& indexes,
                              Helper::IndexSequence<N...>*)
         {
-            size_t gap = 0;
+            size_t gap = 1;
             return IndexToOffset(dims, gap, std::get<N>(indexes)...);
         }
 
@@ -95,7 +94,7 @@ namespace MetaNN
         size_t IndexToOffset(TIntTypes... indexes) const
         {
             static_assert(sizeof...(TIntTypes) == uDimNum);
-            size_t gap = 0;
+            size_t gap = 1;
             return NSShape::IndexToOffset(m_dims, gap, indexes...);
         }
 
