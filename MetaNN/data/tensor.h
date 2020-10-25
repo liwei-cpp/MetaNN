@@ -23,12 +23,11 @@ namespace MetaNN
 
             if constexpr (sizeof...(TRemainParam) == 0)
             {
-                gap = 1;
                 return std::pair(static_cast<size_t>(curIdx), nextParam);
             }
             else
             {
-                size_t curGap = 0;
+                size_t curGap = 1;
                 auto [pos, val] = OffsetAndVal(shape, curGap, nextParam, remPara...);
                 gap = curGap * shape[indexPos + 1];
                 pos += static_cast<size_t>(curIdx) * gap;
@@ -84,7 +83,7 @@ namespace MetaNN
             static_assert(sizeof...(TPosValParams) == uDim + 1);
 
             assert(AvailableForWrite());
-            size_t gap = 0;
+            size_t gap = 1;
             auto [pos, val] = NSTensor::OffsetAndVal(m_shape, gap, posValParams...);
             (m_mem.RawMemory())[pos] = static_cast<ElementType>(val);
         }

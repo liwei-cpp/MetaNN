@@ -10,6 +10,7 @@ namespace Test::Operation::Math
     void test_asinh();      void test_asinh_grad();
     void test_cos();        void test_cos_grad();
     void test_divide();
+    void test_exp();        void test_exp_grad();
     void test_multiply();
     void test_negative();
     void test_reduce_sum();
@@ -31,6 +32,7 @@ namespace Test::Operation::Math
         test_asinh();       test_asinh_grad();
         test_cos();         test_cos_grad();
         test_divide();
+        test_exp() ;        test_exp_grad();
         test_multiply();
         test_negative();
         test_reduce_sum();

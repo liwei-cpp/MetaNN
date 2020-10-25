@@ -6,6 +6,7 @@
 #include <MetaNN/operation/math/asinh.h>
 #include <MetaNN/operation/math/cos.h>
 #include <MetaNN/operation/math/divide.h>
+#include <MetaNN/operation/math/exp.h>
 #include <MetaNN/operation/math/multiply.h>
 #include <MetaNN/operation/math/negative.h>
 #include <MetaNN/operation/math/reduce_sum.h>

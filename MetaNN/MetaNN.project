@@ -223,6 +223,7 @@
       <File Name="operation/tensor/tile.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="math">
+      <File Name="operation/math/exp.h"/>
       <File Name="operation/math/square.h"/>
       <File Name="operation/math/asinh.h"/>
       <File Name="operation/math/acosh.h"/>
