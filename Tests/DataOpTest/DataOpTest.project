@@ -12,6 +12,7 @@
       <File Name="operation/nn/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="tensor">
+      <File Name="operation/tensor/test_reshape.cpp"/>
       <File Name="operation/tensor/test_permute.cpp"/>
       <File Name="operation/tensor/test_dot.cpp"/>
       <File Name="operation/tensor/test_slice.cpp"/>

@@ -15,11 +15,15 @@ namespace MetaNN
         
         struct ModifyDimNumValueCate;
         static constexpr size_t ModifyDimNum = 1;
+        
+        struct DimCountValueCate;
+        static constexpr size_t DimCount = 0;
     };
     ValuePolicyObj(PKeepDim,             DimPolicy, IsKeepDim, true);
     ValuePolicyObj(PNoKeepDIm,           DimPolicy, IsKeepDim, false);
     ValuePolicyTemplate(PKeepDimValueIs, DimPolicy, IsKeepDim);
     ValuePolicyTemplate(PModifyDimNumIs, DimPolicy, ModifyDimNum);
+    ValuePolicyTemplate(PDimCountIs,     DimPolicy, DimCount);
 
     template <size_t... uDims>
     struct PDimArrayIs : virtual public DimPolicy

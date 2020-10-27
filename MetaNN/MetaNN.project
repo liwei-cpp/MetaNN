@@ -216,6 +216,7 @@
     </VirtualDirectory>
     <File Name="operation/_.h"/>
     <VirtualDirectory Name="tensor">
+      <File Name="operation/tensor/reshape.h"/>
       <File Name="operation/tensor/permute.h"/>
       <File Name="operation/tensor/dot.h"/>
       <File Name="operation/tensor/slice.h"/>

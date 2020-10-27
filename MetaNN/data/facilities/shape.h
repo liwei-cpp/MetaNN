@@ -194,6 +194,11 @@ namespace MetaNN
         {
             return m_dims.rend();
         }
+        
+        decltype(auto) size() const
+        {
+            return m_dims.size();
+        }
     private:
         std::array<size_t, uDimNum> m_dims{};
     };
@@ -220,6 +225,11 @@ namespace MetaNN
         size_t Count() const
         {
             return 1;
+        }
+        
+        decltype(auto) size() const
+        {
+            return 0;
         }
     };
     

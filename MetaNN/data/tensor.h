@@ -218,6 +218,11 @@ namespace MetaNN
         {
             return m_data.m_mem.RawMemory();
         }
+        
+        auto SharedMemory()
+        {
+            return m_data.m_mem;
+        }
 
     private:
         Tensor<TElement, TDevice, uDIm> m_data;
