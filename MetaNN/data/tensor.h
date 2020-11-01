@@ -73,7 +73,7 @@ namespace MetaNN
                    (m_mem == val.m_mem);
         }
         
-        bool AvailableForWrite() const { return m_mem.IsShared(); }
+        bool AvailableForWrite() const { return !m_mem.IsShared(); }
 
         template <typename... TPosValParams>
         void SetValue(TPosValParams... posValParams)
@@ -174,7 +174,7 @@ namespace MetaNN
 
         bool AvailableForWrite() const
         {
-            return m_mem.IsShared();
+            return !m_mem.IsShared();
         }
 
         void SetValue(ElementType val)

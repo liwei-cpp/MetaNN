@@ -32,7 +32,7 @@ public:
 
     bool IsShared() const
     {
-        return m_mem.use_count() == 1;
+        return m_mem.use_count() > 1;
     }
     
     size_t Size() const
@@ -42,7 +42,7 @@ public:
     
     bool operator== (const ContinuousMemory& val) const noexcept
     {
-        return (m_mem == val.m_mem);
+        return (m_mem == val.m_mem) && (m_size == val.m_size);
     }
 
     bool operator!= (const ContinuousMemory& val) const noexcept
