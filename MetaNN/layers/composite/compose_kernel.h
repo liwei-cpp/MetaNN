@@ -579,7 +579,7 @@ namespace NSSI
     };
     
     template <typename TInputs, typename OrderedSublayers, typename TSublayerClauses, typename InConnects, typename InterConnects, typename SublayerPolicyFinal>
-    struct NontrivalInst_
+    struct NontrivialInst_
     {
         //  Fill Input type container with in-connections
         using InputTypeCont1 = typename NSSI::InputTypeFillInConnect_<OrderedSublayers,
@@ -597,7 +597,7 @@ namespace NSSI
     };
     
     template <typename TSublayerMap, typename SublayerPolicyFinal>
-    struct TrivalInstHelper_
+    struct TrivialInstHelper_
     {
         template <typename TCurLayer>
         struct apply
@@ -609,10 +609,10 @@ namespace NSSI
     };
     
     template <typename OrderedSublayers, typename TSublayerClauses, typename SublayerPolicyFinal>
-    struct TrivalInst_
+    struct TrivialInst_
     {
         using type = Sequential::Transform<OrderedSublayers,
-                                                        TrivalInstHelper_<ClauseRefine::SublayerMap<TSublayerClauses>,
+                                                        TrivialInstHelper_<ClauseRefine::SublayerMap<TSublayerClauses>,
                                                                           SublayerPolicyFinal>::template apply,
                                                         std::tuple>;
     };
@@ -644,8 +644,8 @@ struct SublayerInstantiation_
 
     /// Instantiation
     using type = typename std::conditional_t<IsEmptyLayerInMap<TInputs>,
-                                             NSSI::TrivalInst_<OrderedSublayers, TSublayerClauses, SublayerPolicyFinal>,
-                                             NSSI::NontrivalInst_<TInputs, OrderedSublayers, TSublayerClauses, InConnects, InterConnects, SublayerPolicyFinal>>::type;
+                                             NSSI::TrivialInst_<OrderedSublayers, TSublayerClauses, SublayerPolicyFinal>,
+                                             NSSI::NontrivialInst_<TInputs, OrderedSublayers, TSublayerClauses, InConnects, InterConnects, SublayerPolicyFinal>>::type;
 
 };
 }

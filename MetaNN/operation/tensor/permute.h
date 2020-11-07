@@ -37,7 +37,7 @@ namespace MetaNN
         };
         
         template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
-        class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
+        class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
         {
             using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicies>;
             constexpr static size_t uDim = EvalItemType::CategoryTag::DimNum;
@@ -169,7 +169,7 @@ namespace MetaNN
         }
         
         template <size_t uDim>
-        constexpr bool TrivalDims(std::array<size_t, uDim> dims)
+        constexpr bool TrivialDims(std::array<size_t, uDim> dims)
         {
             for (size_t i = 0; i < uDim; ++i)
             {
@@ -185,7 +185,7 @@ namespace MetaNN
     {
         constexpr auto dims = PolicySelect<DimPolicy, TDimPolicy>::DimArray;
         static_assert(OperPermute::ValidDims(dims));
-        if constexpr (OperPermute::TrivalDims(dims))
+        if constexpr (OperPermute::TrivialDims(dims))
         {
             return std::forward<TP>(oper);
         }
@@ -224,7 +224,7 @@ namespace MetaNN
     {
         constexpr auto dims = PolicySelect<DimPolicy, TDimPolicy>::DimArray;
         static_assert(OperPermute::ValidDims(dims));
-        if constexpr (OperPermute::TrivalDims(dims))
+        if constexpr (OperPermute::TrivialDims(dims))
         {
             return std::forward<TP>(oper);
         }

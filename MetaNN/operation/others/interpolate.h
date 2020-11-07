@@ -42,7 +42,7 @@ namespace OperInterpolate::NSCaseGen
     
     template <typename TInputHandle1, typename TInputHandle2, typename TInputHandle3,
               typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TInputHandle3, TOutputHandle>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TInputHandle3, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TInputHandle3, TOutputHandle>;
     protected:

@@ -38,7 +38,7 @@ namespace OperSubstract::NSCaseGen
     };
 
     template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TOutputHandle>;
     protected:
@@ -122,7 +122,7 @@ namespace NSCaseGen
     };
 
     template <typename TInputHandle, typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
     protected:
@@ -212,7 +212,7 @@ namespace NSCaseGen
     };
 
     template <typename TInputHandle, typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
     protected:

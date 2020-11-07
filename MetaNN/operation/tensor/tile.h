@@ -117,7 +117,7 @@ namespace MetaNN
         };
         
         template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
-        class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
+        class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
         {
             using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicies>;
             constexpr static size_t AimDim = CategoryTagFromHandle<TOutputHandle>::DimNum;
@@ -284,8 +284,8 @@ namespace MetaNN
     {
         static_assert(DataCategory<TP>::DimNum <= AimDim);
 
-        constexpr bool HasDimArray = HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::DimArrayValueCate>;
-        if constexpr (HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::DimArrayValueCate>)
+        constexpr bool HasDimArray = HasNonTrivialPolicy<TPolicy, DimPolicy, DimPolicy::DimArrayValueCate>;
+        if constexpr (HasNonTrivialPolicy<TPolicy, DimPolicy, DimPolicy::DimArrayValueCate>)
         {
             constexpr auto dimArray = PolicySelect<DimPolicy, TPolicy>::DimArray;
             static_assert(DataCategory<TP>::DimNum + dimArray.size() == AimDim,

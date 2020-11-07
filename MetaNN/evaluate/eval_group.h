@@ -17,7 +17,7 @@ namespace MetaNN
     };
     
     template <typename TEvalItem>
-    class TrivalEvalGroup : public BaseEvalGroup
+    class TrivialEvalGroup : public BaseEvalGroup
     {
     public:
         virtual void Add(std::unique_ptr<BaseEvalItem> item) override final

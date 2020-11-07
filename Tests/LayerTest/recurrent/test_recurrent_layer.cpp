@@ -114,7 +114,7 @@ namespace
         
     void test_recurrent_layer2()
     {
-        cout << "Test recurrent layer case 2 (non-trival)...\t";
+        cout << "Test recurrent layer case 2 (non-trivial)...\t";
         using RootLayer = MakeTrainLayer<RecurrentLayer, SeqInputMap, PSeqIDsAre<SeqID<LayerInput, 0>>, PActFuncIs<AddWrapLayer>>;
         static_assert(!RootLayer::IsUpdate);
         static_assert(!RootLayer::IsFeedbackOutput);
@@ -159,7 +159,7 @@ namespace
     
     void test_recurrent_layer3()
     {
-        cout << "Test recurrent layer case 3 (non-trival, feedout)...\t";
+        cout << "Test recurrent layer case 3 (non-trivial, feedout)...\t";
         using RootLayer = MakeTrainLayer<RecurrentLayer, SeqInputMap, PActFuncIs<AddWrapLayer>, PSeqIDsAre<SeqID<LayerInput, 0>>, PFeedbackOutput>;
         static_assert(!RootLayer::IsUpdate);
         static_assert(RootLayer::IsFeedbackOutput);

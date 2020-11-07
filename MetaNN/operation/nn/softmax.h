@@ -38,7 +38,7 @@ namespace OperSoftmax::NSCaseGen
     };
 
     template <typename TInputHandle, typename TOutputHandle, typename TPolicy>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicy>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicy>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicy>;
         using ResType = typename TOutputHandle::DataType;
@@ -141,7 +141,7 @@ namespace OperSoftmaxGrad::NSCaseGen
     };
 
     template <typename TGradHandle, typename TInputHandle, typename TOutputHandle, typename TPolicy>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle, TPolicy>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle, TPolicy>>
     {
         using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle, TPolicy>;
         using ResType = typename TOutputHandle::DataType;
@@ -241,7 +241,7 @@ namespace OperSoftmaxGrad::NSCaseNLLLossGrad
     
     template <typename TGradHandle, typename TWeightHandle, 
               typename TSoftmaxHandle, typename TOutputHandle, typename TPolicy>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TWeightHandle, TSoftmaxHandle, TOutputHandle, TPolicy>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TGradHandle, TWeightHandle, TSoftmaxHandle, TOutputHandle, TPolicy>>
     {
         using EvalItemType = EvalItem<TGradHandle, TWeightHandle, TSoftmaxHandle, TOutputHandle, TPolicy>;
     protected:
@@ -340,7 +340,7 @@ namespace OperSoftmaxGrad::NSCaseNLLLossGrad
                                          RemConstRef<decltype(softmaxHandle)>,
                                          RemConstRef<decltype(outHandle)>,
                                          typename TOp::Policies>;
-                using EvalDispatcher = TrivalEvalItemDispatcher<TGroup>;
+                using EvalDispatcher = TrivialEvalItemDispatcher<TGroup>;
                 
                 auto item = std::make_unique<TItem>(std::move(gradHandle), std::move(weightHandle),
                                                     std::move(softmaxHandle), std::move(outHandle));

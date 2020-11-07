@@ -63,7 +63,7 @@ namespace MetaNN
         };
 
         template <size_t uDimNum>
-        constexpr bool IsTrivalDimBits(std::array<bool, uDimNum> dimBits)
+        constexpr bool IsTrivialDimBits(std::array<bool, uDimNum> dimBits)
         {
             for (size_t i = 0; i < uDimNum; ++i)
             {
@@ -115,7 +115,7 @@ namespace MetaNN
         };
 
         template <typename TInputHandle, typename TOutputHandle, typename TPolicies>
-        class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
+        class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle, TOutputHandle, TPolicies>>
         {
             using EvalItemType = EvalItem<TInputHandle, TOutputHandle, TPolicies>;
             constexpr static size_t OriDim = CategoryTagFromHandle<TInputHandle>::DimNum;
@@ -283,8 +283,8 @@ namespace MetaNN
               std::enable_if_t<IsValidOper<OpTags::ReduceSum, TP>>* = nullptr>
     auto ReduceSum(TP&& oper)
     {
-        constexpr bool HasDimArray = HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::DimArrayValueCate>;
-        constexpr bool HasModDimNum = HasNonTrivalPolicy<TPolicy, DimPolicy, DimPolicy::ModifyDimNumValueCate>;
+        constexpr bool HasDimArray = HasNonTrivialPolicy<TPolicy, DimPolicy, DimPolicy::DimArrayValueCate>;
+        constexpr bool HasModDimNum = HasNonTrivialPolicy<TPolicy, DimPolicy, DimPolicy::ModifyDimNumValueCate>;
 
         static_assert((int)HasDimArray + (int)HasModDimNum <= 1, "only one of DimArray or ResDimValue could be set");
         
@@ -295,7 +295,7 @@ namespace MetaNN
 
         static constexpr bool KeepDim = PolicySelect<DimPolicy, TPolicy>::IsKeepDim;
         constexpr auto DimBits = TDimBits::DimBitArray;
-        if constexpr (OperReduceSum::IsTrivalDimBits(DimBits))
+        if constexpr (OperReduceSum::IsTrivialDimBits(DimBits))
         {
             return std::forward<TP>(oper);
         }

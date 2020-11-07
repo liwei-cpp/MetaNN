@@ -176,7 +176,7 @@ namespace MetaNN
             static_assert(SeqIdsValid<SeqIdCont, InputPortSet>,
                           "Some sequence id not correcponds to any RNN port.");            
             static_assert(Sequential::Size<SeqIdCont> != 0,
-                          "Trival recurrent layer is not allowed.");
+                          "Trivial recurrent layer is not allowed.");
 
         };
 

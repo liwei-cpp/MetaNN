@@ -9,7 +9,7 @@
 
 namespace MetaNN
 {
-    namespace NSTrivalTensor
+    namespace NSTrivialTensor
     {
         template <typename TScalarHandle, typename TOutputHandle, size_t uDim>
         class EvalItem : public BaseEvalItem
@@ -32,7 +32,7 @@ namespace MetaNN
         };
     
         template <typename TScalarHandle, typename TOutputHandle, size_t uDim>
-        class EvalGroup : public TrivalEvalGroup<EvalItem<TScalarHandle, TOutputHandle, uDim>>
+        class EvalGroup : public TrivialEvalGroup<EvalItem<TScalarHandle, TOutputHandle, uDim>>
         {
             using EvalItemType = EvalItem<TScalarHandle, TOutputHandle, uDim>;
 
@@ -63,7 +63,7 @@ namespace MetaNN
     }
 
     template<typename TScalar, size_t uDim>
-    class TrivalTensor
+    class TrivialTensor
     {
     public:
         using CategoryTag = CategoryTags::Tensor<uDim>;
@@ -72,7 +72,7 @@ namespace MetaNN
 
     public:
         template <typename...TParams>
-        explicit TrivalTensor(TScalar p_scalar, TParams&&... params)
+        explicit TrivialTensor(TScalar p_scalar, TParams&&... params)
             : m_shape(std::forward<TParams>(params)...)
             , m_scalar(std::move(p_scalar))
         {}
@@ -82,7 +82,7 @@ namespace MetaNN
             return m_shape;
         }
 
-        bool operator== (const TrivalTensor& val) const
+        bool operator== (const TrivialTensor& val) const
         {
             return (m_shape == val.m_shape) &&
                    (m_scalar == val.m_scalar);
@@ -98,9 +98,9 @@ namespace MetaNN
                 {
                     auto handle = m_scalar.EvalRegister();
 
-                    using ItemType = NSTrivalTensor::EvalItem<decltype(handle), decltype(outHandle), uDim>;
-                    using GroupType = NSTrivalTensor::EvalGroup<decltype(handle), decltype(outHandle), uDim>;
-                    using DispatcherType = TrivalEvalItemDispatcher<GroupType>;
+                    using ItemType = NSTrivialTensor::EvalItem<decltype(handle), decltype(outHandle), uDim>;
+                    using GroupType = NSTrivialTensor::EvalGroup<decltype(handle), decltype(outHandle), uDim>;
+                    using DispatcherType = TrivialEvalItemDispatcher<GroupType>;
 
                     auto item = std::make_unique<ItemType>(std::move(handle), std::move(outHandle), m_shape);
                     EvalPlan::Inst().Register<DispatcherType>(std::move(item));
@@ -121,5 +121,5 @@ namespace MetaNN
     };
     
     template<typename TScalar, typename... TShapeParams>
-    TrivalTensor(TScalar, TShapeParams&&...) -> TrivalTensor<TScalar, sizeof...(TShapeParams)>;
+    TrivialTensor(TScalar, TShapeParams&&...) -> TrivialTensor<TScalar, sizeof...(TShapeParams)>;
 }

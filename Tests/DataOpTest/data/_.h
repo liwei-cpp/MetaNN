@@ -7,7 +7,7 @@ namespace Test::Data
     void test_scalar();     void test_tensor();
 
     void test_bias_vector();
-    void test_trival_tensor();
+    void test_trivial_tensor();
     void test_zero_tensor();
 
     void test_dynamic();
@@ -21,7 +21,7 @@ namespace Test::Data
         test_tensor();
 
         test_bias_vector();
-        test_trival_tensor();
+        test_trivial_tensor();
         test_zero_tensor();
 
         test_dynamic();

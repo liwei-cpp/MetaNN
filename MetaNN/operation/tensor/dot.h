@@ -41,7 +41,7 @@ namespace OperDot::NSCaseGen
     };
 
     template <typename TInputHandle1, typename TInputHandle2, typename TOutputHandle, typename TPolicy>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TOutputHandle, TPolicy>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle1, TInputHandle2, TOutputHandle, TPolicy>>
     {
         using EvalItemType = EvalItem<TInputHandle1, TInputHandle2, TOutputHandle, TPolicy>;
     protected:

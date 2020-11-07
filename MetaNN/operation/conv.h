@@ -202,7 +202,7 @@ struct Calculator
         
         using UnitType = EvalUnit<decltype(inputHandle), decltype(kernelHandle),
                                   ElementType, DeviceType, CategoryType>;
-        using GroupType = TrivalEvalGroup<UnitType>;
+        using GroupType = TrivialEvalGroup<UnitType>;
 
         auto outHandle = evalRes.Handle();
         const void* dataPtr = outHandle.DataPtr();

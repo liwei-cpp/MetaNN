@@ -40,7 +40,7 @@ namespace OperNLLLoss::NSCaseGen
     };
     
     template <typename TTruthHandle, typename TPredHandle, typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TTruthHandle, TPredHandle, TOutputHandle>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TTruthHandle, TPredHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TTruthHandle, TPredHandle, TOutputHandle>;
     protected:
@@ -135,7 +135,7 @@ namespace OperNLLLossGrad::NSCaseGen
     };
 
     template <typename TGradHandle, typename TTruthHandle, typename TPredHandle, typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TTruthHandle, TPredHandle, TOutputHandle>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TGradHandle, TTruthHandle, TPredHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TGradHandle, TTruthHandle, TPredHandle, TOutputHandle>;
     protected:

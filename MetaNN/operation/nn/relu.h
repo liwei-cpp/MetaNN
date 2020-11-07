@@ -34,7 +34,7 @@ namespace OperReLU::NSCaseGen
     };
 
     template <typename TInputHandle, typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
     protected:
@@ -107,7 +107,7 @@ namespace OperReLUGrad::NSCaseGen
     };
 
     template <typename TGradHandle, typename TInputHandle, typename TOutputHandle>
-    class EvalGroup : public TrivalEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle>>
+    class EvalGroup : public TrivialEvalGroup<EvalItem<TGradHandle, TInputHandle, TOutputHandle>>
     {
         using EvalItemType = EvalItem<TGradHandle, TInputHandle, TOutputHandle>;
     protected:

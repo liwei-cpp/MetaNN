@@ -243,7 +243,7 @@ namespace
         using namespace MetaNN::Helper;
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
-        using Input2Type = TrivalTensor<Scalar<CheckElement, CheckDevice>, 2>;
+        using Input2Type = TrivialTensor<Scalar<CheckElement, CheckDevice>, 2>;
         using CheckInputs = LayerInMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
@@ -376,7 +376,7 @@ namespace
                                    OutConnect<Sublayer5, LayerOutput, Output1>>;
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
-        using Input2Type = TrivalTensor<Scalar<CheckElement, CheckDevice>, 2>;
+        using Input2Type = TrivialTensor<Scalar<CheckElement, CheckDevice>, 2>;
         using CheckInputs = LayerInMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,
@@ -424,7 +424,7 @@ namespace
                                    OutConnect<Sublayer5, LayerOutput, Output1>>;
         
         using Input1Type = Matrix<CheckElement, CheckDevice>;
-        using Input2Type = TrivalTensor<Scalar<CheckElement, CheckDevice>, 2>;
+        using Input2Type = TrivialTensor<Scalar<CheckElement, CheckDevice>, 2>;
         using CheckInputs = LayerInMap<LayerKV<Input1, Input1Type>,
                                        LayerKV<Input2, Input2Type>>;
         using CheckPolicyContainer = PolicyContainer<PFeedbackOutput,

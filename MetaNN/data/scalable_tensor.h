@@ -40,7 +40,7 @@ namespace MetaNN
         };
         
         template <typename TInputHandle, typename TOutputHandle, size_t uDim>
-        class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle, uDim>>
+        class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle, TOutputHandle, uDim>>
         {
             using EvalItemType = EvalItem<TInputHandle, TOutputHandle, uDim>;
         protected:
@@ -207,7 +207,7 @@ namespace MetaNN
 
                     using ItemType = NSScalableTensor::EvalItem<TOpEvalHandle, decltype(outHandle), ElemShapeDim + 1>;
                     using GroupType = NSScalableTensor::EvalGroup<TOpEvalHandle, decltype(outHandle), ElemShapeDim + 1>;
-                    using DispatcherType = TrivalEvalItemDispatcher<GroupType>;
+                    using DispatcherType = TrivialEvalItemDispatcher<GroupType>;
 
                     auto item = std::make_unique<ItemType>(std::move(handleBuf), std::move(outHandle), std::move(depVec), m_shape);
                     EvalPlan::Inst().Register<DispatcherType>(std::move(item));

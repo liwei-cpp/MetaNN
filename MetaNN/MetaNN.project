@@ -95,6 +95,7 @@
     <File Name="meta_nn.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data">
+    <File Name="data/trivial_tensor.h"/>
     <File Name="data/dynamic.h"/>
     <File Name="data/scalable_tensor.h"/>
     <File Name="data/bias_vector.h"/>
@@ -109,7 +110,6 @@
       <File Name="data/facilities/traits.h"/>
       <File Name="data/facilities/shape.h"/>
     </VirtualDirectory>
-    <File Name="data/trival_tensor.h"/>
     <File Name="data/zero_tensor.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="data_copy">

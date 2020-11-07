@@ -35,7 +35,7 @@ namespace MetaNN
         };
 
         template <typename TInputHandle, typename TOutputHandle>
-        class EvalGroup : public TrivalEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
+        class EvalGroup : public TrivialEvalGroup<EvalItem<TInputHandle, TOutputHandle>>
         {
             using EvalItemType = EvalItem<TInputHandle, TOutputHandle>;
         protected:
@@ -99,7 +99,7 @@ namespace MetaNN
 
                     using ItemType = NSBiasVector::EvalItem<decltype(handle), decltype(outHandle)>;
                     using GroupType = NSBiasVector::EvalGroup<decltype(handle), decltype(outHandle)>;
-                    using DispatcherType = TrivalEvalItemDispatcher<GroupType>;
+                    using DispatcherType = TrivialEvalItemDispatcher<GroupType>;
 
                     auto item = std::make_unique<ItemType>(std::move(handle), std::move(outHandle), m_shape[0], m_pos);
                     EvalPlan::Inst().Register<DispatcherType>(std::move(item));

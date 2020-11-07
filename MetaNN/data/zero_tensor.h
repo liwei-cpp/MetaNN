@@ -32,7 +32,7 @@ namespace MetaNN
         };
 
         template <typename TElem, typename TDevice, size_t uDim>
-        class EvalGroup : public TrivalEvalGroup<EvalItem<TElem, TDevice, uDim>>
+        class EvalGroup : public TrivialEvalGroup<EvalItem<TElem, TDevice, uDim>>
         {
             using EvalItemType = EvalItem<TElem, TDevice, uDim>;
         protected:
@@ -94,7 +94,7 @@ namespace MetaNN
         {
             using TEvalItem = NSZeroTensor::EvalItem<ElementType, DeviceType, uDim>;
             using TEvalGroup = NSZeroTensor::EvalGroup<ElementType, DeviceType, uDim>;
-            using TItemDispatcher = TrivalEvalItemDispatcher<TEvalGroup>;
+            using TItemDispatcher = TrivialEvalItemDispatcher<TEvalGroup>;
 
             if (!m_evalBuf.IsEvaluated())
             {

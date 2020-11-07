@@ -22,10 +22,10 @@ namespace MetaNN
     };
     
     template <typename TEvalGroup>
-    class TrivalEvalItemDispatcher final : public BaseEvalItemDispatcher
+    class TrivialEvalItemDispatcher final : public BaseEvalItemDispatcher
     {
     public:
-        TrivalEvalItemDispatcher(size_t evalItemID)
+        TrivialEvalItemDispatcher(size_t evalItemID)
             : BaseEvalItemDispatcher(evalItemID) {}
 
         virtual void Add(std::unique_ptr<BaseEvalItem> item) final override

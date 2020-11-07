@@ -130,7 +130,7 @@ namespace
         
         auto input = LayerInputCont<RootLayer>()
                      .Set<LayerInput>(FillTensor<CheckElement>(x_np_1, 1, 4))
-                     .Set<Previous<LayerOutput>>(TrivalTensor(Scalar<CheckElement, CheckDevice>{1}, 1, 6));
+                     .Set<Previous<LayerOutput>>(TrivialTensor(Scalar<CheckElement, CheckDevice>{1}, 1, 6));
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
@@ -160,7 +160,7 @@ namespace
         
         auto input = LayerInputCont<RootLayer>()
                      .Set<LayerInput>(FillTensor<CheckElement>(x_np_1, 3, 1, 4))
-                     .Set<Previous<LayerOutput>>(TrivalTensor(Scalar<CheckElement, CheckDevice>{1}, 1, 6));
+                     .Set<Previous<LayerOutput>>(TrivialTensor(Scalar<CheckElement, CheckDevice>{1}, 1, 6));
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
@@ -190,7 +190,7 @@ namespace
         
         auto input = LayerInputCont<RootLayer>()
                      .Set<LayerInput>(FillTensor<CheckElement>(x_np_2, 3, 2, 4))
-                     .Set<Previous<LayerOutput>>(TrivalTensor(Scalar<CheckElement, CheckDevice>{1}, 2, 6));
+                     .Set<Previous<LayerOutput>>(TrivialTensor(Scalar<CheckElement, CheckDevice>{1}, 2, 6));
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());
@@ -200,7 +200,7 @@ namespace
     }
     
     using InputMap = LayerInMap<LayerKV<LayerInput, Tensor<CheckElement, CheckDevice, 3>>,
-                                LayerKV<Previous<LayerOutput>, TrivalTensor<Scalar<CheckElement, CheckDevice>, 2>>
+                                LayerKV<Previous<LayerOutput>, TrivialTensor<Scalar<CheckElement, CheckDevice>, 2>>
                                >;
     void test_gru4()
     {
@@ -223,7 +223,7 @@ namespace
         
         auto input = LayerInputCont<RootLayer>()
                      .Set<LayerInput>(FillTensor<CheckElement>(x_np_2, 3, 2, 4))
-                     .Set<Previous<LayerOutput>>(TrivalTensor(Scalar<CheckElement, CheckDevice>{1}, 2, 6));
+                     .Set<Previous<LayerOutput>>(TrivialTensor(Scalar<CheckElement, CheckDevice>{1}, 2, 6));
 
         auto out = layer.FeedForward(input);
         auto res = Evaluate(out.Get<LayerOutput>());

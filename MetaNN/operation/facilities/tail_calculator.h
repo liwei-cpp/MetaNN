@@ -21,7 +21,7 @@ namespace MetaNN
         
         struct DispatcherTempCate;
         template <typename TGroup>
-        using Dispatcher = TrivalEvalItemDispatcher<TGroup>;
+        using Dispatcher = TrivialEvalItemDispatcher<TGroup>;
     };
 #include <MetaNN/policies/policy_macro_begin.h>
     ValuePolicyObj(PPassPolicy,     TailCalculatorPolicy, IsPassPolicy,    true);
