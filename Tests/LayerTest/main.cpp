@@ -1,9 +1,6 @@
-namespace Test::Layer
-{
-    void test_composite();
-    void test_principal();
-    void test_recurrent();
-}
+#include <composite/_.h>
+#include <principal/_.h>
+#include <recurrent/_.h>
 
 int main()
 {

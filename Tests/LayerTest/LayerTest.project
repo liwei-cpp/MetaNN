@@ -6,27 +6,27 @@
     <File Name="composite/test_weight_layer.cpp"/>
     <File Name="composite/test_bias_layer.cpp"/>
     <File Name="composite/test_compose_kenrel.cpp"/>
-    <File Name="composite/_.cpp"/>
+    <File Name="composite/_.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="principal">
     <VirtualDirectory Name="nn">
       <File Name="principal/nn/test_nll_loss_layer.cpp"/>
       <File Name="principal/nn/test_softmax_layer.cpp"/>
       <File Name="principal/nn/test_relu_layer.cpp"/>
-      <File Name="principal/nn/_.cpp"/>
+      <File Name="principal/nn/_.h"/>
     </VirtualDirectory>
     <VirtualDirectory Name="others">
       <File Name="principal/others/test_value_source_layer.cpp"/>
       <File Name="principal/others/test_param_source_layer.cpp"/>
-      <File Name="principal/others/_.cpp"/>
+      <File Name="principal/others/_.h"/>
       <File Name="principal/others/test_interpolate_layer.cpp"/>
     </VirtualDirectory>
     <VirtualDirectory Name="tensor">
       <File Name="principal/tensor/test_permute_layer.cpp"/>
-      <File Name="principal/tensor/_.cpp"/>
+      <File Name="principal/tensor/_.h"/>
       <File Name="principal/tensor/test_dot_layer.cpp"/>
     </VirtualDirectory>
-    <File Name="principal/_.cpp"/>
+    <File Name="principal/_.h"/>
     <VirtualDirectory Name="math">
       <File Name="principal/math/test_square_layer.cpp"/>
       <File Name="principal/math/test_asinh_layer.cpp"/>
@@ -41,7 +41,7 @@
       <File Name="principal/math/test_multiply_layer.cpp"/>
       <File Name="principal/math/test_substract_layer.cpp"/>
       <File Name="principal/math/test_add_layer.cpp"/>
-      <File Name="principal/math/_.cpp"/>
+      <File Name="principal/math/_.h"/>
       <File Name="principal/math/test_abs_layer.cpp"/>
     </VirtualDirectory>
   </VirtualDirectory>
@@ -51,7 +51,7 @@
     <File Name="main.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="recurrent">
-    <File Name="recurrent/_.cpp"/>
+    <File Name="recurrent/_.h"/>
     <File Name="recurrent/test_gru.cpp"/>
     <File Name="recurrent/test_recurrent_layer.cpp"/>
   </VirtualDirectory>

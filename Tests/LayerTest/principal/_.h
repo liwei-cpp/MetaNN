@@ -1,14 +1,10 @@
 #pragma once
+#include <principal/math/_.h>
+#include <principal/nn/_.h>
+#include <principal/others/_.h>
+#include <principal/tensor/_.h>
 namespace Test::Layer
 {
-    namespace Principal
-    {
-        void test_math();
-        void test_nn();
-        void test_others();
-        void test_tensor();
-    }
-
     void test_principal()
     {
         Principal::test_math();
