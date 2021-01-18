@@ -104,7 +104,7 @@ namespace
     {
         cout << "Test divide case 5 (scalar divide by number)\t";
         Scalar<CheckElement, CheckDevice> ori1(3);
-        auto op = ori1 / 9;
+        auto op = ori1 / static_cast<CheckElement>(9);
         static_assert(IsScalar<decltype(op)>);
         
         auto res = Evaluate(op);
@@ -117,7 +117,7 @@ namespace
     {
         cout << "Test divide case 6 (matrix divide by number)\t";
         auto ori1 = GenTensor<CheckElement>(-100, 3, 10, 7);
-        auto op = ori1 / 13;
+        auto op = ori1 / static_cast<CheckElement>(13);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);
         assert(op.Shape()[1] == 7);
@@ -173,7 +173,7 @@ namespace
     {
         cout << "Test divide case 8 (matrix divide from number)\t";
         auto ori1 = GenTensor<CheckElement>(-100, 3, 10, 7);
-        auto op = 13 / ori1;
+        auto op = static_cast<CheckElement>(13) / ori1;
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape() == Shape(10, 7));
         

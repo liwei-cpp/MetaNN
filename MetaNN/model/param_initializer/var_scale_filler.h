@@ -79,7 +79,7 @@ namespace MetaNN
             double fan_factor = 0;
             if constexpr (std::is_same<ScaleMode, VarScaleFillerPolicy::ScaleModeTypeCate::FanIn>::value)
             {
-                fan_factor = fanIn;
+                fan_factor = static_cast<double>(fanIn);
             }
             else if constexpr (std::is_same<ScaleMode, VarScaleFillerPolicy::ScaleModeTypeCate::FanOut>::value)
             {
@@ -87,7 +87,7 @@ namespace MetaNN
             }
             else if constexpr (std::is_same<ScaleMode, VarScaleFillerPolicy::ScaleModeTypeCate::FanAvg>::value)
             {
-                fan_factor = (fanIn + fanOut) / 2;
+                fan_factor = (fanIn + fanOut) / 2.;
             }
             else
             {
@@ -98,14 +98,14 @@ namespace MetaNN
             using ElementType = typename TData::ElementType;
             if constexpr (std::is_same<DistType, VarScaleFillerPolicy::DistributeTypeCate::Uniform>::value)
             {
-                double limit = sqrt(3.0 * m_factor / fan_factor);
+                ElementType limit = static_cast<ElementType>(sqrt(3.0 * m_factor / fan_factor));
                 std::uniform_real_distribution<ElementType> dist(-limit, limit);
                 NSInitializer::FillWithDist(data, dist, m_engine);
             }
             else if constexpr (std::is_same<DistType, VarScaleFillerPolicy::DistributeTypeCate::Norm>::value)
             {
                 double stddev = sqrt(m_factor / fan_factor);
-                std::normal_distribution<ElementType> dist(0, stddev);
+                std::normal_distribution<ElementType> dist(0, static_cast<ElementType>(stddev));
                 NSInitializer::FillWithDist(data, dist, m_engine);
             }
             else

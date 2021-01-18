@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stack>
+#include <string>
 #include <type_traits>
 #include <MetaNN/facilities/var_type_dict.h>
 #include <MetaNN/layers/facilities/layer_in_map.h>

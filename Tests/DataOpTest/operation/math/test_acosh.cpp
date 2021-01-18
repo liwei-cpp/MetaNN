@@ -44,7 +44,7 @@ namespace
     void test_acosh_case3()
     {
         cout << "Test acosh case 3 (matrix)\t";
-        auto ori = GenTensor<CheckElement>(1.1, 0.01, 10, 7);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(1.1), static_cast<CheckElement>(0.01), 10, 7);
         auto op = Acosh(ori);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);
@@ -84,7 +84,7 @@ namespace
         cout << "Test acosh-grad case 1 (scalar)\t";
         {
             Scalar<CheckElement, CheckDevice> grad(1);
-            Scalar<CheckElement, CheckDevice> ori(1.2);
+            Scalar<CheckElement, CheckDevice> ori(static_cast<CheckElement>(1.2));
             auto op = AcoshGrad(grad, ori);
             auto res = Evaluate(op);
             
@@ -120,7 +120,7 @@ namespace
     {
         cout << "Test acosh-grad case 3 (matrix)\t";
         auto grad = GenTensor<CheckElement>(0, 1, 10, 7);
-        auto ori = GenTensor<CheckElement>(1.5, 0.01, 10, 7);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(1.5), static_cast<CheckElement>(0.01), 10, 7);
         auto op = AcoshGrad(grad, ori);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);

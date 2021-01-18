@@ -16,7 +16,7 @@ namespace
         static_assert(IsScalar<const Scalar<CheckElement, CheckDevice> &&>, "Test Error");
     
         Scalar<CheckElement, CheckDevice> pi(3.1415926f);
-        Scalar<CheckElement, CheckDevice> value2(3.14);
+        Scalar<CheckElement, CheckDevice> value2(static_cast<CheckElement>(3.14));
         assert(pi == pi);
         assert(!(pi != pi));
         assert(pi != value2);

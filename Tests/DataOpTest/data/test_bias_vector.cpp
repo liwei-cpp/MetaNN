@@ -16,7 +16,7 @@ namespace
         static_assert(IsVector<const BiasVector<Scalar<CheckElement, CheckDevice>> &>);
         static_assert(IsVector<const BiasVector<Scalar<CheckElement, CheckDevice>> &&>);
 
-        BiasVector rm(100, 37, Scalar<CheckElement, CheckDevice>{0.3});
+        BiasVector rm(100, 37, Scalar<CheckElement, CheckDevice>{static_cast<CheckElement>(0.3)});
         assert(rm.Shape()[0] == 100);
         assert(rm.HotPos() == 37);
 
@@ -38,8 +38,8 @@ namespace
     void test_bias_vector_case2()
     {
         cout << "Test bias vector vector case 2...\t";
-        BiasVector rm1(100, 37, Scalar<CheckElement, CheckDevice>{0.3});
-        BiasVector rm2(50, 16, Scalar<CheckElement, CheckDevice>{0.1});
+        BiasVector rm1(100, 37, Scalar<CheckElement, CheckDevice>{static_cast<CheckElement>(0.3)});
+        BiasVector rm2(50, 16, Scalar<CheckElement, CheckDevice>{static_cast<CheckElement>(0.1)});
 
         auto evalRes1 = rm1.EvalRegister();
         auto evalRes2 = rm2.EvalRegister();

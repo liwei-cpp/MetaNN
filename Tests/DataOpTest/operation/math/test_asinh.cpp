@@ -46,7 +46,7 @@ namespace
     void test_asinh_case3()
     {
         cout << "Test asinh case 3 (matrix)\t";
-        auto ori = GenTensor<CheckElement>(1.1, 0.01, 10, 7);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(1.1), static_cast<CheckElement>(0.01), 10, 7);
         auto op = Asinh(ori);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);
@@ -86,7 +86,7 @@ namespace
         cout << "Test asinh-grad case 1 (scalar)\t";
         {
             Scalar<CheckElement, CheckDevice> grad(1);
-            Scalar<CheckElement, CheckDevice> ori(1.2);
+            Scalar<CheckElement, CheckDevice> ori(static_cast<CheckElement>(1.2));
             auto op = AsinhGrad(grad, ori);
             auto res = Evaluate(op);
             
@@ -124,7 +124,7 @@ namespace
     {
         cout << "Test asinh-grad case 3 (matrix)\t";
         auto grad = GenTensor<CheckElement>(0, 1, 10, 7);
-        auto ori = GenTensor<CheckElement>(1.5, 0.01, 10, 7);
+        auto ori = GenTensor<CheckElement>(1.5, static_cast<CheckElement>(0.01), 10, 7);
         auto op = AsinhGrad(grad, ori);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);

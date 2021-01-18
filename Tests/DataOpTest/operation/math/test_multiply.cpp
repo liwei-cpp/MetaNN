@@ -105,7 +105,7 @@ namespace
         cout << "Test multiply case 3 (multiply with number)\t";
         {
             auto ori1 = GenTensor<CheckElement>(-100, 3, 10, 7);
-            auto op = ori1 * 3;
+            auto op = ori1 * static_cast<CheckElement>(3);
             static_assert(IsMatrix<decltype(op)>);
             assert(op.Shape()[0] == 10);
             assert(op.Shape()[1] == 7);
@@ -126,7 +126,7 @@ namespace
         }
         {
             auto ori1 = GenTensor<CheckElement>(-100, 3, 10, 7);
-            auto op = 3 * ori1;
+            auto op = static_cast<CheckElement>(3) * ori1;
             static_assert(IsMatrix<decltype(op)>);
             assert(op.Shape()[0] == 10);
             assert(op.Shape()[1] == 7);

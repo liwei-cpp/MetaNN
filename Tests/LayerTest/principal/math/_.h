@@ -1,3 +1,4 @@
+#pragma once
 namespace Test::Layer::Principal
 {
     void test_abs_layer();

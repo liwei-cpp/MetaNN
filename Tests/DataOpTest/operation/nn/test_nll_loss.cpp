@@ -27,7 +27,7 @@ namespace
     {
         cout << "Test NLL loss case 2 (matrix)\t";
         auto truth = GenTensor<CheckElement>(-100, 3, 10, 7);
-        auto pred = GenTensor<CheckElement>(1, 0.1, 10, 7);
+        auto pred = GenTensor<CheckElement>(1, static_cast<CheckElement>(0.1), 10, 7);
         auto op = NLLLoss(truth, pred);
         static_assert(IsScalar<decltype(op)>);
         
@@ -52,7 +52,7 @@ namespace
     {
         cout << "Test NLL loss case 2 (batch matrix)\t";
         auto truth = GenTensor<CheckElement>(-100, 3, 3, 10, 7);
-        auto pred = GenTensor<CheckElement>(1, 0.1, 3, 10, 7);
+        auto pred = GenTensor<CheckElement>(1, static_cast<CheckElement>(0.1), 3, 10, 7);
         auto op = NLLLoss(truth, pred);
         static_assert(IsScalar<decltype(op)>);
 

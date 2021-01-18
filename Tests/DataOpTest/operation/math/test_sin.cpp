@@ -12,7 +12,7 @@ namespace
     {
         cout << "Test sin case 1 (scalar)\t";
         {
-            Scalar<CheckElement, CheckDevice> ori(0.2718);
+            Scalar<CheckElement, CheckDevice> ori(static_cast<CheckElement>(0.2718));
             auto op = Sin(ori);
             auto res = Evaluate(op);
             assert(fabs(res.Value() - std::sin(0.2718)) < 0.001f);
@@ -23,7 +23,7 @@ namespace
     void test_sin_case2()
     {
         cout << "Test sin case 2 (matrix)\t";
-        auto ori = GenTensor<CheckElement>(-1, 0.01, 10, 7);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.01), 10, 7);
         auto op = Sin(ori);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);
@@ -48,7 +48,7 @@ namespace
     void test_sin_case3()
     {
         cout << "Test sin case 3 (3d-array)\t";
-        auto ori = GenTensor<CheckElement>(-1, 0.01, 2, 10, 7);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.01), 2, 10, 7);
         auto op = Sin(ori);
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape()[0] == 2);
@@ -78,7 +78,7 @@ namespace
     void test_sin_case4()
     {
         cout << "Test sin case 4 (batch scalar)\t";
-        auto ori = GenTensor<CheckElement>(-1, 0.1, 10);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.1), 10);
         auto op = Sin(ori);
         static_assert(IsVector<decltype(op)>);
         assert(op.Shape()[0] == 10);
@@ -114,7 +114,7 @@ namespace
         cout << "Test sin-grad case 1 (scalar)\t";
         {
             Scalar<CheckElement, CheckDevice> grad(1.5);
-            Scalar<CheckElement, CheckDevice> ori(0.3348);
+            Scalar<CheckElement, CheckDevice> ori(static_cast<CheckElement>(0.3348));
             auto op = SinGrad(grad, ori);
             auto res = Evaluate(op);
             
@@ -128,7 +128,7 @@ namespace
     {
         cout << "Test sin-grad case 2 (matrix)\t";
         auto grad = GenTensor<CheckElement>(0, 1, 10, 7);
-        auto ori = GenTensor<CheckElement>(-0.5, 0.01, 10, 7);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(-0.5), static_cast<CheckElement>(0.01), 10, 7);
         auto op = SinGrad(grad, ori);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);
@@ -154,7 +154,7 @@ namespace
     {
         cout << "Test sin-grad case 3 (3d-array)\t";
         auto grad = GenTensor<CheckElement>(0, 1, 2, 10, 7);
-        auto ori = GenTensor<CheckElement>(-0.9, 0.01, 2, 10, 7);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(-0.9), static_cast<CheckElement>(0.01), 2, 10, 7);
         auto op = SinGrad(grad, ori);
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape()[0] == 2);
@@ -185,7 +185,7 @@ namespace
     {
         cout << "Test sin-grad case 4 (batch scalar)\t";
         auto grad = GenTensor<CheckElement>(0, 1, 10);
-        auto ori = GenTensor<CheckElement>(-0.9, 0.1, 10);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(-0.9), static_cast<CheckElement>(0.1), 10);
         auto op = SinGrad(grad, ori);
         static_assert(IsTensorWithDim<decltype(op), 1>);
         assert(op.Shape()[0] == 10);
@@ -206,7 +206,7 @@ namespace
     {
         cout << "Test sin-grad case 5 (grad broadcast)\t";
         auto grad = GenTensor<CheckElement>(0, 1, 10, 7);
-        auto ori = GenTensor<CheckElement>(-0.9, 0.01, 2, 10, 7);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(-0.9), static_cast<CheckElement>(0.01), 2, 10, 7);
         auto op = SinGrad(grad, ori);
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape()[0] == 2);

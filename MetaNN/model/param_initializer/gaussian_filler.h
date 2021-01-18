@@ -29,7 +29,7 @@ public:
     void Fill(TData& data)
     {
         using ElementType = typename TData::ElementType;
-        std::normal_distribution<ElementType> dist(m_mean, m_std);
+        std::normal_distribution<ElementType> dist(static_cast<ElementType>(m_mean), static_cast<ElementType>(m_std));
         NSInitializer::FillWithDist(data, dist, m_engine);
     }
     

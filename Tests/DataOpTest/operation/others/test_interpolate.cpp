@@ -13,13 +13,13 @@ namespace
         cout << "Test interpolate case 1 (scalar)\t";
         Scalar<CheckElement, CheckDevice> ori1(3);
         Scalar<CheckElement, CheckDevice> ori2(9);
-        Scalar<CheckElement, CheckDevice> lambda(0.3);
+        Scalar<CheckElement, CheckDevice> lambda(static_cast<CheckElement>(0.3));
         auto op = Interpolate(ori1, ori2, lambda);
         static_assert(IsScalar<decltype(op)>);
         
         auto res = Evaluate(op);
         static_assert(IsScalar<decltype(res)>);
-        CheckElement value = 3 * 0.3 + 9 * (1 - 0.3);
+        CheckElement value = static_cast<CheckElement>(3 * 0.3 + 9 * (1 - 0.3));
         assert(fabs(res.Value() - value) < 0.001f);
         cout << "done" << endl;
     }
@@ -29,7 +29,7 @@ namespace
         cout << "Test interpolate case 2 (matrix)\t";
         auto ori1 = GenTensor<CheckElement>(-100, 3, 10, 7);
         auto ori2 = GenTensor<CheckElement>(1, 1.5, 10, 7);
-        auto lambda = GenTensor<CheckElement>(0.1, -2, 10, 7);
+        auto lambda = GenTensor<CheckElement>(static_cast<CheckElement>(0.1), -2, 10, 7);
         auto op = Interpolate(ori1, ori2, lambda);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);
@@ -56,7 +56,7 @@ namespace
         cout << "Test interpolate case 3 (broadcast)\t";
         auto ori1 = GenTensor<CheckElement>(-100, 3, 10, 7);
         auto ori2 = GenTensor<CheckElement>(1, 1.5, 5, 10, 7);
-        auto lambda = GenTensor<CheckElement>(0.1, -2, 7);
+        auto lambda = GenTensor<CheckElement>(static_cast<CheckElement>(0.1), -2, 7);
         auto op = Interpolate(ori1, ori2, lambda);
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape()[0] == 5);

@@ -23,7 +23,7 @@ namespace
     void test_exp_case2()
     {
         cout << "Test exp case 2 (matrix)\t";
-        auto ori = GenTensor<CheckElement>(-1, 0.01, 10, 7);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.01), 10, 7);
         auto op = Exp(ori);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);
@@ -48,7 +48,7 @@ namespace
     void test_exp_case3()
     {
         cout << "Test exp case 3 (3d-array)\t";
-        auto ori = GenTensor<CheckElement>(-1, 0.01, 2, 10, 7);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.01), 2, 10, 7);
         auto op = Exp(ori);
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape()[0] == 2);
@@ -78,7 +78,7 @@ namespace
     void test_exp_case4()
     {
         cout << "Test exp case 4 (batch scalar)\t";
-        auto ori = GenTensor<CheckElement>(-1, 0.1, 10);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.1), 10);
         auto op = Exp(ori);
         static_assert(IsTensorWithDim<decltype(op), 1>);
         assert(op.Shape()[0] == 10);
@@ -127,7 +127,7 @@ namespace
     {
         cout << "Test exp-grad case 2 (matrix)\t";
         auto grad = GenTensor<CheckElement>(0, 1, 10, 7);
-        auto ori = GenTensor<CheckElement>(-0.5, 0.01, 10, 7);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(-0.5), static_cast<CheckElement>(0.01), 10, 7);
         auto op = ExpGrad(grad, ori);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);
@@ -153,7 +153,7 @@ namespace
     {
         cout << "Test exp-grad case 3 (3d-array)\t";
         auto grad = GenTensor<CheckElement>(0, 1, 2, 10, 7);
-        auto ori = GenTensor<CheckElement>(-0.9, 0.01, 2, 10, 7);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(-0.9), static_cast<CheckElement>(0.01), 2, 10, 7);
         auto op = ExpGrad(grad, ori);
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape()[0] == 2);
@@ -184,7 +184,7 @@ namespace
     {
         cout << "Test exp-grad case 4 (batch scalar)\t";
         auto grad = GenTensor<CheckElement>(0, 1, 10);
-        auto ori = GenTensor<CheckElement>(-0.9, 0.1, 10);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(-0.9), static_cast<CheckElement>(0.1), 10);
         auto op = ExpGrad(grad, ori);
         static_assert(IsTensorWithDim<decltype(op), 1>);
         assert(op.Shape()[0] == 10);
@@ -205,7 +205,7 @@ namespace
     {
         cout << "Test exp-grad case 5 (grad broadcast)\t";
         auto grad = GenTensor<CheckElement>(0, 1, 10, 7);
-        auto ori = GenTensor<CheckElement>(-0.9, 0.01, 2, 10, 7);
+        auto ori = GenTensor<CheckElement>(static_cast<CheckElement>(-0.9), static_cast<CheckElement>(0.01), 2, 10, 7);
         auto op = ExpGrad(grad, ori);
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape()[0] == 2);

@@ -155,7 +155,7 @@ namespace NSCaseGen
 
             for (size_t i = 0; i < count; ++i)
             {
-                mem_out[i] = mem_in[i] + evalItem.m_value;
+                mem_out[i] = mem_in[i] + static_cast<ElementType>(evalItem.m_value);
             }
             evalItem.m_outputHandle.SetData(std::move(out));
         }

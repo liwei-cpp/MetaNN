@@ -83,7 +83,7 @@ namespace
     {
         cout << "Test substract case 4\t";
         auto ori = GenTensor<CheckElement>(-100, 3, 6, 10, 7);
-        auto op = 1 - ori;
+        auto op = static_cast<CheckElement>(1) - ori;
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape()[0] == 6);
         assert(op.Shape()[1] == 10);
@@ -144,7 +144,7 @@ namespace
     {
         cout << "Test substract case 6\t";
         auto ori = GenTensor<CheckElement>(-100, 3, 6, 10, 7);
-        auto op = ori - 1;
+        auto op = ori - static_cast<CheckElement>(1);
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape() == Shape(6, 10, 7));
         

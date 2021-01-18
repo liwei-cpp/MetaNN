@@ -32,7 +32,7 @@ public:
         using DistType = std::conditional_t<std::is_integral<ElementType>::value,
                                             std::uniform_int_distribution<ElementType>,
                                             std::uniform_real_distribution<ElementType>>;
-        DistType dist(m_min, m_max);
+        DistType dist(static_cast<ElementType>(m_min), static_cast<ElementType>(m_max));
         NSInitializer::FillWithDist(data, dist, m_engine);
     }
     

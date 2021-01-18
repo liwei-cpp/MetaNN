@@ -1,3 +1,4 @@
+#pragma once
 namespace Test::Layer
 {
     namespace Principal

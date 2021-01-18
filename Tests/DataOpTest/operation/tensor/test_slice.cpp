@@ -12,7 +12,7 @@ namespace
     {
         cout << "Test slice: vector -> scalar\t";
         
-        auto ori = GenTensor<CheckElement>(-1, 0.1, 10);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.1), 10);
         auto trans = Tanh(ori);
         for (size_t i = 0; i < 10; ++i)
         {
@@ -27,7 +27,7 @@ namespace
     {
         cout << "Test slice: batch matrix -> matrix\t";
         
-        auto ori = GenTensor<CheckElement>(-1, 0.1, 10, 3, 7);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.1), 10, 3, 7);
         auto trans = Tanh(ori);
         for (size_t i = 0; i < 10; ++i)
         {

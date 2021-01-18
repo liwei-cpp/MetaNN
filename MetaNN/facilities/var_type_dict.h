@@ -114,7 +114,7 @@ struct VarTypeDict
         }
 
     private:
-        std::shared_ptr<void> m_tuple[sizeof...(TTypes)];
+        std::shared_ptr<void> m_tuple[(sizeof...(TTypes) == 0) ? 1 : sizeof...(TTypes)];
     };
 
 public:

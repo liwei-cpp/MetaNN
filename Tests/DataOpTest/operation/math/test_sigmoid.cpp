@@ -12,7 +12,7 @@ namespace
     {
         cout << "Test sigmoid case 1 (scalar)\t";
         {
-            Scalar<CheckElement, CheckDevice> ori(0.9213);
+            Scalar<CheckElement, CheckDevice> ori(static_cast<CheckElement>(0.9213));
             auto op = Sigmoid(ori);
             auto res = Evaluate(op);
             assert(fabs(res.Value() - 0.7153) < 0.001f);
@@ -23,7 +23,7 @@ namespace
     void test_sigmoid_case2()
     {
         cout << "Test sigmoid case 2 (matrix)\t";
-        auto ori = GenTensor<CheckElement>(-1, 0.01, 10, 7);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.01), 10, 7);
         auto op = Sigmoid(ori);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);
@@ -48,7 +48,7 @@ namespace
     void test_sigmoid_case3()
     {
         cout << "Test sigmoid case 3 (3d-array)\t";
-        auto ori = GenTensor<CheckElement>(-1, 0.01, 2, 10, 7);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.01), 2, 10, 7);
         auto op = Sigmoid(ori);
         static_assert(IsThreeDArray<decltype(op)>);
         assert(op.Shape()[0] == 2);
@@ -78,7 +78,7 @@ namespace
     void test_sigmoid_case4()
     {
         cout << "Test sigmoid case 4 (batch scalar)\t";
-        auto ori = GenTensor<CheckElement>(-1, 0.1, 10);
+        auto ori = GenTensor<CheckElement>(-1, static_cast<CheckElement>(0.1), 10);
         auto op = Sigmoid(ori);
         static_assert(IsTensorWithDim<decltype(op), 1>);
         assert(op.Shape()[0] == 10);

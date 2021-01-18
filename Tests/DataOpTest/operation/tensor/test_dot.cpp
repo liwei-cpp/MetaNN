@@ -12,7 +12,7 @@ namespace
     {
         cout << "Test dot case 1 (matrix)\t";
         auto in1 = GenTensor<CheckElement>(0, 1, 5, 3);
-        auto in2 = GenTensor<CheckElement>(-10, 0.1, 3, 8);
+        auto in2 = GenTensor<CheckElement>(-10, static_cast<CheckElement>(0.1), 3, 8);
         auto op = Dot(in1, in2);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 5);
@@ -42,7 +42,7 @@ namespace
     {
         cout << "Test dot case 2 (vector)\t";
         auto in1 = GenTensor<CheckElement>(0, 1, 5);
-        auto in2 = GenTensor<CheckElement>(-10, 0.1, 5);
+        auto in2 = GenTensor<CheckElement>(-10, static_cast<CheckElement>(0.1), 5);
         auto op = Dot(in1, in2);
         static_assert(IsScalar<decltype(op)>);
 

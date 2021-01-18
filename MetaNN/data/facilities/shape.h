@@ -86,7 +86,7 @@ namespace MetaNN
         size_t Count() const
         {
             return std::accumulate(std::begin(m_dims), std::end(m_dims),
-                                   1, std::multiplies<>());
+                                   static_cast<size_t>(1), std::multiplies<>());
         }
         
         template <typename... TIntTypes,

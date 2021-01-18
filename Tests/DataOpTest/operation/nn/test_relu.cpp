@@ -54,7 +54,7 @@ namespace
     {
         cout << "Test ReLU grad case 1\t";
         auto input = GenTensor<CheckElement>(-10, 1, 10, 7);
-        auto grad = GenTensor<CheckElement>(0, 0.1, 10, 7);
+        auto grad = GenTensor<CheckElement>(0, static_cast<CheckElement>(0.1), 10, 7);
         auto op = ReLUGrad(grad, input);
         static_assert(IsMatrix<decltype(op)>);
         assert(op.Shape()[0] == 10);

@@ -112,7 +112,7 @@ namespace
                     for (size_t c = 0; c < checkBuf; ++c)
                     {
                         std::array<size_t, 3> idx{i, j, k};
-                        sh.ShiftIndex(idx, c);
+                        sh.ShiftIndex(idx, static_cast<int>(c));
                         assert(sh.IndexToOffset(idx) == curPos + c);
                     }
                 }
