@@ -33,18 +33,18 @@ namespace MetaNN
 
             const auto& inPtrs = item->InputPtrs();
             
-            size_t inAct = 0;
+            size_t inArc = 0;
             for (auto* const in : inPtrs)
             {
                 if (m_nodes.find(in) != m_nodes.end())
                 {
                     m_nodeAimPos[in].insert(outPtr);
-                    ++inAct;
+                    ++inArc;
                 }
             }
-            m_nodeInActNum[outPtr] = inAct;
+            m_nodeInArcNum[outPtr] = inArc;
             m_nodes.emplace(outPtr, std::move(item));
-            if (inAct == 0)
+            if (inArc == 0)
             {
                 assert(m_procNodes.find(outPtr) == m_procNodes.end());
                 m_procNodes.insert(outPtr);
@@ -86,24 +86,24 @@ namespace MetaNN
                 {
                     assert(m_procNodes.find(p) != m_procNodes.end());
                     assert(m_nodes.find(p) != m_nodes.end());
-                    assert(m_nodeInActNum.find(p) != m_nodeInActNum.end());
-                    assert(m_nodeInActNum[p] == 0);
+                    assert(m_nodeInArcNum.find(p) != m_nodeInArcNum.end());
+                    assert(m_nodeInArcNum[p] == 0);
                     
                     m_procNodes.erase(p);
                     m_nodes.erase(p);
-                    m_nodeInActNum.erase(p);
+                    m_nodeInArcNum.erase(p);
                     
                     auto aimNodeIt = m_nodeAimPos.find(p);
                     if (aimNodeIt == m_nodeAimPos.end()) continue;
                     for (DataPtr aimNode : aimNodeIt->second)
                     {
-                        auto actNumIt = m_nodeInActNum.find(aimNode);
-                        assert(actNumIt != m_nodeInActNum.end());
-                        assert(actNumIt->second > 0);
-                        --actNumIt->second;
-                        if (actNumIt->second == 0)
+                        auto arcNumIt = m_nodeInArcNum.find(aimNode);
+                        assert(arcNumIt != m_nodeInArcNum.end());
+                        assert(arcNumIt->second > 0);
+                        --arcNumIt->second;
+                        if (arcNumIt->second == 0)
                         {
-                            newProcNodes.insert(actNumIt->first);
+                            newProcNodes.insert(arcNumIt->first);
                         }
                     }
                     m_nodeAimPos.erase(p);
@@ -112,7 +112,7 @@ namespace MetaNN
                 m_procNodes.insert(newProcNodes.begin(), newProcNodes.end());
             }
 
-            assert(m_nodeInActNum.empty());
+            assert(m_nodeInArcNum.empty());
             assert(m_nodeAimPos.empty());
             assert(m_nodes.empty());
         }
@@ -139,7 +139,7 @@ namespace MetaNN
         }
                              
     private:
-        std::unordered_map<DataPtr, size_t> m_nodeInActNum;
+        std::unordered_map<DataPtr, size_t> m_nodeInArcNum;
         std::unordered_map<DataPtr, std::set<DataPtr>> m_nodeAimPos;
         std::unordered_map<DataPtr, std::unique_ptr<BaseEvalItem>> m_nodes;
         std::unordered_map<size_t, std::unique_ptr<BaseEvalItemDispatcher>> m_itemDispatcher;
